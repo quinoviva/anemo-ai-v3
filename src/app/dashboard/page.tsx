@@ -38,17 +38,16 @@ const mockClinics = [
 
 export default function DashboardPage() {
   const { user } = useUser();
-  const welcomeMessage = user?.displayName ? `Welcome, ${user.displayName.split(' ')[0]}!` : 'Welcome to Anemo Check';
+  const welcomeMessage = user?.displayName ? `Welcome, ${user.displayName.split(' ')[0]}!` : 'AI-powered anemia detection at your fingertips.';
 
   return (
     <div className="space-y-8">
       <div className="space-y-4 text-center">
         <h1 className="text-4xl font-bold tracking-tight md:text-5xl">
-          {welcomeMessage}
+          Anemo Check
         </h1>
         <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
-          AI-powered anemia detection using Convolutional Neural Networks (CNN)
-          to analyze key health indicators from images.
+          {welcomeMessage}
         </p>
         <div className="flex justify-center gap-4">
           <Button asChild size="lg">
