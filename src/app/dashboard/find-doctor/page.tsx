@@ -74,7 +74,7 @@ export default function FindDoctorPage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Nearby Healthcare Providers</h1>
         <p className="text-muted-foreground">
-          Use our AI to search for doctors, clinics, and hospitals in Iloilo.
+          Search for nearby hospitals in Iloilo.
         </p>
       </div>
 
