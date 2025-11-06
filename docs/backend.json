@@ -1,0 +1,62 @@
+{
+  "entities": {
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user of the AnemoCheck AI application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the user entity."
+        },
+        "firstName": {
+          "type": "string",
+          "description": "The first name of the user."
+        },
+        "lastName": {
+          "type": "string",
+          "description": "The last name of the user."
+        },
+        "email": {
+          "type": "string",
+          "description": "The email address of the user.",
+          "format": "email"
+        }
+      },
+      "required": [
+        "id",
+        "firstName",
+        "lastName",
+        "email"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores user profile information. Accessible only by the user with matching UID. Includes denormalized fields for simpler security rules.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user, matching the Firebase Auth UID."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure is designed to ensure Authorization Independence, DBAC, and QAPs. User data is stored under `/users/{userId}` to establish clear ownership. The `userId` obtained from `request.auth.uid` is used to control access to user-specific data. This design avoids hierarchical authorization dependencies by storing authorization data directly within the user document, removing the need for `get()` calls in security rules.\n\nThe structure is segregated to ensure a homogeneous security posture. Each collection is designed to store a specific type of data with consistent access needs. For example, user profiles are stored in `/users/{userId}`, enabling straightforward rules based on user ID.\n\nThis design also facilitates QAPs by using path-based ownership for user data, enabling secure `list` operations within the `/users/{userId}` collection. The membership model is standardized with a `members` map for collaborative data, allowing easy management of roles and permissions.\n\nExplicit state modeling is achieved through dedicated `status` fields, and a predictable schema is maintained by avoiding dynamic keys and using arrays of objects with static keys. Naming conventions are standardized to ensure clarity and consistency throughout the database."
+  }
+}
