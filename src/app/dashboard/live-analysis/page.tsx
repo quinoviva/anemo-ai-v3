@@ -1,14 +1,32 @@
-import { FeatureCard } from "@/components/anemo/FeatureCard";
-import { Video } from "lucide-react";
+'use client';
+
+import { useState } from 'react';
+import { LiveCameraAnalyzer } from '@/components/anemo/LiveCameraAnalyzer';
+import { ImageAnalyzer } from '@/components/anemo/ImageAnalyzer';
 
 export default function LiveAnalysisPage() {
-  return (
-    <div className="space-y-8 flex flex-col items-center justify-center text-center h-full">
-        <Video className="w-24 h-24 text-muted-foreground" />
-        <h1 className="text-3xl font-bold tracking-tight">Live Camera Analysis</h1>
-        <p className="text-muted-foreground max-w-md">
-            This feature is coming soon. You'll be able to analyze your skin, under-eye, or fingernails in real-time using your device's camera.
-        </p>
-    </div>
-  );
+  const [capturedImage, setCapturedImage] = useState<{ file: File; dataUri: string } | null>(null);
+
+  const handleCapture = (file: File, dataUri: string) => {
+    setCapturedImage({ file, dataUri });
+  };
+
+  const handleReset = () => {
+    setCapturedImage(null);
+  };
+
+  if (capturedImage) {
+    // If an image is captured, we re-use the existing ImageAnalyzer component
+    // We pass the captured image data and a function to reset the state
+    return (
+      <ImageAnalyzer
+        initialImageFile={capturedImage.file}
+        initialImageDataUri={capturedImage.dataUri}
+        onReset={handleReset}
+      />
+    );
+  }
+
+  // Otherwise, show the live camera view
+  return <LiveCameraAnalyzer onCapture={handleCapture} />;
 }

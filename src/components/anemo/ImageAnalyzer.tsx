@@ -15,17 +15,25 @@ import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
-import { UploadCloud, Bot, User, XCircle, FileImage, Send, FileText, Loader2, Sparkles } from 'lucide-react';
+import { UploadCloud, Bot, User, XCircle, FileImage, Send, FileText, Loader2, Sparkles, Camera } from 'lucide-react';
 import type { PersonalizedRecommendationsOutput } from '@/ai/flows/provide-personalized-recommendations';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
 
 type AnalysisStep = 'idle' | 'analyzingImage' | 'interview' | 'generatingReport' | 'reportReady' | 'error';
 type Message = { role: 'user' | 'assistant'; content: string };
 
-export function ImageAnalyzer() {
-  const [imageFile, setImageFile] = useState<File | null>(null);
+type ImageAnalyzerProps = {
+  initialImageFile?: File;
+  initialImageDataUri?: string;
+  onReset?: () => void;
+};
+
+
+export function ImageAnalyzer({ initialImageFile, initialImageDataUri, onReset }: ImageAnalyzerProps) {
+  const [imageFile, setImageFile] = useState<File | null>(initialImageFile || null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const [imageDataUri, setImageDataUri] = useState<string | null>(null);
+  const [imageDataUri, setImageDataUri] = useState<string | null>(initialImageDataUri || null);
   const [analysisStep, setAnalysisStep] = useState<AnalysisStep>('idle');
   const [imageDescription, setImageDescription] = useState<string | null>(null);
   const [isImageValid, setIsImageValid] = useState(false);
@@ -40,7 +48,57 @@ export function ImageAnalyzer() {
   const dropzoneRef = useRef<HTMLDivElement>(null);
   const chatBottomRef = useRef<HTMLDivElement>(null);
 
+  const startAnalysis = useCallback(async (dataUri: string) => {
+    setAnalysisStep('analyzingImage');
+    try {
+      const result = await runGenerateImageDescription({ photoDataUri: dataUri });
+      setImageDescription(result.description);
+      setIsImageValid(result.isValid);
+
+      if (!result.isValid) {
+        setError('The uploaded image is not suitable for analysis. Please upload a clear picture of skin, under-eye, or fingernails.');
+        setAnalysisStep('error');
+        toast({
+          title: "Analysis Failed",
+          description: "Image not valid for analysis.",
+          variant: "destructive",
+        });
+      } else {
+        setAnalysisStep('interview');
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "An unknown error occurred.";
+      setError(`Failed to analyze image. ${errorMessage}`);
+      setAnalysisStep('error');
+      toast({
+        title: "Analysis Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    }
+  }, [toast]);
+  
+  useEffect(() => {
+    if (initialImageFile && initialImageDataUri) {
+      setImageFile(initialImageFile);
+      setImageUrl(URL.createObjectURL(initialImageFile));
+      setImageDataUri(initialImageDataUri);
+      startAnalysis(initialImageDataUri);
+    }
+     // Cleanup function to revoke the object URL
+    return () => {
+      if (imageUrl) {
+        URL.revokeObjectURL(imageUrl);
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialImageFile, initialImageDataUri, startAnalysis]);
+
+
   const resetState = () => {
+    if(onReset) {
+      onReset();
+    }
     setImageFile(null);
     if(imageUrl) {
         URL.revokeObjectURL(imageUrl);
@@ -82,34 +140,7 @@ export function ImageAnalyzer() {
     reader.onload = async (e) => {
       const dataUri = e.target?.result as string;
       setImageDataUri(dataUri);
-      setAnalysisStep('analyzingImage');
-
-      try {
-        const result = await runGenerateImageDescription({ photoDataUri: dataUri });
-        setImageDescription(result.description);
-        setIsImageValid(result.isValid);
-
-        if (!result.isValid) {
-          setError('The uploaded image is not suitable for analysis. Please upload a clear picture of skin, under-eye, or fingernails.');
-          setAnalysisStep('error');
-          toast({
-            title: "Analysis Failed",
-            description: "Image not valid for analysis.",
-            variant: "destructive",
-          });
-        } else {
-          setAnalysisStep('interview');
-        }
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : "An unknown error occurred.";
-        setError(`Failed to analyze image. ${errorMessage}`);
-        setAnalysisStep('error');
-        toast({
-            title: "Analysis Error",
-            description: errorMessage,
-            variant: "destructive",
-        });
-      }
+      startAnalysis(dataUri);
     };
     reader.readAsDataURL(file);
   };
@@ -348,15 +379,40 @@ export function ImageAnalyzer() {
   return (
     <div className="h-full">
         {analysisStep === 'idle' && (
-            <div ref={dropzoneRef} onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop} className="text-center p-8 h-full flex flex-col justify-center items-center border-2 border-dashed rounded-lg transition-colors">
-            <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground" />
-            <h3 className="mt-4 text-lg font-medium">Upload an Image</h3>
-            <p className="mt-1 text-sm text-muted-foreground">Drag & drop or click to upload a clear photo of your skin, under-eye, or fingernails.</p>
-            <Input type="file" accept="image/*" className="sr-only" id="image-upload" onChange={(e) => handleImageChange(e.target.files ? e.target.files[0] : null)} />
-            <Button asChild className="mt-4">
-                <label htmlFor="image-upload">Browse Files</label>
-            </Button>
+            <div className="text-center p-8 h-full flex flex-col justify-center items-center">
+              <div ref={dropzoneRef} onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop} className="w-full max-w-lg border-2 border-dashed rounded-lg transition-colors p-8">
+                <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground" />
+                <h3 className="mt-4 text-lg font-medium">Upload an Image</h3>
+                <p className="mt-1 text-sm text-muted-foreground">Drag & drop or click to upload a clear photo of your skin, under-eye, or fingernails.</p>
+                <Input type="file" accept="image/*" className="sr-only" id="image-upload" onChange={(e) => handleImageChange(e.target.files ? e.target.files[0] : null)} />
+                <Button asChild className="mt-4">
+                    <label htmlFor="image-upload">Browse Files</label>
+                </Button>
+              </div>
+
+              <div className="relative my-6 w-full max-w-lg">
+                <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">
+                    Or
+                    </span>
+                </div>
             </div>
+
+            <div className="w-full max-w-lg">
+                 <Button asChild variant="outline" className="w-full">
+                    <Link href="/dashboard/live-analysis">
+                      <Camera className="mr-2" />
+                       Use Live Camera
+                    </Link>
+                </Button>
+                 <p className="mt-2 text-center text-xs text-muted-foreground">
+                    Use your device's camera for a real-time analysis.
+                </p>
+            </div>
+          </div>
         )}
 
         {analysisStep === 'analyzingImage' && (
