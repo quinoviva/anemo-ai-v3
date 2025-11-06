@@ -20,7 +20,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 const menuItems = [
-  { href: '/', label: 'Dashboard', icon: LayoutGrid },
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutGrid },
   { href: '/history', label: 'Analysis History', icon: History },
   { href: '/chatbot', label: 'AI Chatbot', icon: Bot },
   { href: '/live-analysis', label: 'Live Analysis', icon: Video, disabled: true },
@@ -33,7 +33,7 @@ export function SidebarNav() {
   return (
     <>
       <SidebarHeader>
-        <Link href="/" className="flex items-center gap-2.5">
+        <Link href="/dashboard" className="flex items-center gap-2.5">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"

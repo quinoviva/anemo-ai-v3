@@ -60,7 +60,7 @@ export function LoginForm() {
     setIsLoading(true);
     try {
       await signInWithEmailAndPassword(auth, values.email, values.password);
-      router.push('/');
+      router.push('/dashboard');
     } catch (error: any) {
       toast({
         title: 'Login Failed',
@@ -77,7 +77,7 @@ export function LoginForm() {
     try {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
-      router.push('/');
+      router.push('/dashboard');
     } catch (error: any) {
       toast({
         title: 'Google Sign-In Failed',
@@ -93,7 +93,7 @@ export function LoginForm() {
     setIsGuestLoading(true);
     try {
       await signInAnonymously(auth);
-      router.push('/');
+      router.push('/dashboard');
     } catch (error: any) {
       toast({
         title: 'Guest Sign-In Failed',
@@ -216,7 +216,7 @@ export function LoginForm() {
                     )}
                     Continue as Guest
                 </Button>
-                <p className="mt-2 px-8 text-center text-xs text-muted-foreground">
+                <p className="mt-2 text-center text-xs text-muted-foreground">
                     Try the app without creating an account. Analysis history won't be saved.
                 </p>
             </div>

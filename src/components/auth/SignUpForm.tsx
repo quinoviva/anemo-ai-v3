@@ -103,7 +103,7 @@ export function SignUpForm() {
         email: values.email,
       }, {});
 
-      router.push('/');
+      router.push('/dashboard');
     } catch (error: any) {
       toast({
         title: 'Sign Up Failed',

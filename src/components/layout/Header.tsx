@@ -38,7 +38,7 @@ export function Header() {
     <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm md:px-6">
       <div className="flex items-center gap-2">
         <SidebarTrigger className="md:hidden" />
-        <Link href="/" className="flex items-center gap-2 font-bold text-lg md:hidden">
+        <Link href="/dashboard" className="flex items-center gap-2 font-bold text-lg md:hidden">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
