@@ -134,7 +134,8 @@ export function ImageAnalyzer({ initialImageFile, initialImageDataUri, onReset }
     resetState();
 
     setImageFile(file);
-    setImageUrl(URL.createObjectURL(file));
+    const newImageUrl = URL.createObjectURL(file);
+    setImageUrl(newImageUrl);
 
     const reader = new FileReader();
     reader.onload = async (e) => {
@@ -281,7 +282,7 @@ export function ImageAnalyzer({ initialImageFile, initialImageDataUri, onReset }
         <CardContent className="flex-1 flex flex-col justify-center">
             {imageUrl && (
               <div className="space-y-4">
-                <div className="relative aspect-video rounded-md overflow-hidden border">
+                <div className="relative aspect-video rounded-md overflow-hidden border bg-black">
                   <img src={imageUrl} alt="Uploaded for analysis" className="object-contain w-full h-full" />
                   <div 
                     className="absolute inset-0 bg-gradient-to-br from-red-500/80 via-yellow-500/50 to-green-500/80 mix-blend-multiply"
