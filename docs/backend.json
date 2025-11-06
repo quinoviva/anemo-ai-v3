@@ -32,6 +32,29 @@
           "type": "object",
           "description": "User's medical information.",
           "properties": {
+            "dateOfBirth": {
+              "type": "string",
+              "format": "date-time",
+              "description": "User's date of birth."
+            },
+            "sex": {
+              "type": "string",
+              "description": "User's biological sex.",
+              "enum": [
+                "Male",
+                "Female",
+                "Other",
+                "Prefer not to say"
+              ]
+            },
+            "height": {
+              "type": "number",
+              "description": "User's height in centimeters."
+            },
+            "weight": {
+              "type": "number",
+              "description": "User's weight in kilograms."
+            },
             "bloodType": {
               "type": "string",
               "description": "User's blood type."
@@ -43,6 +66,14 @@
             "conditions": {
               "type": "string",
               "description": "User's pre-existing medical conditions."
+            },
+            "medications": {
+              "type": "string",
+              "description": "List of current medications."
+            },
+            "familyHistory": {
+              "type": "string",
+              "description": "Relevant family medical history."
             }
           }
         }

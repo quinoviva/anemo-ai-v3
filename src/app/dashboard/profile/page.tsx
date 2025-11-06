@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { updateProfile } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, Timestamp } from 'firebase/firestore';
 
 import { useUser, useFirestore, useAuth } from '@/firebase';
 import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
@@ -21,6 +21,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Calendar } from "@/components/ui/calendar"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import {
   Select,
   SelectContent,
@@ -31,22 +37,33 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Upload } from 'lucide-react';
+import { Loader2, Upload, CalendarIcon } from 'lucide-react';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { cn } from '@/lib/utils';
+import { format } from "date-fns"
+
 
 const profileSchema = z.object({
   firstName: z.string().min(1, 'First name is required.'),
   lastName: z.string().min(1, 'Last name is required.'),
   photoURL: z.string().url('Must be a valid URL.').optional().or(z.literal('')),
+  // Medical Info
+  dateOfBirth: z.date().optional(),
+  sex: z.string().optional(),
+  height: z.coerce.number().positive('Height must be positive.').optional().or(z.literal('')),
+  weight: z.coerce.number().positive('Weight must be positive.').optional().or(z.literal('')),
   bloodType: z.string().optional(),
   allergies: z.string().optional(),
   conditions: z.string().optional(),
+  medications: z.string().optional(),
+  familyHistory: z.string().optional(),
 });
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
@@ -66,9 +83,15 @@ export default function ProfilePage() {
       firstName: '',
       lastName: '',
       photoURL: '',
+      dateOfBirth: undefined,
+      sex: '',
+      height: '',
+      weight: '',
       bloodType: '',
       allergies: '',
       conditions: '',
+      medications: '',
+      familyHistory: '',
     },
   });
 
@@ -79,13 +102,20 @@ export default function ProfilePage() {
         const docSnap = await getDoc(userDocRef);
         if (docSnap.exists()) {
           const data = docSnap.data();
+          const medicalInfo = data.medicalInfo || {};
           form.reset({
             firstName: data.firstName || '',
             lastName: data.lastName || '',
             photoURL: data.photoURL || user.photoURL || '',
-            bloodType: data.medicalInfo?.bloodType || '',
-            allergies: data.medicalInfo?.allergies || '',
-            conditions: data.medicalInfo?.conditions || '',
+            dateOfBirth: medicalInfo.dateOfBirth ? (medicalInfo.dateOfBirth as Timestamp).toDate() : undefined,
+            sex: medicalInfo.sex || '',
+            height: medicalInfo.height || '',
+            weight: medicalInfo.weight || '',
+            bloodType: medicalInfo.bloodType || '',
+            allergies: medicalInfo.allergies || '',
+            conditions: medicalInfo.conditions || '',
+            medications: medicalInfo.medications || '',
+            familyHistory: medicalInfo.familyHistory || '',
           });
         } else {
           // Pre-fill from auth if no doc exists
@@ -156,9 +186,15 @@ export default function ProfilePage() {
           email: user.email, // email is immutable
           photoURL: data.photoURL,
           medicalInfo: {
+            dateOfBirth: data.dateOfBirth,
+            sex: data.sex,
+            height: data.height,
+            weight: data.weight,
             bloodType: data.bloodType,
             allergies: data.allergies,
             conditions: data.conditions,
+            medications: data.medications,
+            familyHistory: data.familyHistory,
           },
         },
         { merge: true }
@@ -192,7 +228,7 @@ export default function ProfilePage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Your Profile</h1>
         <p className="text-muted-foreground">
-          View and manage your account details.
+          View and manage your account details and medical information.
         </p>
       </div>
       <Form {...form}>
@@ -270,13 +306,106 @@ export default function ProfilePage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Medical Information</CardTitle>
+              <CardTitle>Medical Record</CardTitle>
               <CardDescription>
-                This information can help provide more accurate analysis. It is
-                private and will not be shared.
+                This information helps provide more accurate analysis. It is private and will not be shared.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="grid gap-6 md:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="dateOfBirth"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel>Date of Birth</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant={"outline"}
+                              className={cn(
+                                "w-full pl-3 text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value ? (
+                                format(field.value, "PPP")
+                              ) : (
+                                <span>Pick a date</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={(date) =>
+                              date > new Date() || date < new Date("1900-01-01")
+                            }
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="sex"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Sex</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select sex" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Male">Male</SelectItem>
+                          <SelectItem value="Female">Female</SelectItem>
+                          <SelectItem value="Other">Other</SelectItem>
+                          <SelectItem value="Prefer not to say">Prefer not to say</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                    control={form.control}
+                    name="height"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Height (cm)</FormLabel>
+                        <FormControl>
+                            <Input type="number" placeholder="e.g., 170" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                />
+
+                <FormField
+                    control={form.control}
+                    name="weight"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Weight (kg)</FormLabel>
+                        <FormControl>
+                            <Input type="number" placeholder="e.g., 65" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                />
+
                <FormField
                 control={form.control}
                 name="bloodType"
@@ -304,35 +433,66 @@ export default function ProfilePage() {
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="allergies"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Allergies</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="e.g., Penicillin, Peanuts"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="conditions"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Pre-existing Conditions</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="e.g., Asthma, Diabetes" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className="md:col-span-2 space-y-6">
+                <FormField
+                    control={form.control}
+                    name="allergies"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Known Allergies</FormLabel>
+                        <FormControl>
+                        <Textarea
+                            placeholder="e.g., Penicillin, Peanuts, Pollen"
+                            {...field}
+                        />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="conditions"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Pre-existing Medical Conditions</FormLabel>
+                        <FormControl>
+                        <Textarea placeholder="e.g., Asthma, Diabetes, Hypertension" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="medications"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Current Medications</FormLabel>
+                        <FormControl>
+                        <Textarea placeholder="List any medications you are currently taking" {...field} />
+                        </FormControl>
+                         <FormDescription>
+                            Include dosage if known.
+                        </FormDescription>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="familyHistory"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Relevant Family Medical History</FormLabel>
+                        <FormControl>
+                        <Textarea placeholder="e.g., History of anemia, blood disorders, or heart disease in your immediate family" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+              </div>
             </CardContent>
           </Card>
 
