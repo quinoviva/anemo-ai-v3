@@ -109,7 +109,7 @@ export function LoginForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Welcome Back!</CardTitle>
+        <CardTitle>Login</CardTitle>
         <CardDescription>Sign in to access your dashboard.</CardDescription>
       </CardHeader>
       <CardContent>
@@ -218,7 +218,7 @@ export function LoginForm() {
 
             <div>
                 <Button
-                    variant="outline"
+                    variant="secondary"
                     className="w-full"
                     onClick={handleGuestSignIn}
                     disabled={isLoading || isGoogleLoading || isGuestLoading}
