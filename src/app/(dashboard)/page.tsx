@@ -1,4 +1,3 @@
-
 'use client';
 
 import { ImageAnalyzer } from '@/components/anemo/ImageAnalyzer';
@@ -6,7 +5,7 @@ import { FeatureCard } from '@/components/anemo/FeatureCard';
 import { Video, Stethoscope } from 'lucide-react';
 import { useUser } from '@/firebase';
 
-export default function RootPage() {
+export default function DashboardPage() {
   const { user, isUserLoading } = useUser();
 
   if (isUserLoading) {
