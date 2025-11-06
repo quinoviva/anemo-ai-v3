@@ -20,6 +20,12 @@ import {
   AnswerAnemiaQuestionInput,
   AnswerAnemiaQuestionOutput,
 } from '@/ai/flows/answer-anemia-related-questions';
+import {
+  findNearbyClinics,
+  FindNearbyClinicsInput,
+  FindNearbyClinicsOutput,
+} from '@/ai/flows/find-nearby-clinics';
+
 
 export async function runGenerateImageDescription(
   input: GenerateImageDescriptionInput
@@ -43,4 +49,10 @@ export async function runAnswerAnemiaQuestion(
   input: AnswerAnemiaQuestionInput
 ): Promise<AnswerAnemiaQuestionOutput> {
   return await answerAnemiaQuestion(input);
+}
+
+export async function runFindNearbyClinics(
+  input: FindNearbyClinicsInput
+): Promise<FindNearbyClinicsOutput> {
+  return await findNearbyClinics(input);
 }
