@@ -215,6 +215,9 @@ export function LoginForm() {
             )}
             Continue as Guest
           </Button>
+          <p className="px-8 text-center text-sm text-muted-foreground">
+            Try the app without creating an account. Analysis history won't be saved.
+          </p>
         </div>
         <p className="mt-4 text-center text-sm text-muted-foreground">
           Don't have an account?{' '}
