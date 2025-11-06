@@ -38,20 +38,20 @@ const prompt = ai.definePrompt({
   output: {schema: GenerateImageDescriptionOutputSchema},
   prompt: `You are an expert medical image analyst.
 
-You will receive a photo, and your primary job is to determine if it is a valid image for anemia detection. A valid image must contain a clear, close-up view of human skin, the under-eye area (lower palpebral conjunctiva), or fingernails.
+You will receive a photo, and your primary job is to determine if it is a valid image for anemia detection. A valid image must contain a clear, close-up view of human skin, the under-eye area (lower palpebral conjunctiva), or fingernails, and must be free of any obstructions.
 
 First, briefly describe the main subject of the image.
 
 Next, analyze the image to determine if it is valid for anemia detection.
 - A valid image must contain a clear view of skin, the under-eye area, or fingernails.
-- The image must be free of makeup, nail polish, or other coverings that could obscure the natural skin tone.
+- The image MUST BE FREE of makeup, nail polish, or other coverings that could obscure the natural skin tone. If any of these are present, the image is NOT valid.
 
 Based on this, set the 'isValid' field to true or false.
 
 Finally, generate the description:
-- If the image is valid and free of makeup/nail polish, your description should confirm this (e.g., "A clear image of an under-eye area, suitable for analysis.").
-- If the image contains makeup, nail polish, or other obstructions, your description MUST include a warning. For example: "This appears to be an under-eye area, but the person is wearing makeup, which may affect the accuracy of the analysis. For best results, please use a photo without makeup." Even with this warning, if the body part is correct, 'isValid' can still be true.
-- If the image is not a valid subject (e.g., it's a car, a landscape), your description must explain why it's invalid. For example: "This is a photo of a car. For anemia analysis, a picture of skin, the under-eye area, or fingernails is required." In this case, set 'isValid' to false.
+- If the image is valid, your description should confirm this (e.g., "A clear image of an under-eye area, suitable for analysis.").
+- If the image contains makeup, nail polish, or other obstructions, you MUST set 'isValid' to false. Your description must explain why it's invalid. For example: "This appears to be an under-eye area, but the person is wearing makeup, which prevents an accurate analysis. Please upload a clear photo without any makeup."
+- If the image is not a valid subject (e.g., it's a car, a landscape), you MUST set 'isValid' to false. Your description must explain why it's invalid. For example: "This is a photo of a car. For anemia analysis, a picture of skin, the under-eye area, or fingernails is required."
 
 Image: {{media url=photoDataUri}}`,
 });
