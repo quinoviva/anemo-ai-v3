@@ -6,7 +6,7 @@ export default function HistoryPage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Analysis History</h1>
         <p className="text-muted-foreground">
-          Review your past analysis reports and recommendations.
+          Review your past analysis reports and recommendations. This is a mock implementation.
         </p>
       </div>
       <AnalysisHistoryList />
