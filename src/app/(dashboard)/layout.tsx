@@ -52,8 +52,8 @@ export default function DashboardLayout({
 
   // If the user is authenticated, render the dashboard layout.
   return (
-    <SidebarProvider defaultOpen={true}>
-      <Sidebar>
+    <SidebarProvider>
+      <Sidebar collapsible="none">
         <SidebarNav />
       </Sidebar>
       <SidebarInset className="flex flex-col">
