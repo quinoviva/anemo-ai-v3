@@ -18,7 +18,7 @@ export default function RootPage() {
     }
     if (user) {
       // If user is logged in, go to the dashboard
-      router.replace('/');
+      router.replace('/dashboard');
     } else {
       // If user is not logged in, go to the login page
       router.replace('/login');
