@@ -8,37 +8,54 @@ import {
   CardContent,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Search, Stethoscope, Hospital, HeartPulse } from 'lucide-react';
+import { Hospital, Stethoscope, Loader2 } from 'lucide-react';
 import { ChatbotPopup } from '@/components/anemo/ChatbotPopup';
 import Link from 'next/link';
 import { useUser } from '@/firebase';
+import { useEffect, useState } from 'react';
+import { runFindNearbyClinics } from '@/app/actions';
+import { Skeleton } from '@/components/ui/skeleton';
 
-const mockClinics = [
-  {
-    name: 'Iloilo Doctors’ Hospital',
-    type: 'Hospital',
-    address: 'West Timawa Avenue, Molo, Iloilo City',
-    icon: <Hospital className="h-5 w-5 text-primary" />,
-  },
-  {
-    name: 'The Medical City Iloilo',
-    type: 'Hospital',
-    address: 'Lopez Jaena St, Molo, Iloilo City',
-    icon: <Hospital className="h-5 w-5 text-primary" />,
-  },
-  {
-    name: 'Medicus Medical Center',
-    type: 'Hospital',
-    address: 'Pison Ave., Mandurriao, Iloilo City',
-    icon: <Stethoscope className="h-5 w-5 text-primary" />,
-  },
-];
+type Clinic = {
+  name: string;
+  type: 'Hospital' | 'Doctor' | 'Clinic';
+  address: string;
+  icon: React.ReactNode;
+};
 
 export default function DashboardPage() {
   const { user } = useUser();
-  const welcomeMessage = user?.displayName ? `Welcome, ${user.displayName.split(' ')[0]}!` : 'Welcome to Anemo Check';
+  const [clinics, setClinics] = useState<Clinic[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchClinics = async () => {
+      try {
+        const response = await runFindNearbyClinics({ query: 'Iloilo City' });
+        const clinicsWithIcons = response.results.map((clinic) => ({
+          ...clinic,
+          icon:
+            clinic.type === 'Hospital' ? (
+              <Hospital className="h-5 w-5 text-primary" />
+            ) : (
+              <Stethoscope className="h-5 w-5 text-primary" />
+            ),
+        }));
+        setClinics(clinicsWithIcons);
+      } catch (error) {
+        console.error("Failed to fetch clinics:", error);
+        // Optionally, set some error state to show in the UI
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchClinics();
+  }, []);
+
+  const welcomeMessage = user?.displayName
+    ? `Welcome, ${user.displayName.split(' ')[0]}!`
+    : 'Welcome to Anemo Check';
 
   return (
     <div className="space-y-8">
@@ -71,29 +88,44 @@ export default function DashboardPage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {mockClinics.slice(0,3).map((clinic, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between rounded-md border p-4"
-              >
-                <div className="flex items-center gap-4">
-                  <Avatar className="h-10 w-10">
-                    <AvatarFallback className="bg-secondary">
-                      {clinic.icon}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="font-semibold">{clinic.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {clinic.address}
-                    </p>
+            {isLoading ? (
+               Array.from({ length: 3 }).map((_, index) => (
+                <div key={index} className="flex items-center justify-between rounded-md border p-4">
+                  <div className="flex items-center gap-4">
+                    <Skeleton className="h-10 w-10 rounded-full" />
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-48" />
+                      <Skeleton className="h-4 w-64" />
+                    </div>
                   </div>
+                  <Skeleton className="h-8 w-16" />
                 </div>
-                 <Button variant="outline" size="sm" asChild>
-                  <Link href="/dashboard/find-doctor">View</Link>
-                </Button>
-              </div>
-            ))}
+              ))
+            ) : (
+              clinics.slice(0, 3).map((clinic, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between rounded-md border p-4"
+                >
+                  <div className="flex items-center gap-4">
+                    <Avatar className="h-10 w-10">
+                      <AvatarFallback className="bg-secondary">
+                        {clinic.icon}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-semibold">{clinic.name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {clinic.address}
+                      </p>
+                    </div>
+                  </div>
+                  <Button variant="outline" size="sm" asChild>
+                    <Link href="/dashboard/find-doctor">View</Link>
+                  </Button>
+                </div>
+              ))
+            )}
           </div>
         </CardContent>
       </Card>
