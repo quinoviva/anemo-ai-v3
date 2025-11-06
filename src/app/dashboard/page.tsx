@@ -50,7 +50,7 @@ export default function DashboardPage() {
           {welcomeMessage}
         </p>
         <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
-          AI-powered anemia detection at your fingertips.
+          Your intelligent health companion for early anemia detection. Get an instant risk assessment by uploading a photo, receive personalized health advice, and find nearby healthcare providers in Iloilo.
         </p>
         <div className="flex justify-center gap-4">
           <Button asChild size="lg">
