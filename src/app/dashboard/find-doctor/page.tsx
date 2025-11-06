@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Search, Stethoscope, Hospital, HeartPulse, Loader2 } from 'lucide-react';
+import Link from 'next/link';
 
 type Clinic = {
   name: string;
@@ -92,27 +93,20 @@ export default function FindDoctorPage() {
         </p>
       </div>
 
-      <Card className="w-full">
+      <Card>
         <CardHeader>
-          <CardTitle>Search Healthcare Providers</CardTitle>
-          <CardDescription>
-            Enter a name or location to filter the list of providers below.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex w-full items-center space-x-2 mb-6">
-            <div className="relative flex-grow">
+           <div className="relative flex-grow">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 type="text"
-                placeholder="e.g., Jaro or Iloilo Doctors' Hospital"
-                className="pl-10"
+                placeholder="Enter a name or location..."
+                className="pl-10 text-base"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-          </div>
-
+        </CardHeader>
+        <CardContent>
           <div className="space-y-4">
             {isSearching ? (
               <div className="flex justify-center items-center py-10">
@@ -138,8 +132,9 @@ export default function FindDoctorPage() {
                         </p>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm">
-                      View
+                    <Button variant="outline" size="sm" asChild>
+                      {/* In a real app, this would link to a details page */}
+                      <Link href="#">View Details</Link>
                     </Button>
                   </div>
                 ))

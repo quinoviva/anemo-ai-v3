@@ -101,7 +101,7 @@ export function Chatbot({ isPopup = false }: ChatbotProps) {
 
   return (
     <Card className={cn("h-full flex flex-col", isPopup ? "border-0 shadow-none" : "")}>
-      {!isPopup && (
+      {!isPopup ? (
          <CardHeader>
           <CardTitle className="flex items-center gap-2">
             ChatbotAI
@@ -110,8 +110,7 @@ export function Chatbot({ isPopup = false }: ChatbotProps) {
               Ask me anything about anemia.
             </CardDescription>
         </CardHeader>
-      )}
-      {isPopup && <ChatHeader />}
+      ) : <ChatHeader />}
       <CardContent className="p-4 flex-1 flex flex-col overflow-hidden">
         <ScrollArea className="flex-grow mb-4" ref={scrollAreaRef}>
           <div className="space-y-4 pr-4">
