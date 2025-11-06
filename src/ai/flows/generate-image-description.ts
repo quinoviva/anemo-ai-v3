@@ -38,9 +38,15 @@ const prompt = ai.definePrompt({
   output: {schema: GenerateImageDescriptionOutputSchema},
   prompt: `You are an expert medical image analyst.
 
-You will receive a photo, and it is your job to analyze it and determine if it is a valid image for anemia detection. Anemia detection requires an image of skin, under-eye, or fingernails.
+You will receive a photo, and your primary job is to determine if it is a valid image for anemia detection. A valid image must contain a clear, close-up view of human skin, the under-eye area (lower palpebral conjunctiva), or fingernails.
 
-Describe the image and determine if it is valid for anemia detection. Set the isValid field to true if it is, and false if it is not.
+First, briefly describe the main subject of the image.
+
+Next, analyze the image to determine if it is valid for anemia detection.
+- If the image contains a clear view of skin, the under-eye area, or fingernails, set the 'isValid' field to true.
+- If the image does NOT contain one of these valid subjects (e.g., it's a car, a landscape, an animal), set 'isValid' to false.
+
+If the image is not valid, your description must explain why. For example: "This is a photo of a car. For anemia analysis, a picture of skin, the under-eye area, or fingernails is required."
 
 Image: {{media url=photoDataUri}}`,
 });

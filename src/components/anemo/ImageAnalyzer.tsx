@@ -56,7 +56,7 @@ export function ImageAnalyzer({ initialImageFile, initialImageDataUri, onReset }
       setIsImageValid(result.isValid);
 
       if (!result.isValid) {
-        setError('The uploaded image is not suitable for analysis. Please upload a clear picture of skin, under-eye, or fingernails.');
+        setError(result.description);
         setAnalysisStep('error');
         toast({
           title: "Analysis Failed",
