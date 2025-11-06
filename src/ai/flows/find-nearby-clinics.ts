@@ -46,8 +46,6 @@ const allClinics = [
     { name: 'Western Visayas Medical Center', type: 'Hospital', address: 'Q. Abeto St, Mandurriao, Iloilo City', contact: '(033) 321-2841', hours: '24/7', website: 'https://wvmc.doh.gov.ph/', notes: 'A DOH-retained tertiary teaching and training hospital.' },
     { name: 'West Visayas State University Medical Center', type: 'Hospital', address: 'E. Lopez St, Jaro, Iloilo City', contact: '(033) 320-2431', hours: '24/7', website: 'https://wvsu.edu.ph/medical-center/', notes: 'A state-owned tertiary hospital and teaching institution.' },
     { name: 'Medicus Medical Center', type: 'Hospital', address: 'Mandurriao, Iloilo City', contact: '(033) 321-7821', hours: '24/7', website: 'https://www.medicus.com.ph/', notes: 'Comprehensive medical services.' },
-    { name: 'Dr. Zaxius Berina, MD (Internal Medicine)', type: 'Doctor', address: 'Medicus Medical Center, Room 301, Mandurriao, Iloilo City', contact: 'N/A', hours: 'By Appointment', notes: 'Specializes in adult diseases.' },
-    { name: 'AnemoCare Clinic', type: 'Clinic', address: '2nd Floor, Jaro Town Square, Jaro, Iloilo City', contact: '(033) 329-1234', hours: 'Mon-Sat: 9AM-5PM', website: 'N/A', notes: 'Specializes in blood disorders and anemia care.' },
     { name: 'MedicPro Medical Clinic', type: 'Clinic', address: 'La Paz, Iloilo City', contact: '(033) 320-5678', hours: 'Mon-Fri: 8AM-6PM', notes: 'General consultation and laboratory services.' },
     { name: 'Healthlink E-Clinic', type: 'Clinic', address: 'Festive Walk Mall, Mandurriao, Iloilo City', contact: '(033) 501-4433', hours: 'Daily: 10AM-7PM', notes: 'Telemedicine and in-person consultations.' },
     
@@ -58,7 +56,7 @@ const allClinics = [
     { name: 'Dumangas District Hospital', type: 'Hospital', address: 'Dumangas, Iloilo', contact: '(033) 361-2022', hours: '24/7', notes: 'Government district hospital.' },
     { name: 'Guimbal District Hospital', type: 'Hospital', address: 'Guimbal, Iloilo', contact: 'N/A', hours: '24/7', notes: 'Government district hospital.' },
     { name: 'Jesus M. Colmenares Memorial District Hospital', type: 'Hospital', address: 'Balasan, Iloilo', contact: '(033) 397-0402', hours: '24/7', notes: 'Government district hospital.' },
-    { name: 'Lambunao District Hospital', type: 'Hospital', address: 'Lambunao, Iloilo', contact: '(033) 533-7053', hours: '24/7', notes: 'Government district hospital.' },
+    { name: 'Lambunao District Hospital', type 'Hospital', address: 'Lambunao, Iloilo', contact: '(033) 533-7053', hours: '24/7', notes: 'Government district hospital.' },
     { name: 'Passi City District Hospital', type: 'Hospital', address: 'Passi City, Iloilo', contact: '(033) 536-8029', hours: '24/7', notes: 'Serves Passi City and nearby towns.' },
     { name: 'Pototan District Hospital', type: 'Hospital', address: 'Pototan, Iloilo', contact: '(033) 529-8131', hours: '24/7', notes: 'Government district hospital.' },
     { name: 'Ramon D. Duremdes District Hospital', type: 'Hospital', address: 'Dumangas, Iloilo', contact: '(033) 361-2022', hours: '24/7', notes: 'Government district hospital.' },
