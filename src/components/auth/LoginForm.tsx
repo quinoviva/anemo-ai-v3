@@ -133,15 +133,7 @@ export function LoginForm() {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <div className="flex justify-between">
-                    <FormLabel>Password</FormLabel>
-                    <Link
-                      href="/forgot-password"
-                      className="text-sm font-medium text-primary hover:underline"
-                    >
-                      Forgot password?
-                    </Link>
-                  </div>
+                  <FormLabel>Password</FormLabel>
                   <div className="relative">
                     <FormControl>
                       <Input type={showPassword ? "text" : "password"} placeholder="••••••••" {...field} />
@@ -164,6 +156,14 @@ export function LoginForm() {
             </Button>
           </form>
         </Form>
+        <div className="mt-4 text-center text-sm">
+          <Link
+            href="/forgot-password"
+            className="font-medium text-primary hover:underline"
+          >
+            Forgot password?
+          </Link>
+        </div>
 
         <div className="relative my-4">
           <div className="absolute inset-0 flex items-center">
