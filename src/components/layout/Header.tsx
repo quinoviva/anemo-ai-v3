@@ -15,15 +15,12 @@ import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { useAuth } from '@/firebase';
 import { cn } from '@/lib/utils';
 import { Sheet, SheetContent, SheetTrigger } from '../ui/sheet';
-import { Menu, Stethoscope, HeartPulse, History, User } from 'lucide-react';
+import { Menu, Stethoscope, HeartPulse, History } from 'lucide-react';
 
 const navLinks = [
   { href: '/dashboard', label: 'Home', icon: HeartPulse },
   { href: '/dashboard/analysis', label: 'Analysis', icon: Stethoscope },
-  { href: '/dashboard/history', label: 'History', icon: History },
-  { href: '/dashboard/chatbot', label: 'AI Assistant', icon: User },
-  { href: '/dashboard/live-analysis', label: 'Live Analysis', icon: User },
-  { href: '/dashboard/find-doctor', label: 'Find a Doctor', icon: User },
+  { href: '/dashboard/history', label: 'Track', icon: History },
 ];
 
 export function Header() {
@@ -67,7 +64,7 @@ export function Header() {
             <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
             <path d="M3.22 12H9.5l.7-1 2.1 4.2 1.6-3.2 1.6 3.2h3.22" />
           </svg>
-          <span className="sr-only">Anemo Check</span>
+          <span className="font-bold">Anemo Check</span>
         </Link>
         {navLinks.map(({ href, label }) => (
           <Link
