@@ -1,14 +1,13 @@
 import type { Metadata } from 'next';
-import { Poppins } from 'next/font/google';
+import { Space_Grotesk } from 'next/font/google';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { cn } from '@/lib/utils';
 import { FirebaseClientProvider } from '@/firebase';
 
-const poppins = Poppins({
+const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
-  variable: '--font-poppins',
-  weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'],
+  variable: '--font-space-grotesk',
 });
 
 export const metadata: Metadata = {
@@ -26,7 +25,7 @@ export default function RootLayout({
       <body
         className={cn(
           'min-h-screen bg-background font-body antialiased',
-          poppins.variable
+          spaceGrotesk.variable
         )}
       >
         <FirebaseClientProvider>
