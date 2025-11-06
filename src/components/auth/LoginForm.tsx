@@ -33,7 +33,6 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/firebase';
 import { Loader2, Eye, EyeOff } from 'lucide-react';
-import { initiateAnonymousSignIn } from '@/firebase/non-blocking-login';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email.' }),
@@ -93,7 +92,7 @@ export function LoginForm() {
   const handleGuestSignIn = async () => {
     setIsGuestLoading(true);
     try {
-      initiateAnonymousSignIn(auth);
+      await signInAnonymously(auth);
       router.push('/');
     } catch (error: any) {
       toast({
@@ -109,7 +108,7 @@ export function LoginForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Login</CardTitle>
+        <CardTitle>Log in</CardTitle>
         <CardDescription>Sign in to access your dashboard.</CardDescription>
       </CardHeader>
       <CardContent>
@@ -150,11 +149,7 @@ export function LoginForm() {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full" disabled={isLoading || isGoogleLoading || isGuestLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Log in
-            </Button>
-            <div className="text-center text-sm">
+             <div className="text-right text-sm">
               <Link
                 href="/forgot-password"
                 className="font-medium text-primary hover:underline"
@@ -162,6 +157,10 @@ export function LoginForm() {
                 Forgot password?
               </Link>
             </div>
+            <Button type="submit" className="w-full" disabled={isLoading || isGoogleLoading || isGuestLoading}>
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Log in
+            </Button>
           </form>
         </Form>
         
