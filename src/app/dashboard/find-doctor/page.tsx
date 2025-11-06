@@ -85,7 +85,7 @@ export default function FindDoctorPage() {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                 type="text"
-                placeholder="Enter a location, e.g., 'near Jaro Cathedral' or 'hospitals in Oton'"
+                placeholder="Enter a location, e.g., 'Pototan' or 'hospitals in Jaro'"
                 className="pl-10 text-base"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
