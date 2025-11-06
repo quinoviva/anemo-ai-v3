@@ -9,15 +9,21 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
+  DropdownMenuPortal,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { useAuth } from '@/firebase';
 import { cn } from '@/lib/utils';
 import { Sheet, SheetContent, SheetTrigger } from '../ui/sheet';
-import { Menu, HeartPulse, History, Bot, Stethoscope } from 'lucide-react';
+import { Menu, HeartPulse, History, Stethoscope, Moon, Sun, Monitor } from 'lucide-react';
 import { Cog } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { useTheme } from 'next-themes';
+
 
 const navLinks = [
   { href: '/dashboard', label: 'Home', icon: HeartPulse },
@@ -29,6 +35,7 @@ export function Header() {
   const auth = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const { setTheme } = useTheme();
   const [, setForceRender] = useState(0);
 
   useEffect(() => {
@@ -118,7 +125,7 @@ export function Header() {
           </SheetContent>
         </Sheet>
 
-        <Link href="/dashboard" className="flex items-center gap-2">
+        <Link href="/dashboard" className="hidden items-center gap-2 md:flex">
            <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
@@ -186,6 +193,27 @@ export function Header() {
             <DropdownMenuItem onClick={() => router.push('/dashboard/settings')}>
               Settings
             </DropdownMenuItem>
+             <DropdownMenuSub>
+              <DropdownMenuSubTrigger>
+                <span>Theme</span>
+              </DropdownMenuSubTrigger>
+              <DropdownMenuPortal>
+                <DropdownMenuSubContent>
+                  <DropdownMenuItem onClick={() => setTheme('light')}>
+                    <Sun className="mr-2 h-4 w-4" />
+                    <span>Light</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setTheme('dark')}>
+                    <Moon className="mr-2 h-4 w-4" />
+                    <span>Dark</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setTheme('system')}>
+                    <Monitor className="mr-2 h-4 w-4" />
+                    <span>System</span>
+                  </DropdownMenuItem>
+                </DropdownMenuSubContent>
+              </DropdownMenuPortal>
+            </DropdownMenuSub>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
           </DropdownMenuContent>
