@@ -135,7 +135,7 @@ export function Chatbot({ isPopup = false }: ChatbotProps) {
                       key={i} 
                       variant="outline" 
                       size="sm" 
-                      className="text-left h-auto justify-start"
+                      className="text-left h-auto justify-start whitespace-normal"
                       onClick={() => handleSampleQuestionClick(q)}
                     >
                       {q}
