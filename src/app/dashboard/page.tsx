@@ -38,7 +38,7 @@ const mockClinics = [
 
 export default function DashboardPage() {
   const { user } = useUser();
-  const welcomeMessage = user?.displayName ? `Welcome, ${user.displayName.split(' ')[0]}!` : 'AI-powered anemia detection at your fingertips.';
+  const welcomeMessage = user?.displayName ? `Welcome, ${user.displayName.split(' ')[0]}!` : 'Welcome to Anemo Check';
 
   return (
     <div className="space-y-8">
@@ -48,6 +48,9 @@ export default function DashboardPage() {
         </h1>
         <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
           {welcomeMessage}
+        </p>
+        <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
+          AI-powered anemia detection at your fingertips.
         </p>
         <div className="flex justify-center gap-4">
           <Button asChild size="lg">
