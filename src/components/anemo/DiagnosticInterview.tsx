@@ -5,19 +5,19 @@ import {
   runConductDiagnosticInterview,
   runProvidePersonalizedRecommendations,
 } from '@/app/actions';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
-import { Bot, User, Send, FileText, Loader2, Sparkles } from 'lucide-react';
+import { Bot, FileText, Loader2, Sparkles, Send } from 'lucide-react';
 import type { PersonalizedRecommendationsOutput } from '@/ai/flows/provide-personalized-recommendations';
-import { cn } from '@/lib/utils';
 
-type InterviewStep = 'interview' | 'generatingReport' | 'reportReady';
-type Message = { role: 'user' | 'assistant'; content: string };
+type InterviewStep = 'loading' | 'form' | 'generatingReport' | 'reportReady';
+type Answers = Record<string, string>;
 
 type DiagnosticInterviewProps = {
     imageDescription: string | null;
@@ -26,29 +26,30 @@ type DiagnosticInterviewProps = {
 }
 
 export function DiagnosticInterview({ imageDescription, onReset, onAnalysisError }: DiagnosticInterviewProps) {
-  const [interviewStep, setInterviewStep] = useState<InterviewStep>('interview');
-  const [interviewHistory, setInterviewHistory] = useState<Message[]>([]);
-  const [isInterviewComplete, setIsInterviewComplete] = useState(false);
-  const [userInput, setUserInput] = useState('');
+  const [interviewStep, setInterviewStep] = useState<InterviewStep>('loading');
+  const [questions, setQuestions] = useState<string[]>([]);
+  const [answers, setAnswers] = useState<Answers>({});
   const [report, setReport] = useState<PersonalizedRecommendationsOutput | null>(null);
-  const [isInterviewLoading, setInterviewLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const chatBottomRef = useRef<HTMLDivElement>(null);
-
-   useEffect(() => {
-    chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [interviewHistory]);
-
-  const startInterview = useCallback(async () => {
-    if (interviewHistory.length > 0) return;
-
-    setInterviewLoading(true);
+  
+  const fetchQuestions = useCallback(async () => {
+    setIsLoading(true);
+    setInterviewStep('loading');
     try {
       const result = await runConductDiagnosticInterview({
-        userId: 'guest-user',
+        userId: 'guest-user', // Replace with actual user ID if available
         imageAnalysisResult: imageDescription || '',
+        profileData: {}, // Replace with actual profile data if available
       });
-      setInterviewHistory([{ role: 'assistant', content: result.question }]);
+      setQuestions(result.questions);
+      // Initialize answers state
+      const initialAnswers: Answers = {};
+      result.questions.forEach(q => {
+        initialAnswers[q] = '';
+      });
+      setAnswers(initialAnswers);
+      setInterviewStep('form');
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "An unknown error occurred starting the interview.";
       onAnalysisError(errorMessage);
@@ -57,68 +58,43 @@ export function DiagnosticInterview({ imageDescription, onReset, onAnalysisError
             description: errorMessage,
             variant: "destructive",
       });
+      setInterviewStep('loading'); // Or some error state
     } finally {
-      setInterviewLoading(false);
+      setIsLoading(false);
     }
-  }, [imageDescription, interviewHistory.length, onAnalysisError, toast]);
+  }, [imageDescription, onAnalysisError, toast]);
 
   useEffect(() => {
-    startInterview();
-  }, [startInterview]);
+    fetchQuestions();
+  }, [fetchQuestions]);
 
-  const handleInterviewSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!userInput.trim() || isInterviewLoading) return;
-
-    const newHistory: Message[] = [...interviewHistory, { role: 'user', content: userInput }];
-    setInterviewHistory(newHistory);
-    setUserInput('');
-    setInterviewLoading(true);
-
-    try {
-      const result = await runConductDiagnosticInterview({
-        userId: 'guest-user',
-        lastResponse: userInput,
-        imageAnalysisResult: imageDescription || '',
-        profileData: { age: 30, gender: 'female' }, // Example profile data
-      });
-
-      if (result.isComplete) {
-        setIsInterviewComplete(true);
-        setInterviewHistory(prev => [...prev, { role: 'assistant', content: "Thank you for your responses. I'm now generating your personalized report." }]);
-        setInterviewStep('generatingReport');
-      } else {
-        setInterviewHistory(prev => [...prev, { role: 'assistant', content: result.question }]);
-      }
-    } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : "An unknown error occurred during the interview.";
-        onAnalysisError(errorMessage);
-        toast({
-            title: "Interview Error",
-            description: errorMessage,
-            variant: "destructive",
-        });
-    } finally {
-      setInterviewLoading(false);
-    }
+  const handleAnswerChange = (question: string, value: string) => {
+    setAnswers(prev => ({ ...prev, [question]: value }));
   };
 
-  const generateReport = useCallback(async () => {
-    if (interviewStep !== 'generatingReport') return;
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setInterviewStep('generatingReport');
 
     try {
-      const interviewText = interviewHistory.map(m => `${m.role}: ${m.content}`).join('\n');
-      const result = await runProvidePersonalizedRecommendations({
+      const formattedResponses = Object.entries(answers)
+        .map(([question, answer]) => `Q: ${question}\nA: ${answer}`)
+        .join('\n\n');
+
+      const reportResult = await runProvidePersonalizedRecommendations({
         imageAnalysis: imageDescription || 'No description available',
-        interviewResponses: interviewText,
+        interviewResponses: formattedResponses,
         userProfile: 'Age: 30, Gender: Female', // Example profile data
       });
-      setReport(result);
+      
+      setReport(reportResult);
       setInterviewStep('reportReady');
       toast({
         title: "Report Generated",
         description: "Your personalized health report is ready.",
       });
+
     } catch (err) {
         const errorMessage = err instanceof Error ? err.message : "An unknown error occurred while generating the report.";
         onAnalysisError(errorMessage);
@@ -127,44 +103,56 @@ export function DiagnosticInterview({ imageDescription, onReset, onAnalysisError
             description: errorMessage,
             variant: "destructive",
         });
+        setInterviewStep('form'); // Go back to form on error
+    } finally {
+        setIsLoading(false);
     }
-  }, [interviewStep, imageDescription, interviewHistory, onAnalysisError, toast]);
+  };
+  
+  if (interviewStep === 'loading') {
+    return (
+        <Card className="flex-1 flex flex-col items-center justify-center">
+            <CardHeader className="text-center">
+                <CardTitle className="flex items-center gap-2 justify-center"><Bot /> Building Questionnaire</CardTitle>
+                <CardDescription>AI is preparing a few questions for you...</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <Loader2 className="h-10 w-10 animate-spin text-primary" />
+            </CardContent>
+        </Card>
+    );
+  }
 
-  useEffect(() => {
-    if (interviewStep === 'generatingReport') {
-      generateReport();
-    }
-  }, [interviewStep, generateReport]);
-
-
-  if (interviewStep === 'interview') {
+  if (interviewStep === 'form') {
     return (
         <Card className="flex-1 flex flex-col">
-        <CardHeader>
-            <CardTitle className="flex items-center gap-2"><Bot /> Diagnostic Interview</CardTitle>
-            <CardDescription>Answer the questions to get personalized recommendations.</CardDescription>
-        </CardHeader>
-        <CardContent className="flex-1 flex flex-col overflow-hidden">
-            <ScrollArea className="flex-grow pr-4 -mr-4 mb-4">
-                <div className="space-y-4">
-                    {interviewHistory.map((msg, i) => (
-                    <div key={i} className={cn("flex items-start gap-3", msg.role === 'user' ? "justify-end" : "justify-start")}>
-                        {msg.role === 'assistant' && <Avatar className="h-8 w-8"><AvatarFallback><Bot size={18}/></AvatarFallback></Avatar>}
-                        <div className={cn("max-w-[80%] rounded-lg p-3 text-sm", msg.role === 'assistant' ? "bg-muted" : "bg-primary text-primary-foreground")}>
-                            {msg.content}
-                        </div>
-                        {msg.role === 'user' && <Avatar className="h-8 w-8"><AvatarFallback><User size={18}/></AvatarFallback></Avatar>}
+          <CardHeader>
+              <CardTitle className="flex items-center gap-2"><Bot /> Diagnostic Questionnaire</CardTitle>
+              <CardDescription>Please answer the following questions to help us build your health profile.</CardDescription>
+          </CardHeader>
+          <form onSubmit={handleSubmit} className="flex-1 flex flex-col">
+            <CardContent className="flex-1 overflow-y-auto space-y-6">
+                {questions.map((q, index) => (
+                    <div key={index} className="grid gap-2">
+                        <Label htmlFor={`question-${index}`}>{q}</Label>
+                        <Textarea
+                            id={`question-${index}`}
+                            placeholder="Your answer..."
+                            value={answers[q] || ''}
+                            onChange={(e) => handleAnswerChange(q, e.target.value)}
+                            required
+                            className="text-base"
+                        />
                     </div>
-                    ))}
-                    {isInterviewLoading && <div className="flex justify-start"><div className="rounded-lg p-3 bg-muted"><Loader2 className="h-5 w-5 animate-spin" /></div></div>}
-                    <div ref={chatBottomRef} />
-                </div>
-            </ScrollArea>
-            <form onSubmit={handleInterviewSubmit} className="flex items-center gap-2 border-t pt-4">
-                <Input placeholder="Type your answer..." value={userInput} onChange={(e) => setUserInput(e.target.value)} disabled={isInterviewComplete || isInterviewLoading} />
-                <Button type="submit" size="icon" disabled={!userInput.trim() || isInterviewComplete || isInterviewLoading}><Send size={16} /></Button>
-            </form>
-        </CardContent>
+                ))}
+            </CardContent>
+            <CardFooter>
+              <Button type="submit" disabled={isLoading}>
+                <Send className="mr-2" />
+                Submit for Analysis
+              </Button>
+            </CardFooter>
+          </form>
         </Card>
     );
   }

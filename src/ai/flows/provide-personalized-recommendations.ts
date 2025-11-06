@@ -13,7 +13,7 @@ import {z} from 'genkit';
 
 const PersonalizedRecommendationsInputSchema = z.object({
   imageAnalysis: z.string().describe('The analysis of the image uploaded by the user.'),
-  interviewResponses: z.string().describe('The responses provided by the user during the interview.'),
+  interviewResponses: z.string().describe('The user\'s answers to the diagnostic questionnaire, formatted as a string of Q&A pairs.'),
   userProfile: z.string().describe('The user profile data, including age, gender, and health history.'),
   menstrualDetails: z
     .string()
@@ -44,14 +44,14 @@ const prompt = ai.definePrompt({
   output: {schema: PersonalizedRecommendationsOutputSchema},
   prompt: `You are an AI health assistant that provides personalized health recommendations to users based on their image analysis, interview responses, user profile, and menstrual details (if applicable).
 
-  Analyze the following information to generate tailored health recommendations. Also provide an overall anemia risk score (0-100).
+  Analyze the following information to generate tailored health recommendations. Also provide an overall anemia risk score (0-100), where a higher score indicates a higher risk.
 
   Image Analysis: {{{imageAnalysis}}}
-  Interview Responses: {{{interviewResponses}}}
+  Questionnaire Answers: {{{interviewResponses}}}
   User Profile: {{{userProfile}}}
   Menstrual Details (if applicable): {{{menstrualDetails}}}
 
-  Provide clear, concise, and actionable advice.  For female users, give more tailored insights based on menstrual-related data.
+  Provide clear, concise, and actionable advice. The recommendations should be formatted as a bulleted or numbered list. Include lifestyle, dietary, and when to consult a doctor. For female users, give more tailored insights based on menstrual-related data.
 
   Output the risk score and recommendations in a JSON format.
   `,
