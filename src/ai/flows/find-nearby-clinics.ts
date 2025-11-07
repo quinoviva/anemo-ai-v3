@@ -83,7 +83,7 @@ const searchForHealthcareProviders = ai.defineTool(
         { name: 'The Medical City Clinic', type: 'Clinic', address: 'Pavia, Iloilo', contact: 'N/A', hours: 'N/A', notes: 'Private' },
         { name: 'Tiu Clinic And Hospital', type: 'Hospital', address: 'Tigbauan, Iloilo', contact: 'N/A', hours: 'N/A', notes: 'Private' },
         { name: 'Well-family-Midwife-Clinic', type: 'Clinic', address: 'Estancia, Iloilo', contact: 'N/A', hours: 'N/A', notes: 'Private' },
-        { name: 'Leganes Medical Clinic', type: 'Clinic', address: 'Leganes, Iloilo', contact: 'N/A', hours: 'N_A', notes: 'Private' },
+        { name: 'Leganes Medical Clinic', type: 'Clinic', address: 'Leganes, Iloilo', contact: 'N_A', hours: 'N_A', notes: 'Private' },
 
     ];
     
