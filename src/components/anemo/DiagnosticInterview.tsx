@@ -18,6 +18,8 @@ import type { PersonalizedRecommendationsOutput } from '@/ai/flows/provide-perso
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { cn } from '@/lib/utils';
 import { Alert, AlertDescription } from '../ui/alert';
+import { useUser, useFirestore } from '@/firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 type InterviewStep = 'loading' | 'form' | 'generatingReport' | 'reportReady';
 type Answers = Record<string, 'Yes' | 'No' | ''>;
@@ -36,13 +38,15 @@ export function DiagnosticInterview({ imageDescription, onReset, onAnalysisError
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const reportRef = useRef<HTMLDivElement>(null);
+  const { user } = useUser();
+  const firestore = useFirestore();
   
   const fetchQuestions = useCallback(async () => {
     setIsLoading(true);
     setInterviewStep('loading');
     try {
       const result = await runConductDiagnosticInterview({
-        userId: 'guest-user', // Replace with actual user ID if available
+        userId: user?.uid || 'guest-user',
         imageAnalysisResult: imageDescription || '',
         profileData: {}, // Replace with actual profile data if available
       });
@@ -66,7 +70,7 @@ export function DiagnosticInterview({ imageDescription, onReset, onAnalysisError
     } finally {
       setIsLoading(false);
     }
-  }, [imageDescription, onAnalysisError, toast]);
+  }, [imageDescription, onAnalysisError, toast, user]);
 
   useEffect(() => {
     fetchQuestions();
@@ -78,6 +82,34 @@ export function DiagnosticInterview({ imageDescription, onReset, onAnalysisError
 
   const isFormComplete = () => {
     return questions.length > 0 && questions.every(q => answers[q] === 'Yes' || answers[q] === 'No');
+  }
+
+  const saveReportToFirestore = async (reportData: PersonalizedRecommendationsOutput) => {
+    if (!user || user.isAnonymous || !firestore) {
+      return;
+    }
+
+    try {
+      const reportCollection = collection(firestore, `users/${user.uid}/imageAnalyses`);
+      await addDoc(reportCollection, {
+        userId: user.uid,
+        createdAt: serverTimestamp(),
+        riskScore: reportData.riskScore,
+        recommendations: reportData.recommendations,
+        imageAnalysisSummary: imageDescription || 'N/A',
+      });
+      toast({
+        title: "Analysis Saved",
+        description: "Your image analysis report has been saved to your history."
+      })
+    } catch (error) {
+       console.error("Error saving image analysis report: ", error);
+       toast({
+        title: "Save Failed",
+        description: "Could not save your analysis to your history.",
+        variant: 'destructive',
+      });
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -111,6 +143,9 @@ export function DiagnosticInterview({ imageDescription, onReset, onAnalysisError
         title: "Report Generated",
         description: "Your personalized health report is ready.",
       });
+
+      // Save the report to Firestore
+      await saveReportToFirestore(reportResult);
 
     } catch (err) {
         const errorMessage = err instanceof Error ? err.message : "An unknown error occurred while generating the report.";

@@ -78,6 +78,14 @@ service cloud.firestore {
         // Allow the user to create, read, update, and delete their own lab reports.
         allow read, write: if isSignedIn() && isOwner(userId);
       }
+      
+      /**
+        * @description Protects a user's image analysis reports. Only the owner can manage them.
+        * @path /users/{userId}/imageAnalyses/{analysisId}
+        */
+      match /imageAnalyses/{analysisId} {
+        allow read, write: if isSignedIn() && isOwner(userId);
+      }
     }
   }
 }

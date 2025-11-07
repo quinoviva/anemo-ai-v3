@@ -157,6 +157,39 @@
         }
       },
       "required": ["id", "userId", "createdAt", "summary", "parameters"]
+    },
+    "ImageAnalysisReport": {
+      "title": "Image Analysis Report",
+      "type": "object",
+      "description": "Represents a report generated from image analysis and a diagnostic interview.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the report."
+        },
+        "userId": {
+          "type": "string",
+          "description": "The ID of the user who owns this report."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp when the report was created."
+        },
+        "riskScore": {
+          "type": "number",
+          "description": "The calculated anemia risk score (0-100)."
+        },
+        "recommendations": {
+          "type": "string",
+          "description": "AI-generated personalized health recommendations."
+        },
+        "imageAnalysisSummary": {
+          "type": "string",
+          "description": "A summary of the results from the image analysis step."
+        }
+      },
+      "required": ["id", "userId", "createdAt", "riskScore", "recommendations", "imageAnalysisSummary"]
     }
   },
   "auth": {
@@ -203,8 +236,28 @@
             }
           ]
         }
+      },
+      {
+        "path": "/users/{userId}/imageAnalyses/{analysisId}",
+        "definition": {
+          "entityName": "ImageAnalysisReport",
+          "schema": {
+            "$ref": "#/backend/entities/ImageAnalysisReport"
+          },
+          "description": "Stores AI-generated image analysis and questionnaire reports.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user, matching the Firebase Auth UID."
+            },
+            {
+              "name": "analysisId",
+              "description": "The unique identifier for the image analysis report."
+            }
+          ]
+        }
       }
     ],
-    "reasoning": "The Firestore structure is designed to ensure Authorization Independence, DBAC, and QAPs. User data is stored under `/users/{userId}` to establish clear ownership. The `userId` obtained from `request.auth.uid` is used to control access to user-specific data. This design avoids hierarchical authorization dependencies by storing authorization data directly within the user document, removing the need for `get()` calls in security rules.\n\nThe structure is segregated to ensure a homogeneous security posture. Each collection is designed to store a specific type of data with consistent access needs. For example, user profiles are stored in `/users/{userId}`, enabling straightforward rules based on user ID.\n\nThis design also facilitates QAPs by using path-based ownership for user data, enabling secure `list` operations within the `/users/{userId}` collection. The membership model is standardized with a `members` map for collaborative data, allowing easy management of roles and permissions.\n\nExplicit state modeling is achieved through dedicated `status` fields, and a predictable schema is maintained by avoiding dynamic keys and using arrays of objects with static keys. Naming conventions are standardized to ensure clarity and consistency throughout the database."
+    "reasoning": "The Firestore structure is designed to ensure Authorization Independence, DBAC, and QAPs. User data is stored under `/users/{userId}` to establish clear ownership. The `userId` obtained from `request.auth.uid` is used to control access to user-specific data. This design avoids hierarchical authorization dependencies by storing authorization data directly within the user document, removing the need for `get()` calls in security rules.\n\nThe structure is segregated to ensure a homogeneous security posture. Each collection is designed to store a specific type of data with consistent access needs. For example, user profiles are stored in `/users/{userId}`, enabling straightforward rules based on user ID. Image analyses and lab reports are stored in sub-collections under the user's document to enforce ownership.\n\nThis design also facilitates QAPs by using path-based ownership for user data, enabling secure `list` operations within the sub-collections. The membership model is standardized with a `members` map for collaborative data, allowing easy management of roles and permissions.\n\nExplicit state modeling is achieved through dedicated `status` fields, and a predictable schema is maintained by avoiding dynamic keys and using arrays of objects with static keys. Naming conventions are standardized to ensure clarity and consistency throughout the database."
   }
 }
