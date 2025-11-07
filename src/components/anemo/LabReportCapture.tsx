@@ -196,14 +196,17 @@ export function LabReportCapture({ isOpen, onClose }: LabReportCaptureProps) {
     </div>
   );
   
-  const renderResultView = () => (
+  const renderResultView = () => {
+    const isAnemiaPositive = analysisResult?.summary?.toLowerCase().includes('anemia');
+
+    return (
     <>
       <DialogHeader>
         <DialogTitle>AI Analysis Result</DialogTitle>
         <DialogDescription>Review the extracted information from your lab report. This is not medical advice.</DialogDescription>
       </DialogHeader>
       <div className="py-4 space-y-4">
-        <Alert>
+        <Alert variant={isAnemiaPositive ? 'destructive' : 'default'}>
           <AlertTitle>Summary</AlertTitle>
           <AlertDescription>{analysisResult.summary}</AlertDescription>
         </Alert>
@@ -238,7 +241,8 @@ export function LabReportCapture({ isOpen, onClose }: LabReportCaptureProps) {
         </Button>
       </DialogFooter>
     </>
-  );
+    );
+  };
 
   const renderContent = () => {
     switch(step) {
