@@ -10,7 +10,7 @@ import {
   createUserWithEmailAndPassword,
   updateProfile,
 } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc } from 'firebase/firestore';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -49,7 +49,7 @@ const formSchema = z
     firstName: z.string().min(1, { message: 'First name is required.' }),
     lastName: z.string().min(1, { message: 'Last name is required.' }),
     municipality: z.string({ required_error: 'Please select a municipality.' }).min(1, 'Please select a municipality.'),
-    sex: z.string({ required_error: 'Please select an option.' }),
+    sex: z.string({ required_error: 'Please select your sex.' }).min(1, { message: 'Please select your sex.' }),
     email: z.string().email({ message: 'Please enter a valid email.' }),
     password: z
       .string()
@@ -189,7 +189,7 @@ export function SignUpForm() {
                         <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
                         <FormControl>
                             <SelectTrigger className="pl-10">
-                            <SelectValue placeholder="Select municipality" />
+                              <SelectValue placeholder="Select municipality" />
                             </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -267,11 +267,6 @@ export function SignUpForm() {
                       {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                     </button>
                   </div>
-                  {!fieldState.error && field.value && (
-                    <FormDescription>
-                       Your password is secure.
-                    </FormDescription>
-                  )}
                   {fieldState.error && (
                     <FormDescription>
                       Must be at least 8 characters and include uppercase, lowercase, number, and special characters.
