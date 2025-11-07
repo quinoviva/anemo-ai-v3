@@ -89,9 +89,6 @@ export default function DashboardPage() {
           <Button asChild size="lg">
             <Link href="/dashboard/analysis">Start Analysis</Link>
           </Button>
-          <Button asChild size="lg" variant="outline">
-            <Link href="/dashboard/find-doctor">Nearby Healthcare Providers</Link>
-          </Button>
         </div>
       </div>
       
@@ -100,10 +97,17 @@ export default function DashboardPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Nearby Healthcare Providers in {location}</CardTitle>
-            <CardDescription>
-              A quick look at some of the available doctors, hospitals, and clinics.
-            </CardDescription>
+            <div className="flex justify-between items-start">
+              <div>
+                <CardTitle>Nearby Healthcare Providers in {location}</CardTitle>
+                <CardDescription>
+                  A quick look at some of the available doctors, hospitals, and clinics.
+                </CardDescription>
+              </div>
+               <Button asChild variant="outline">
+                <Link href="/dashboard/find-doctor">View All</Link>
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
