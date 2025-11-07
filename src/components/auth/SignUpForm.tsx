@@ -314,6 +314,9 @@ export function SignUpForm() {
             Log in
           </Link>
         </p>
+        <p className="mt-4 px-8 text-center text-xs text-muted-foreground">
+          By continuing, you agree to our Terms of Service and Privacy Policy
+        </p>
       </CardContent>
     </Card>
   );
