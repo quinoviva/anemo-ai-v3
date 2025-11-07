@@ -19,6 +19,7 @@ import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { Badge } from '../ui/badge';
 import { Table, TableBody, TableCell, TableHeader, TableHead, TableRow } from '../ui/table';
 import { Input } from '../ui/input';
+import { ScrollArea } from '../ui/scroll-area';
 
 type LabReportCaptureProps = {
   isOpen: boolean;
@@ -205,34 +206,36 @@ export function LabReportCapture({ isOpen, onClose }: LabReportCaptureProps) {
         <DialogTitle>AI Analysis Result</DialogTitle>
         <DialogDescription>Review the extracted information from your lab report. This is not medical advice.</DialogDescription>
       </DialogHeader>
-      <div className="py-4 space-y-4">
-        <Alert variant={isAnemiaPositive ? 'destructive' : 'default'}>
-          <AlertTitle>Summary</AlertTitle>
-          <AlertDescription>{analysisResult.summary}</AlertDescription>
-        </Alert>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Parameter</TableHead>
-              <TableHead>Value</TableHead>
-              <TableHead>Status</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {analysisResult.parameters.map((p: any, i: number) => (
-              <TableRow key={i}>
-                <TableCell className="font-medium">{p.parameter}</TableCell>
-                <TableCell>{p.value} {p.unit}</TableCell>
-                <TableCell>
-                  <Badge variant={p.isNormal ? 'default' : 'destructive'}>
-                    {p.isNormal ? 'Normal' : 'Out of Range'}
-                  </Badge>
-                </TableCell>
+      <ScrollArea className="max-h-[60vh] my-4">
+        <div className="py-4 space-y-4 pr-6">
+          <Alert variant={isAnemiaPositive ? 'destructive' : 'default'}>
+            <AlertTitle>Summary</AlertTitle>
+            <AlertDescription>{analysisResult.summary}</AlertDescription>
+          </Alert>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Parameter</TableHead>
+                <TableHead>Value</TableHead>
+                <TableHead>Status</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+            </TableHeader>
+            <TableBody>
+              {analysisResult.parameters.map((p: any, i: number) => (
+                <TableRow key={i}>
+                  <TableCell className="font-medium">{p.parameter}</TableCell>
+                  <TableCell>{p.value} {p.unit}</TableCell>
+                  <TableCell>
+                    <Badge variant={p.isNormal ? 'default' : 'destructive'}>
+                      {p.isNormal ? 'Normal' : 'Out of Range'}
+                    </Badge>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </ScrollArea>
       <DialogFooter>
         <Button variant="outline" onClick={() => setStep('upload')}>Re-upload</Button>
         <Button onClick={handleSaveResult} disabled={step === 'saving'}>
