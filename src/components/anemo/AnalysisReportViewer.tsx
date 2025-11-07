@@ -3,7 +3,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import { format } from 'date-fns';
+import { format, differenceInYears } from 'date-fns';
 import {
   Dialog,
   DialogContent,
@@ -15,13 +15,12 @@ import {
 import { Button } from '@/components/ui/button';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Table, TableBody, TableCell, TableHeader, TableHead, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Download, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import type { ReportType } from './AnalysisHistoryList';
-import { useUser } from '@/firebase';
-import { cn } from '@/lib/utils';
+import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
+import { doc } from 'firebase/firestore';
 
 type AnalysisReportViewerProps = {
   report: ReportType | null;
@@ -35,13 +34,20 @@ export function AnalysisReportViewer({ report, isOpen, onClose, startDownload = 
   const [isDownloading, setIsDownloading] = useState(false);
   const { toast } = useToast();
   const { user } = useUser();
+  const firestore = useFirestore();
+
+  const userDocRef = useMemoFirebase(() => {
+    if (!user || !firestore) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [user, firestore]);
+  
+  const { data: userData } = useDoc<any>(userDocRef);
 
   const handleDownloadPdf = async () => {
-    // For direct downloads, the modal isn't rendered, so we create a temporary element.
     const element = document.createElement('div');
     element.style.position = 'absolute';
     element.style.left = '-9999px';
-    element.style.width = '800px'; // A fixed width for consistent PDF output
+    element.style.width = '800px'; 
     
     const reportContentElement = document.getElementById(`pdf-content-${report?.id}`);
     
@@ -59,6 +65,7 @@ export function AnalysisReportViewer({ report, isOpen, onClose, startDownload = 
         description: 'Could not find report content.',
         variant: 'destructive',
       });
+      document.body.removeChild(element);
       return;
     }
 
@@ -97,7 +104,7 @@ export function AnalysisReportViewer({ report, isOpen, onClose, startDownload = 
         document.body.removeChild(element);
       }
       setIsDownloading(false);
-      onClose(); // Close the dialog/reset state after download attempt
+      onClose();
     }
   };
   
@@ -105,7 +112,7 @@ export function AnalysisReportViewer({ report, isOpen, onClose, startDownload = 
     if (isOpen && startDownload && report?.id) {
       const timer = setTimeout(() => {
         handleDownloadPdf();
-      }, 50); // Short delay to ensure content is available for capture
+      }, 100);
       return () => clearTimeout(timer);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -116,31 +123,54 @@ export function AnalysisReportViewer({ report, isOpen, onClose, startDownload = 
 
   const isAnemiaPositive = report.summary?.toLowerCase().includes('anemia');
   
+  const getAge = () => {
+    if (userData?.medicalInfo?.dateOfBirth?.toDate) {
+      return differenceInYears(new Date(), userData.medicalInfo.dateOfBirth.toDate());
+    }
+    return 'N/A';
+  }
+
   const ReportContent = () => (
-    <div className="p-6 rounded-lg border bg-background space-y-6">
-      <header className="flex items-start justify-between border-b pb-4">
-        <div className="flex items-center gap-4">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="h-10 w-10 text-primary"
-          >
-            <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
-            <path d="M3.22 12H9.5l.7-1 2.1 4.2 1.6-3.2 1.6 3.2h3.22" />
-          </svg>
-          <div>
-            <h2 className="text-xl font-bold text-foreground">Anemo Check</h2>
-            <p className="text-sm text-muted-foreground">AI Lab Report Analysis</p>
-          </div>
+    <div className="p-6 rounded-lg border bg-background space-y-4 relative overflow-hidden">
+        {/* Watermark */}
+        <div className="absolute inset-0 flex items-center justify-center -z-10">
+            <p className="text-8xl font-black text-foreground/5 -rotate-45 select-none">
+                ANEMO CHECK
+            </p>
         </div>
-        <div className="text-right text-sm">
-          <p className="font-semibold">{user?.displayName || 'User'}</p>
-          <p className="text-muted-foreground">{report.createdAt ? format(report.createdAt.toDate(), 'PPP, p') : 'N/A'}</p>
+
+      <header className="space-y-4">
+        <div className="flex items-start justify-between border-b pb-4">
+            <div className="flex items-center gap-4">
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-10 w-10 text-primary"
+            >
+                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+                <path d="M3.22 12H9.5l.7-1 2.1 4.2 1.6-3.2 1.6 3.2h3.22" />
+            </svg>
+            <div>
+                <h2 className="text-xl font-bold text-foreground">Anemo Check</h2>
+                <a href="https://anemocheck.com" className="text-sm text-muted-foreground hover:underline">anemocheck.com</a>
+            </div>
+            </div>
+            <div className="text-right text-xs">
+                <p className='font-bold text-base'>AI Lab Report Analysis</p>
+                <p>Generated On: {format(new Date(), 'PPP')}</p>
+            </div>
+        </div>
+
+        <div className="grid grid-cols-3 gap-4 text-sm">
+            <div><span className="font-semibold">Patient:</span> {user?.displayName || 'N/A'}</div>
+            <div><span className="font-semibold">Age:</span> {getAge()}</div>
+            <div><span className="font-semibold">Sex:</span> {userData?.medicalInfo?.sex || 'N/A'}</div>
+            <div className="col-span-3"><span className="font-semibold">Source:</span> {report.hospitalName || 'N/A'}</div>
         </div>
       </header>
 
@@ -163,7 +193,7 @@ export function AnalysisReportViewer({ report, isOpen, onClose, startDownload = 
                 <TableRow key={i}>
                 <TableCell className="font-medium">{p.parameter}</TableCell>
                 <TableCell>{p.value} {p.unit}</TableCell>
-                <TableCell>
+                <TableCell className='flex items-center justify-start'>
                   {p.isNormal ? (
                     <p className="text-primary font-semibold">Normal</p>
                   ) : (
@@ -176,11 +206,11 @@ export function AnalysisReportViewer({ report, isOpen, onClose, startDownload = 
         </Table>
       </div>
       <p className="text-xs text-muted-foreground pt-4 text-center">Disclaimer: This report is AI-generated and for informational purposes only. It is not a substitute for professional medical advice.</p>
+      <p className="text-sm font-semibold text-muted-foreground pt-2 text-center">*** End of Report ***</p>
     </div>
   );
 
   // If startDownload is true, this component renders nothing visible.
-  // It just triggers the download effect. The content is captured off-screen.
   if (startDownload) {
       return (
         <div id={`pdf-content-${report.id}`} style={{ display: 'none' }}>
@@ -192,7 +222,7 @@ export function AnalysisReportViewer({ report, isOpen, onClose, startDownload = 
   // This is the visible modal for viewing
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>Analysis Report</DialogTitle>
           <DialogDescription>
@@ -200,7 +230,7 @@ export function AnalysisReportViewer({ report, isOpen, onClose, startDownload = 
           </DialogDescription>
         </DialogHeader>
 
-        <ScrollArea className="max-h-[60vh] my-4">
+        <ScrollArea className="max-h-[70vh] my-4">
             <div ref={reportRef}>
                <ReportContent />
             </div>

@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { Loader2, XCircle, Sparkles, Upload, Send, FileUp, Info } from 'lucide-react';
+import { Loader2, XCircle, Sparkles, Upload, Send, FileUp, Info, Hospital } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { runAnalyzeCbcReport } from '@/app/actions';
 import { useUser, useFirestore } from '@/firebase';
@@ -20,6 +20,7 @@ import { Badge } from '../ui/badge';
 import { Table, TableBody, TableCell, TableHeader, TableHead, TableRow } from '../ui/table';
 import { Input } from '../ui/input';
 import { ScrollArea } from '../ui/scroll-area';
+import { Label } from '../ui/label';
 
 type LabReportCaptureProps = {
   isOpen: boolean;
@@ -33,6 +34,7 @@ export function LabReportCapture({ isOpen, onClose }: LabReportCaptureProps) {
   const [analysisResult, setAnalysisResult] = useState<any>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [hospitalName, setHospitalName] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
   const { toast } = useToast();
@@ -43,6 +45,7 @@ export function LabReportCapture({ isOpen, onClose }: LabReportCaptureProps) {
     setStep('upload');
     setAnalysisResult(null);
     setSelectedFile(null);
+    setHospitalName('');
     if (previewUrl) {
       URL.revokeObjectURL(previewUrl);
     }
@@ -120,6 +123,7 @@ export function LabReportCapture({ isOpen, onClose }: LabReportCaptureProps) {
       const reportsCollection = collection(firestore, `users/${user.uid}/labReports`);
       await addDoc(reportsCollection, {
         ...analysisResult,
+        hospitalName: hospitalName,
         userId: user.uid,
         createdAt: serverTimestamp(),
       });
@@ -175,6 +179,21 @@ export function LabReportCapture({ isOpen, onClose }: LabReportCaptureProps) {
             className="sr-only"
             onChange={(e) => handleFileChange(e.target.files ? e.target.files[0] : null)}
         />
+        {selectedFile && (
+             <div className="space-y-2">
+                <Label htmlFor="hospital-name">Hospital/Clinic Name (Optional)</Label>
+                 <div className="relative">
+                    <Hospital className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                    <Input 
+                        id="hospital-name"
+                        placeholder="e.g., Iloilo Doctors' Hospital"
+                        value={hospitalName}
+                        onChange={(e) => setHospitalName(e.target.value)}
+                        className="pl-10"
+                    />
+                 </div>
+            </div>
+        )}
       </div>
       <DialogFooter className='sm:justify-between items-center'>
         <Button onClick={() => { setSelectedFile(null); if(previewUrl) URL.revokeObjectURL(previewUrl); setPreviewUrl(null); }} variant="outline" disabled={!selectedFile}>

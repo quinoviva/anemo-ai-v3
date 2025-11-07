@@ -118,6 +118,10 @@
           "format": "date-time",
           "description": "The timestamp when the report was created."
         },
+        "hospitalName": {
+          "type": "string",
+          "description": "The name of the hospital or clinic where the CBC was performed."
+        },
         "summary": {
           "type": "string",
           "description": "AI-generated summary of the lab results."
