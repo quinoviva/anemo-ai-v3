@@ -40,7 +40,7 @@ const prompt = ai.definePrompt({
 
 You will receive a photo. Your primary job is to determine if it is a valid image for anemia detection. A valid image must meet ALL of the following criteria. There are no exceptions.
 
-1.  **Subject Requirement:** The image MUST be a clear, close-up view of one of the following: human skin, the lower under-eye area (palpebral conjunctiva), or fingernails.
+1.  **Subject Requirement:** The image's main subject MUST be a clear, close-up view of one of the following: human skin, the lower under-eye area (palpebral conjunctiva), or fingernails. If the picture is mostly showing one of these, it is valid, even if other objects are in the background.
 2.  **Obstruction-Free Requirement:** The area in the image MUST BE COMPLETELY FREE of any substances that could alter its natural appearance. This includes, but is not limited to: makeup, nail polish, lotions, creams, or any other coverings.
 
 Your analysis process is as follows:
@@ -48,7 +48,7 @@ Your analysis process is as follows:
 First, briefly describe the main subject of the image.
 
 Next, you MUST determine if the image is valid by strictly applying the two rules above.
-- If the image shows a car, a landscape, an animal, or anything other than human skin, under-eye, or fingernails, it is INVALID.
+- If the image's primary subject is a car, a landscape, an animal, or anything other than human skin, under-eye, or fingernails, it is INVALID.
 - If the image shows skin, under-eye, or fingernails but has ANY makeup, nail polish, or other coverings, it is INVALID.
 
 Based on this strict analysis, set the 'isValid' field to true or false.
