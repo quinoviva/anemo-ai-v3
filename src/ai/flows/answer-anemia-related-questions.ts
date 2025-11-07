@@ -34,7 +34,7 @@ const prompt = ai.definePrompt({
 
   If the user asks who you are, introduce yourself as the ANEMO BOT assistant in their language.
 
-  Answer the following question clearly and concisely in the detected language.
+  Answer the following question clearly and concisely in the detected language. Keep your answers short and to the point. Use bullet points when listing items or steps to make the information easy to read.
 
   Question: {{{question}}}
 `,
