@@ -114,7 +114,6 @@ export function AnalysisHistoryList() {
               <TableRow>
                 <TableHead>Date</TableHead>
                 <TableHead>Summary</TableHead>
-                <TableHead>Source</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -125,7 +124,6 @@ export function AnalysisHistoryList() {
                   <TableCell>
                     <Badge variant={getBadgeVariant(item.summary)}>{item.summary}</Badge>
                   </TableCell>
-                  <TableCell>{item.hospitalName || 'N/A'}</TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="icon" onClick={() => setReportToView(item)}>
                       <Eye className="h-4 w-4" />
