@@ -26,6 +26,7 @@ export type ReportType = AnalyzeCbcReportOutput & {
     toDate: () => Date;
   };
   hospitalName?: string;
+  doctorName?: string;
 };
 
 export function AnalysisHistoryList() {

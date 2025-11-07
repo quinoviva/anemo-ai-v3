@@ -122,6 +122,10 @@
           "type": "string",
           "description": "The name of the hospital or clinic where the CBC was performed."
         },
+        "doctorName": {
+          "type": "string",
+          "description": "The name of the doctor who requested or reviewed the CBC report."
+        },
         "summary": {
           "type": "string",
           "description": "AI-generated summary of the lab results."

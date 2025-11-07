@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Table, TableBody, TableCell, TableHeader, TableHead, TableRow } from '@/components/ui/table';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Download, Loader2 } from 'lucide-react';
+import { Download, Loader2, Hospital, Stethoscope } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import type { ReportType } from './AnalysisHistoryList';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
@@ -135,33 +135,42 @@ export function AnalysisReportViewer({ report, isOpen, onClose, startDownload = 
       <header className="space-y-4">
         <div className="flex items-start justify-between border-b pb-4">
             <div className="flex items-center gap-4">
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-10 w-10 text-primary"
-            >
-                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
-                <path d="M3.22 12H9.5l.7-1 2.1 4.2 1.6-3.2 1.6 3.2h3.22" />
-            </svg>
-            <div>
-                <h2 className="text-xl font-bold text-foreground">Anemo Check</h2>
-                <p className="text-sm text-muted-foreground">AI Lab Report Analysis</p>
-            </div>
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-10 w-10 text-primary"
+                >
+                    <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+                    <path d="M3.22 12H9.5l.7-1 2.1 4.2 1.6-3.2 1.6 3.2h3.22" />
+                </svg>
+                <div>
+                    <h2 className="text-xl font-bold text-foreground">Anemo Check</h2>
+                    <p className="text-sm text-muted-foreground">AI Lab Report Analysis</p>
+                </div>
             </div>
             <div className="text-right">
                 <p className='font-bold text-lg'>{user?.displayName || ''}</p>
             </div>
         </div>
-        {report.hospitalName && (
-            <p className="text-sm text-muted-foreground">
-                <span className="font-medium text-foreground">{report.hospitalName}</span>
-            </p>
-        )}
+        <div className="space-y-1 text-sm text-muted-foreground">
+          {report.hospitalName && (
+              <p className="flex items-center gap-2">
+                  <Hospital className="h-4 w-4 text-primary"/>
+                  <span className="font-medium text-foreground">{report.hospitalName}</span>
+              </p>
+          )}
+          {report.doctorName && (
+              <p className="flex items-center gap-2">
+                  <Stethoscope className="h-4 w-4 text-primary"/>
+                  <span className="font-medium text-foreground">{report.doctorName}</span>
+              </p>
+          )}
+        </div>
       </header>
 
       <div className="space-y-4">

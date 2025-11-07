@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { Loader2, XCircle, Sparkles, Upload, Send, FileUp, Info, Hospital } from 'lucide-react';
+import { Loader2, XCircle, Sparkles, Upload, Send, FileUp, Info, Hospital, Stethoscope } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { runAnalyzeCbcReport } from '@/app/actions';
 import { useUser, useFirestore } from '@/firebase';
@@ -35,6 +35,7 @@ export function LabReportCapture({ isOpen, onClose }: LabReportCaptureProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [hospitalName, setHospitalName] = useState('');
+  const [doctorName, setDoctorName] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
   const { toast } = useToast();
@@ -46,6 +47,7 @@ export function LabReportCapture({ isOpen, onClose }: LabReportCaptureProps) {
     setAnalysisResult(null);
     setSelectedFile(null);
     setHospitalName('');
+    setDoctorName('');
     if (previewUrl) {
       URL.revokeObjectURL(previewUrl);
     }
@@ -124,6 +126,7 @@ export function LabReportCapture({ isOpen, onClose }: LabReportCaptureProps) {
       await addDoc(reportsCollection, {
         ...analysisResult,
         hospitalName: hospitalName,
+        doctorName: doctorName,
         userId: user.uid,
         createdAt: serverTimestamp(),
       });
@@ -180,18 +183,33 @@ export function LabReportCapture({ isOpen, onClose }: LabReportCaptureProps) {
             onChange={(e) => handleFileChange(e.target.files ? e.target.files[0] : null)}
         />
         {selectedFile && (
-             <div className="space-y-2">
-                <Label htmlFor="hospital-name">Hospital/Clinic Name (Optional)</Label>
-                 <div className="relative">
-                    <Hospital className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                    <Input 
-                        id="hospital-name"
-                        placeholder="e.g., Iloilo Doctors' Hospital"
-                        value={hospitalName}
-                        onChange={(e) => setHospitalName(e.target.value)}
-                        className="pl-10"
-                    />
-                 </div>
+             <div className="space-y-4">
+                <div>
+                    <Label htmlFor="hospital-name">Hospital/Clinic Name (Optional)</Label>
+                    <div className="relative">
+                        <Hospital className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                        <Input 
+                            id="hospital-name"
+                            placeholder="e.g., Iloilo Doctors' Hospital"
+                            value={hospitalName}
+                            onChange={(e) => setHospitalName(e.target.value)}
+                            className="pl-10"
+                        />
+                    </div>
+                </div>
+                <div>
+                    <Label htmlFor="doctor-name">Doctor's Name (Optional)</Label>
+                    <div className="relative">
+                        <Stethoscope className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                        <Input 
+                            id="doctor-name"
+                            placeholder="e.g., Dr. Juan Dela Cruz"
+                            value={doctorName}
+                            onChange={(e) => setDoctorName(e.target.value)}
+                            className="pl-10"
+                        />
+                    </div>
+                </div>
             </div>
         )}
       </div>
