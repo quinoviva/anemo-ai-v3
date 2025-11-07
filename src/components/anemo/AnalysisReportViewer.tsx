@@ -156,11 +156,14 @@ export function AnalysisReportViewer({ report, isOpen, onClose, startDownload = 
             <div className="text-right text-xs">
                 <p className='font-bold text-base'>AI Lab Report Analysis</p>
                 <p>Generated On: {format(new Date(), 'PPP')}</p>
+                <p className='font-bold text-lg pt-2 pr-1'>{user?.displayName || 'N/A'}</p>
             </div>
         </div>
 
         <div className="space-y-1">
-            <p className="font-bold text-lg">{user?.displayName || 'N/A'}</p>
+            <p className="font-semibold text-muted-foreground">
+                Source: <span className="font-medium text-foreground">{report.hospitalName || 'N/A'}</span>
+            </p>
         </div>
       </header>
 
@@ -183,7 +186,7 @@ export function AnalysisReportViewer({ report, isOpen, onClose, startDownload = 
                 <TableRow key={i}>
                 <TableCell className="font-medium">{p.parameter}</TableCell>
                 <TableCell>{p.value} {p.unit}</TableCell>
-                <TableCell className='flex items-center justify-start'>
+                <TableCell>
                   <p className={p.isNormal ? 'text-primary font-semibold' : 'text-destructive font-semibold'}>
                     {p.isNormal ? 'Normal' : 'Out of Range'}
                   </p>
