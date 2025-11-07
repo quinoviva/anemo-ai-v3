@@ -30,6 +30,13 @@ import {
   FormDescription,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth, useFirestore } from '@/firebase';
 import { Loader2, Eye, EyeOff, User, Mail, Lock } from 'lucide-react';
@@ -39,6 +46,7 @@ const formSchema = z
   .object({
     firstName: z.string().min(1, { message: 'First name is required.' }),
     lastName: z.string().min(1, { message: 'Last name is required.' }),
+    sex: z.string({ required_error: 'Please select an option.' }),
     email: z.string().email({ message: 'Please enter a valid email.' }),
     password: z
       .string()
@@ -74,6 +82,7 @@ export function SignUpForm() {
     defaultValues: {
       firstName: '',
       lastName: '',
+      sex: '',
       email: '',
       password: '',
       confirmPassword: '',
@@ -101,7 +110,10 @@ export function SignUpForm() {
         firstName: values.firstName,
         lastName: values.lastName,
         email: values.email,
-      }, {});
+        medicalInfo: {
+            sex: values.sex,
+        }
+      }, { merge: true });
 
       router.push('/');
     } catch (error: any) {
@@ -160,6 +172,27 @@ export function SignUpForm() {
                 )}
               />
             </div>
+             <FormField
+                  control={form.control}
+                  name="sex"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Sex</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select sex" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Male">Male</SelectItem>
+                          <SelectItem value="Female">Female</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
             <FormField
               control={form.control}
               name="email"
