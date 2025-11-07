@@ -116,7 +116,7 @@ export function AnalysisReportViewer({ report, isOpen, onClose, startDownload = 
   const isAnemiaPositive = report.summary?.toLowerCase().includes('anemia');
   
   const ReportContent = () => (
-    <div className="p-4 rounded-lg border bg-background space-y-6">
+    <div className="p-6 rounded-lg border bg-background space-y-6">
       <header className="flex items-start justify-between border-b pb-4">
         <div className="flex items-center gap-4">
           <svg
