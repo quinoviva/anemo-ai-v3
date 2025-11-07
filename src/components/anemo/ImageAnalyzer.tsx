@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
-import { UploadCloud, XCircle, FileImage, Loader2, CheckCircle, RefreshCw } from 'lucide-react';
+import { UploadCloud, XCircle, Loader2, CheckCircle, RefreshCw, Hand, Eye } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DiagnosticInterview } from './DiagnosticInterview';
 
@@ -35,10 +35,10 @@ const initialAnalysisState: AnalysisState = {
   status: 'idle',
 };
 
-const analysisPoints: { id: BodyPart; title: string; description: string }[] = [
-  { id: 'skin', title: 'Skin', description: 'A clear photo of your skin, like the palm of your hand.' },
-  { id: 'under-eye', title: 'Under-eye', description: 'A clear photo of the lower under-eye area.' },
-  { id: 'fingernails', title: 'Fingernails', description: 'A clear photo of your bare fingernails.' },
+const analysisPoints: { id: BodyPart; title: string; description: string, icon: React.ReactNode }[] = [
+  { id: 'skin', title: 'Skin', description: 'A clear photo of your skin, like the palm of your hand.', icon: <Hand /> },
+  { id: 'under-eye', title: 'Under-eye', description: 'A clear photo of the lower under-eye area.', icon: <Eye /> },
+  { id: 'fingernails', title: 'Fingernails', description: 'A clear photo of your bare fingernails.', icon: <Hand /> },
 ];
 
 export function ImageAnalyzer() {
@@ -143,13 +143,14 @@ export function ImageAnalyzer() {
   return (
     <div className="space-y-6">
       <div className="grid gap-6 md:grid-cols-3">
-        {analysisPoints.map(({ id, title, description }) => (
+        {analysisPoints.map(({ id, title, description, icon }) => (
           <AnalysisCard
             key={id}
             bodyPart={id}
             title={title}
             description={description}
             analysisState={analyses[id]}
+            icon={icon}
             onImageChange={(file) => handleImageChange(id, file)}
             onReset={() => resetAnalysis(id)}
           />
@@ -177,6 +178,7 @@ type AnalysisCardProps = {
   bodyPart: BodyPart;
   title: string;
   description: string;
+  icon: React.ReactNode;
   analysisState: AnalysisState;
   onImageChange: (file: File | null) => void;
   onReset: () => void;
@@ -186,6 +188,7 @@ function AnalysisCard({
   bodyPart,
   title,
   description,
+  icon,
   analysisState,
   onImageChange,
   onReset,
@@ -277,7 +280,7 @@ function AnalysisCard({
     <Card>
       <CardHeader>
         <CardTitle className='flex items-center gap-2'>
-            <FileImage /> {title}
+            {icon} {title}
         </CardTitle>
         <CardDescription>{description}</CardDescription>
       </CardHeader>
