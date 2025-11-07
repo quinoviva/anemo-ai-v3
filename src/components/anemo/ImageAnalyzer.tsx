@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
-import { UploadCloud, XCircle, Loader2, CheckCircle, RefreshCw, Hand, Eye } from 'lucide-react';
+import { UploadCloud, XCircle, Loader2, CheckCircle, RefreshCw, Hand, Eye, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DiagnosticInterview } from './DiagnosticInterview';
 
@@ -36,7 +36,7 @@ const initialAnalysisState: AnalysisState = {
 };
 
 const analysisPoints: { id: BodyPart; title: string; description: string, icon: React.ReactNode }[] = [
-  { id: 'skin', title: 'Skin', description: 'A clear photo of your skin, like the palm of your hand.', icon: <Hand /> },
+  { id: 'skin', title: 'Skin', description: 'A clear photo of your skin, like the palm of your hand.', icon: <User /> },
   { id: 'under-eye', title: 'Under-eye', description: 'A clear photo of the lower under-eye area.', icon: <Eye /> },
   { id: 'fingernails', title: 'Fingernails', description: 'A clear photo of your bare fingernails.', icon: <Hand /> },
 ];
