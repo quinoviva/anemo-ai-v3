@@ -159,7 +159,7 @@ export function AnalysisReportViewer({ report, isOpen, onClose, startDownload = 
             </div>
         </div>
 
-        <div className="space-y-1 text-sm">
+        <div className="space-y-1">
             <p className="font-bold text-lg">{user?.displayName || 'N/A'}</p>
         </div>
       </header>
@@ -184,11 +184,9 @@ export function AnalysisReportViewer({ report, isOpen, onClose, startDownload = 
                 <TableCell className="font-medium">{p.parameter}</TableCell>
                 <TableCell>{p.value} {p.unit}</TableCell>
                 <TableCell className='flex items-center justify-start'>
-                  {p.isNormal ? (
-                    <p className="text-primary font-semibold">Normal</p>
-                  ) : (
-                    <p className="text-destructive font-semibold">Out of Range</p>
-                  )}
+                  <p className={p.isNormal ? 'text-primary font-semibold' : 'text-destructive font-semibold'}>
+                    {p.isNormal ? 'Normal' : 'Out of Range'}
+                  </p>
                 </TableCell>
                 </TableRow>
             ))}
