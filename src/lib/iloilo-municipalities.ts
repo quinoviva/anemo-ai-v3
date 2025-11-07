@@ -1,5 +1,4 @@
 export const iloiloMunicipalities: string[] = [
-    "Iloilo City",
     "Ajuy",
     "Alimodian",
     "Anilao",
@@ -20,6 +19,7 @@ export const iloiloMunicipalities: string[] = [
     "Estancia",
     "Guimbal",
     "Igbaras",
+    "Iloilo City",
     "Janiuay",
     "Lambunao",
     "Leganes",
