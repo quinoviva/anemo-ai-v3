@@ -48,7 +48,7 @@ const formSchema = z
   .object({
     firstName: z.string().min(1, { message: 'First name is required.' }),
     lastName: z.string().min(1, { message: 'Last name is required.' }),
-    municipality: z.string({ required_error: 'Please select a municipality.' }),
+    municipality: z.string({ required_error: 'Please select a municipality.' }).min(1, 'Please select a municipality.'),
     sex: z.string({ required_error: 'Please select an option.' }),
     email: z.string().email({ message: 'Please enter a valid email.' }),
     password: z
@@ -184,7 +184,7 @@ export function SignUpForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Municipality</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select your municipality" />
