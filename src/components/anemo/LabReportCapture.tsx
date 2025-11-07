@@ -213,14 +213,6 @@ export function LabReportCapture({ isOpen, onClose }: LabReportCaptureProps) {
             <AlertDescription>{analysisResult.summary}</AlertDescription>
           </Alert>
 
-          {analysisResult.interpretation && (
-              <Alert>
-                <Info className="h-4 w-4" />
-                <AlertTitle>AI Interpretation</AlertTitle>
-                <AlertDescription>{analysisResult.interpretation}</AlertDescription>
-              </Alert>
-          )}
-
           <Table>
             <TableHeader>
               <TableRow>

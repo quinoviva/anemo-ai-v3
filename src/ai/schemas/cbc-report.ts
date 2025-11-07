@@ -31,11 +31,6 @@ export const AnalyzeCbcReportOutputSchema = z.object({
     .describe(
       'A simple, one-sentence summary of the overall result (e.g., "Hemoglobin level appears below normal, suggesting possible anemia." or "All CBC values are within normal range.").'
     ),
-  interpretation: z
-    .string()
-    .describe(
-      'A detailed, easy-to-understand interpretation of the results, explaining what the key values mean in simple terms.'
-    ),
   parameters: z
     .array(CbcParameterSchema)
     .describe('An array of key CBC parameters found in the report.'),
