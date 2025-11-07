@@ -133,191 +133,193 @@ export function SignUpForm() {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Create a New Account</CardTitle>
-        <CardDescription>
-          Enter your details to get started.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="firstName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>First Name</FormLabel>
-                    <div className="relative">
-                      <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                      <FormControl>
-                        <Input className="pl-10" placeholder="Zaxius" {...field} />
-                      </FormControl>
-                    </div>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="lastName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Last Name</FormLabel>
-                     <div className="relative">
-                      <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                      <FormControl>
-                        <Input className="pl-10" placeholder="Berina" {...field} />
-                      </FormControl>
-                    </div>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div className="grid grid-cols-3 gap-4">
-             <FormField
-                control={form.control}
-                name="municipality"
-                render={({ field }) => (
-                  <FormItem className="col-span-2">
-                    <FormLabel>Municipality</FormLabel>
-                     <div className="relative">
-                       <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                        <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
-                        <FormControl>
-                            <SelectTrigger className="pl-10">
-                              <SelectValue placeholder="Select municipality" />
-                            </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                            <ScrollArea className='h-72'>
-                            {iloiloMunicipalities.map((municipality) => (
-                                <SelectItem key={municipality} value={municipality}>
-                                    {municipality}
-                                </SelectItem>
-                            ))}
-                            </ScrollArea>
-                        </SelectContent>
-                        </Select>
-                     </div>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-             <FormField
+    <div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Create a New Account</CardTitle>
+          <CardDescription>
+            Enter your details to get started.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
                   control={form.control}
-                  name="sex"
+                  name="firstName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Sex</FormLabel>
+                      <FormLabel>First Name</FormLabel>
+                      <div className="relative">
+                        <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                        <FormControl>
+                          <Input className="pl-10" placeholder="Zaxius" {...field} />
+                        </FormControl>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="lastName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Last Name</FormLabel>
                        <div className="relative">
-                        <Users className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                        <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
-                            <FormControl>
-                            <SelectTrigger className="pl-10">
-                                <SelectValue placeholder="Select sex" />
-                            </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                            <SelectItem value="Male">Male</SelectItem>
-                            <SelectItem value="Female">Female</SelectItem>
-                            </SelectContent>
-                        </Select>
+                        <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                        <FormControl>
+                          <Input className="pl-10" placeholder="Berina" {...field} />
+                        </FormControl>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+               <FormField
+                  control={form.control}
+                  name="municipality"
+                  render={({ field }) => (
+                    <FormItem className="col-span-2">
+                      <FormLabel>Municipality</FormLabel>
+                       <div className="relative">
+                         <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                          <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
+                          <FormControl>
+                              <SelectTrigger className="pl-10">
+                                <SelectValue placeholder="Select municipality" />
+                              </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                              <ScrollArea className='h-72'>
+                              {iloiloMunicipalities.map((municipality) => (
+                                  <SelectItem key={municipality} value={municipality}>
+                                      {municipality}
+                                  </SelectItem>
+                              ))}
+                              </ScrollArea>
+                          </SelectContent>
+                          </Select>
                        </div>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-            </div>
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+               <FormField
+                    control={form.control}
+                    name="sex"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Sex</FormLabel>
+                         <div className="relative">
+                          <Users className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                          <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
+                              <FormControl>
+                              <SelectTrigger className="pl-10">
+                                  <SelectValue placeholder="Select sex" />
+                              </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                              <SelectItem value="Male">Male</SelectItem>
+                              <SelectItem value="Female">Female</SelectItem>
+                              </SelectContent>
+                          </Select>
+                         </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+              </div>
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                     <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                      <FormControl>
+                        <Input className="pl-10" placeholder="you@example.com" {...field} />
+                      </FormControl>
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field, fieldState }) => (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                      <FormControl>
+                        <Input className="pl-10" type={showPassword ? "text" : "password"} placeholder="••••••••" {...field} />
+                      </FormControl>
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-foreground"
+                      >
+                        {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                      </button>
+                    </div>
+                    {fieldState.error && (
+                      <FormDescription>
+                        Must be at least 8 characters and include uppercase, lowercase, number, and special characters.
+                      </FormDescription>
+                    )}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirm Password</FormLabel>
+                    <div className="relative">
+                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                     <FormControl>
-                      <Input className="pl-10" placeholder="you@example.com" {...field} />
-                    </FormControl>
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field, fieldState }) => (
-                <FormItem>
-                  <FormLabel>Password</FormLabel>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                    <FormControl>
-                      <Input className="pl-10" type={showPassword ? "text" : "password"} placeholder="••••••••" {...field} />
+                      <Input className="pl-10" type={showConfirmPassword ? "text" : "password"} placeholder="••••••••" {...field} />
                     </FormControl>
                     <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-foreground"
-                    >
-                      {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                    </button>
-                  </div>
-                  {fieldState.error && (
-                    <FormDescription>
-                      Must be at least 8 characters and include uppercase, lowercase, number, and special characters.
-                    </FormDescription>
-                  )}
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="confirmPassword"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Confirm Password</FormLabel>
-                  <div className="relative">
-                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                  <FormControl>
-                    <Input className="pl-10" type={showConfirmPassword ? "text" : "password"} placeholder="••••••••" {...field} />
-                  </FormControl>
-                  <button
-                      type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-foreground"
-                    >
-                      {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                    </button>
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Sign Up
-            </Button>
-          </form>
-        </Form>
-        <p className="mt-4 text-center text-sm text-muted-foreground">
-          Already have an account?{' '}
-          <Link
-            href="/login"
-            className="font-medium text-primary hover:underline"
-          >
-            Log in
-          </Link>
-        </p>
-        <p className="mt-4 px-8 text-center text-xs text-muted-foreground">
-          By continuing, you agree to our Terms of Service and Privacy Policy
-        </p>
-      </CardContent>
-    </Card>
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-foreground"
+                      >
+                        {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                      </button>
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Sign Up
+              </Button>
+            </form>
+          </Form>
+          <p className="mt-4 text-center text-sm text-muted-foreground">
+            Already have an account?{' '}
+            <Link
+              href="/login"
+              className="font-medium text-primary hover:underline"
+            >
+              Log in
+            </Link>
+          </p>
+        </CardContent>
+      </Card>
+      <p className="mt-4 px-8 text-center text-xs text-muted-foreground">
+        By continuing, you agree to our Terms of Service and Privacy Policy
+      </p>
+    </div>
   );
 }
