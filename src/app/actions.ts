@@ -25,11 +25,11 @@ import {
   FindNearbyClinicsInput,
   FindNearbyClinicsOutput,
 } from '@/ai/flows/find-nearby-clinics';
-import {
-  analyzeCbcReport,
+import { analyzeCbcReport } from '@/ai/flows/analyze-cbc-report';
+import type {
   AnalyzeCbcReportInput,
   AnalyzeCbcReportOutput,
-} from '@/ai/flows/analyze-cbc-report';
+} from '@/ai/schemas/cbc-report';
 
 
 export async function runGenerateImageDescription(

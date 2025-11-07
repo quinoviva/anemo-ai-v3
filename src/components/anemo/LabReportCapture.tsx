@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Camera, Video, RefreshCw, XCircle, FlipHorizontal, Sparkles, Upload, Send } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { analyzeCbcReport } from '@/ai/flows/analyze-cbc-report';
+import { runAnalyzeCbcReport } from '@/app/actions';
 import { useUser, useFirestore, useMemoFirebase } from '@/firebase';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { Badge } from '../ui/badge';
@@ -73,6 +73,10 @@ export function LabReportCapture({ isOpen, onClose }: LabReportCaptureProps) {
     }
     return () => stopStream();
   }, [isOpen, startStream, stopStream]);
+  
+  const handleFlipCamera = () => {
+    setFacingMode(prev => prev === 'user' ? 'environment' : 'user');
+  };
 
   const handleClose = () => {
     setStep('camera');
@@ -96,7 +100,7 @@ export function LabReportCapture({ isOpen, onClose }: LabReportCaptureProps) {
     context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
     const dataUri = canvas.toDataURL('image/jpeg');
 
-    analyzeCbcReport({ photoDataUri: dataUri })
+    runAnalyzeCbcReport({ photoDataUri: dataUri })
       .then(result => {
         if (!result.parameters || result.parameters.length === 0) {
             toast({
