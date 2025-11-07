@@ -177,6 +177,7 @@ export function SignUpForm() {
                 )}
               />
             </div>
+            <div className="grid grid-cols-2 gap-4">
              <FormField
                 control={form.control}
                 name="municipality"
@@ -224,6 +225,7 @@ export function SignUpForm() {
                     </FormItem>
                   )}
                 />
+            </div>
             <FormField
               control={form.control}
               name="email"
