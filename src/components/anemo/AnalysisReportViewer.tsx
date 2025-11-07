@@ -150,21 +150,17 @@ export function AnalysisReportViewer({ report, isOpen, onClose, startDownload = 
             </svg>
             <div>
                 <h2 className="text-xl font-bold text-foreground">Anemo Check</h2>
-                <a href="https://anemocheck.com" className="text-sm text-muted-foreground hover:underline">anemocheck.com</a>
+                <p className="text-sm text-muted-foreground">AI Lab Report Analysis</p>
             </div>
             </div>
-            <div className="text-right text-xs">
-                <p className='font-bold text-base'>AI Lab Report Analysis</p>
-                <p>Generated On: {format(new Date(), 'PPP')}</p>
-                <p className='font-bold text-lg pt-2 pr-1'>{user?.displayName || 'N/A'}</p>
+            <div className="text-right">
+                <p className='font-bold text-lg'>{user?.displayName || 'N/A'}</p>
+                <p className='text-xs text-muted-foreground'>Generated On: {format(new Date(), 'PPP')}</p>
             </div>
         </div>
-
-        <div className="space-y-1">
-            <p className="font-semibold text-muted-foreground">
-                Source: <span className="font-medium text-foreground">{report.hospitalName || 'N/A'}</span>
-            </p>
-        </div>
+        <p className="text-sm text-muted-foreground">
+            From: <span className="font-medium text-foreground">{report.hospitalName || 'N/A'}</span> | <a href="https://anemocheck.com" className="hover:underline">anemocheck.com</a>
+        </p>
       </header>
 
       <div className="space-y-4">
