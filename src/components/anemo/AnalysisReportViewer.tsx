@@ -160,7 +160,7 @@ export function AnalysisReportViewer({ report, isOpen, onClose, startDownload = 
         </div>
 
         <div className="space-y-1">
-            <p className="font-bold text-lg">{user?.displayName || 'N/A'}</p>
+            <p className="font-bold text-lg pl-12">{user?.displayName || 'N/A'}</p>
         </div>
       </header>
 
