@@ -22,12 +22,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Calendar } from "@/components/ui/calendar"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
 import {
   Select,
   SelectContent,
@@ -45,10 +39,9 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Upload, CalendarIcon, User, LogIn } from 'lucide-react';
+import { Loader2, Upload, User, LogIn } from 'lucide-react';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { cn } from '@/lib/utils';
-import { format } from "date-fns"
 
 
 const profileSchema = z.object({
@@ -57,7 +50,7 @@ const profileSchema = z.object({
   photoURL: z.string().url('Must be a valid URL.').optional().or(z.literal('')),
   address: z.string().optional(),
   // Medical Info
-  dateOfBirth: z.date().optional(),
+  dateOfBirth: z.string().optional(),
   sex: z.string().optional(),
   height: z.coerce.number().positive('Height must be positive.').optional().or(z.literal('')),
   weight: z.coerce.number().positive('Weight must be positive.').optional().or(z.literal('')),
@@ -88,7 +81,7 @@ export default function ProfilePage() {
       lastName: '',
       photoURL: '',
       address: '',
-      dateOfBirth: undefined,
+      dateOfBirth: '',
       sex: '',
       height: '',
       weight: '',
@@ -100,6 +93,15 @@ export default function ProfilePage() {
     },
   });
 
+  const formatDate = (date: Date | undefined): string => {
+    if (!date) return '';
+    const d = new Date(date);
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${month}/${day}/${year}`;
+  }
+
   useEffect(() => {
     if (user && firestore && !initialDataLoaded && !isGuest) {
       const fetchUserData = async () => {
@@ -108,12 +110,22 @@ export default function ProfilePage() {
         if (docSnap.exists()) {
           const data = docSnap.data();
           const medicalInfo = data.medicalInfo || {};
+          
+          let dobValue = medicalInfo.dateOfBirth;
+          if (dobValue instanceof Timestamp) {
+            dobValue = formatDate(dobValue.toDate());
+          } else if (typeof dobValue === 'string') {
+             // assume it's already in the right format or handle it
+          } else {
+            dobValue = '';
+          }
+
           form.reset({
             firstName: data.firstName || '',
             lastName: data.lastName || '',
             photoURL: data.photoURL || user.photoURL || '',
             address: data.address || '',
-            dateOfBirth: medicalInfo.dateOfBirth ? (medicalInfo.dateOfBirth as Timestamp).toDate() : undefined,
+            dateOfBirth: dobValue,
             sex: medicalInfo.sex || '',
             height: medicalInfo.height || '',
             weight: medicalInfo.weight || '',
@@ -176,6 +188,22 @@ export default function ProfilePage() {
     if (!user || !auth.currentUser || isGuest) return;
     setIsLoading(true);
 
+    let dateOfBirthForFirestore: Date | string | undefined = data.dateOfBirth;
+
+    if (data.dateOfBirth && /^\d{2}\/\d{2}\/\d{4}$/.test(data.dateOfBirth)) {
+      dateOfBirthForFirestore = new Date(data.dateOfBirth);
+      if (isNaN(dateOfBirthForFirestore.getTime())) {
+         toast({
+          title: 'Invalid Date',
+          description: 'Please enter a valid date in MM/DD/YYYY format.',
+          variant: 'destructive',
+        });
+        setIsLoading(false);
+        return;
+      }
+    }
+
+
     try {
       // 1. Update Firebase Auth Profile
       await updateProfile(auth.currentUser, {
@@ -195,7 +223,7 @@ export default function ProfilePage() {
           photoURL: data.photoURL,
           address: data.address,
           medicalInfo: {
-            dateOfBirth: data.dateOfBirth,
+            dateOfBirth: dateOfBirthForFirestore,
             sex: data.sex,
             height: data.height,
             weight: data.weight,
@@ -367,42 +395,11 @@ export default function ProfilePage() {
                   control={form.control}
                   name="dateOfBirth"
                   render={({ field }) => (
-                    <FormItem className="flex flex-col">
+                    <FormItem>
                       <FormLabel>Date of Birth</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant={"outline"}
-                              className={cn(
-                                "w-full pl-3 text-left font-normal",
-                                !field.value && "text-muted-foreground"
-                              )}
-                            >
-                              {field.value ? (
-                                format(field.value, "MM/dd/yyyy")
-                              ) : (
-                                <span>Pick a date</span>
-                              )}
-                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            captionLayout="dropdown-buttons"
-                            fromYear={1900}
-                            toYear={new Date().getFullYear()}
-                            selected={field.value}
-                            onSelect={field.onChange}
-                            disabled={(date) =>
-                              date > new Date() || date < new Date("1900-01-01")
-                            }
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
+                      <FormControl>
+                        <Input placeholder="MM/DD/YYYY" {...field} />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
