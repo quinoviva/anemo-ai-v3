@@ -74,7 +74,7 @@ export default function FindDoctorPage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Nearby Healthcare Providers</h1>
         <p className="text-muted-foreground">
-          Search for nearby hospitals in Iloilo.
+          Search for nearby hospitals, clinics, and doctors in Iloilo.
         </p>
       </div>
 
@@ -143,7 +143,7 @@ export default function FindDoctorPage() {
                            )}
                         </div>
 
-                        <div className='mt-4 flex gap-2'>
+                        <div className='mt-4 flex gap-2 flex-wrap'>
                            <Button variant="outline" size="sm" asChild>
                               <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(clinic.name + ', ' + clinic.address)}`} target="_blank" rel="noopener noreferrer">
                                 <MapPin />
