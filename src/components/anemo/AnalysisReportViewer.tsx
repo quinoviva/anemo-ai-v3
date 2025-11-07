@@ -21,6 +21,7 @@ import { Download, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import type { ReportType } from './AnalysisHistoryList';
 import { useUser } from '@/firebase';
+import { cn } from '@/lib/utils';
 
 type AnalysisReportViewerProps = {
   report: ReportType | null;
@@ -163,9 +164,11 @@ export function AnalysisReportViewer({ report, isOpen, onClose, startDownload = 
                 <TableCell className="font-medium">{p.parameter}</TableCell>
                 <TableCell>{p.value} {p.unit}</TableCell>
                 <TableCell>
-                    <Badge variant={p.isNormal ? 'default' : 'destructive'}>
-                    {p.isNormal ? 'Normal' : 'Out of Range'}
-                    </Badge>
+                  {p.isNormal ? (
+                    <p className="text-primary font-semibold">Normal</p>
+                  ) : (
+                    <p className="text-destructive font-semibold">Out of Range</p>
+                  )}
                 </TableCell>
                 </TableRow>
             ))}
