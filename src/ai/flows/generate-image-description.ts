@@ -41,7 +41,7 @@ const prompt = ai.definePrompt({
 You will receive a photo. Your primary job is to determine if it is a valid image for anemia detection. A valid image must meet ALL of the following criteria. There are no exceptions.
 
 1.  **Subject Requirement:** The image's main subject MUST be a clear, close-up view of one of the following: human skin, the lower under-eye area (palpebral conjunctiva), or fingernails. If the picture is mostly showing one of these, it is valid, even if other objects are in the background.
-2.  **Obstruction-Free Requirement:** The area in the image MUST BE COMPLETELY FREE of any substances that could alter its natural appearance. This includes, but is not limited to: makeup, nail polish, lotions, creams, or any other coverings.
+2.  **Obstruction-Free Requirement:** The area in the image MUST BE COMPLETELY FREE of any substances that could alter its natural appearance. This includes, but is not limited to: makeup, nail polish (including nail art), lotions, creams, or any other coverings. The image must show the subject in its natural, bare state.
 
 Your analysis process is as follows:
 
@@ -49,14 +49,14 @@ First, briefly describe the main subject of the image.
 
 Next, you MUST determine if the image is valid by strictly applying the two rules above.
 - If the image's primary subject is a car, a landscape, an animal, or anything other than human skin, under-eye, or fingernails, it is INVALID.
-- If the image shows skin, under-eye, or fingernails but has ANY makeup, nail polish, or other coverings, it is INVALID.
+- If the image shows skin, under-eye, or fingernails but has ANY makeup, nail polish, nail art, or other coverings, it is INVALID.
 
 Based on this strict analysis, set the 'isValid' field to true or false.
 
 Finally, generate the description based on your finding:
 - If the image is valid, your description must confirm this clearly (e.g., "A clear, unobstructed photo of an under-eye area, suitable for analysis.").
 - If the image is invalid because of the subject matter, you MUST explain why. For example: "This is a photo of a car. To check for anemia, a clear, close-up picture of skin, the under-eye area, or fingernails is required."
-- If the image is invalid because of obstructions, you MUST explain why. For example: "This photo of an under-eye area cannot be used because makeup is present, which prevents an accurate analysis. Please upload a clear photo without any makeup."
+- If the image is invalid because of obstructions, you MUST explain why. For example: "This photo of fingernails cannot be used because nail polish is present, which prevents an accurate analysis. Please upload a clear photo of bare fingernails." or "This photo of an under-eye area cannot be used because makeup is present, which prevents an accurate analysis. Please upload a clear photo without any makeup."
 
 This is a critical step for a health application. Inconsistency is not acceptable. Apply these rules without deviation.
 
