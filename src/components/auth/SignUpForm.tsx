@@ -32,7 +32,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth, useFirestore } from '@/firebase';
-import { Loader2, Eye, EyeOff } from 'lucide-react';
+import { Loader2, Eye, EyeOff, User, Mail, Lock } from 'lucide-react';
 import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 
 const formSchema = z
@@ -133,9 +133,12 @@ export function SignUpForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>First Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Zaxius" {...field} />
-                    </FormControl>
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                      <FormControl>
+                        <Input className="pl-10" placeholder="Zaxius" {...field} />
+                      </FormControl>
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -146,9 +149,12 @@ export function SignUpForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Last Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Berina" {...field} />
-                    </FormControl>
+                     <div className="relative">
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                      <FormControl>
+                        <Input className="pl-10" placeholder="Berina" {...field} />
+                      </FormControl>
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -160,9 +166,12 @@ export function SignUpForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input placeholder="you@example.com" {...field} />
-                  </FormControl>
+                   <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                    <FormControl>
+                      <Input className="pl-10" placeholder="you@example.com" {...field} />
+                    </FormControl>
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}
@@ -174,8 +183,9 @@ export function SignUpForm() {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                     <FormControl>
-                      <Input type={showPassword ? "text" : "password"} placeholder="••••••••" {...field} />
+                      <Input className="pl-10" type={showPassword ? "text" : "password"} placeholder="••••••••" {...field} />
                     </FormControl>
                     <button
                       type="button"
@@ -199,8 +209,9 @@ export function SignUpForm() {
                 <FormItem>
                   <FormLabel>Confirm Password</FormLabel>
                   <div className="relative">
+                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                   <FormControl>
-                    <Input type={showConfirmPassword ? "text" : "password"} placeholder="••••••••" {...field} />
+                    <Input className="pl-10" type={showConfirmPassword ? "text" : "password"} placeholder="••••••••" {...field} />
                   </FormControl>
                   <button
                       type="button"
