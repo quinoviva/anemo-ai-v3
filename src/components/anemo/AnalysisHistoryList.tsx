@@ -97,7 +97,6 @@ export function AnalysisHistoryList() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Analysis ID</TableHead>
               <TableHead>Date</TableHead>
               <TableHead>Summary</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -106,7 +105,6 @@ export function AnalysisHistoryList() {
           <TableBody>
             {history.map((item) => (
               <TableRow key={item.id}>
-                <TableCell className="font-medium">{item.id.substring(0, 8)}...</TableCell>
                 <TableCell>{item.createdAt ? format(item.createdAt.toDate(), 'PPP') : 'N/A'}</TableCell>
                 <TableCell>
                    <Badge variant={getBadgeVariant(item.summary)}>{item.summary}</Badge>
