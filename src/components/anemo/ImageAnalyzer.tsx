@@ -1,260 +1,287 @@
 'use client';
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
-import {
-  runGenerateImageDescription,
-} from '@/app/actions';
+import React, { useState, useRef } from 'react';
+import { runGenerateImageDescription } from '@/app/actions';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Slider } from '@/components/ui/slider';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
-import { UploadCloud, XCircle, FileImage, Loader2, Camera } from 'lucide-react';
+import { UploadCloud, XCircle, FileImage, Loader2, CheckCircle, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import Link from 'next/link';
 import { DiagnosticInterview } from './DiagnosticInterview';
 
-type AnalysisStep = 'idle' | 'analyzingImage' | 'interview' | 'error';
+type BodyPart = 'skin' | 'under-eye' | 'fingernails';
 
-type ImageAnalyzerProps = {
-  initialImageFile?: File;
-  initialImageDataUri?: string;
-  onReset?: () => void;
+type AnalysisState = {
+  file: File | null;
+  imageUrl: string | null;
+  dataUri: string | null;
+  description: string | null;
+  isValid: boolean;
+  analysisResult: string | null;
+  error: string | null;
+  status: 'idle' | 'analyzing' | 'success' | 'error';
 };
 
+const initialAnalysisState: AnalysisState = {
+  file: null,
+  imageUrl: null,
+  dataUri: null,
+  description: null,
+  isValid: false,
+  analysisResult: null,
+  error: null,
+  status: 'idle',
+};
 
-export function ImageAnalyzer({ initialImageFile, initialImageDataUri, onReset }: ImageAnalyzerProps) {
-  const [imageFile, setImageFile] = useState<File | null>(initialImageFile || null);
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const [imageDataUri, setImageDataUri] = useState<string | null>(initialImageDataUri || null);
-  const [analysisStep, setAnalysisStep] = useState<AnalysisStep>('idle');
-  const [imageDescription, setImageDescription] = useState<string | null>(null);
-  const [isImageValid, setIsImageValid] = useState(false);
-  const [heatmapOpacity, setHeatmapOpacity] = useState(0.5);
-  const [error, setError] = useState<string | null>(null);
+const analysisPoints: { id: BodyPart; title: string; description: string }[] = [
+  { id: 'skin', title: 'Skin', description: 'A clear photo of your skin, like the palm of your hand.' },
+  { id: 'under-eye', title: 'Under-eye', description: 'A clear photo of the lower under-eye area.' },
+  { id: 'fingernails', title: 'Fingernails', description: 'A clear photo of your bare fingernails.' },
+];
+
+export function ImageAnalyzer() {
+  const [analyses, setAnalyses] = useState<Record<BodyPart, AnalysisState>>({
+    'skin': initialAnalysisState,
+    'under-eye': initialAnalysisState,
+    'fingernails': initialAnalysisState,
+  });
+  const [showQuestionnaire, setShowQuestionnaire] = useState(false);
   const { toast } = useToast();
-  const dropzoneRef = useRef<HTMLDivElement>(null);
 
-  const startAnalysis = useCallback(async (dataUri: string) => {
-    setAnalysisStep('analyzingImage');
-    try {
-      const result = await runGenerateImageDescription({ photoDataUri: dataUri });
-      setImageDescription(result.description);
-      setIsImageValid(result.isValid);
-
-      if (!result.isValid) {
-        setError(result.description);
-        setAnalysisStep('error');
-        toast({
-          title: "Analysis Failed",
-          description: "Image not valid for analysis.",
-          variant: "destructive",
-        });
-      } else {
-        setAnalysisStep('interview');
-      }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "An unknown error occurred.";
-      setError(`Failed to analyze image. ${errorMessage}`);
-      setAnalysisStep('error');
-      toast({
-        title: "Analysis Error",
-        description: errorMessage,
-        variant: "destructive",
-      });
-    }
-  }, [toast]);
-  
-  useEffect(() => {
-    if (initialImageFile && initialImageDataUri) {
-      setImageFile(initialImageFile);
-      setImageUrl(URL.createObjectURL(initialImageFile));
-      setImageDataUri(initialImageDataUri);
-      startAnalysis(initialImageDataUri);
-    }
-     // Cleanup function to revoke the object URL
-    return () => {
-      if (imageUrl) {
-        URL.revokeObjectURL(imageUrl);
-      }
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialImageFile, initialImageDataUri]);
-
-
-  const resetState = () => {
-    if(onReset) {
-      onReset();
-    }
-    setImageFile(null);
-    if(imageUrl) {
-        URL.revokeObjectURL(imageUrl);
-    }
-    setImageUrl(null);
-    setImageDataUri(null);
-    setAnalysisStep('idle');
-    setImageDescription(null);
-    setIsImageValid(false);
-    setHeatmapOpacity(0.5);
-    setError(null);
-  };
-  
-  const handleImageChange = (file: File | null) => {
+  const handleImageChange = (bodyPart: BodyPart, file: File | null) => {
     if (!file || !file.type.startsWith('image/')) {
-        toast({
-            title: "Invalid File Type",
-            description: "Please upload an image file (e.g., PNG, JPG).",
-            variant: "destructive",
-        });
-        return;
+      toast({
+        title: 'Invalid File Type',
+        description: 'Please upload an image file (e.g., PNG, JPG).',
+        variant: 'destructive',
+      });
+      return;
     }
-    
-    resetState();
 
-    setImageFile(file);
-    const newImageUrl = URL.createObjectURL(file);
-    setImageUrl(newImageUrl);
+    setAnalyses(prev => ({
+      ...prev,
+      [bodyPart]: { ...initialAnalysisState, status: 'analyzing' },
+    }));
 
+    const imageUrl = URL.createObjectURL(file);
     const reader = new FileReader();
+
     reader.onload = async (e) => {
       const dataUri = e.target?.result as string;
-      setImageDataUri(dataUri);
-      startAnalysis(dataUri);
+      setAnalyses(prev => ({
+        ...prev,
+        [bodyPart]: {
+          ...prev[bodyPart],
+          file,
+          imageUrl,
+          dataUri,
+        },
+      }));
+      await startAnalysis(bodyPart, dataUri);
     };
+
     reader.readAsDataURL(file);
   };
+
+  const startAnalysis = async (bodyPart: BodyPart, dataUri: string) => {
+    try {
+      const result = await runGenerateImageDescription({ photoDataUri: dataUri, bodyPart });
+      
+      setAnalyses(prev => ({
+        ...prev,
+        [bodyPart]: {
+          ...prev[bodyPart],
+          description: result.description,
+          isValid: result.isValid,
+          analysisResult: result.analysisResult,
+          status: result.isValid ? 'success' : 'error',
+          error: result.isValid ? null : result.description,
+        }
+      }));
+
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
+      setAnalyses(prev => ({
+        ...prev,
+        [bodyPart]: {
+          ...prev[bodyPart],
+          status: 'error',
+          error: `Failed to analyze image. ${errorMessage}`,
+        }
+      }));
+      toast({
+        title: 'Analysis Error',
+        description: errorMessage,
+        variant: 'destructive',
+      });
+    }
+  };
   
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if(dropzoneRef.current) dropzoneRef.current.classList.add('border-primary', 'bg-primary/10');
+  const resetAnalysis = (bodyPart: BodyPart) => {
+    const currentAnalysis = analyses[bodyPart];
+    if (currentAnalysis.imageUrl) {
+        URL.revokeObjectURL(currentAnalysis.imageUrl);
+    }
+    setAnalyses(prev => ({
+        ...prev,
+        [bodyPart]: initialAnalysisState
+    }));
   };
 
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if(dropzoneRef.current) dropzoneRef.current.classList.remove('border-primary', 'bg-primary/10');
-  };
+  const allAnalysesComplete = Object.values(analyses).every(a => a.status === 'success');
+  
+  const allImageDescriptions = allAnalysesComplete 
+    ? Object.entries(analyses).map(([key, value]) => `${key}: ${value.analysisResult}`).join('\n')
+    : null;
+
+  if (showQuestionnaire && allImageDescriptions) {
+    return <DiagnosticInterview imageDescription={allImageDescriptions} onReset={() => setShowQuestionnaire(false)} onAnalysisError={(e) => console.error(e)} />
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="grid gap-6 md:grid-cols-3">
+        {analysisPoints.map(({ id, title, description }) => (
+          <AnalysisCard
+            key={id}
+            bodyPart={id}
+            title={title}
+            description={description}
+            analysisState={analyses[id]}
+            onImageChange={(file) => handleImageChange(id, file)}
+            onReset={() => resetAnalysis(id)}
+          />
+        ))}
+      </div>
+       {allAnalysesComplete && (
+        <Card className="text-center">
+            <CardHeader>
+                <CardTitle>All Analyses Complete</CardTitle>
+                <CardDescription>You can now proceed to the questionnaire to get a full report.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <Button onClick={() => setShowQuestionnaire(true)}>
+                    Proceed to Questionnaire
+                </Button>
+            </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
+
+// --- AnalysisCard Component ---
+type AnalysisCardProps = {
+  bodyPart: BodyPart;
+  title: string;
+  description: string;
+  analysisState: AnalysisState;
+  onImageChange: (file: File | null) => void;
+  onReset: () => void;
+};
+
+function AnalysisCard({
+  bodyPart,
+  title,
+  description,
+  analysisState,
+  onImageChange,
+  onReset,
+}: AnalysisCardProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if(dropzoneRef.current) dropzoneRef.current.classList.remove('border-primary', 'bg-primary/10');
     const file = e.dataTransfer.files[0];
-    handleImageChange(file);
+    onImageChange(file);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
   };
   
-
-  const AnalysisWorkspace = () => (
-    <div className="flex flex-col gap-6 h-full">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileImage /> Image Analysis
-          </CardTitle>
-          {isImageValid ? (
-             <CardDescription>{imageDescription}</CardDescription>
-          ) : (
-            <CardDescription className='text-destructive'>{imageDescription || "Analyzing..."}</CardDescription>
-          )}
-        </CardHeader>
-        <CardContent>
-            {imageUrl && (
-              <div className="space-y-4">
-                <div className="relative aspect-video rounded-md overflow-hidden border bg-black">
-                  <img src={imageUrl} alt="Uploaded for analysis" className="object-contain w-full h-full" />
-                  <div 
-                    className="absolute inset-0 bg-gradient-to-br from-red-500/80 via-yellow-500/50 to-green-500/80 mix-blend-multiply"
-                    style={{ opacity: heatmapOpacity, transition: 'opacity 0.2s' }}
-                    data-ai-hint="anemia detection heatmap"
-                  />
-                </div>
-                <div className="space-y-2">
-                    <label htmlFor="heatmap-opacity" className="text-sm font-medium">Heatmap Transparency</label>
-                    <Slider
-                        id="heatmap-opacity"
-                        min={0}
-                        max={1}
-                        step={0.05}
-                        value={[heatmapOpacity]}
-                        onValueChange={(value) => setHeatmapOpacity(value[0])}
-                    />
-                </div>
+  const renderContent = () => {
+    switch (analysisState.status) {
+      case 'idle':
+        return (
+          <div
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            className="flex flex-col items-center justify-center text-center p-6 border-2 border-dashed rounded-lg h-48"
+          >
+            <UploadCloud className="h-8 w-8 text-muted-foreground" />
+            <p className="mt-2 text-sm text-muted-foreground">Drag & drop or</p>
+            <Button variant="link" size="sm" onClick={() => inputRef.current?.click()}>
+              browse to upload
+            </Button>
+            <Input
+              ref={inputRef}
+              type="file"
+              accept="image/*"
+              className="sr-only"
+              onChange={(e) => onImageChange(e.target.files ? e.target.files[0] : null)}
+            />
+          </div>
+        );
+      case 'analyzing':
+        return (
+          <div className="flex flex-col items-center justify-center text-center p-6 border-2 border-dashed rounded-lg h-48 bg-secondary">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="mt-2 text-sm text-muted-foreground">Analyzing...</p>
+          </div>
+        );
+      case 'success':
+        return (
+          <div className="space-y-2">
+            <div className="relative aspect-video rounded-md overflow-hidden border">
+              {analysisState.imageUrl && <img src={analysisState.imageUrl} alt={title} className="object-cover w-full h-full" />}
+              <div className="absolute top-1 right-1">
+                <Button variant="destructive" size="icon" className="h-7 w-7" onClick={onReset}>
+                  <RefreshCw className="h-4 w-4" />
+                </Button>
               </div>
-            )}
-        </CardContent>
-      </Card>
-
-      {analysisStep === 'interview' && (
-         <DiagnosticInterview 
-           imageDescription={imageDescription}
-           onAnalysisError={(err) => {
-              setError(err);
-              setAnalysisStep('error');
-           }}
-           onReset={resetState}
-          />
-      )}
-    </div>
-  );
-
+            </div>
+            <Alert>
+              <CheckCircle className="h-4 w-4" />
+              <AlertTitle>Analysis Complete</AlertTitle>
+              <AlertDescription>{analysisState.analysisResult}</AlertDescription>
+            </Alert>
+          </div>
+        );
+      case 'error':
+        return (
+          <div className="space-y-2">
+             <div className="relative aspect-video rounded-md overflow-hidden border">
+                {analysisState.imageUrl && <img src={analysisState.imageUrl} alt={title} className="object-cover w-full h-full opacity-50" />}
+                 <div className="absolute top-1 right-1">
+                    <Button variant="destructive" size="icon" className="h-7 w-7" onClick={onReset}>
+                        <RefreshCw className="h-4 w-4" />
+                    </Button>
+                </div>
+            </div>
+            <Alert variant="destructive">
+              <XCircle className="h-4 w-4" />
+              <AlertTitle>Analysis Failed</AlertTitle>
+              <AlertDescription>{analysisState.error}</AlertDescription>
+            </Alert>
+          </div>
+        );
+    }
+  };
 
   return (
-    <div className="h-full">
-        {analysisStep === 'idle' && (
-            <div className="text-center p-8 h-full flex flex-col justify-center items-center">
-              <div ref={dropzoneRef} onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop} className="w-full max-w-lg border-2 border-dashed rounded-lg transition-colors p-8">
-                <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground" />
-                <h3 className="mt-4 text-lg font-medium">Upload an Image</h3>
-                <p className="mt-1 text-sm text-muted-foreground">Drag & drop or click to upload a clear photo of your skin, under-eye, or fingernails.</p>
-                <Input type="file" accept="image/*" className="sr-only" id="image-upload" onChange={(e) => handleImageChange(e.target.files ? e.target.files[0] : null)} />
-                <Button asChild className="mt-4">
-                    <label htmlFor="image-upload">Browse Files</label>
-                </Button>
-              </div>
-
-              <div className="relative my-6 w-full max-w-lg">
-                <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-background px-2 text-muted-foreground">
-                    Or
-                    </span>
-                </div>
-            </div>
-
-            <div className="w-full max-w-lg">
-                 <Button asChild variant="outline" className="w-full">
-                    <Link href="/dashboard/live-analysis">
-                      <Camera className="mr-2" />
-                       Use Live Camera
-                    </Link>
-                </Button>
-                 <p className="mt-2 text-center text-xs text-muted-foreground">
-                    Use your device's camera for a real-time analysis.
-                </p>
-            </div>
-          </div>
-        )}
-
-        {analysisStep === 'analyzingImage' && (
-             <div className="flex justify-center items-center h-full"><Loader2 className="h-8 w-8 animate-spin" /> <p className='ml-2 text-lg'>Analyzing Image...</p></div>
-        )}
-
-        {analysisStep === 'interview' && <AnalysisWorkspace />}
-        
-        {analysisStep === 'error' && (
-            <div className="h-full flex flex-col justify-center items-center">
-            <Alert variant="destructive" className="max-w-lg">
-                <XCircle className="h-4 w-4" />
-                <AlertTitle>Analysis Error</AlertTitle>
-                <AlertDescription>{error}</AlertDescription>
-                <Button variant="outline" size="sm" className="mt-4" onClick={resetState}>Try Again</Button>
-            </Alert>
-            </div>
-        )}
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle className='flex items-center gap-2'>
+            <FileImage /> {title}
+        </CardTitle>
+        <CardDescription>{description}</CardDescription>
+      </CardHeader>
+      <CardContent>{renderContent()}</CardContent>
+    </Card>
   );
 }
