@@ -160,8 +160,7 @@ export function AnalysisReportViewer({ report, isOpen, onClose, startDownload = 
         </div>
 
         <div className="space-y-1 text-sm">
-            <p className="font-bold">{user?.displayName || 'N/A'}</p>
-            <p><span className="font-semibold">Source:</span> {report.hospitalName || 'N/A'}</p>
+            <p className="font-bold text-lg">{user?.displayName || 'N/A'}</p>
         </div>
       </header>
 
