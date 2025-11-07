@@ -132,7 +132,7 @@ export function Chatbot({ isPopup = false }: ChatbotProps) {
             {history.map((msg, i) => (
               <div key={i} className={cn("flex items-start gap-3", msg.role === 'user' ? "justify-end" : "justify-start")}>
                 {msg.role === 'assistant' && <Avatar className="h-8 w-8 bg-primary text-primary-foreground"><AvatarFallback><Bot size={18}/></AvatarFallback></Avatar>}
-                <div className={cn("max-w-[80%] rounded-lg p-3 text-sm", msg.role === 'assistant' ? "bg-muted" : "bg-primary text-primary-foreground")}>
+                <div className={cn("max-w-[80%] rounded-lg p-3 text-sm whitespace-pre-wrap", msg.role === 'assistant' ? "bg-muted" : "bg-primary text-primary-foreground")}>
                   {msg.content}
                 </div>
                 {msg.role === 'user' && <Avatar className="h-8 w-8"><AvatarFallback><User size={18}/></AvatarFallback></Avatar>}
