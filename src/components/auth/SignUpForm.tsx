@@ -39,7 +39,7 @@ import {
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth, useFirestore } from '@/firebase';
-import { Loader2, Eye, EyeOff, User, Mail, Lock } from 'lucide-react';
+import { Loader2, Eye, EyeOff, User, Mail, Lock, MapPin, Users } from 'lucide-react';
 import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { iloiloMunicipalities } from '@/lib/iloilo-municipalities';
 import { ScrollArea } from '../ui/scroll-area';
@@ -184,22 +184,25 @@ export function SignUpForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Municipality</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select municipality" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <ScrollArea className='h-72'>
-                           {iloiloMunicipalities.map((municipality) => (
-                            <SelectItem key={municipality} value={municipality}>
-                                {municipality}
-                            </SelectItem>
-                           ))}
-                        </ScrollArea>
-                      </SelectContent>
-                    </Select>
+                     <div className="relative">
+                       <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                        <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
+                        <FormControl>
+                            <SelectTrigger className="pl-10">
+                            <SelectValue placeholder="Select municipality" />
+                            </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                            <ScrollArea className='h-72'>
+                            {iloiloMunicipalities.map((municipality) => (
+                                <SelectItem key={municipality} value={municipality}>
+                                    {municipality}
+                                </SelectItem>
+                            ))}
+                            </ScrollArea>
+                        </SelectContent>
+                        </Select>
+                     </div>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -210,17 +213,20 @@ export function SignUpForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Sex</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select sex" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Male">Male</SelectItem>
-                          <SelectItem value="Female">Female</SelectItem>
-                        </SelectContent>
-                      </Select>
+                       <div className="relative">
+                        <Users className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                        <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
+                            <FormControl>
+                            <SelectTrigger className="pl-10">
+                                <SelectValue placeholder="Select sex" />
+                            </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                            <SelectItem value="Male">Male</SelectItem>
+                            <SelectItem value="Female">Female</SelectItem>
+                            </SelectContent>
+                        </Select>
+                       </div>
                       <FormMessage />
                     </FormItem>
                   )}
