@@ -16,6 +16,9 @@ export function Footer() {
             </p>
           </div>
 
+          {/* Empty div for spacing on medium screens and up */}
+          <div className="hidden md:block"></div>
+
           <div>
             <h3 className="text-lg font-semibold text-foreground">Quick Links</h3>
             <ul className="mt-4 space-y-2 text-sm">
