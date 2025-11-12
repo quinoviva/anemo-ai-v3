@@ -107,26 +107,33 @@ const findNearbyClinicsFlow = ai.defineFlow(
     outputSchema: FindNearbyClinicsOutputSchema,
   },
   async (input) => {
-    const llmResponse = await ai.generate({
-      prompt: `You are an expert local guide for Iloilo City and Province, Philippines. Your goal is to help users find the nearest and most relevant medical facilities.
+    try {
+        const llmResponse = await ai.generate({
+        prompt: `You are an expert local guide for Iloilo City and Province, Philippines. Your goal is to help users find the nearest and most relevant medical facilities.
 
-      1. Call the 'searchForHealthcareProviders' tool to get a comprehensive list of all available healthcare providers.
-      2. Analyze the user's query: "${input.query}"
-      3. From the full list provided by the tool, select and return ONLY the results that are most relevant to the user's query. Match by name, address, or type. For example, if the user asks for "hospitals in Molo", you should return hospitals whose address contains "Molo". If the user asks for "lab tests", return clinics and hospitals with notes about laboratory services. If the query is empty or very generic like "Iloilo", return all results.
-      `,
-      model: 'googleai/gemini-1.5-flash',
-      tools: [searchForHealthcareProviders],
-      output: {
-        schema: FindNearbyClinicsOutputSchema,
-      },
-    });
-    
-    // The model should decide whether to call the tool or return a direct answer based on the prompt.
-    if(llmResponse.output) {
-      return llmResponse.output;
+        1. Call the 'searchForHealthcareProviders' tool to get a comprehensive list of all available healthcare providers.
+        2. Analyze the user's query: "${input.query}"
+        3. From the full list provided by the tool, select and return ONLY the results that are most relevant to the user's query. Match by name, address, or type. For example, if the user asks for "hospitals in Molo", you should return hospitals whose address contains "Molo". If the user asks for "lab tests", return clinics and hospitals with notes about laboratory services. If the query is empty or very generic like "Iloilo", return all results.
+        `,
+        model: 'googleai/gemini-1.5-flash',
+        tools: [searchForHealthcareProviders],
+        output: {
+            schema: FindNearbyClinicsOutputSchema,
+        },
+        });
+        
+        // The model should decide whether to call the tool or return a direct answer based on the prompt.
+        if(llmResponse.output) {
+        return llmResponse.output;
+        }
+    } catch (error) {
+        console.warn('AI filtering failed, returning all results. Error:', error);
+        // Fallback: if AI fails, call the tool directly and return all results.
+        return await searchForHealthcareProviders(input);
     }
 
-    // Fallback for when no direct output is given.
+
+    // Fallback for when no direct output is given and no error was caught.
     return { results: [] };
   }
 );
