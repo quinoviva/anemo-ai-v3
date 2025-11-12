@@ -28,18 +28,20 @@ const prompt = ai.definePrompt({
 
   **Instructions:**
 
-  1.  **Scan the Image:** Analyze the image to identify text and values from the CBC report.
-  2.  **Extract Key Parameters:** Focus on extracting the following key parameters. If not present, omit them.
+  1.  **Assess Image Quality:** First, determine if the image is a clear, well-lit, and readable photo of a CBC lab report.
+  2.  **Scan the Image:** Analyze the image to identify text and values from the CBC report.
+  3.  **Extract Key Parameters:** Focus on extracting the following key parameters. If a parameter is not present, omit it from the results.
       - Hemoglobin (HGB or Hb)
       - Hematocrit (HCT)
       - Red Blood Cell (RBC) count
       - Mean Corpuscular Volume (MCV)
       - Mean Corpuscular Hemoglobin (MCH)
-  3.  **Populate Data:** For each parameter, extract its value, unit, and reference range. Determine if the value is normal and set 'isNormal'.
-  4.  **Generate Summary:** Create a concise, one-sentence summary.
+  4.  **Populate Data:** For each parameter found, extract its value, unit, and reference range. Determine if the value is within the normal range and set 'isNormal' accordingly.
+  5.  **Generate Summary:** Based on your analysis, create a concise, one-sentence summary.
+      - If the image is not a valid CBC report: "The uploaded image does not appear to be a valid CBC lab report." and ensure the parameters array is empty.
+      - If the image is blurry or unreadable: "The image is too blurry or unclear to analyze. Please upload a high-quality, well-lit photo of the report." and ensure the parameters array is empty.
       - If Hemoglobin/Hematocrit are low: "Hemoglobin level appears below normal, suggesting possible anemia."
       - If all key values are normal: "All key CBC values appear to be within the normal range."
-      - If not a valid report: "The uploaded image does not appear to be a valid CBC lab report." and clear the parameters array.
   
   **Crucially, do not add any medical advice or diagnosis. Emphasize that this is an AI interpretation and a healthcare professional must be consulted.**
 
