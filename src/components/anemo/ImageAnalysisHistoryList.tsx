@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -12,16 +13,29 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Eye, Plus, LogIn, User, Loader2, FileText, Download } from 'lucide-react';
+import { Eye, Plus, LogIn, User, Loader2, FileText, Download, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, orderBy } from 'firebase/firestore';
+import { collection, query, orderBy, doc } from 'firebase/firestore';
 import { format } from 'date-fns';
 import { PersonalizedRecommendationsOutput } from '@/ai/flows/provide-personalized-recommendations';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '../ui/dialog';
 import { Progress } from '../ui/progress';
 import { Alert, AlertDescription } from '../ui/alert';
 import { ScrollArea } from '../ui/scroll-area';
+import { deleteDocumentNonBlocking } from '@/firebase/non-blocking-updates';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { useToast } from '@/hooks/use-toast';
 
 type ImageReportType = PersonalizedRecommendationsOutput & {
   id: string;
@@ -35,6 +49,7 @@ export function ImageAnalysisHistoryList() {
   const { user } = useUser();
   const firestore = useFirestore();
   const isGuest = user?.isAnonymous;
+  const { toast } = useToast();
   const [reportToView, setReportToView] = useState<ImageReportType | null>(null);
 
   const imageAnalysesQuery = useMemoFirebase(() => {
@@ -51,6 +66,16 @@ export function ImageAnalysisHistoryList() {
     if (riskScore > 75) return 'destructive';
     if (riskScore > 50) return 'secondary';
     return 'default';
+  };
+
+  const handleDelete = (reportId: string) => {
+    if (!user || !firestore) return;
+    const docRef = doc(firestore, `users/${user.uid}/imageAnalyses`, reportId);
+    deleteDocumentNonBlocking(docRef);
+    toast({
+        title: 'Report Deleted',
+        description: 'The image analysis report has been removed from your history.',
+    });
   };
 
   if (isGuest) {
@@ -129,6 +154,28 @@ export function ImageAnalysisHistoryList() {
                       <Eye className="h-4 w-4" />
                       <span className="sr-only">View Report</span>
                     </Button>
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                                <span className="sr-only">Delete Report</span>
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    This action cannot be undone. This will permanently delete the image analysis report from your history.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleDelete(item.id)} className='bg-destructive text-destructive-foreground hover:bg-destructive/90'>
+                                    Delete
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
                   </TableCell>
                 </TableRow>
               ))}

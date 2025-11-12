@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -12,13 +13,26 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Eye, FileText, Plus, LogIn, User, Loader2, Download } from 'lucide-react';
+import { Eye, FileText, Plus, LogIn, User, Loader2, Download, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, orderBy } from 'firebase/firestore';
+import { collection, query, orderBy, doc } from 'firebase/firestore';
 import { format } from 'date-fns';
 import { AnalysisReportViewer } from './AnalysisReportViewer';
 import type { AnalyzeCbcReportOutput } from '@/ai/schemas/cbc-report';
+import { deleteDocumentNonBlocking } from '@/firebase/non-blocking-updates';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { useToast } from '@/hooks/use-toast';
 
 export type ReportType = AnalyzeCbcReportOutput & {
   id: string;
@@ -33,6 +47,7 @@ export function AnalysisHistoryList() {
   const { user } = useUser();
   const firestore = useFirestore();
   const isGuest = user?.isAnonymous;
+  const { toast } = useToast();
   const [reportToView, setReportToView] = useState<ReportType | null>(null);
   const [reportToDownload, setReportToDownload] = useState<ReportType | null>(null);
 
@@ -52,6 +67,16 @@ export function AnalysisHistoryList() {
     }
     return 'default';
   };
+
+  const handleDelete = (reportId: string) => {
+    if (!user || !firestore) return;
+    const docRef = doc(firestore, `users/${user.uid}/labReports`, reportId);
+    deleteDocumentNonBlocking(docRef);
+    toast({
+        title: 'Report Deleted',
+        description: 'The lab report has been removed from your history.',
+    });
+  }
 
   if (isGuest) {
     return (
@@ -133,6 +158,28 @@ export function AnalysisHistoryList() {
                       <Download className="h-4 w-4" />
                       <span className="sr-only">Download Report</span>
                     </Button>
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                                <span className="sr-only">Delete Report</span>
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    This action cannot be undone. This will permanently delete the lab report from your history.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleDelete(item.id)} className='bg-destructive text-destructive-foreground hover:bg-destructive/90'>
+                                    Delete
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
                   </TableCell>
                 </TableRow>
               ))}
