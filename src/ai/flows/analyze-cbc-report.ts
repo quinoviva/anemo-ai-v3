@@ -56,8 +56,8 @@ const prompt = ai.definePrompt({
       - **Generate Summary:** Based on your analysis, create a concise, one-sentence summary.
           - If Hemoglobin/Hematocrit are low: "Hemoglobin level appears below normal, suggesting possible anemia."
           - If all key values are normal: "All key CBC values appear to be within the normal range."
-
-  **Crucially, do not add any medical advice or diagnosis. Emphasize that this is an AI interpretation and a healthcare professional must be consulted.**
+          
+  **IMPORTANT:** Your final output MUST be a single, valid JSON object matching the requested schema. Do not include any explanatory text, markdown formatting, or anything outside of the JSON structure itself.
 
   Image of the lab report: {{media url=photoDataUri}}`,
 });
