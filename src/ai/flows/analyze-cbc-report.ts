@@ -69,7 +69,14 @@ const analyzeCbcReportFlow = ai.defineFlow(
     outputSchema: AnalyzeCbcReportOutputSchema,
   },
   async input => {
-    const { output } = await prompt(input);
+    const { output } = await ai.generate({
+      model: 'googleai/gemini-1.5-pro',
+      prompt: prompt.prompt,
+      input: input,
+      output: {
+        schema: AnalyzeCbcReportOutputSchema,
+      }
+    });
     return output!;
   }
 );
