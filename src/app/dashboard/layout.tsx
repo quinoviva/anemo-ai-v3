@@ -5,7 +5,6 @@ import { useUser } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
-import { Footer } from '@/components/layout/Footer';
 
 export default function DashboardLayout({
   children,
@@ -41,7 +40,6 @@ export default function DashboardLayout({
     <div className="flex min-h-screen w-full flex-col">
       <Header />
       <main className="flex-1 p-4 md:p-6 lg:p-8">{children}</main>
-      <Footer />
     </div>
   );
 }
