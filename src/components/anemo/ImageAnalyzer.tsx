@@ -1,20 +1,19 @@
 
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { runGenerateImageDescription } from '@/app/actions';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
-import { UploadCloud, XCircle, Loader2, CheckCircle, RefreshCw, Hand, Eye, User, FileText } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { DiagnosticInterview } from './DiagnosticInterview';
+import { UploadCloud, XCircle, Loader2, CheckCircle, RefreshCw, Hand, Eye, User } from 'lucide-react';
+import { ImageAnalysisReport } from './ImageAnalysisReport';
 
 type BodyPart = 'skin' | 'under-eye' | 'fingernails';
 
-type AnalysisState = {
+export type AnalysisState = {
   file: File | null;
   imageUrl: string | null;
   dataUri: string | null;
@@ -48,7 +47,6 @@ export function ImageAnalyzer() {
     'under-eye': initialAnalysisState,
     'fingernails': initialAnalysisState,
   });
-  const [showQuestionnaire, setShowQuestionnaire] = useState(false);
   const { toast } = useToast();
 
   const handleImageChange = (bodyPart: BodyPart, file: File | null) => {
@@ -120,7 +118,22 @@ export function ImageAnalyzer() {
     }
   };
   
-  const resetAnalysis = (bodyPart: BodyPart) => {
+  const resetAllAnalyses = () => {
+    Object.keys(analyses).forEach(key => {
+        const bodyPart = key as BodyPart;
+        const currentAnalysis = analyses[bodyPart];
+        if (currentAnalysis.imageUrl) {
+            URL.revokeObjectURL(currentAnalysis.imageUrl);
+        }
+    });
+    setAnalyses({
+        'skin': initialAnalysisState,
+        'under-eye': initialAnalysisState,
+        'fingernails': initialAnalysisState,
+    });
+  };
+
+  const resetSingleAnalysis = (bodyPart: BodyPart) => {
     const currentAnalysis = analyses[bodyPart];
     if (currentAnalysis.imageUrl) {
         URL.revokeObjectURL(currentAnalysis.imageUrl);
@@ -133,12 +146,8 @@ export function ImageAnalyzer() {
 
   const allAnalysesComplete = Object.values(analyses).every(a => a.status === 'success');
   
-  const allImageDescriptions = allAnalysesComplete 
-    ? Object.entries(analyses).map(([key, value]) => `Result for ${key}: ${value.analysisResult}`).join('\n')
-    : null;
-
-  if (showQuestionnaire && allImageDescriptions) {
-    return <DiagnosticInterview imageDescription={allImageDescriptions} onReset={() => setShowQuestionnaire(false)} onAnalysisError={(e) => console.error(e)} />
+  if (allAnalysesComplete) {
+    return <ImageAnalysisReport analyses={analyses} onReset={resetAllAnalyses} />
   }
 
   return (
@@ -153,31 +162,10 @@ export function ImageAnalyzer() {
             analysisState={analyses[id]}
             icon={icon}
             onImageChange={(file) => handleImageChange(id, file)}
-            onReset={() => resetAnalysis(id)}
+            onReset={() => resetSingleAnalysis(id)}
           />
         ))}
       </div>
-       {allAnalysesComplete && (
-        <Card>
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2"><FileText />Combined Analysis Results</CardTitle>
-                <CardDescription>Here is a summary of the analysis for each image. Proceed to the questionnaire to get your personalized report.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-4 rounded-lg border p-4 bg-muted/50">
-                {Object.entries(analyses).map(([key, value]) => (
-                    <div key={key}>
-                      <h4 className="font-semibold capitalize text-foreground">{key.replace('-', ' ')}</h4>
-                      <p className="text-sm text-muted-foreground">{value.analysisResult}</p>
-                    </div>
-                ))}
-              </div>
-              <Button onClick={() => setShowQuestionnaire(true)}>
-                  Proceed to Questionnaire
-              </Button>
-            </CardContent>
-        </Card>
-      )}
     </div>
   );
 }
@@ -202,7 +190,7 @@ function AnalysisCard({
   onImageChange,
   onReset,
 }: AnalysisCardProps) {
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = React.useRef<HTMLInputElement>(null);
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
