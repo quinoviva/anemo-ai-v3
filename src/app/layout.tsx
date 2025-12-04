@@ -12,8 +12,11 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: 'Anemo Check',
+  title: 'AnemoCheck AI',
   description: 'Intelligent anemia detection using AI',
+  icons: {
+    icon: '/favicon.svg',
+  }
 };
 
 export default function RootLayout({
@@ -23,6 +26,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+       <head>
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+      </head>
       <body
         className={cn(
           'min-h-screen bg-background font-body antialiased',
