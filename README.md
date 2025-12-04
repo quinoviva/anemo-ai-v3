@@ -1,5 +1,8 @@
-# Firebase Studio
+anemo check
 
-This is a NextJS starter in Firebase Studio.
 
-To get started, take a look at src/app/page.tsx.
+cy
+
+
+npm install
+npm run dev
