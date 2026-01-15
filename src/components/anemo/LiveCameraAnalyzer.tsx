@@ -8,11 +8,14 @@ import { Loader2, Camera, Video, RefreshCw, XCircle, FlipHorizontal } from 'luci
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
+type BodyPart = 'skin' | 'under-eye' | 'fingernails';
+
 type LiveCameraAnalyzerProps = {
   onCapture: (file: File, dataUri: string) => void;
+  bodyPart?: BodyPart;
 };
 
-export function LiveCameraAnalyzer({ onCapture }: LiveCameraAnalyzerProps) {
+export function LiveCameraAnalyzer({ onCapture, bodyPart }: LiveCameraAnalyzerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
@@ -103,7 +106,49 @@ export function LiveCameraAnalyzer({ onCapture }: LiveCameraAnalyzerProps) {
   const handleFlipCamera = () => {
     setFacingMode(prev => prev === 'user' ? 'environment' : 'user');
   };
+
+  const getOverlayInstruction = () => {
+      switch (bodyPart) {
+          case 'skin':
+              return "Place your palm or skin area within the circle.";
+          case 'under-eye':
+              return "Center your eyes in the frame and look up slightly.";
+          case 'fingernails':
+              return "Place your fingernails in the center of the frame.";
+          default:
+              return "Position the subject in the center.";
+      }
+  };
   
+  const renderOverlay = () => {
+      if (!bodyPart) return <div className="absolute inset-0 bg-grid-slate-100/[0.075] [mask-image:linear-gradient(to_bottom,white_40%,transparent_90%)]"></div>;
+
+      return (
+          <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center">
+              {/* Darkened background with cutout */}
+              <div className="absolute inset-0 bg-black/40"></div>
+              
+              {/* Cutout Shape */}
+              <div className={cn(
+                  "relative z-10 border-2 border-white/80 shadow-[0_0_0_9999px_rgba(0,0,0,0.4)]",
+                  bodyPart === 'skin' && "rounded-full w-48 h-48",
+                  bodyPart === 'under-eye' && "rounded-[50%] w-64 h-24", // Oval
+                  bodyPart === 'fingernails' && "rounded-lg w-56 h-32"
+              )}>
+                 {/* Crosshair/Guides inside the shape */}
+                 <div className="absolute inset-0 flex items-center justify-center opacity-30">
+                    <div className="w-4 h-full bg-white/50 w-[1px]"></div>
+                    <div className="h-4 w-full bg-white/50 h-[1px]"></div>
+                 </div>
+              </div>
+
+              {/* Instruction Text */}
+              <div className="absolute bottom-4 z-20 bg-black/60 text-white px-4 py-2 rounded-full text-sm font-medium">
+                  {getOverlayInstruction()}
+              </div>
+          </div>
+      );
+  }
 
   const renderContent = () => {
     if (hasCameraPermission === null) {
@@ -141,8 +186,8 @@ export function LiveCameraAnalyzer({ onCapture }: LiveCameraAnalyzerProps) {
             </CardHeader>
             <CardContent className="flex-1 flex flex-col items-center justify-center gap-4">
                  <div className="relative w-full max-w-2xl mx-auto aspect-video rounded-lg overflow-hidden border bg-black">
-                     <video ref={videoRef} className="w-full h-full object-cover" autoPlay muted playsInline />
-                     <div className="absolute inset-0 bg-grid-slate-100/[0.075] [mask-image:linear-gradient(to_bottom,white_40%,transparent_90%)]"></div>
+                     <video ref={videoRef} className="w-full h-full object-cover transform scale-x-[-1]" autoPlay muted playsInline />
+                     {renderOverlay()}
                  </div>
 
                 <div className="flex items-center gap-4">

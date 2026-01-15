@@ -42,23 +42,27 @@ const prompt = ai.definePrompt({
 
 **Input Data:**
 -   **Image Analysis Summary:** {{{imageAnalysis}}}
--   **User Profile Information:** {{{userProfile}}}
+-   **User Profile Information (includes clinical indicators):** {{{userProfile}}}
 
 **Your Tasks:**
 
 1.  **Calculate a Risk Score:**
-    -   Analyze the combined results from the image analysis.
+    -   Analyze the combined results from the image analysis AND the clinical indicators (fatigue, cardiovascular strain, physical indicators).
     -   Assign a composite anemia risk score from 0 to 100.
         -   A score of **0-40** suggests **Low Risk**.
         -   A score of **41-70** suggests **Moderate Risk**.
         -   A score of **71-100** suggests **High Risk**.
-    -   Base the score on the severity and number of anemia signs detected (e.g., pallor, pale conjunctiva).
+    -   Base the score on the severity and number of anemia signs detected visually (e.g., pallor, pale conjunctiva) and reported clinically.
+    -   Increase the score if the user reports 'Moderate' or 'Severe' fatigue, or 'High' cardiovascular strain.
+    -   If the user's sex is 'Female' and their menstrual flow is 'Heavy', increase the risk score by 10 points.
 
 2.  **Generate Personalized Recommendations:**
     -   Create a bulleted list of clear, actionable recommendations.
+    -   **Clinical Context:** Address reported symptoms like fatigue or shortness of breath.
     -   **Dietary Advice:** Suggest specific, iron-rich foods commonly available in the Philippines (e.g., malunggay, kangkong, lean meats, beans). Mention Vitamin C sources to aid iron absorption.
     -   **Lifestyle and Home Remedies:** Provide simple lifestyle adjustments (e.g., rest, hydration) and safe home remedies.
     -   **When to See a Doctor:** Clearly state at what point a user should consult a healthcare professional. For moderate or high-risk scores, strongly advise a consultation.
+    -   **For Women's Health:** If the user's sex is 'Female', add a section with recommendations related to menstrual health, especially if their flow is 'Heavy'. For example, suggest tracking their cycle, discussing heavy flow with a doctor, and ensuring adequate iron intake during their period.
 
 **CRITICAL INSTRUCTIONS:**
 -   Your entire response MUST be a valid JSON object that conforms to the output schema.

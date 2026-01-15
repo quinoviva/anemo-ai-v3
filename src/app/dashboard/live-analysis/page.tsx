@@ -19,11 +19,13 @@ export default function LiveAnalysisPage() {
     // If an image is captured, we re-use the existing ImageAnalyzer component
     // We pass the captured image data and a function to reset the state
     return (
-      <ImageAnalyzer
-        initialImageFile={capturedImage.file}
-        initialImageDataUri={capturedImage.dataUri}
-        onReset={handleReset}
-      />
+      <div className="space-y-6">
+          <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold">Captured Image</h2>
+              <button onClick={handleReset} className="text-primary hover:underline">Retake</button>
+          </div>
+          <ImageAnalyzer initialCapture={capturedImage} />
+      </div>
     );
   }
 

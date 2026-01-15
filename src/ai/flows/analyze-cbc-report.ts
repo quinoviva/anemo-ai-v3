@@ -1,59 +1,68 @@
 'use server';
 
 import { ai } from '@/ai/genkit';
-import { z } from 'genkit';
+import { z } from 'zod';
+
+const AnalyzeCbcReportInputSchema = z.object({
+  photoDataUri: z.string(),
+});
+
+const AnalyzeCbcReportOutputSchema = z.object({
+  summary: z.string(),
+  parameters: z.array(
+    z.object({
+      parameter: z.string(),
+      value: z.string(),
+      unit: z.string(),
+      range: z.string(),
+      isNormal: z.boolean(),
+    })
+  ),
+});
+
+export type AnalyzeCbcReportInput = z.infer<typeof AnalyzeCbcReportInputSchema>;
+export type AnalyzeCbcReportOutput = z.infer<typeof AnalyzeCbcReportOutputSchema>;
 
 /**
  * Analyze CBC report
  * Supports multiple image formats and PDFs
  * Generates summary including anemia status
  */
-export async function analyzeCbcReport(input: { photoDataUri: string }) {
-  // ---------------- Input Validation ----------------
-  const InputSchema = z.object({
-    photoDataUri: z.string(),
-  });
-  const validatedInput = InputSchema.parse(input);
+export const analyzeCbcReport = ai.defineFlow(
+  {
+    name: 'analyzeCbcReport',
+    inputSchema: AnalyzeCbcReportInputSchema,
+    outputSchema: AnalyzeCbcReportOutputSchema,
+  },
+  async (input: AnalyzeCbcReportInput) => {
+    const validatedInput = AnalyzeCbcReportInputSchema.parse(input);
 
-  // ---------------- Output Schema ----------------
-  const OutputSchema = z.object({
-    summary: z.string(),
-    parameters: z.array(
-      z.object({
-        parameter: z.string(),
-        value: z.string(),
-        unit: z.string(),
-        range: z.string(),
-        isNormal: z.boolean(),
-      })
-    ),
-  });
+    let contentType = 'image/jpeg'; // default
+    const uri = validatedInput.photoDataUri.toLowerCase();
 
-  // ---------------- Determine content type ----------------
-  let contentType = 'image/jpeg'; // default
-  const uri = validatedInput.photoDataUri.toLowerCase();
+    if (uri.startsWith('data:')) {
+      const match = uri.match(/^data:(image\/[a-z+]+|application\/pdf);/);
+      if (match) contentType = match[1];
+    } else if (uri.endsWith('.pdf')) {
+      contentType = 'application/pdf';
+    } else if (uri.endsWith('.png')) {
+      contentType = 'image/png';
+    } else if (uri.endsWith('.gif')) {
+      contentType = 'image/gif';
+    } else if (uri.endsWith('.bmp')) {
+      contentType = 'image/bmp';
+    } else if (uri.endsWith('.webp')) {
+      contentType = 'image/webp';
+    }
 
-  if (uri.startsWith('data:')) {
-    const match = uri.match(/^data:(image\/[a-z+]+|application\/pdf);/);
-    if (match) contentType = match[1];
-  } else if (uri.endsWith('.pdf')) {
-    contentType = 'application/pdf';
-  } else if (uri.endsWith('.png')) {
-    contentType = 'image/png';
-  } else if (uri.endsWith('.gif')) {
-    contentType = 'image/gif';
-  } else if (uri.endsWith('.bmp')) {
-    contentType = 'image/bmp';
-  } else if (uri.endsWith('.webp')) {
-    contentType = 'image/webp';
-  }
-
-  // ---------------- Generate CBC Analysis ----------------
-  const { output } = await ai.generate({
-    model: 'googleai/gemini-2.5-flash',
-    prompt: [
-      {
-        text: `
+    const { output } = await ai.generate({
+      model: 'googleai/gemini-2.5-flash',
+      config: {
+        temperature: 0.0,
+      },
+      prompt: [
+        {
+          text: `
 You are an expert medical AI specializing in reading Complete Blood Count (CBC)
 laboratory reports using Optical Character Recognition (OCR).
 
@@ -88,23 +97,23 @@ CRITICAL RULES:
 5. DO NOT guess missing values.
 6. DO NOT fabricate ranges.
 7. Output MUST strictly match the schema.
-        `.trim(),
-      },
-      {
-        media: {
-          url: validatedInput.photoDataUri,
-          contentType: contentType,
+          `.trim(),
         },
-      },
-    ],
-    output: { schema: OutputSchema },
-  });
+        {
+          media: {
+            url: validatedInput.photoDataUri,
+            contentType: contentType,
+          },
+        },
+      ],
+      output: { schema: AnalyzeCbcReportOutputSchema },
+    });
 
-  // ---------------- Return Validated Output ----------------
-  return {
-    summary:
-      output?.summary ??
-      'An unexpected error occurred while analyzing the CBC report.',
-    parameters: output?.parameters ?? [],
-  };
-}
+    return {
+      summary:
+        output?.summary ??
+        'An unexpected error occurred while analyzing the CBC report.',
+      parameters: output?.parameters ?? [],
+    };
+  }
+);

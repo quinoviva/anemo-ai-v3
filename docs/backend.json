@@ -34,7 +34,7 @@
         },
         "medicalInfo": {
           "type": "object",
-          "description": "User's medical information.",
+          "description": "User's medical information, including self-reported clinical data for AI-powered analysis.",
           "properties": {
             "dateOfBirth": {
               "type": "string",
@@ -43,13 +43,28 @@
             },
             "sex": {
               "type": "string",
-              "description": "User's biological sex.",
+              "description": "User's biological sex. Used to tailor the diagnostic interview.",
               "enum": [
                 "Male",
                 "Female",
                 "Other",
                 "Prefer not to say"
               ]
+            },
+            "fatigue": {
+              "type": "string",
+              "description": "User's self-reported level of fatigue.",
+              "enum": ["Mild", "Moderate", "Severe"]
+            },
+            "cardiovascularStrain": {
+              "type": "string",
+              "description": "User's self-reported level of cardiovascular strain.",
+              "enum": ["None", "Noticeable", "High"]
+            },
+            "physicalIndicators": {
+              "type": "string",
+              "description": "User's self-reported physical indicators of anemia.",
+              "enum": ["None", "Pale skin", "Brittle nails", "Swollen tongue"]
             },
             "height": {
               "type": "number",
@@ -161,7 +176,7 @@
     "ImageAnalysisReport": {
       "title": "Image Analysis Report",
       "type": "object",
-      "description": "Represents a report generated from image analysis and a diagnostic interview.",
+      "description": "Represents a report generated from image analysis, a diagnostic interview, and includes a multimodal validation against clinical lab data.",
       "properties": {
         "id": {
           "type": "string",
@@ -187,6 +202,14 @@
         "imageAnalysisSummary": {
           "type": "string",
           "description": "A summary of the results from the image analysis step."
+        },
+        "reliabilityScore": {
+            "type": "number",
+            "description": "A score (0-100) indicating the reliability of the analysis based on cross-verification with clinical data."
+        },
+        "discrepancyAlert": {
+            "type": "boolean",
+            "description": "Flag indicating if a discrepancy was found between visual analysis and clinical data."
         }
       },
       "required": ["id", "userId", "createdAt", "riskScore", "recommendations", "imageAnalysisSummary"]
@@ -208,7 +231,7 @@
           "schema": {
             "$ref": "#/backend/entities/User"
           },
-          "description": "Stores user profile information. Accessible only by the user with matching UID. Includes denormalized fields for simpler security rules.",
+          "description": "Stores user profile information, including self-reported clinical data. Accessible only by the user with matching UID.",
           "params": [
             {
               "name": "userId",
@@ -224,7 +247,7 @@
           "schema": {
             "$ref": "#/backend/entities/LabReport"
           },
-          "description": "Stores analyzed CBC lab reports for a user.",
+          "description": "Stores analyzed CBC lab reports for a user. Used as clinical data for multimodal validation.",
           "params": [
             {
               "name": "userId",
@@ -244,7 +267,7 @@
           "schema": {
             "$ref": "#/backend/entities/ImageAnalysisReport"
           },
-          "description": "Stores AI-generated image analysis and questionnaire reports.",
+          "description": "Stores AI-generated image analysis and questionnaire reports, including multimodal validation results.",
           "params": [
             {
               "name": "userId",

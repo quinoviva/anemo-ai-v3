@@ -1,9 +1,5 @@
-'use server';
 
-console.log(
-  '[ENV CHECK] Gemini key loaded:',
-  !!process.env.GOOGLE_GENAI_API_KEY
-);
+'use server';
 
 import {
   generateImageDescription,
@@ -30,12 +26,16 @@ import {
   FindNearbyClinicsInput,
   FindNearbyClinicsOutput,
 } from '@/ai/flows/find-nearby-clinics';
-import { analyzeCbcReport } from '@/ai/flows/analyze-cbc-report';
-import type {
+import {
+  analyzeCbcReport,
   AnalyzeCbcReportInput,
   AnalyzeCbcReportOutput,
-} from '@/ai/schemas/cbc-report';
-
+} from '@/ai/flows/analyze-cbc-report';
+import {
+  validateMultimodalResults,
+  ValidateMultimodalResultsInput,
+  ValidateMultimodalResultsOutput,
+} from '@/ai/flows/validate-multimodal-results';
 
 export async function runGenerateImageDescription(
   input: GenerateImageDescriptionInput
@@ -71,4 +71,10 @@ export async function runAnalyzeCbcReport(
   input: AnalyzeCbcReportInput
 ): Promise<AnalyzeCbcReportOutput> {
   return await analyzeCbcReport(input);
+}
+
+export async function runValidateMultimodalResults(
+  input: ValidateMultimodalResultsInput
+): Promise<ValidateMultimodalResultsOutput> {
+  return await validateMultimodalResults(input);
 }

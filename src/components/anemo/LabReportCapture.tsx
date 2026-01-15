@@ -21,6 +21,7 @@ import { Table, TableBody, TableCell, TableHeader, TableHead, TableRow } from '.
 import { Input } from '../ui/input';
 import { ScrollArea } from '../ui/scroll-area';
 import { Label } from '../ui/label';
+import { AnalyzeCbcReportOutput } from '@/ai/flows/analyze-cbc-report';
 
 type LabReportCaptureProps = {
   isOpen: boolean;
@@ -29,9 +30,11 @@ type LabReportCaptureProps = {
 
 type AnalysisStep = 'upload' | 'analyzing' | 'result' | 'saving';
 
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+
 export function LabReportCapture({ isOpen, onClose }: LabReportCaptureProps) {
   const [step, setStep] = useState<AnalysisStep>('upload');
-  const [analysisResult, setAnalysisResult] = useState<any>(null);
+  const [analysisResult, setAnalysisResult] = useState<AnalyzeCbcReportOutput | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [hospitalName, setHospitalName] = useState('');
@@ -66,6 +69,14 @@ export function LabReportCapture({ isOpen, onClose }: LabReportCaptureProps) {
         toast({
             title: 'Invalid File',
             description: 'Please upload a valid image file.',
+            variant: 'destructive',
+        });
+        return;
+    }
+    if (file.size > MAX_FILE_SIZE) {
+        toast({
+            title: 'File Too Large',
+            description: `The selected file exceeds the ${MAX_FILE_SIZE / 1024 / 1024}MB size limit.`,
             variant: 'destructive',
         });
         return;
@@ -226,12 +237,18 @@ export function LabReportCapture({ isOpen, onClose }: LabReportCaptureProps) {
   );
 
   const renderAnalyzingView = () => (
-    <div className="flex flex-col items-center justify-center text-center p-8 min-h-[400px]">
-      <Sparkles className="h-12 w-12 text-primary mb-4" />
-      <h3 className="text-xl font-semibold">AI is Analyzing Your Report...</h3>
-      <p className="text-muted-foreground">This may take a moment. Please wait.</p>
-      <Loader2 className="h-8 w-8 animate-spin text-primary mt-6" />
-    </div>
+    <>
+      <DialogHeader>
+        <DialogTitle className="sr-only">AI is Analyzing Your Report</DialogTitle>
+        <DialogDescription className="sr-only">The AI is currently analyzing your lab report. Please wait a moment.</DialogDescription>
+      </DialogHeader>
+      <div className="flex flex-col items-center justify-center text-center p-8 min-h-[400px]">
+        <Sparkles className="h-12 w-12 text-primary mb-4" />
+        <h3 className="text-xl font-semibold">AI is Analyzing Your Report...</h3>
+        <p className="text-muted-foreground">This may take a moment. Please wait.</p>
+        <Loader2 className="h-8 w-8 animate-spin text-primary mt-6" />
+      </div>
+    </>
   );
   
   const renderResultView = () => {
@@ -247,7 +264,7 @@ export function LabReportCapture({ isOpen, onClose }: LabReportCaptureProps) {
         <div className="py-4 space-y-4 pr-6">
           <Alert variant={isAnemiaPositive ? 'destructive' : 'default'}>
             <AlertTitle>Summary</AlertTitle>
-            <AlertDescription>{analysisResult.summary}</AlertDescription>
+            <AlertDescription>{analysisResult?.summary}</AlertDescription>
           </Alert>
 
           <Table>
@@ -259,8 +276,8 @@ export function LabReportCapture({ isOpen, onClose }: LabReportCaptureProps) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {analysisResult.parameters.map((p: any, i: number) => (
-                <TableRow key={i}>
+              {analysisResult?.parameters.map((p) => (
+                <TableRow key={p.parameter}>
                   <TableCell className="font-medium">{p.parameter}</TableCell>
                   <TableCell>{p.value} {p.unit}</TableCell>
                   <TableCell>

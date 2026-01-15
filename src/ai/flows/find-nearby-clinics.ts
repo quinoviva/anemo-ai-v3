@@ -45,7 +45,7 @@ const searchForHealthcareProviders = ai.defineTool(
     // or a similar service. For now, we return a small, static list to
     // simulate a successful API call.
     console.log(`Simulating search for: ${query}`);
-    const simulatedResults = [
+    const simulatedResults: z.infer<typeof ClinicSchema>[] = [
         // Iloilo City - Private Hospitals
         { name: 'Iloilo Doctors’ Hospital', type: 'Hospital', address: 'West Timawa Avenue, Molo, Iloilo City', contact: '(033) 337-8621', hours: '24/7', website: 'https://www.iloilodoctorshospital.com.ph/', notes: 'Private, Tertiary. Offers comprehensive laboratory services.' },
         { name: 'The Medical City Iloilo', type: 'Hospital', address: 'Lopez Jaena St, Molo, Iloilo City', contact: '(033) 500-1000', hours: '24/7', website: 'https://themedicalcity.com/iloilo', notes: 'Private, Tertiary. Comprehensive laboratory and diagnostic imaging.' },
@@ -115,16 +115,18 @@ const findNearbyClinicsFlow = ai.defineFlow(
         2. Analyze the user's query: "${input.query}"
         3. From the full list provided by the tool, select and return ONLY the results that are most relevant to the user's query. Match by name, address, or type. For example, if the user asks for "hospitals in Molo", you should return hospitals whose address contains "Molo". If the user asks for "lab tests", return clinics and hospitals with notes about laboratory services. If the query is empty or very generic like "Iloilo", return all results.
         `,
-        model: 'googleai/gemini-1.5-flash',
+        model: 'googleai/gemini-2.5-flash',
         tools: [searchForHealthcareProviders],
         output: {
             schema: FindNearbyClinicsOutputSchema,
         },
         });
         
-        // The model should decide whether to call the tool or return a direct answer based on the prompt.
-        if(llmResponse.output) {
-        return llmResponse.output;
+        const output = llmResponse.output;
+        if(output) {
+          return {
+            results: output.results,
+          };
         }
     } catch (error) {
         console.warn('AI filtering failed, returning all results. Error:', error);

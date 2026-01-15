@@ -1,15 +1,20 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { runGenerateImageDescription } from '@/app/actions';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
-import { UploadCloud, XCircle, Loader2, CheckCircle, RefreshCw, Hand, Eye, User } from 'lucide-react';
+import { UploadCloud, XCircle, Loader2, CheckCircle, RefreshCw, Hand, Eye, User, Camera } from 'lucide-react';
 import { ImageAnalysisReport } from './ImageAnalysisReport';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { LiveCameraAnalyzer } from './LiveCameraAnalyzer';
+import { useOfflineSync } from '@/contexts/OfflineSyncContext';
+import { saveOfflineImage } from '@/lib/offline-storage';
 
 type BodyPart = 'skin' | 'under-eye' | 'fingernails';
 
@@ -21,7 +26,7 @@ export type AnalysisState = {
   isValid: boolean;
   analysisResult: string | null;
   error: string | null;
-  status: 'idle' | 'analyzing' | 'success' | 'error';
+  status: 'idle' | 'analyzing' | 'success' | 'error' | 'queued';
 };
 
 const initialAnalysisState: AnalysisState = {
@@ -41,22 +46,72 @@ const analysisPoints: { id: BodyPart; title: string; description: string, icon: 
   { id: 'fingernails', title: 'Fingernails', description: 'A clear photo of your bare fingernails.', icon: <Hand /> },
 ];
 
-export function ImageAnalyzer() {
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+
+interface ImageAnalyzerProps {
+    initialCapture?: {
+        file: File;
+        dataUri: string;
+        bodyPart?: BodyPart;
+    };
+}
+
+export function ImageAnalyzer({ initialCapture }: ImageAnalyzerProps) {
   const [analyses, setAnalyses] = useState<Record<BodyPart, AnalysisState>>({
     'skin': initialAnalysisState,
     'under-eye': initialAnalysisState,
     'fingernails': initialAnalysisState,
   });
+  const [activeCameraBodyPart, setActiveCameraBodyPart] = useState<BodyPart | null>(null);
+  const isMobile = useIsMobile();
+  const { isOnline } = useOfflineSync();
   const { toast } = useToast();
 
+  useEffect(() => {
+      if (initialCapture) {
+          const { file, dataUri, bodyPart } = initialCapture;
+          if (bodyPart) {
+              handleImageChange(bodyPart, file);
+          } else {
+              // If no body part specified, we might want to ask or just default to skin
+              // For now, let's just toast that we got the image but need to know where it's for
+              toast({
+                  title: "Image Captured",
+                  description: "Please select which body part this image represents.",
+              });
+          }
+      }
+  }, [initialCapture]);
+
+  React.useEffect(() => {
+    return () => {
+      Object.values(analyses).forEach(analysis => {
+        if (analysis.imageUrl) {
+          URL.revokeObjectURL(analysis.imageUrl);
+        }
+      });
+    };
+  }, [analyses]);
+
   const handleImageChange = (bodyPart: BodyPart, file: File | null) => {
-    if (!file || !file.type.startsWith('image/')) {
+    if (!file) {
+        return;
+    }
+    if (!file.type.startsWith('image/')) {
       toast({
         title: 'Invalid File Type',
         description: 'Please upload an image file (e.g., PNG, JPG).',
         variant: 'destructive',
       });
       return;
+    }
+    if (file.size > MAX_FILE_SIZE) {
+        toast({
+            title: 'File Too Large',
+            description: `The selected file exceeds the ${MAX_FILE_SIZE / 1024 / 1024}MB size limit.`,
+            variant: 'destructive',
+        });
+        return;
     }
 
     setAnalyses(prev => ({
@@ -78,7 +133,25 @@ export function ImageAnalyzer() {
           dataUri,
         },
       }));
-      await startAnalysis(bodyPart, dataUri);
+
+      if (!isOnline) {
+          await saveOfflineImage(file, bodyPart);
+          setAnalyses(prev => ({
+            ...prev,
+            [bodyPart]: {
+                ...prev[bodyPart],
+                status: 'queued',
+                analysisResult: 'Saved for offline sync.',
+                isValid: true, // Assume valid for now
+            }
+          }));
+          toast({
+              title: "Offline Mode",
+              description: "Image saved locally. Analysis will start when online.",
+          });
+      } else {
+          await startAnalysis(bodyPart, dataUri);
+      }
     };
 
     reader.readAsDataURL(file);
@@ -144,7 +217,7 @@ export function ImageAnalyzer() {
     }));
   };
 
-  const allAnalysesComplete = Object.values(analyses).every(a => a.status === 'success');
+  const allAnalysesComplete = Object.values(analyses).every(a => a.status === 'success' || a.status === 'queued');
   
   if (allAnalysesComplete) {
     return <ImageAnalysisReport analyses={analyses} onReset={resetAllAnalyses} />
@@ -232,6 +305,24 @@ function AnalysisCard({
           <div className="flex flex-col items-center justify-center text-center p-6 border-2 border-dashed rounded-lg h-48 bg-secondary">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
             <p className="mt-2 text-sm text-muted-foreground">Analyzing...</p>
+          </div>
+        );
+      case 'queued':
+        return (
+            <div className="space-y-2">
+            <div className="relative aspect-video rounded-md overflow-hidden border">
+              {analysisState.imageUrl && <img src={analysisState.imageUrl} alt={title} className="object-cover w-full h-full opacity-70" />}
+              <div className="absolute top-1 right-1">
+                <Button variant="destructive" size="icon" className="h-7 w-7" onClick={onReset}>
+                  <RefreshCw className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+            <Alert className="bg-muted">
+              <UploadCloud className="h-4 w-4" />
+              <AlertTitle>Queued</AlertTitle>
+              <AlertDescription>Waiting for connection...</AlertDescription>
+            </Alert>
           </div>
         );
       case 'success':

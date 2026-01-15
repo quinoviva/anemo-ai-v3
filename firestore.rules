@@ -86,6 +86,14 @@ service cloud.firestore {
       match /imageAnalyses/{analysisId} {
         allow read, write: if isSignedIn() && isOwner(userId);
       }
+
+      /**
+        * @description Protects a user's cycle logs. Only the owner can manage them.
+        * @path /users/{userId}/cycle_logs/{logId}
+        */
+      match /cycle_logs/{logId} {
+        allow read, write: if isSignedIn() && isOwner(userId);
+      }
     }
   }
 }

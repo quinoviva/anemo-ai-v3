@@ -1,15 +1,13 @@
 import type { Metadata } from 'next';
-import { Space_Grotesk } from 'next/font/google';
+import { Inter } from 'next/font/google';
 import './globals.css';
-import { Toaster } from '@/components/ui/toaster';
-import { cn } from '@/lib/utils';
-import { FirebaseClientProvider } from '@/firebase';
 import { ThemeProvider } from '@/components/layout/ThemeProvider';
+import { Toaster } from '@/components/ui/toaster';
+import { FirebaseClientProvider } from '@/firebase/client-provider';
+import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
+import { OfflineSyncProvider } from '@/contexts/OfflineSyncContext';
 
-const spaceGrotesk = Space_Grotesk({
-  subsets: ['latin'],
-  variable: '--font-space-grotesk',
-});
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'AnemoCheck AI',
@@ -29,12 +27,7 @@ export default function RootLayout({
        <head>
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
       </head>
-      <body
-        className={cn(
-          'min-h-screen bg-background font-body antialiased',
-          spaceGrotesk.variable
-        )}
-      >
+      <body className={inter.className}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -42,9 +35,16 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <FirebaseClientProvider>
-            {children}
+            <OfflineSyncProvider>
+                <div className="flex min-h-screen flex-col bg-background text-foreground">
+                <main className="flex-1">
+                    {children}
+                </main>
+                <Toaster />
+                <FirebaseErrorListener />
+                </div>
+            </OfflineSyncProvider>
           </FirebaseClientProvider>
-          <Toaster />
         </ThemeProvider>
       </body>
     </html>

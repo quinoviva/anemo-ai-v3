@@ -3,7 +3,7 @@
 import { firebaseConfig } from '@/firebase/config';
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
 import { getAuth, initializeAuth, browserLocalPersistence, browserPopupRedirectResolver } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore'
+import { getFirestore, enableIndexedDbPersistence } from 'firebase/firestore'
 
 // IMPORTANT: DO NOT MODIFY THIS FUNCTION
 export function initializeFirebase() {
@@ -14,26 +14,42 @@ export function initializeFirebase() {
     return { firebaseApp: null, auth: null, firestore: null };
   }
 
+  let app: FirebaseApp;
+  let auth: any;
+
   if (!getApps().length) {
-    const app = initializeApp(firebaseConfig);
-    const auth = initializeAuth(app, {
+    app = initializeApp(firebaseConfig);
+    auth = initializeAuth(app, {
       persistence: browserLocalPersistence,
       popupRedirectResolver: browserPopupRedirectResolver,
     });
-    return getSdks(app, auth);
+  } else {
+    // If already initialized, return the SDKs with the already initialized App
+    app = getApp();
+    auth = getAuth(app);
   }
+  
+  const firestore = getFirestore(app);
 
-  // If already initialized, return the SDKs with the already initialized App
-  const app = getApp();
-  const auth = getAuth(app);
-  return getSdks(app, auth);
+  // Enable Offline Persistence
+  enableIndexedDbPersistence(firestore).catch((err) => {
+      if (err.code == 'failed-precondition') {
+          // Multiple tabs open, persistence can only be enabled in one tab at a a time.
+          console.warn('Firebase persistence failed: Multiple tabs open');
+      } else if (err.code == 'unimplemented') {
+          // The current browser does not support all of the features required to enable persistence
+          console.warn('Firebase persistence not supported');
+      }
+  });
+
+  return getSdks(app, auth, firestore);
 }
 
-export function getSdks(firebaseApp: FirebaseApp, auth: any) {
+export function getSdks(firebaseApp: FirebaseApp, auth: any, firestore?: any) {
   return {
     firebaseApp,
     auth,
-    firestore: getFirestore(firebaseApp)
+    firestore: firestore || getFirestore(firebaseApp)
   };
 }
 

@@ -1,19 +1,22 @@
 import type { NextConfig } from 'next';
+import withPWA from '@ducanh2912/next-pwa';
+
+const withPWAConfig = withPWA({
+  dest: 'public',
+  cacheOnFrontEndNav: true,
+  aggressiveFrontEndNavCaching: true,
+  reloadOnOnline: false,
+  disable: process.env.NODE_ENV === 'development',
+  workboxOptions: {
+    disableDevLogs: true,
+  },
+});
 
 const nextConfig: NextConfig = {
   devIndicators: false,
 
-  experimental: {
-    // TS types lag behind runtime – cast is safe
-    allowedDevOrigins: [
-      '.cloudworkstations.dev',
-      '.googleusercontent.com',
-      'localhost',
-    ],
-  } as any,
-
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
 
   images: {
@@ -35,6 +38,16 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  experimental: {
+    // @ts-ignore - Turbopack type not yet updated in Next.js types
+    turbopack: {
+      resolveAlias: {
+        '@firebase/firestore': '@firebase/firestore/dist/index.esm2017.js',
+      },
+    },
+    // Allow the dev server to accept requests from the cloud workstation proxy
+    allowedDevOrigins: ['*.cloudworkstations.dev'],
+  },
 };
 
-export default nextConfig;
+export default withPWAConfig(nextConfig);
