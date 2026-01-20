@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
@@ -16,13 +15,21 @@ import { format } from 'date-fns';
 import { Loader2, Sparkles, Download, FileText, Hospital, Stethoscope, HeartPulse, MapPin } from 'lucide-react';
 import type { PersonalizedRecommendationsOutput } from '@/ai/flows/provide-personalized-recommendations';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
-import { collection, addDoc, serverTimestamp, doc, getDoc } from 'firebase/firestore';
-import type { AnalysisState } from './ImageAnalyzer';
+import { collection, addDoc, serverTimestamp, doc } from 'firebase/firestore';
 import { ScrollArea } from '../ui/scroll-area';
-import { useOfflineSync } from '@/contexts/OfflineSyncContext';
-import { cacheInsights, getCachedInsights } from '@/lib/offline-storage';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { WifiOff } from 'lucide-react';
+import { AnalyzeCbcReportOutput } from '@/ai/flows/analyze-cbc-report';
+
+export type AnalysisState = {
+  file: File | null;
+  imageUrl: string | null;
+  dataUri: string | null;
+  calibrationMetadata: any | null;
+  description: string | null;
+  isValid: boolean;
+  analysisResult: string | null;
+  error: string | null;
+  status: 'idle' | 'analyzing' | 'success' | 'error' | 'queued';
+};
 
 type Clinic = {
   name: string;
@@ -32,10 +39,11 @@ type Clinic = {
 
 type ImageAnalysisReportProps = {
   analyses: Record<string, AnalysisState>;
+  labReport: AnalyzeCbcReportOutput | null;
   onReset: () => void;
 };
 
-export function ImageAnalysisReport({ analyses, onReset }: ImageAnalysisReportProps) {
+export function ImageAnalysisReport({ analyses, labReport, onReset }: ImageAnalysisReportProps) {
   const [report, setReport] = useState<PersonalizedRecommendationsOutput | null>(null);
   const [clinics, setClinics] = useState<Clinic[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -46,81 +54,62 @@ export function ImageAnalysisReport({ analyses, onReset }: ImageAnalysisReportPr
   const reportRef = useRef<HTMLDivElement>(null);
   const { user } = useUser();
   const firestore = useFirestore();
-  const { isOnline } = useOfflineSync();
-  const [isCachedData, setIsCachedData] = useState(false);
+  const isOnline = typeof window !== 'undefined' ? navigator.onLine : true;
 
   const allImageDescriptions = Object.entries(analyses)
     .map(([key, value]) => `Result for ${key}: ${value.analysisResult}`)
     .join('\n');
+  
+  const labReportSummary = labReport ? `Lab Report Summary: ${labReport.summary}` : '';
+
+  const userDocRef = useMemoFirebase(() => {
+    if (!user || !firestore) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [user, firestore]);
+  const { data: userData } = useDoc(userDocRef);
+
+  useEffect(() => {
+    if (userData) {
+      if (userData.address) setUserLocation(userData.address);
+      if (userData.firstName) setUserName(`${userData.firstName} ${userData.lastName}`);
+    }
+  }, [userData]);
 
   const generateReport = useCallback(async () => {
     setIsLoading(true);
 
     try {
-      let userProfileString = `User's location: Iloilo City`;
-      // Fetch user data first to get location and name
-      if (user && firestore) {
-        // We can access Firestore even offline if persistence is enabled!
-        const userDocRef = doc(firestore, 'users', user.uid);
-        try {
-            const docSnap = await getDoc(userDocRef);
-            if (docSnap.exists()) {
-            const data = docSnap.data();
-            if (data.address) setUserLocation(data.address);
-            if (data.firstName) setUserName(`${data.firstName} ${data.lastName}`);
-            
-            const medicalInfo = data.medicalInfo || {};
-            userProfileString = `
-                Name: ${data.firstName || ''} ${data.lastName || ''}
-                Location: ${data.address || 'Iloilo City'}
-                Date of Birth: ${medicalInfo.dateOfBirth ? format(medicalInfo.dateOfBirth.toDate(), 'PPP') : 'N/A'}
-                Sex: ${medicalInfo.sex || 'N/A'}
-                Height: ${medicalInfo.height || 'N/A'} cm
-                Weight: ${medicalInfo.weight || 'N/A'} kg
-                Blood Type: ${medicalInfo.bloodType || 'N/A'}
-                Allergies: ${medicalInfo.allergies || 'N/A'}
-                Conditions: ${medicalInfo.conditions || 'N/A'}
-                Medications: ${medicalInfo.medications || 'N/A'}
-                Family History: ${medicalInfo.familyHistory || 'N/A'}
-                Last Menstrual Period: ${medicalInfo.lastMenstrualPeriod ? format(medicalInfo.lastMenstrualPeriod.toDate(), 'PPP') : 'N/A'}
-                Cycle Length: ${medicalInfo.cycleLength || 'N/A'} days
-                Flow Duration: ${medicalInfo.flowDuration || 'N/A'} days
-                Flow Intensity: ${medicalInfo.flowIntensity || 'N/A'}
-            `;
-            }
-        } catch (e) {
-            console.warn("Failed to fetch user doc (likely offline first time):", e);
-        }
+      let userProfileString = `User's location: ${userLocation}`;
+      if (userData) {
+        const data = userData;
+        const medicalInfo = data.medicalInfo || {};
+        userProfileString = `
+            Name: ${data.firstName || ''} ${data.lastName || ''}
+            Location: ${data.address || 'Iloilo City'}
+            Date of Birth: ${medicalInfo.dateOfBirth ? format(medicalInfo.dateOfBirth.toDate(), 'PPP') : 'N/A'}
+            Sex: ${medicalInfo.sex || 'N/A'}
+            Height: ${medicalInfo.height || 'N/A'} cm
+            Weight: ${medicalInfo.weight || 'N/A'} kg
+            Blood Type: ${medicalInfo.bloodType || 'N/A'}
+            Allergies: ${medicalInfo.allergies || 'N/A'}
+            Conditions: ${medicalInfo.conditions || 'N/A'}
+            Medications: ${medicalInfo.medications || 'N/A'}
+            Family History: ${medicalInfo.familyHistory || 'N/A'}
+            Last Menstrual Period: ${medicalInfo.lastMenstrualPeriod ? format(medicalInfo.lastMenstrualPeriod.toDate(), 'PPP') : 'N/A'}
+            Cycle Length: ${medicalInfo.cycleLength || 'N/A'} days
+            Flow Duration: ${medicalInfo.flowDuration || 'N/A'} days
+            Flow Intensity: ${medicalInfo.flowIntensity || 'N/A'}
+        `;
       }
 
       // Generate recommendations
       let reportResult: PersonalizedRecommendationsOutput | null = null;
       
-      try {
-        if (!isOnline) throw new Error("Offline");
-        reportResult = await runProvidePersonalizedRecommendations({
-            imageAnalysis: allImageDescriptions,
-            userProfile: userProfileString,
-        });
-        // Cache for offline use
-        await cacheInsights(reportResult);
-        setIsCachedData(false);
-
-      } catch (e) {
-          console.warn("API failed, trying cache", e);
-          const cached = await getCachedInsights();
-          if (cached) {
-              reportResult = cached;
-              setIsCachedData(true);
-              toast({
-                  title: "Offline Mode",
-                  description: "Showing cached health insights.",
-                  variant: "default"
-              });
-          } else {
-              throw e;
-          }
-      }
+      if (!isOnline) throw new Error("Offline");
+      reportResult = await runProvidePersonalizedRecommendations({
+          imageAnalysis: allImageDescriptions,
+          userProfile: userProfileString,
+      });
 
       setReport(reportResult);
 
@@ -135,7 +124,7 @@ export function ImageAnalysisReport({ analyses, onReset }: ImageAnalysisReportPr
       }
 
       // Save to Firestore - Firestore SDK handles offline queueing!
-      if (user && !user.isAnonymous && firestore && reportResult && !isCachedData) {
+      if (user && !user.isAnonymous && firestore && reportResult) {
         const reportCollection = collection(firestore, `users/${user.uid}/imageAnalyses`);
         await addDoc(reportCollection, {
           userId: user.uid,
@@ -143,6 +132,7 @@ export function ImageAnalysisReport({ analyses, onReset }: ImageAnalysisReportPr
           riskScore: reportResult.riskScore,
           recommendations: reportResult.recommendations,
           imageAnalysisSummary: allImageDescriptions,
+          labReportSummary: labReportSummary,
         });
         toast({
           title: "Analysis Saved",
@@ -160,7 +150,7 @@ export function ImageAnalysisReport({ analyses, onReset }: ImageAnalysisReportPr
     } finally {
       setIsLoading(false);
     }
-  }, [allImageDescriptions, user, firestore, userLocation, toast, isOnline]);
+  }, [allImageDescriptions, labReportSummary, user, firestore, userLocation, toast, isOnline, userData]);
 
   useEffect(() => {
     generateReport();
@@ -263,15 +253,6 @@ export function ImageAnalysisReport({ analyses, onReset }: ImageAnalysisReportPr
         <ScrollArea className="max-h-[70vh] mb-4">
             <div ref={reportRef} className="p-6 rounded-lg border bg-background space-y-8">
             <header className="space-y-4">
-                {isCachedData && (
-                    <Alert className="border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20">
-                        <WifiOff className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
-                        <AlertTitle className="text-yellow-800 dark:text-yellow-300">Offline Mode</AlertTitle>
-                        <AlertDescription className="text-yellow-700 dark:text-yellow-200">
-                            You are currently viewing cached health insights. Some data, like nearby clinics, may not be available.
-                        </AlertDescription>
-                    </Alert>
-                )}
                 <div className="flex items-start justify-between border-b pb-4">
                     <div className="flex items-center gap-4">
                         <svg
@@ -365,4 +346,3 @@ export function ImageAnalysisReport({ analyses, onReset }: ImageAnalysisReportPr
     </Card>
   );
 }
-

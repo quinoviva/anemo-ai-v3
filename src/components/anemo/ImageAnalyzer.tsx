@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -12,9 +11,7 @@ import { UploadCloud, XCircle, Loader2, CheckCircle, RefreshCw, Hand, Eye, User,
 import { ImageAnalysisReport } from './ImageAnalysisReport';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { LiveCameraAnalyzer } from './LiveCameraAnalyzer';
-import { useOfflineSync } from '@/contexts/OfflineSyncContext';
-import { saveOfflineImage } from '@/lib/offline-storage';
+import { LiveCameraAnalyzer, CalibrationMetadata } from './LiveCameraAnalyzer';
 
 type BodyPart = 'skin' | 'under-eye' | 'fingernails';
 
@@ -22,6 +19,7 @@ export type AnalysisState = {
   file: File | null;
   imageUrl: string | null;
   dataUri: string | null;
+  calibrationMetadata: CalibrationMetadata | null;
   description: string | null;
   isValid: boolean;
   analysisResult: string | null;
@@ -33,6 +31,7 @@ const initialAnalysisState: AnalysisState = {
   file: null,
   imageUrl: null,
   dataUri: null,
+  calibrationMetadata: null,
   description: null,
   isValid: false,
   analysisResult: null,
@@ -64,7 +63,6 @@ export function ImageAnalyzer({ initialCapture }: ImageAnalyzerProps) {
   });
   const [activeCameraBodyPart, setActiveCameraBodyPart] = useState<BodyPart | null>(null);
   const isMobile = useIsMobile();
-  const { isOnline } = useOfflineSync();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -73,8 +71,6 @@ export function ImageAnalyzer({ initialCapture }: ImageAnalyzerProps) {
           if (bodyPart) {
               handleImageChange(bodyPart, file);
           } else {
-              // If no body part specified, we might want to ask or just default to skin
-              // For now, let's just toast that we got the image but need to know where it's for
               toast({
                   title: "Image Captured",
                   description: "Please select which body part this image represents.",
@@ -134,24 +130,7 @@ export function ImageAnalyzer({ initialCapture }: ImageAnalyzerProps) {
         },
       }));
 
-      if (!isOnline) {
-          await saveOfflineImage(file, bodyPart);
-          setAnalyses(prev => ({
-            ...prev,
-            [bodyPart]: {
-                ...prev[bodyPart],
-                status: 'queued',
-                analysisResult: 'Saved for offline sync.',
-                isValid: true, // Assume valid for now
-            }
-          }));
-          toast({
-              title: "Offline Mode",
-              description: "Image saved locally. Analysis will start when online.",
-          });
-      } else {
-          await startAnalysis(bodyPart, dataUri);
-      }
+      await startAnalysis(bodyPart, dataUri);
     };
 
     reader.readAsDataURL(file);
@@ -220,7 +199,7 @@ export function ImageAnalyzer({ initialCapture }: ImageAnalyzerProps) {
   const allAnalysesComplete = Object.values(analyses).every(a => a.status === 'success' || a.status === 'queued');
   
   if (allAnalysesComplete) {
-    return <ImageAnalysisReport analyses={analyses} onReset={resetAllAnalyses} />
+    return <ImageAnalysisReport analyses={analyses} onReset={resetAllAnalyses} labReport={null} />
   }
 
   return (

@@ -115,7 +115,7 @@ const findNearbyClinicsFlow = ai.defineFlow(
         2. Analyze the user's query: "${input.query}"
         3. From the full list provided by the tool, select and return ONLY the results that are most relevant to the user's query. Match by name, address, or type. For example, if the user asks for "hospitals in Molo", you should return hospitals whose address contains "Molo". If the user asks for "lab tests", return clinics and hospitals with notes about laboratory services. If the query is empty or very generic like "Iloilo", return all results.
         `,
-        model: 'googleai/gemini-2.5-flash',
+        model: 'googleai/gemini-1.5-flash',
         tools: [searchForHealthcareProviders],
         output: {
             schema: FindNearbyClinicsOutputSchema,

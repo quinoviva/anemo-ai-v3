@@ -4,8 +4,6 @@ import './globals.css';
 import { ThemeProvider } from '@/components/layout/ThemeProvider';
 import { Toaster } from '@/components/ui/toaster';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
-import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
-import { OfflineSyncProvider } from '@/contexts/OfflineSyncContext';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -35,15 +33,12 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <FirebaseClientProvider>
-            <OfflineSyncProvider>
-                <div className="flex min-h-screen flex-col bg-background text-foreground">
-                <main className="flex-1">
-                    {children}
-                </main>
-                <Toaster />
-                <FirebaseErrorListener />
-                </div>
-            </OfflineSyncProvider>
+            <div className="flex min-h-screen flex-col bg-background text-foreground">
+            <main className="flex-1">
+                {children}
+            </main>
+            <Toaster />
+            </div>
           </FirebaseClientProvider>
         </ThemeProvider>
       </body>

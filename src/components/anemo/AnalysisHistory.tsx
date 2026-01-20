@@ -15,8 +15,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Eye, Plus, LogIn, User, Loader2, FileText, Download, Trash2, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
-import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, orderBy, doc, getDoc } from 'firebase/firestore';
+import { useUser, useFirestore, useCollection, useMemoFirebase, useDoc } from '@/firebase';
+import { collection, query, orderBy, doc } from 'firebase/firestore';
 import { format } from 'date-fns';
 import { PersonalizedRecommendationsOutput } from '@/ai/flows/provide-personalized-recommendations';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '../ui/dialog';
@@ -103,15 +103,17 @@ export function AnalysisHistory() {
   const { data: cbcHistory, isLoading: cbcIsLoading } = useCollection<any>(labReportsQuery);
   const { data: cycleLogs, isLoading: cycleIsLoading } = useCollection<any>(cycleLogsQuery);
 
-  useEffect(() => {
-    if (user && firestore) {
-      getDoc(doc(firestore, 'users', user.uid)).then(docSnap => {
-        if (docSnap.exists()) {
-          setUserSex(docSnap.data().medicalInfo?.sex || '');
-        }
-      });
-    }
+  const userDocRef = useMemoFirebase(() => {
+    if (!user || !firestore) return null;
+    return doc(firestore, 'users', user.uid);
   }, [user, firestore]);
+  const { data: userData } = useDoc(userDocRef);
+
+  useEffect(() => {
+    if (userData?.medicalInfo?.sex) {
+      setUserSex(userData.medicalInfo.sex);
+    }
+  }, [userData]);
 
   const history = useMemo(() => {
     if (!imageHistory || !cbcHistory) return [];
@@ -150,9 +152,7 @@ export function AnalysisHistory() {
     }
 
     try {
-      const userDocRef = doc(firestore, 'users', user.uid);
-      const docSnap = await getDoc(userDocRef);
-      const medicalInfo = docSnap.exists() ? docSnap.data().medicalInfo : {};
+      const medicalInfo = userData?.medicalInfo || {};
 
       const result = await runValidateMultimodalResults({
         medicalInfo: medicalInfo,

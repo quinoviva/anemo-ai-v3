@@ -26,13 +26,14 @@ import { AnalyzeCbcReportOutput } from '@/ai/flows/analyze-cbc-report';
 type LabReportCaptureProps = {
   isOpen: boolean;
   onClose: () => void;
+  onAnalysisComplete: (result: AnalyzeCbcReportOutput) => void;
 };
 
 type AnalysisStep = 'upload' | 'analyzing' | 'result' | 'saving';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
-export function LabReportCapture({ isOpen, onClose }: LabReportCaptureProps) {
+export function LabReportCapture({ isOpen, onClose, onAnalysisComplete }: LabReportCaptureProps) {
   const [step, setStep] = useState<AnalysisStep>('upload');
   const [analysisResult, setAnalysisResult] = useState<AnalyzeCbcReportOutput | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -108,6 +109,7 @@ export function LabReportCapture({ isOpen, onClose }: LabReportCaptureProps) {
         }
         setAnalysisResult(result);
         setStep('result');
+        if (onAnalysisComplete) onAnalysisComplete(result);
        } catch (err) {
          toast({
           title: 'AI Analysis Error',

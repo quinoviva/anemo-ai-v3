@@ -16,6 +16,7 @@ export function initializeFirebase() {
 
   let app: FirebaseApp;
   let auth: any;
+  let firestore: any;
 
   if (!getApps().length) {
     app = initializeApp(firebaseConfig);
@@ -23,24 +24,15 @@ export function initializeFirebase() {
       persistence: browserLocalPersistence,
       popupRedirectResolver: browserPopupRedirectResolver,
     });
+    firestore = getFirestore(app);
+
   } else {
     // If already initialized, return the SDKs with the already initialized App
     app = getApp();
     auth = getAuth(app);
+    firestore = getFirestore(app);
   }
   
-  const firestore = getFirestore(app);
-
-  // Enable Offline Persistence
-  enableIndexedDbPersistence(firestore).catch((err) => {
-      if (err.code == 'failed-precondition') {
-          // Multiple tabs open, persistence can only be enabled in one tab at a a time.
-          console.warn('Firebase persistence failed: Multiple tabs open');
-      } else if (err.code == 'unimplemented') {
-          // The current browser does not support all of the features required to enable persistence
-          console.warn('Firebase persistence not supported');
-      }
-  });
 
   return getSdks(app, auth, firestore);
 }
@@ -59,5 +51,3 @@ export * from './firestore/use-collection';
 export * from './firestore/use-doc';
 export * from './non-blocking-updates';
 export * from './non-blocking-login';
-export * from './errors';
-export * from './error-emitter';

@@ -18,17 +18,21 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { useAuth } from '@/firebase';
 import { cn } from '@/lib/utils';
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '../ui/sheet';
-import { Menu, HeartPulse, History, Stethoscope, Moon, Sun, Monitor, Bot, Video, Search } from 'lucide-react';
-import { Cog } from 'lucide-react';
+import { HeartPulse, History, Stethoscope, Moon, Sun, Monitor, Bot, Video, Search, User, Settings, LogOut, LayoutGrid, ChevronRight } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useTheme } from 'next-themes';
 import { Logo } from './Logo';
 
-const navLinks = [
-  { href: '/dashboard', label: 'Home', icon: HeartPulse },
-  { href: '/dashboard/analysis', label: 'Analysis', icon: Stethoscope },
-  { href: '/dashboard/history', label: 'Track', icon: History },
+const mainNavLinks = [
+  { href: '/dashboard', label: 'HOME', icon: HeartPulse },
+  { href: '/dashboard/analysis', label: 'ANALYSIS', icon: Stethoscope },
+  { href: '/dashboard/history', label: 'TRACK', icon: History },
+];
+
+const secondaryNavLinks = [
+  { href: '/dashboard/chatbot', label: 'AI Assistant', icon: Bot, description: 'Chat with our health AI' },
+  { href: '/dashboard/live-analysis', label: 'Live Scan', icon: Video, description: 'Real-time camera check' },
+  { href: '/dashboard/find-doctor', label: 'Find Care', icon: Search, description: 'Locate nearby clinics' },
 ];
 
 export function Header() {
@@ -70,175 +74,140 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background px-4 md:px-6">
-      <div className="flex items-center gap-4">
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button variant="outline" size="icon" className="shrink-0 md:hidden">
-              <Menu className="h-5 w-5" />
-              <span className="sr-only">Toggle navigation menu</span>
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left">
-            <SheetHeader>
-              <SheetTitle>Navigation</SheetTitle>
-              <SheetDescription>
-                Select a page to navigate to.
-              </SheetDescription>
-            </SheetHeader>
-            <nav className="grid gap-6 text-lg font-medium">
-              <Link
-                href="/dashboard"
-                className="flex items-center gap-2 text-lg font-semibold"
-              >
-                <Logo className="h-6 w-6" />
-                <span className="font-bold">Anemo Check</span>
-              </Link>
-              {navLinks.map(({ href, label, icon: Icon }) => (
-                <Link
-                  key={href}
-                  href={href}
-                  className={cn(
-                    'flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground',
-                    { 'bg-muted text-foreground': pathname === href }
-                  )}
-                >
-                  <Icon className="h-5 w-5" />
-                  {label}
-                </Link>
-              ))}
-              <div className="border-t pt-4 mt-auto space-y-4">
-                 <Link
-                  href="/dashboard/chatbot"
-                  className={cn(
-                    'flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground',
-                    { 'bg-muted text-foreground': pathname === '/dashboard/chatbot' }
-                  )}
-                >
-                  <Bot className="h-5 w-5" />
-                  ChatbotAI
-                </Link>
-                 <Link
-                  href="/dashboard/live-analysis"
-                  className={cn(
-                    'flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground',
-                    { 'bg-muted text-foreground': pathname === '/dashboard/live-analysis' }
-                  )}
-                >
-                  <Video className="h-5 w-5" />
-                  Live Analysis
-                </Link>
-                 <Link
-                  href="/dashboard/find-doctor"
-                  className={cn(
-                    'flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground',
-                    { 'bg-muted text-foreground': pathname === '/dashboard/find-doctor' }
-                  )}
-                >
-                  <Search className="h-5 w-5" />
-                  Nearby Providers
-                </Link>
-                <Link
-                  href="/dashboard/settings"
-                  className={cn(
-                    'flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground',
-                    { 'bg-muted text-foreground': pathname === '/dashboard/settings' }
-                  )}
-                >
-                  <Cog className="h-5 w-5" />
-                  Settings
-                </Link>
-              </div>
-            </nav>
-          </SheetContent>
-        </Sheet>
+    <header className="sticky top-0 z-40 w-full border-b border-border/40 bg-background/60 backdrop-blur-xl supports-[backdrop-filter]:bg-background/30 shadow-sm transition-all duration-300">
+      <div className="flex h-16 items-center justify-between px-4 md:px-8 max-w-7xl mx-auto relative">
+        {/* Left: Logo */}
+        <div className="flex items-center shrink-0">
+          <Link href="/dashboard" className="flex items-center gap-2 transition-opacity hover:opacity-90">
+            <Logo className="h-7 w-7" />
+            <span className="font-bold text-lg tracking-tight hidden sm:inline-block">Anemo Check</span>
+          </Link>
+        </div>
 
-        <Link href="/dashboard" className="hidden items-center gap-2 md:flex">
-          <Logo className="h-6 w-6" />
-          <span className="font-bold text-lg">Anemo Check</span>
-        </Link>
-      </div>
-
-      <nav className="hidden flex-grow items-center justify-center gap-5 text-sm font-medium md:flex lg:gap-6">
-        {navLinks.map(({ href, label }) => (
+        {/* Center: Navigation */}
+        <nav className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-1 md:gap-2">
+          {mainNavLinks.map(({ href, label }) => (
             <Link
-            key={href}
-            href={href}
-            className={cn(
-                'transition-colors hover:text-foreground',
-                pathname === href ? 'text-foreground' : 'text-muted-foreground'
-            )}
-            >
-            {label}
-            </Link>
-        ))}
-      </nav>
-
-      <div className="flex items-center gap-4">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="rounded-full">
-              <Avatar>
-                <AvatarImage
-                  src={auth?.currentUser?.photoURL ?? undefined}
-                  key={auth?.currentUser?.photoURL}
-                  data-ai-hint="person face"
-                />
-                <AvatarFallback>
-                  {getInitials(
-                    auth?.currentUser?.displayName ?? auth?.currentUser?.email
-                  )}
-                </AvatarFallback>
-              </Avatar>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>
-              {isGuest ? (
-                <p className="font-medium">Guest Mode</p>
-              ) : (
-                <>
-                  <p className="font-medium">
-                    {auth?.currentUser?.displayName || 'User'}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {auth?.currentUser?.email || 'No email provided'}
-                  </p>
-                </>
+              key={href}
+              href={href}
+              className={cn(
+                'px-3 md:px-5 py-2 text-[10px] md:text-sm font-bold tracking-wider rounded-full transition-all',
+                pathname === href 
+                  ? 'text-primary bg-primary/10 shadow-sm' 
+                  : 'text-muted-foreground hover:text-foreground hover:bg-accent'
               )}
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => router.push('/dashboard/profile')} disabled={isGuest}>
-              Profile
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => router.push('/dashboard/settings')}>
-              Settings
-            </DropdownMenuItem>
-             <DropdownMenuSub>
-              <DropdownMenuSubTrigger>
-                <span>Theme</span>
-              </DropdownMenuSubTrigger>
-              <DropdownMenuPortal>
-                <DropdownMenuSubContent>
-                  <DropdownMenuItem onClick={() => setTheme('light')}>
-                    <Sun className="mr-2 h-4 w-4" />
-                    <span>Light</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setTheme('dark')}>
-                    <Moon className="mr-2 h-4 w-4" />
-                    <span>Dark</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setTheme('system')}>
-                    <Monitor className="mr-2 h-4 w-4" />
-                    <span>System</span>
-                  </DropdownMenuItem>
-                </DropdownMenuSubContent>
-              </DropdownMenuPortal>
-            </DropdownMenuSub>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+            >
+              {label}
+            </Link>
+          ))}
+        </nav>
+
+        {/* Right: Actions */}
+        <div className="flex items-center gap-2 md:gap-3 shrink-0">
+          
+          {/* Tools / App Launcher Menu */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="rounded-full text-muted-foreground hover:text-foreground" title="Tools & Apps">
+                <LayoutGrid className="h-5 w-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-64 p-2 glass border-border/50">
+              <DropdownMenuLabel className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 px-2">
+                Health Tools
+              </DropdownMenuLabel>
+              {secondaryNavLinks.map(({ href, label, icon: Icon, description }) => (
+                <DropdownMenuItem key={href} asChild className="p-2 cursor-pointer focus:bg-primary/5 rounded-lg group">
+                  <Link href={href} className="flex items-start gap-3">
+                    <div className="p-2 rounded-md bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                      <Icon className="h-4 w-4" />
+                    </div>
+                    <div className="flex-1 space-y-0.5">
+                      <p className="text-sm font-medium leading-none flex items-center justify-between">
+                        {label}
+                      </p>
+                      <p className="text-[10px] text-muted-foreground line-clamp-1">{description}</p>
+                    </div>
+                  </Link>
+                </DropdownMenuItem>
+              ))}
+              <DropdownMenuSeparator className="my-2 bg-border/50" />
+              <DropdownMenuItem asChild className="p-2 cursor-pointer focus:bg-accent rounded-lg">
+                 <Link href="/dashboard/settings" className="flex items-center gap-3">
+                    <div className="p-2 rounded-md bg-muted text-muted-foreground">
+                        <Settings className="h-4 w-4" />
+                    </div>
+                    <span className="text-sm font-medium">Settings</span>
+                 </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* User Profile Menu */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="rounded-full ring-2 ring-transparent hover:ring-primary/20 transition-all" aria-label="Open user menu">
+                <Avatar className="h-8 w-8 md:h-9 md:h-9 border">
+                  <AvatarImage
+                    src={auth?.currentUser?.photoURL ?? undefined}
+                    key={auth?.currentUser?.photoURL}
+                    alt={auth?.currentUser?.displayName || 'User profile'}
+                  />
+                  <AvatarFallback className="bg-primary/10 text-primary text-xs md:text-sm font-medium">
+                    {getInitials(
+                      auth?.currentUser?.displayName ?? auth?.currentUser?.email
+                    )}
+                  </AvatarFallback>
+                </Avatar>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56 p-2 glass border-border/50">
+              <DropdownMenuLabel className="font-normal">
+                <div className="flex flex-col space-y-1">
+                  <p className="text-sm font-medium leading-none">
+                     {isGuest ? 'Guest User' : (auth?.currentUser?.displayName || 'User')}
+                  </p>
+                  <p className="text-xs leading-none text-muted-foreground truncate">
+                    {isGuest ? 'Sign in to save data' : (auth?.currentUser?.email || '')}
+                  </p>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator className="bg-border/50" />
+              <DropdownMenuItem onClick={() => router.push('/dashboard/profile')} disabled={isGuest} className="cursor-pointer focus:bg-accent">
+                <User className="mr-2 h-4 w-4" />
+                Profile
+              </DropdownMenuItem>
+               <DropdownMenuSub>
+                <DropdownMenuSubTrigger className="cursor-pointer focus:bg-accent">
+                  <Sun className="mr-2 h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                  <Moon className="absolute mr-2 h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                  <span className="ml-2">Theme</span>
+                </DropdownMenuSubTrigger>
+                <DropdownMenuPortal>
+                  <DropdownMenuSubContent className="glass border-border/50">
+                    <DropdownMenuItem onClick={() => setTheme('light')}>
+                      <Sun className="mr-2 h-4 w-4" />
+                      <span>Light</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setTheme('dark')}>
+                      <Moon className="mr-2 h-4 w-4" />
+                      <span>Dark</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setTheme('system')}>
+                      <Monitor className="mr-2 h-4 w-4" />
+                      <span>System</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuSubContent>
+                </DropdownMenuPortal>
+              </DropdownMenuSub>
+              <DropdownMenuSeparator className="bg-border/50" />
+              <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:bg-destructive/10 cursor-pointer">
+                <LogOut className="mr-2 h-4 w-4" />
+                Logout
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
     </header>
   );

@@ -56,7 +56,7 @@ export const analyzeCbcReport = ai.defineFlow(
     }
 
     const { output } = await ai.generate({
-      model: 'googleai/gemini-2.5-flash',
+      model: 'googleai/gemini-1.5-flash',
       config: {
         temperature: 0.0,
       },

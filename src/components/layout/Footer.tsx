@@ -3,36 +3,43 @@ import { HeartPulse } from 'lucide-react';
 
 export function Footer() {
   return (
-    <footer className="mt-auto border-t bg-background">
+    <footer className="mt-auto glass border-t-0 border-b-0 border-x-0 rounded-none backdrop-blur-2xl">
       <div className="mx-auto max-w-7xl py-12 px-4 sm:px-6 lg:px-8">
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-              <HeartPulse className="h-8 w-8 text-primary" />
-              <span className="text-2xl font-bold">Anemo Check</span>
-          </div>
-          <p className="text-muted-foreground text-sm max-w-md">
-            Helping you stay informed about your health through smart, image-based anemia screening.
-          </p>
-          <div className="pt-4 text-xs text-muted-foreground">
-           <p className="font-semibold">Disclaimer</p>
-           <p className="mt-1">
-             Anemo Check is a health-assistive tool, not a medical diagnostic service. Always consult a qualified healthcare provider for professional diagnosis and treatment.
-          </p>
-          </div>
+        <div className="grid md:grid-cols-2 gap-8 mb-8">
+            <div className="space-y-4">
+            <div className="flex items-center gap-2">
+                <div className="p-2 rounded-lg bg-primary/10">
+                    <HeartPulse className="h-6 w-6 text-primary" />
+                </div>
+                <span className="text-xl font-bold tracking-tight">Anemo Check</span>
+            </div>
+            <p className="text-muted-foreground text-sm max-w-sm leading-relaxed">
+                Empowering you with AI-driven health insights. Early detection, personalized care, and seamless connection to healthcare providers.
+            </p>
+            </div>
+            <div className="md:text-right text-xs text-muted-foreground space-y-2">
+            <p className="font-semibold text-foreground">Medical Disclaimer</p>
+            <p className="max-w-md ml-auto">
+                Anemo Check is a health-assistive tool, not a medical diagnostic service. The results provided are for informational purposes only. Always consult a qualified healthcare provider for professional diagnosis and treatment.
+            </p>
+            </div>
         </div>
-        <div className="mt-12 border-t pt-8 text-center text-xs text-muted-foreground">
+        
+        <div className="border-t pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-muted-foreground">
             <p>
                 &copy; {new Date().getFullYear()} AnemoCheck. All rights reserved.
             </p>
-            <p className="mt-2">
-                <Link href="/privacy-policy" className="text-muted-foreground hover:text-foreground underline underline-offset-4">
+            <div className="flex flex-wrap justify-center gap-4">
+                <Link href="/privacy-policy" className="hover:text-primary transition-colors">
                   Privacy Policy
                 </Link>
-                <span className="mx-2">|</span>
-                <Link href="/terms-of-service" className="text-muted-foreground hover:text-foreground underline underline-offset-4">
+                <Link href="/terms-of-service" className="hover:text-primary transition-colors">
                   Terms of Service
                 </Link>
-            </p>
+                <Link href="/how-to-use" className="hover:text-primary transition-colors">
+                  How to Use
+                </Link>
+            </div>
         </div>
       </div>
     </footer>

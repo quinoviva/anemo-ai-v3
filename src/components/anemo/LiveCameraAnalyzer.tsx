@@ -1,19 +1,33 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Camera, Video, RefreshCw, XCircle, FlipHorizontal } from 'lucide-react';
+import { Loader2, Camera, Video, RefreshCw, XCircle, FlipHorizontal, Sun, Target, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { useColorNormalization } from '@/hooks/use-color-normalization'; // Import the hook
 
 type BodyPart = 'skin' | 'under-eye' | 'fingernails';
 
+export type CalibrationMetadata = {
+  ambientLux: number | null;
+  colorTemperatureKelvin: number | null;
+  colorCorrectionMatrix: number[][] | null;
+};
+
 type LiveCameraAnalyzerProps = {
-  onCapture: (file: File, dataUri: string) => void;
+  onCapture: (file: File, dataUri: string, calibrationMetadata: CalibrationMetadata) => void;
   bodyPart?: BodyPart;
 };
+
+// Extend Window interface for AmbientLightSensor
+declare global {
+  interface Window {
+    AmbientLightSensor: any;
+  }
+}
 
 export function LiveCameraAnalyzer({ onCapture, bodyPart }: LiveCameraAnalyzerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -22,7 +36,15 @@ export function LiveCameraAnalyzer({ onCapture, bodyPart }: LiveCameraAnalyzerPr
   const [isCapturing, setIsCapturing] = useState(false);
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
   const [stream, setStream] = useState<MediaStream | null>(null);
+  const [lux, setLux] = useState<number | null>(null); // State for ambient light level
+  const [lowLightCondition, setLowLightCondition] = useState(false); // State for low light alert
+
+  // Calibration states
+  const [calibrationStage, setCalibrationStage] = useState<'idle' | 'calibrating_white' | 'capturing_subject'>('idle');
+  
   const { toast } = useToast();
+  // Call the useColorNormalization hook
+  const { colorTemperatureKelvin, colorCorrectionMatrix, performCalibration, applyColorCorrection, resetCalibration } = useColorNormalization();
 
   const stopStream = () => {
     if (stream) {
@@ -64,13 +86,86 @@ export function LiveCameraAnalyzer({ onCapture, bodyPart }: LiveCameraAnalyzerPr
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [facingMode]);
 
-  const handleCapture = () => {
+  // AmbientLightSensor integration
+  useEffect(() => {
+    if ('AmbientLightSensor' in window) {
+      const sensor = new window.AmbientLightSensor();
+
+      sensor.onreading = () => {
+        setLux(sensor.illuminance);
+      };
+
+      sensor.onerror = (event: any) => {
+        console.error('AmbientLightSensor error:', event.error.name, event.error.message);
+        toast({
+          title: 'Ambient Light Sensor Error',
+          description: `Could not read ambient light: ${event.error.message}`,
+        });
+      };
+
+      sensor.start();
+
+      return () => {
+        sensor.stop();
+      };
+    } else {
+      console.warn('AmbientLightSensor not supported in this browser.');
+    }
+  }, [toast]);
+
+  // Luminance Guardrail effect
+  useEffect(() => {
+    if (lux !== null) {
+      setLowLightCondition(lux < 300); // Trigger alert if lux is below 300
+      if (lux < 300 && calibrationStage !== 'idle') {
+          // If low light condition appears during calibration or capture, reset calibration
+          setCalibrationStage('idle');
+          resetCalibration(); // Reset calibration data from hook
+          toast({
+              title: "Calibration Reset",
+              description: "Low light detected, please recalibrate in a brighter area.",
+          });
+      }
+    }
+  }, [lux, calibrationStage, toast, resetCalibration]);
+
+  const handleSampleReferenceColor = useCallback(() => {
     if (!videoRef.current || !canvasRef.current) return;
+
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+
+    // Define the Reference ROI area (e.g., center-right square)
+    // Adjust these values based on actual UI positioning
+    const roiSize = Math.min(video.videoWidth, video.videoHeight) * 0.2; // 20% of smallest dimension
+    const roiX = (video.videoWidth / 2) + (roiSize / 2); // Example position: center-right
+    const roiY = (video.videoHeight / 2) - (roiSize / 2);
+
+    const calibrationResult = performCalibration(video, canvas, { x: roiX, y: roiY, width: roiSize, height: roiSize });
+
+    if (calibrationResult) {
+        setCalibrationStage('capturing_subject');
+        toast({
+            title: "Calibration Successful",
+            description: `Color temperature estimated at ${calibrationResult.cct}K.`,
+        });
+    } else {
+        toast({
+            title: "Calibration Error",
+            description: "Could not sample reference color. Ensure white paper is visible.",
+            variant: "destructive"
+        });
+        setCalibrationStage('idle'); // Reset on error
+    }
+  }, [performCalibration, toast]);
+
+  const handleCapture = () => {
+    if (!videoRef.current || !canvasRef.current || lowLightCondition || calibrationStage !== 'capturing_subject') return;
     setIsCapturing(true);
 
     const video = videoRef.current;
     const canvas = canvasRef.current;
-    const context = canvas.getContext('2d');
+    const context = canvas.getContext('2d', { willReadFrequently: true });
 
     if (!context) {
         toast({
@@ -82,16 +177,28 @@ export function LiveCameraAnalyzer({ onCapture, bodyPart }: LiveCameraAnalyzerPr
         return;
     };
 
-    // Set canvas dimensions to match video
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+
+    // Apply color correction matrix if available
+    if (colorCorrectionMatrix) {
+        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+        const correctedImageData = applyColorCorrection(imageData, colorCorrectionMatrix);
+        context.putImageData(correctedImageData, 0, 0);
+    }
+
+    const calibrationMetadata: CalibrationMetadata = {
+        ambientLux: lux,
+        colorTemperatureKelvin: colorTemperatureKelvin,
+        colorCorrectionMatrix: colorCorrectionMatrix,
+    };
 
     canvas.toBlob((blob) => {
       if (blob) {
         const file = new File([blob], 'capture.png', { type: 'image/png' });
         const dataUri = canvas.toDataURL('image/png');
-        onCapture(file, dataUri);
+        onCapture(file, dataUri, calibrationMetadata);
       } else {
          toast({
             title: 'Capture Error',
@@ -105,44 +212,75 @@ export function LiveCameraAnalyzer({ onCapture, bodyPart }: LiveCameraAnalyzerPr
 
   const handleFlipCamera = () => {
     setFacingMode(prev => prev === 'user' ? 'environment' : 'user');
+    setCalibrationStage('idle'); // Reset calibration on camera flip
+    resetCalibration(); // Reset hook state
   };
 
   const getOverlayInstruction = () => {
-      switch (bodyPart) {
-          case 'skin':
-              return "Place your palm or skin area within the circle.";
-          case 'under-eye':
-              return "Center your eyes in the frame and look up slightly.";
-          case 'fingernails':
-              return "Place your fingernails in the center of the frame.";
-          default:
-              return "Position the subject in the center.";
+      if (calibrationStage === 'calibrating_white') {
+          return "Hold a standard white surface (e.g., paper) in the right box, next to the subject area.";
       }
+      if (calibrationStage === 'capturing_subject' && bodyPart) {
+        switch (bodyPart) {
+            case 'skin':
+                return "Place your palm or skin area within the left circle.";
+            case 'under-eye':
+                return "Center your eyes in the left frame and look up slightly.";
+            case 'fingernails':
+                return "Place your fingernails in the left frame.";
+            default:
+                return "Position the subject in the left center.";
+        }
+      }
+      return "Click 'Start Calibration' to begin the process.";
   };
   
   const renderOverlay = () => {
-      if (!bodyPart) return <div className="absolute inset-0 bg-grid-slate-100/[0.075] [mask-image:linear-gradient(to_bottom,white_40%,transparent_90%)]"></div>;
+      if (hasCameraPermission !== true || lowLightCondition) return null;
+
+      const mainRoiCn = cn(
+          "relative z-10 border-2 border-white/80",
+          bodyPart === 'skin' && "rounded-full w-48 h-48",
+          bodyPart === 'under-eye' && "rounded-[50%] w-64 h-24",
+          bodyPart === 'fingernails' && "rounded-lg w-56 h-32",
+          calibrationStage === 'calibrating_white' && "opacity-50"
+      );
+
+      const referenceRoiCn = cn(
+          "relative z-10 border-2 border-green-400 shadow-[0_0_0_9999px_rgba(0,0,0,0.4)]",
+          "w-32 h-32 rounded-lg"
+      );
 
       return (
           <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center">
-              {/* Darkened background with cutout */}
-              <div className="absolute inset-0 bg-black/40"></div>
+              {calibrationStage !== 'calibrating_white' && <div className="absolute inset-0 bg-black/40"></div>}
               
-              {/* Cutout Shape */}
-              <div className={cn(
-                  "relative z-10 border-2 border-white/80 shadow-[0_0_0_9999px_rgba(0,0,0,0.4)]",
-                  bodyPart === 'skin' && "rounded-full w-48 h-48",
-                  bodyPart === 'under-eye' && "rounded-[50%] w-64 h-24", // Oval
-                  bodyPart === 'fingernails' && "rounded-lg w-56 h-32"
-              )}>
-                 {/* Crosshair/Guides inside the shape */}
-                 <div className="absolute inset-0 flex items-center justify-center opacity-30">
-                    <div className="w-4 h-full bg-white/50 w-[1px]"></div>
-                    <div className="h-4 w-full bg-white/50 h-[1px]"></div>
-                 </div>
-              </div>
+              {calibrationStage !== 'idle' ? (
+                <div className="flex justify-center items-center h-full w-full gap-4">
+                    <div className={mainRoiCn}>
+                        <div className="absolute inset-0 flex items-center justify-center opacity-30">
+                            <div className="w-4 h-full bg-white/50 w-[1px]"></div>
+                            <div className="h-4 w-full bg-white/50 h-[1px]"></div>
+                        </div>
+                    </div>
+                    {calibrationStage === 'calibrating_white' && (
+                        <div className={referenceRoiCn}>
+                             <div className="absolute inset-0 flex items-center justify-center opacity-30">
+                                <div className="w-4 h-full bg-white/50 w-[1px]"></div>
+                                <div className="h-4 w-full bg-white/50 h-[1px]"></div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+              ) : (
+                <div className={cn(mainRoiCn, "shadow-[0_0_0_9999px_rgba(0,0,0,0.4)]")}>
+                     <div className="absolute inset-0 flex items-center justify-center opacity-30">
+                        <div className="w-4 h-full bg-white/50 w-[1px]"></div>
+                        <div className="h-4 w-full bg-white/50 h-[1px]"></div>
+                    </div>
+                </div>
+              )}
 
-              {/* Instruction Text */}
               <div className="absolute bottom-4 z-20 bg-black/60 text-white px-4 py-2 rounded-full text-sm font-medium">
                   {getOverlayInstruction()}
               </div>
@@ -190,15 +328,47 @@ export function LiveCameraAnalyzer({ onCapture, bodyPart }: LiveCameraAnalyzerPr
                      {renderOverlay()}
                  </div>
 
+                {lowLightCondition && (
+                    <Alert variant="destructive" className="w-full max-w-2xl">
+                        <Sun className="h-4 w-4" />
+                        <AlertTitle>Low Light Detected</AlertTitle>
+                        <AlertDescription>
+                            Ambient light (approx. {lux} lux) is too low for accurate analysis. Please move to a brighter area (ideally &gt; 300 lux).
+                        </AlertDescription>
+                    </Alert>
+                )}
+
                 <div className="flex items-center gap-4">
-                    <Button onClick={handleCapture} disabled={isCapturing} size="lg">
-                        {isCapturing ? <Loader2 className="animate-spin" /> : <Camera />}
-                        <span className="ml-2">Capture Image</span>
-                    </Button>
+                    {calibrationStage === 'idle' && (
+                        <Button onClick={() => setCalibrationStage('calibrating_white')} disabled={lowLightCondition} size="lg" variant="secondary">
+                            <Target className="mr-2" />
+                            Start Calibration
+                        </Button>
+                    )}
+                    {calibrationStage === 'calibrating_white' && (
+                        <Button onClick={handleSampleReferenceColor} disabled={lowLightCondition} size="lg">
+                            <CheckCircle className="mr-2" />
+                            Confirm White Reference
+                        </Button>
+                    )}
+                    {calibrationStage === 'capturing_subject' && (
+                        <Button onClick={handleCapture} disabled={isCapturing || lowLightCondition} size="lg">
+                            {isCapturing ? <Loader2 className="animate-spin" /> : <Camera />}
+                            <span className="ml-2">Capture Image</span>
+                        </Button>
+                    )}
                     <Button onClick={handleFlipCamera} variant="outline" size="icon" aria-label="Flip camera">
                         <FlipHorizontal />
                     </Button>
                 </div>
+                {calibrationStage !== 'idle' && (
+                    <Button variant="ghost" onClick={() => {
+                        setCalibrationStage('idle');
+                        resetCalibration(); // Reset hook state
+                    }}>
+                        Reset Calibration
+                    </Button>
+                )}
             </CardContent>
         </Card>
     );

@@ -1,190 +1,353 @@
-
 'use client';
 
 import { useEffect, useState } from 'react';
+
 import { useForm } from 'react-hook-form';
+
 import { zodResolver } from '@hookform/resolvers/zod';
+
 import * as z from 'zod';
+
 import { updateProfile } from 'firebase/auth';
-import { doc, getDoc, Timestamp } from 'firebase/firestore';
+
+import { doc, Timestamp } from 'firebase/firestore';
+
 import Link from 'next/link';
 
-import { useUser, useFirestore, useAuth } from '@/firebase';
+
+
+import { useUser, useFirestore, useAuth, useDoc, useMemoFirebase } from '@/firebase';
+
 import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, } from '@/components/ui/card';
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+
 import { Button } from '@/components/ui/button';
+
 import { Input } from '@/components/ui/input';
+
 import { Label } from '@/components/ui/label';
+
 import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
+
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from '@/components/ui/select';
+
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, } from '@/components/ui/form';
+
 import { useToast } from '@/hooks/use-toast';
+
 import { Loader2, Upload, User, LogIn, Info } from 'lucide-react';
+
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+
 import { cn } from '@/lib/utils';
+
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { TagInput } from '@/components/ui/tag-input';
+
+
+
 
 
 const profileSchema = z.object({
+
   firstName: z.string().min(1, 'First name is required.'),
+
   lastName: z.string().min(1, 'Last name is required.'),
+
   photoURL: z.string().url('Must be a valid URL.').optional().or(z.literal('')),
+
   address: z.string().optional(),
+
   // Medical Info
+
   dateOfBirth: z.string().optional(),
+
   sex: z.string().optional(),
+
   height: z.coerce.number().positive('Height must be positive.').optional().or(z.literal('')),
+
   weight: z.coerce.number().positive('Weight must be positive.').optional().or(z.literal('')),
+
   bloodType: z.string().optional(),
-  allergies: z.string().optional(),
-  conditions: z.string().optional(),
-  medications: z.string().optional(),
-  familyHistory: z.string().optional(),
+
+  allergies: z.array(z.string()).optional(),
+
+  conditions: z.array(z.string()).optional(),
+
+  medications: z.array(z.string()).optional(),
+
+  familyHistory: z.array(z.string()).optional(),
+
   // Women's Health
+
   lastMenstrualPeriod: z.string().optional(),
+
   cycleLength: z.coerce.number().positive('Must be a positive number.').optional().or(z.literal('')),
+
   flowDuration: z.coerce.number().positive('Must be a positive number.').optional().or(z.literal('')),
+
   flowIntensity: z.string().optional(),
+
 });
+
+
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
 
+
+
 export default function ProfilePage() {
+
   const { user } = useUser();
+
   const auth = useAuth();
+
   const firestore = useFirestore();
+
   const { toast } = useToast();
+
   const [isLoading, setIsLoading] = useState(false);
+
   const [isUploading, setIsUploading] = useState(false);
+
   const [initialDataLoaded, setInitialDataLoaded] = useState(false);
+
+
 
   const isGuest = user?.isAnonymous;
 
+
+
+  const userDocRef = useMemoFirebase(() => {
+
+    if (!user || !firestore || isGuest) return null;
+
+    return doc(firestore, 'users', user.uid);
+
+  }, [user, firestore, isGuest]);
+
+
+
+  const { data: userData, isLoading: userDataLoading } = useDoc(userDocRef);
+
+
+
   const form = useForm<ProfileFormValues>({
+
     resolver: zodResolver(profileSchema),
+
     defaultValues: {
+
       firstName: '',
+
       lastName: '',
+
       photoURL: '',
+
       address: '',
+
       dateOfBirth: '',
+
       sex: '',
+
       height: '',
+
       weight: '',
+
       bloodType: '',
-      allergies: '',
-      conditions: '',
-      medications: '',
-      familyHistory: '',
+
+      allergies: [],
+
+      conditions: [],
+
+      medications: [],
+
+      familyHistory: [],
+
       lastMenstrualPeriod: '',
+
       cycleLength: '',
+
       flowDuration: '',
+
       flowIntensity: '',
+
     },
+
   });
 
+
+
   const watchSex = form.watch('sex');
+
   const isFemale = watchSex === 'Female';
 
+
+
   const formatDate = (date: Date | undefined): string => {
+
     if (!date) return '';
+
     const d = new Date(date);
+
     const month = String(d.getMonth() + 1).padStart(2, '0');
+
     const day = String(d.getDate()).padStart(2, '0');
+
     const year = d.getFullYear();
+
     return `${month}/${day}/${year}`;
+
   }
 
+
+
   const handleDateInputChange = (e: React.ChangeEvent<HTMLInputElement>, fieldName: keyof ProfileFormValues) => {
+
     let value = e.target.value.replace(/\D/g, ''); // Remove all non-digit characters
+
     if (value.length > 8) {
+
       value = value.slice(0, 8);
+
     }
+
     
+
     if (value.length > 4) {
+
       value = `${value.slice(0, 2)}/${value.slice(2, 4)}/${value.slice(4)}`;
+
     } else if (value.length > 2) {
+
       value = `${value.slice(0, 2)}/${value.slice(2)}`;
+
     }
+
     
+
     form.setValue(fieldName, value);
+
+  };
+
+  const toArray = (value: any): string[] => {
+    if (Array.isArray(value)) return value;
+    if (typeof value === 'string') return value.split(',').map(s => s.trim()).filter(s => s);
+    return [];
   };
 
   useEffect(() => {
-    if (user && firestore && !initialDataLoaded && !isGuest) {
-      const fetchUserData = async () => {
-        const userDocRef = doc(firestore, 'users', user.uid);
-        const docSnap = await getDoc(userDocRef);
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          const medicalInfo = data.medicalInfo || {};
+
+    if (!initialDataLoaded && !userDataLoading) {
+
+        if (userData) {
+
+          const medicalInfo = userData.medicalInfo || {};
+
           
+
           let dobValue = medicalInfo.dateOfBirth;
+
           if (dobValue instanceof Timestamp) {
+
             dobValue = formatDate(dobValue.toDate());
+
           }
+
+
 
           let lmpValue = medicalInfo.lastMenstrualPeriod;
+
           if (lmpValue instanceof Timestamp) {
+
             lmpValue = formatDate(lmpValue.toDate());
+
           }
 
+
+
           form.reset({
-            firstName: data.firstName || '',
-            lastName: data.lastName || '',
-            photoURL: data.photoURL || user.photoURL || '',
-            address: data.address || '',
+
+            firstName: userData.firstName || '',
+
+            lastName: userData.lastName || '',
+
+            photoURL: userData.photoURL || user?.photoURL || '',
+
+            address: userData.address || '',
+
             dateOfBirth: dobValue || '',
+
             sex: medicalInfo.sex || '',
+
             height: medicalInfo.height || '',
+
             weight: medicalInfo.weight || '',
+
             bloodType: medicalInfo.bloodType || '',
-            allergies: medicalInfo.allergies || '',
-            conditions: medicalInfo.conditions || '',
-            medications: medicalInfo.medications || '',
-            familyHistory: medicalInfo.familyHistory || '',
+
+            allergies: toArray(medicalInfo.allergies),
+
+            conditions: toArray(medicalInfo.conditions),
+
+            medications: toArray(medicalInfo.medications),
+
+            familyHistory: toArray(medicalInfo.familyHistory),
+
             lastMenstrualPeriod: lmpValue || '',
+
             cycleLength: medicalInfo.cycleLength || '',
+
             flowDuration: medicalInfo.flowDuration || '',
+
             flowIntensity: medicalInfo.flowIntensity || '',
+
           });
-        } else {
-          // Pre-fill from auth if no doc exists
+
+          setInitialDataLoaded(true);
+
+        } else if (user) {
+
+          // Pre-fill from auth if no doc exists (or while waiting/error)
+
           const [firstName, ...lastName] = (user.displayName || '').split(' ');
+
           form.reset({
+
             firstName: firstName || '',
+
             lastName: lastName.join(' ') || '',
+
             photoURL: user.photoURL || '',
+
           });
+
+          if (!isGuest) {
+
+             // If not guest, we might still be loading or it truly doesn't exist
+
+             // We'll mark as loaded if we have a user but no userData yet and not loading
+
+             setInitialDataLoaded(true);
+
+          }
+
         }
-        setInitialDataLoaded(true);
-      };
-      fetchUserData();
-    } else if (isGuest) {
-        setInitialDataLoaded(true);
+
+        
+
+        if (isGuest) {
+
+            setInitialDataLoaded(true);
+
+        }
+
     }
-  }, [user, firestore, form, initialDataLoaded, isGuest]);
+
+  }, [user, userData, userDataLoading, form, initialDataLoaded, isGuest]);
 
   const getInitials = (name: string | null | undefined) => {
     if (!name) return 'U';
@@ -533,9 +696,10 @@ export default function ProfilePage() {
                     <FormItem>
                         <FormLabel>Known Allergies</FormLabel>
                         <FormControl>
-                        <Textarea
-                            placeholder="e.g., Penicillin, Peanuts, Pollen"
-                            {...field}
+                        <TagInput
+                            placeholder="e.g., Penicillin, Peanuts (Press Enter to add)"
+                            value={field.value || []}
+                            onChange={field.onChange}
                         />
                         </FormControl>
                         <FormMessage />
@@ -549,7 +713,11 @@ export default function ProfilePage() {
                     <FormItem>
                         <FormLabel>Pre-existing Medical Conditions</FormLabel>
                         <FormControl>
-                        <Textarea placeholder="e.g., Asthma, Diabetes, Hypertension" {...field} />
+                        <TagInput
+                            placeholder="e.g., Asthma, Diabetes (Press Enter to add)"
+                            value={field.value || []}
+                            onChange={field.onChange}
+                        />
                         </FormControl>
                         <FormMessage />
                     </FormItem>
@@ -562,7 +730,11 @@ export default function ProfilePage() {
                     <FormItem>
                         <FormLabel>Current Medications</FormLabel>
                         <FormControl>
-                        <Textarea placeholder="List any medications you are currently taking" {...field} />
+                        <TagInput
+                             placeholder="e.g., Lisinopril 10mg (Press Enter to add)"
+                             value={field.value || []}
+                             onChange={field.onChange}
+                        />
                         </FormControl>
                          <FormDescription>
                             Include dosage if known.
@@ -578,7 +750,11 @@ export default function ProfilePage() {
                     <FormItem>
                         <FormLabel>Relevant Family Medical History</FormLabel>
                         <FormControl>
-                        <Textarea placeholder="e.g., History of anemia, blood disorders, or heart disease in your immediate family" {...field} />
+                        <TagInput
+                            placeholder="e.g., Anemia, Heart Disease (Press Enter to add)"
+                            value={field.value || []}
+                            onChange={field.onChange}
+                        />
                         </FormControl>
                         <FormMessage />
                     </FormItem>

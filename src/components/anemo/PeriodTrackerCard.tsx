@@ -7,17 +7,19 @@ import { Progress } from '@/components/ui/progress';
 import { Droplets, CalendarHeart, Plus } from 'lucide-react';
 import { differenceInDays, addDays, format, isBefore, isAfter } from 'date-fns';
 import { CycleLogForm } from './CycleLogForm';
+import { cn } from '@/lib/utils';
 
 interface PeriodTrackerCardProps {
     lastPeriodStart: Date | null;
     cycleLength?: number; // Default to 28 if not provided
     periodLength?: number; // Default to 5 if not provided
+    className?: string;
 }
 
-export function PeriodTrackerCard({ lastPeriodStart, cycleLength = 28, periodLength = 5 }: PeriodTrackerCardProps) {
+export function PeriodTrackerCard({ lastPeriodStart, cycleLength = 28, periodLength = 5, className }: PeriodTrackerCardProps) {
     if (!lastPeriodStart) {
         return (
-            <Card>
+            <Card className={className}>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-pink-600">
                         <Droplets className="h-5 w-5" />
@@ -85,9 +87,9 @@ export function PeriodTrackerCard({ lastPeriodStart, cycleLength = 28, periodLen
     }
 
     return (
-        <Card className="overflow-hidden border-pink-100 dark:border-pink-900/20">
+        <Card className={cn("overflow-hidden border-pink-100 dark:border-pink-900/20", className)}>
              <div className="h-1 w-full bg-pink-100 dark:bg-pink-900/20">
-                <div className={`h-full ${statusColor}`} style={{ width: `${Math.min(progressValue, 100)}%` }} />
+                <div className={`h-full ${statusColor}`} style={{ width: `${Math.max(0, Math.min(progressValue, 100))}%` }} />
             </div>
             <CardHeader>
                 <div className="flex justify-between items-start">
@@ -137,6 +139,7 @@ export function PeriodTrackerCard({ lastPeriodStart, cycleLength = 28, periodLen
                     />
                 </div>
             </CardContent>
+            
         </Card>
     );
 }

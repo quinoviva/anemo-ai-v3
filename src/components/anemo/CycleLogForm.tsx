@@ -31,7 +31,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useUser, useFirestore } from '@/firebase';
-import { addDoc, collection, serverTimestamp, doc, updateDoc } from 'firebase/firestore';
+import { addDoc, collection, serverTimestamp, doc, setDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import {
     Dialog,
@@ -43,8 +43,6 @@ import {
 } from "@/components/ui/dialog"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Separator } from "@/components/ui/separator"
-import { useOfflineSync } from '@/contexts/OfflineSyncContext';
-import { runLocalClinicalScreening } from '@/ai/local-ai';
 
 // Combined schema for the entire form
 const formSchema = z.object({
@@ -65,13 +63,13 @@ interface CycleLogFormProps {
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
     trigger?: React.ReactNode;
+    onFormSubmit?: () => void;
 }
 
-export function CycleLogForm({ open, onOpenChange, trigger }: CycleLogFormProps) {
+export function CycleLogForm({ open, onOpenChange, trigger, onFormSubmit }: CycleLogFormProps) {
   const { user } = useUser();
   const firestore = useFirestore();
   const { toast } = useToast();
-  const { isOnline } = useOfflineSync();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [selectedSex, setSelectedSex] = useState('');
@@ -88,26 +86,14 @@ export function CycleLogForm({ open, onOpenChange, trigger }: CycleLogFormProps)
   });
 
   const onSubmit = async (data: CycleFormValues) => {
-    if (!isOnline) {
-        setIsSubmitting(true);
-        const symptoms = `Fatigue: ${data.fatigue}, Strain: ${data.cardiovascularStrain}, Physical: ${data.physicalIndicators}`;
-        const localAnalysis = await runLocalClinicalScreening(symptoms);
-        
-        toast({
-            title: "Offline Clinical Assessment (Gemini Nano)",
-            description: localAnalysis || "Assessment saved locally. Syncing when online.",
-        });
-        setIsSubmitting(false);
-        setShow(false);
-        return;
-    }
-
     if (!user || !firestore) return;
     setIsSubmitting(true);
     try {
-      // Update user's medical info
+      // Update user's medical info - Use setDoc with merge to safely handle creation or update
       const userRef = doc(firestore, `users/${user.uid}`);
-      await updateDoc(userRef, {
+      await setDoc(userRef, {
+        id: user.uid,
+        email: user.email,
         medicalInfo: {
           sex: data.sex,
           fatigue: data.fatigue,
@@ -115,7 +101,7 @@ export function CycleLogForm({ open, onOpenChange, trigger }: CycleLogFormProps)
           physicalIndicators: data.physicalIndicators,
           flowIntensity: data.flowIntensity,
         }
-      });
+      }, { merge: true });
 
       // Save cycle log if applicable
       if (data.sex === 'Female' && data.dateRange?.from) {
@@ -134,6 +120,7 @@ export function CycleLogForm({ open, onOpenChange, trigger }: CycleLogFormProps)
       
       form.reset();
       setShow(false);
+      if (onFormSubmit) onFormSubmit();
     } catch (error: any) {
        toast({
            title: "Error",

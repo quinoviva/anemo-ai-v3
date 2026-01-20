@@ -1,6 +1,7 @@
 'use client';
 import React from 'react';
 import { Header } from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer'; // Added this line
 import { useUser } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
@@ -40,6 +41,7 @@ export default function DashboardLayout({
     <div className="flex min-h-screen w-full flex-col">
       <Header />
       <main className="flex-1 p-4 md:p-6 lg:p-8">{children}</main>
+      <Footer /> {/* Added this line */}
     </div>
   );
 }
