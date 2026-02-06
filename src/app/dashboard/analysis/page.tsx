@@ -3,10 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import { CycleLogForm } from '@/components/anemo/CycleLogForm';
 import { Button } from '@/components/ui/button';
-import { CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { CardContent, CardHeader, CardTitle, CardDescription, Card } from '@/components/ui/card';
 import { GlassSurface } from '@/components/ui/glass-surface';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Stethoscope, Eye, Hand, CheckCircle, XCircle, FileText } from 'lucide-react';
+import { Stethoscope, Eye, Hand, CheckCircle, XCircle, FileText, Camera, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { LiveCameraAnalyzer, CalibrationMetadata } from '@/components/anemo/LiveCameraAnalyzer';
 import { useUser } from '@/firebase';
@@ -18,6 +18,9 @@ import { AnalysisGuide } from '@/components/anemo/AnalysisGuide';
 import { AnemoLoading } from '@/components/ui/anemo-loading';
 import { AnalyzeCbcReportOutput } from '@/ai/flows/analyze-cbc-report';
 import { runGenerateImageDescription, saveImageForTraining } from '@/app/actions';
+import dynamic from 'next/dynamic';
+
+const LocalCbcAnalyzer = dynamic(() => import('@/components/anemo/LocalCbcAnalyzer').then(mod => mod.LocalCbcAnalyzer), { ssr: false });
 
 type BodyPart = 'skin' | 'under-eye' | 'fingernails';
 
@@ -76,6 +79,7 @@ const initialAnalysisResultsState: Record<BodyPart, AnalysisState> = {
 
 export default function AnalysisPage() {
   const { user } = useUser();
+  const [analysisMode, setAnalysisMode] = useState<'select' | 'full' | 'local-cbc'>('select');
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<boolean[]>(new Array(analysisSteps.length).fill(false));
   const [capturedImages, setCapturedImages] = useState<Record<BodyPart, { file: File, dataUri: string, calibrationMetadata: CalibrationMetadata } | null>>(initialCapturedImagesState);
@@ -417,8 +421,80 @@ export default function AnalysisPage() {
     }
   };
 
+  if (analysisMode === 'select') {
+    return (
+      <div className="max-w-4xl mx-auto space-y-10 py-10">
+        <div className="flex flex-col items-center text-center space-y-4">
+          <h1 className="text-5xl font-extrabold tracking-tight text-foreground">Select Analysis Mode</h1>
+          <p className="text-muted-foreground text-lg max-w-lg">Choose how you want to check for potential anemia today.</p>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Option 1: Full Assessment */}
+          <Card className="relative overflow-hidden cursor-pointer group hover:border-primary transition-all duration-300" onClick={() => setAnalysisMode('full')}>
+            <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <CardHeader>
+              <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                <Camera className="h-7 w-7 text-primary" />
+              </div>
+              <CardTitle className="text-2xl">Full Multimodal Check</CardTitle>
+              <CardDescription className="text-base">
+                Our most accurate assessment using your camera to analyze eye, skin, and nails combined with lab data.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-2">
+                 <li className="flex items-center gap-2 text-sm text-muted-foreground"><CheckCircle className="h-4 w-4 text-green-500" /> Analyzes conjunctiva, palm, & nails</li>
+                 <li className="flex items-center gap-2 text-sm text-muted-foreground"><CheckCircle className="h-4 w-4 text-green-500" /> Integrates optional lab reports</li>
+                 <li className="flex items-center gap-2 text-sm text-muted-foreground"><CheckCircle className="h-4 w-4 text-green-500" /> Comprehensive AI Health Report</li>
+              </ul>
+              <Button className="w-full mt-8" variant="default">Start Full Scan</Button>
+            </CardContent>
+          </Card>
+
+          {/* Option 2: Local CBC Check */}
+          <Card className="relative overflow-hidden cursor-pointer group hover:border-emerald-500 transition-all duration-300" onClick={() => setAnalysisMode('local-cbc')}>
+            <div className="absolute inset-0 bg-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <CardHeader>
+              <div className="w-14 h-14 rounded-full bg-emerald-500/10 flex items-center justify-center mb-4">
+                <FileText className="h-7 w-7 text-emerald-600" />
+              </div>
+              <div className="flex justify-between items-start">
+                  <CardTitle className="text-2xl">Quick CBC Analysis</CardTitle>
+                  <span className="px-2 py-1 rounded text-[10px] font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300 uppercase tracking-wide">
+                    New
+                  </span>
+              </div>
+              <CardDescription className="text-base">
+                Instant analysis of your CBC lab report using on-device AI for privacy and speed.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-2">
+                 <li className="flex items-center gap-2 text-sm text-muted-foreground"><Sparkles className="h-4 w-4 text-emerald-500" /> 100% Local AI (Privacy Focused)</li>
+                 <li className="flex items-center gap-2 text-sm text-muted-foreground"><CheckCircle className="h-4 w-4 text-emerald-500" /> Instant PDF Report Generation</li>
+                 <li className="flex items-center gap-2 text-sm text-muted-foreground"><CheckCircle className="h-4 w-4 text-emerald-500" /> No server upload required</li>
+              </ul>
+              <Button className="w-full mt-8 bg-emerald-600 hover:bg-emerald-700 text-white">Upload Report</Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  if (analysisMode === 'local-cbc') {
+    return <LocalCbcAnalyzer onBack={() => setAnalysisMode('select')} />;
+  }
+
   return (
     <div className="space-y-8 w-full mx-auto">
+      <div className="flex items-center justify-start mb-4">
+         <Button variant="ghost" onClick={() => setAnalysisMode('select')} className="gap-2">
+            &larr; Back to Options
+         </Button>
+      </div>
+
       <div className="flex flex-col items-center text-center space-y-2 mb-10">
         <h1 className="text-4xl font-extrabold tracking-tight">Anemo Check Analysis</h1>
         <p className="text-muted-foreground max-w-lg">Follow the steps below to complete your multimodal anemia assessment.</p>

@@ -16,7 +16,7 @@
     --secondary: 240 4.8% 95.9%;
     --secondary-foreground: 240 5.9% 10%;
     --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 40%; /* Darker for better readability */
+    --muted-foreground: 240 3.8% 40%;
     --accent: 240 4.8% 95.9%;
     --accent-foreground: 240 5.9% 10%;
     --destructive: 0 84.2% 60.2%;
@@ -24,17 +24,20 @@
     --border: 240 5.9% 90%;
     --input: 240 5.9% 90%;
     --ring: 346 87% 60%;
-    --radius: 1rem; /* More rounded, modern feel */
+    --radius: 1rem;
     --chart-1: 346 87% 60%;
     --chart-2: 240 4.8% 95.9%;
     --chart-3: 200 80% 50%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
+    
+    /* Motion & Physics */
+    --ease-expensive: cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .dark {
     /* Premium Dark Mode: "Deep Space & Neon" */
-    --background: 240 10% 4%; /* Almost black, slight blue tint */
+    --background: 240 10% 4%;
     --foreground: 0 0% 98%;
     --card: 240 10% 6%;
     --card-foreground: 0 0% 98%;
@@ -76,15 +79,46 @@
 }
 
 @layer utilities {
+  /* Black Glass Physics */
   .glass-panel {
-    @apply bg-background/60 backdrop-blur-xl border border-white/10 shadow-lg supports-[backdrop-filter]:bg-background/60;
+    @apply bg-background/60 backdrop-blur-xl border border-primary/10 shadow-lg supports-[backdrop-filter]:bg-background/60;
+    box-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.1);
   }
   
   .glass-panel-hover {
-    @apply hover:bg-background/80 hover:border-primary/20 hover:shadow-xl transition-all duration-300;
+    @apply hover:bg-background/80 hover:border-primary/20 transition-all duration-500;
+    transition-timing-function: var(--ease-expensive);
+    box-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.1);
+  }
+
+  .glass-panel-hover:hover {
+     box-shadow: 0 16px 48px -8px rgba(0, 0, 0, 0.15);
+     transform: translateY(-2px);
+  }
+
+  .glass-button {
+    @apply bg-primary/5 border border-primary/20 hover:bg-primary/10 hover:border-primary/30 text-primary font-medium tracking-wide uppercase text-xs transition-all duration-300 backdrop-blur-sm;
+    transition-timing-function: var(--ease-expensive);
+  }
+  
+  .glass-input {
+    @apply bg-background/30 border-b border-primary/20 focus:border-primary/60 focus:bg-background/50 outline-none ring-0 transition-all duration-300 placeholder:text-muted-foreground/50;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    border-radius: 0;
   }
 
   .text-balance {
     text-wrap: balance;
+  }
+  
+  /* Gallery Layout Utilities */
+  .gallery-spacing {
+    @apply p-8 md:p-12 lg:p-16 gap-8 md:gap-12;
+  }
+  
+  .luxury-heading {
+    @apply scroll-m-20 text-4xl font-light tracking-tight lg:text-5xl;
   }
 }

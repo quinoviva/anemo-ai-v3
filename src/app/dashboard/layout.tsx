@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 import { Header } from '@/components/layout/Header';
-import { Footer } from '@/components/layout/Footer'; // Added this line
+import { Footer } from '@/components/layout/Footer';
 import { useUser } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
@@ -18,13 +18,11 @@ export default function DashboardLayout({
 
   useEffect(() => {
     if (isUserLoading) {
-      return; // Still waiting for Firebase to initialize and check auth state
+      return;
     }
     if (!user) {
-      // If not loading and no user, redirect to login
       router.push('/login');
     } else {
-      // If user exists, we can show the content
       setIsCheckingAuth(false);
     }
   }, [user, isUserLoading, router]);
@@ -32,16 +30,23 @@ export default function DashboardLayout({
   if (isCheckingAuth) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary opacity-50" />
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen w-full flex-col">
+    <div className="min-h-screen w-full flex flex-col relative bg-background selection:bg-primary/20">
+      <div className="fixed inset-0 bg-[url('/noise.png')] opacity-[0.03] pointer-events-none mix-blend-overlay z-0" />
       <Header />
-      <main className="flex-1 px-2 py-4">{children}</main>
-      <Footer /> {/* Added this line */}
+      
+      <main className="flex-1 w-full max-w-[1600px] mx-auto pt-32 px-6 md:px-12 lg:px-20 z-10">
+        <div className="w-full h-full animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out fill-mode-backwards">
+            {children}
+        </div>
+      </main>
+      
+      <Footer />
     </div>
   );
 }

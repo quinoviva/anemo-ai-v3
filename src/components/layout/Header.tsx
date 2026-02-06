@@ -18,21 +18,21 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { useAuth } from '@/firebase';
 import { cn } from '@/lib/utils';
-import { HeartPulse, History, Stethoscope, Moon, Sun, Monitor, Bot, Video, Search, User, Settings, LogOut, LayoutGrid, ChevronRight } from 'lucide-react';
+import { HeartPulse, History, Stethoscope, Moon, Sun, Monitor, Bot, Video, Search, User, Settings, LogOut, ChevronDown } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useTheme } from 'next-themes';
 import { Logo } from './Logo';
 
 const mainNavLinks = [
-  { href: '/dashboard', label: 'HOME', icon: HeartPulse },
-  { href: '/dashboard/analysis', label: 'ANALYSIS', icon: Stethoscope },
-  { href: '/dashboard/history', label: 'TRACK', icon: History },
+  { href: '/dashboard', label: 'HOME' },
+  { href: '/dashboard/analysis', label: 'ANALYSIS' },
+  { href: '/dashboard/history', label: 'TRACK' },
 ];
 
-const secondaryNavLinks = [
-  { href: '/dashboard/chatbot', label: 'AI Assistant', icon: Bot, description: 'Chat with our health AI' },
-  { href: '/dashboard/live-analysis', label: 'Live Scan', icon: Video, description: 'Real-time camera check' },
-  { href: '/dashboard/find-doctor', label: 'Find Care', icon: Search, description: 'Locate nearby clinics' },
+const otherLinks = [
+  { href: '/dashboard/chatbot', label: 'AI Assistant', icon: Bot },
+  { href: '/dashboard/live-analysis', label: 'Live Scan', icon: Video },
+  { href: '/dashboard/find-doctor', label: 'Find Care', icon: Search },
 ];
 
 export function Header() {
@@ -74,86 +74,75 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-border/40 bg-background/60 backdrop-blur-xl supports-[backdrop-filter]:bg-background/30 shadow-sm transition-all duration-300">
-      <div className="flex h-16 items-center justify-between px-4 md:px-6 w-full relative">
+    <header className="fixed top-0 z-50 w-full p-4 pointer-events-none flex justify-center">
+      {/* Floating Capsule */}
+      <div className="pointer-events-auto flex items-center justify-between w-full max-w-5xl h-16 px-4 pr-2 bg-background/60 backdrop-blur-xl border border-primary/10 rounded-full shadow-[0_8px_32px_-4px_rgba(0,0,0,0.1)] transition-all duration-500 hover:shadow-[0_16px_48px_-8px_rgba(0,0,0,0.15)] hover:-translate-y-0.5">
+        
         {/* Left: Logo */}
-        <div className="flex items-center shrink-0">
-          <Link href="/dashboard" className="flex items-center gap-2 transition-opacity hover:opacity-90">
-            <Logo className="h-7 w-7" />
-            <span className="font-bold text-lg tracking-tight hidden sm:inline-block">Anemo Check</span>
+        <div className="flex items-center shrink-0 pl-2">
+          <Link href="/dashboard" className="flex items-center gap-3 group">
+            <div className="relative flex items-center justify-center w-8 h-8 rounded-full bg-primary/5 border border-primary/10 group-hover:bg-primary/10 transition-colors">
+                 <Logo className="h-5 w-5 text-primary" />
+            </div>
+            <span className="font-bold text-sm tracking-widest uppercase text-foreground/80 group-hover:text-foreground transition-colors hidden sm:inline-block">Anemo</span>
           </Link>
         </div>
 
         {/* Center: Navigation */}
-        <nav className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-1 md:gap-2">
+        <nav className="flex items-center gap-1 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
           {mainNavLinks.map(({ href, label }) => (
             <Link
               key={href}
               href={href}
               className={cn(
-                'px-3 md:px-5 py-2 text-sm md:text-base font-bold tracking-wider rounded-full transition-all',
+                'px-4 py-2 text-xs font-bold tracking-widest rounded-full transition-all duration-300',
                 pathname === href 
-                  ? 'text-primary bg-primary/10 shadow-sm' 
-                  : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                  ? 'text-primary bg-primary/5 shadow-none' 
+                  : 'text-muted-foreground hover:text-foreground hover:bg-primary/5'
               )}
             >
               {label}
             </Link>
           ))}
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <button className={cn(
+                    'flex items-center gap-1 px-4 py-2 text-xs font-bold tracking-widest rounded-full transition-all duration-300 outline-none',
+                    otherLinks.some(l => l.href === pathname)
+                    ? 'text-primary bg-primary/5' 
+                    : 'text-muted-foreground hover:text-foreground hover:bg-primary/5'
+                )}>
+                    OTHER
+                    <ChevronDown className="h-3 w-3 opacity-50" />
+                </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="center" sideOffset={10} className="w-56 p-2 bg-background/80 backdrop-blur-xl border border-primary/10 rounded-2xl shadow-xl">
+                {otherLinks.map(({ href, label, icon: Icon }) => (
+                    <DropdownMenuItem key={href} asChild className="p-2 cursor-pointer focus:bg-primary/5 rounded-xl text-muted-foreground focus:text-primary transition-colors">
+                        <Link href={href} className="flex items-center gap-3">
+                            <Icon className="h-4 w-4 opacity-70" />
+                            <span className="text-sm font-medium">{label}</span>
+                        </Link>
+                    </DropdownMenuItem>
+                ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </nav>
 
         {/* Right: Actions */}
-        <div className="flex items-center gap-2 md:gap-3 shrink-0">
-          
-          {/* Tools / App Launcher Menu */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full text-muted-foreground hover:text-foreground" title="Tools & Apps">
-                <LayoutGrid className="h-5 w-5" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-64 p-2 glass border-border/50">
-              <DropdownMenuLabel className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 px-2">
-                Health Tools
-              </DropdownMenuLabel>
-              {secondaryNavLinks.map(({ href, label, icon: Icon, description }) => (
-                <DropdownMenuItem key={href} asChild className="p-2 cursor-pointer focus:bg-primary/5 rounded-lg group">
-                  <Link href={href} className="flex items-start gap-3">
-                    <div className="p-2 rounded-md bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                      <Icon className="h-4 w-4" />
-                    </div>
-                    <div className="flex-1 space-y-0.5">
-                      <p className="text-sm font-medium leading-none flex items-center justify-between">
-                        {label}
-                      </p>
-                      <p className="text-[10px] text-muted-foreground line-clamp-1">{description}</p>
-                    </div>
-                  </Link>
-                </DropdownMenuItem>
-              ))}
-              <DropdownMenuSeparator className="my-2 bg-border/50" />
-              <DropdownMenuItem asChild className="p-2 cursor-pointer focus:bg-accent rounded-lg">
-                 <Link href="/dashboard/settings" className="flex items-center gap-3">
-                    <div className="p-2 rounded-md bg-muted text-muted-foreground">
-                        <Settings className="h-4 w-4" />
-                    </div>
-                    <span className="text-sm font-medium">Settings</span>
-                 </Link>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
+        <div className="flex items-center gap-2 shrink-0">
           {/* User Profile Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full ring-2 ring-transparent hover:ring-primary/20 transition-all" aria-label="Open user menu">
-                <Avatar className="h-8 w-8 md:h-9 md:h-9 border">
+              <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full hover:bg-primary/5 transition-all" aria-label="Open user menu">
+                <Avatar className="h-8 w-8 border border-primary/10">
                   <AvatarImage
                     src={auth?.currentUser?.photoURL ?? undefined}
                     key={auth?.currentUser?.photoURL}
                     alt={auth?.currentUser?.displayName || 'User profile'}
                   />
-                  <AvatarFallback className="bg-primary/10 text-primary text-xs md:text-sm font-medium">
+                  <AvatarFallback className="bg-primary/5 text-primary text-xs font-bold">
                     {getInitials(
                       auth?.currentUser?.displayName ?? auth?.currentUser?.email
                     )}
@@ -161,47 +150,51 @@ export function Header() {
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 p-2 glass border-border/50">
-              <DropdownMenuLabel className="font-normal">
+            <DropdownMenuContent align="end" sideOffset={10} className="w-64 p-2 bg-background/80 backdrop-blur-xl border border-primary/10 rounded-2xl shadow-xl">
+              <DropdownMenuLabel className="font-normal px-3 py-2">
                 <div className="flex flex-col space-y-1">
                   <p className="text-sm font-medium leading-none">
                      {isGuest ? 'Guest User' : (auth?.currentUser?.displayName || 'User')}
                   </p>
-                  <p className="text-xs leading-none text-muted-foreground truncate">
+                  <p className="text-xs leading-none text-muted-foreground truncate font-mono opacity-70">
                     {isGuest ? 'Sign in to save data' : (auth?.currentUser?.email || '')}
                   </p>
                 </div>
               </DropdownMenuLabel>
-              <DropdownMenuSeparator className="bg-border/50" />
-              <DropdownMenuItem onClick={() => router.push('/dashboard/profile')} disabled={isGuest} className="cursor-pointer focus:bg-accent">
-                <User className="mr-2 h-4 w-4" />
+              <DropdownMenuSeparator className="bg-primary/10" />
+              <DropdownMenuItem onClick={() => router.push('/dashboard/profile')} disabled={isGuest} className="cursor-pointer focus:bg-primary/5 rounded-lg px-3 py-2 text-sm text-muted-foreground focus:text-primary">
+                <User className="mr-2 h-4 w-4 opacity-70" />
                 Profile
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push('/dashboard/settings')} className="cursor-pointer focus:bg-primary/5 rounded-lg px-3 py-2 text-sm text-muted-foreground focus:text-primary">
+                <Settings className="mr-2 h-4 w-4 opacity-70" />
+                Settings
+              </DropdownMenuItem>
                <DropdownMenuSub>
-                <DropdownMenuSubTrigger className="cursor-pointer focus:bg-accent">
-                  <Sun className="mr-2 h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-                  <Moon className="absolute mr-2 h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                <DropdownMenuSubTrigger className="cursor-pointer focus:bg-primary/5 rounded-lg px-3 py-2 text-sm text-muted-foreground focus:text-primary">
+                  <Sun className="mr-2 h-4 w-4 opacity-70 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                  <Moon className="absolute mr-2 h-4 w-4 opacity-70 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
                   <span className="ml-2">Theme</span>
                 </DropdownMenuSubTrigger>
                 <DropdownMenuPortal>
-                  <DropdownMenuSubContent className="glass border-border/50">
-                    <DropdownMenuItem onClick={() => setTheme('light')}>
+                  <DropdownMenuSubContent className="bg-background/80 backdrop-blur-xl border border-primary/10 rounded-xl shadow-xl ml-2 p-1">
+                    <DropdownMenuItem onClick={() => setTheme('light')} className="rounded-lg focus:bg-primary/5 focus:text-primary cursor-pointer">
                       <Sun className="mr-2 h-4 w-4" />
                       <span>Light</span>
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setTheme('dark')}>
+                    <DropdownMenuItem onClick={() => setTheme('dark')} className="rounded-lg focus:bg-primary/5 focus:text-primary cursor-pointer">
                       <Moon className="mr-2 h-4 w-4" />
                       <span>Dark</span>
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setTheme('system')}>
+                    <DropdownMenuItem onClick={() => setTheme('system')} className="rounded-lg focus:bg-primary/5 focus:text-primary cursor-pointer">
                       <Monitor className="mr-2 h-4 w-4" />
                       <span>System</span>
                     </DropdownMenuItem>
                   </DropdownMenuSubContent>
                 </DropdownMenuPortal>
               </DropdownMenuSub>
-              <DropdownMenuSeparator className="bg-border/50" />
-              <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:bg-destructive/10 cursor-pointer">
+              <DropdownMenuSeparator className="bg-primary/10" />
+              <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:bg-destructive/5 focus:text-destructive cursor-pointer rounded-lg px-3 py-2">
                 <LogOut className="mr-2 h-4 w-4" />
                 Logout
               </DropdownMenuItem>

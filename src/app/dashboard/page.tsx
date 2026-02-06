@@ -70,28 +70,14 @@ const BentoCard = ({
 }) => (
   <motion.div 
     variants={itemVariants}
-    whileHover={{ y: -6, scale: 1.02 }}
     whileTap={{ scale: 0.98 }}
     onClick={onClick}
-    className={`group relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/5 backdrop-blur-2xl shadow-xl transition-all hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/5 dark:bg-black/20 dark:shadow-black/50 ${colSpan} ${rowSpan} ${className}`}
+    className={`group relative overflow-hidden rounded-[2rem] glass-panel glass-panel-hover flex flex-col ${colSpan} ${rowSpan} ${className}`}
   >
-    {/* Inner Glow/Shine Effect */}
-    <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-    <div className="absolute inset-0 shadow-[inset_0_0_40px_rgba(255,255,255,0.03)] rounded-[2rem] pointer-events-none" />
-    
-    <div className="relative z-10 h-full">
+    <div className="relative z-10 h-full w-full">
       {children}
     </div>
   </motion.div>
-);
-
-const SectionTitle = ({ children }: { children: React.ReactNode }) => (
-  <motion.h3 
-    variants={itemVariants} 
-    className="mb-4 text-2xl font-semibold tracking-tighter text-foreground/90"
-  >
-    {children}
-  </motion.h3>
 );
 
 export default function DashboardPage() {
@@ -155,190 +141,172 @@ export default function DashboardPage() {
   const welcomeMessage = user?.displayName ? `Hello, ${user.displayName.split(' ')[0]}` : 'Welcome back';
 
   return (
-    <div className="relative min-h-screen w-full overflow-hidden text-foreground selection:bg-primary/30 selection:text-primary-foreground">
+    <div className="relative w-full">
       
-      {/* --- ColorBends Background --- */}
-      <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden">
-        <ColorBends
-          colors={["#ff5c7a", "#8a5cff", "#00ffd1"]}
-          rotation={0}
-          speed={0.2}
-          scale={1}
-          frequency={1}
-          warpStrength={1}
-          mouseInfluence={1}
-          parallax={0.5}
-          noise={0.1}
-          transparent
-          autoRotate={0}
-          color=""
-        />
-        
-        {/* Cinematic Noise Overlay */}
-        <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.04] mix-blend-overlay contrast-150 brightness-100"></div>
-      </div>
-
       {/* --- Main Content --- */}
       <motion.div 
         variants={containerVariants}
         initial="hidden"
         animate="show"
-        className="relative z-10 w-full px-4 md:px-8 py-10 space-y-10"
+        className="relative z-10 w-full space-y-16"
       >
         
         {/* Header Section */}
-        <div className="flex flex-col md:flex-row justify-between items-end gap-6 mb-8">
-          <motion.div variants={itemVariants} className="space-y-2">
-            <h1 className="text-6xl md:text-7xl font-extrabold tracking-tighter text-balance bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">
+        <div className="flex flex-col md:flex-row justify-between items-end gap-6">
+          <motion.div variants={itemVariants} className="space-y-4">
+            <h1 className="text-6xl md:text-8xl font-light tracking-tighter text-foreground leading-[0.9]">
               {welcomeMessage}
-              <span className="text-primary">.</span>
+              <span className="text-primary animate-pulse">.</span>
             </h1>
-            <p className="text-xl text-muted-foreground/80 font-light tracking-wide max-w-lg">
-              Your daily health command center.
+            <p className="text-xl md:text-2xl text-muted-foreground font-light tracking-widest uppercase">
+              WELCOME TO ANEMO
             </p>
           </motion.div>
           
-          <motion.div variants={itemVariants} className="flex gap-3">
-             <Button size="lg" className="rounded-full px-8 h-14 text-base shadow-xl shadow-primary/25 hover:shadow-primary/50 transition-all duration-500 hover:-translate-y-1 bg-gradient-to-r from-primary to-rose-600 border-0" asChild>
-               <Link href="/dashboard/analysis">
-                 <Camera className="mr-2 h-5 w-5" /> New Analysis
-               </Link>
-             </Button>
+          <motion.div variants={itemVariants}>
+              <div className="text-right hidden md:block">
+                  <p className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Status</p>
+                  <div className="flex items-center justify-end gap-2 mt-1">
+                      <div className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_10px_theme(colors.emerald.500)]" />
+                      <span className="text-sm font-medium">System Optimal</span>
+                  </div>
+              </div>
           </motion.div>
         </div>
 
         {/* --- Bento Grid Layout --- */}
-        <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-4 auto-rows-[minmax(180px,auto)]">
+        <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-6 md:gap-8 auto-rows-[minmax(220px,auto)]">
           
-          {/* 1. Main Stats Card (Latest Result) - Medium/Large */}
-          <BentoCard colSpan="md:col-span-2 lg:col-span-3" className="flex flex-col justify-between p-8 bg-gradient-to-br from-card to-secondary/50">
-            <div className="flex justify-between items-start">
-              <div>
-                 <div className="flex items-center gap-2 mb-2">
-                    <Badge variant="outline" className="bg-primary/5 border-primary/20 text-primary">Latest Scan</Badge>
-                    <span className="text-xs text-muted-foreground">
-                      {latestImage ? format(latestImage.createdAt.toDate(), 'MMM d') : 'No data'}
-                    </span>
-                 </div>
-                 <h2 className="text-2xl font-bold tracking-tight">Risk Score</h2>
+          {/* 1. HERO: Start New Analysis (Dominant) */}
+          <BentoCard 
+            colSpan="md:col-span-4 lg:col-span-4" 
+            rowSpan="row-span-2"
+            className="bg-gradient-to-br from-primary/10 via-background/40 to-background border-primary/20 cursor-pointer group"
+            onClick={() => window.location.href = '/dashboard/analysis'}
+          >
+              <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+              <div className="absolute top-0 right-0 w-96 h-96 bg-primary/20 rounded-full blur-[100px] -mr-20 -mt-20 pointer-events-none" />
+              
+              <div className="relative z-10 h-full p-10 flex flex-col justify-between">
+                  <div className="flex justify-between items-start">
+                    <div className="p-4 bg-background/50 rounded-full backdrop-blur-md border border-primary/10">
+                        <Camera className="h-8 w-8 text-primary" />
+                    </div>
+                    <ArrowUpRight className="h-8 w-8 text-muted-foreground group-hover:text-primary group-hover:rotate-45 transition-all duration-500" />
+                  </div>
+                  
+                  <div className="max-w-xl space-y-6">
+                      <h2 className="text-5xl md:text-6xl font-light tracking-tighter text-foreground">
+                          Start Analysis
+                      </h2>
+                      <p className="text-lg text-muted-foreground font-light leading-relaxed">
+                          Utilize our advanced CNN models to detect potential signs of anemia through non-invasive image analysis. Precision healthcare at your fingertips.
+                      </p>
+                      <div className="flex items-center gap-4 pt-4">
+                        <span className="text-xs font-bold tracking-[0.2em] uppercase text-primary border-b border-primary pb-1">Initialize Scan</span>
+                      </div>
+                  </div>
               </div>
-              <Activity className="h-6 w-6 text-primary/80" />
+          </BentoCard>
+
+          {/* 2. Latest Stats (Vertical Strip) */}
+          <BentoCard colSpan="md:col-span-2 lg:col-span-2" rowSpan="row-span-2" className="p-8 justify-between bg-card/30">
+            <div className="flex justify-between items-start">
+               <h3 className="text-lg font-bold uppercase tracking-widest text-muted-foreground">Risk Score</h3>
+               <Activity className="h-5 w-5 text-primary" />
             </div>
 
-            <div className="flex-1 flex flex-col justify-center py-6">
+            <div className="flex flex-col items-center justify-center space-y-6 my-8">
                {latestImage ? (
-                  <div className="space-y-4">
-                     <div className="flex items-baseline gap-2">
-                        <span className="text-6xl font-black tracking-tighter text-primary">
+                  <>
+                     <div className="relative">
+                        <span className="text-8xl font-thin tracking-tighter text-foreground">
                            {latestImage.riskScore}
                         </span>
-                        <span className="text-xl text-muted-foreground font-medium">/ 100</span>
+                        <span className="absolute top-4 -right-4 text-lg text-muted-foreground font-light">%</span>
                      </div>
-                     <Progress value={latestImage.riskScore} className="h-3 bg-secondary" indicatorClassName="bg-gradient-to-r from-primary to-purple-500" />
-                  </div>
+                     <Progress value={latestImage.riskScore} className="h-2 w-full max-w-[140px] bg-secondary" indicatorClassName="bg-primary shadow-[0_0_15px_theme(colors.primary.DEFAULT)]" />
+                     <p className="text-sm text-muted-foreground text-center px-4">
+                        Analysis from {format(latestImage.createdAt.toDate(), 'MMM d')}
+                     </p>
+                  </>
                ) : (
-                  <div className="flex flex-col items-center justify-center text-center opacity-60">
-                     <p>No analysis performed yet.</p>
+                  <div className="text-center space-y-2 opacity-50">
+                     <span className="text-6xl font-thin">--</span>
+                     <p className="text-xs uppercase tracking-widest">No Data</p>
                   </div>
                )}
             </div>
-             {latestImage && (
-              <Button variant="ghost" size="sm" className="w-fit p-0 h-auto hover:bg-transparent hover:text-primary transition-colors" asChild>
-                <Link href="/dashboard/history" className="flex items-center text-xs font-medium text-muted-foreground">
-                    View History <ChevronRight className="ml-1 h-3 w-3" />
+            
+            <Button variant="ghost" className="w-full justify-between group/btn hover:bg-transparent px-0" asChild>
+                <Link href="/dashboard/history">
+                    <span className="text-xs font-bold uppercase tracking-widest">Full History</span>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground group-hover/btn:translate-x-1 transition-transform" />
                 </Link>
-              </Button>
-            )}
+            </Button>
           </BentoCard>
 
-          {/* 2. Start New Analysis - Medium/Large (Primary Action) */}
-          <BentoCard colSpan="md:col-span-2 lg:col-span-3" className="relative p-8 bg-gradient-to-br from-primary to-primary/80 text-primary-foreground flex flex-col justify-center items-start overflow-hidden group cursor-pointer" onClick={() => window.location.href = '/dashboard/analysis'}>
-              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-16 -mt-16 blur-3xl transition-transform group-hover:scale-110" />
-              <div className="relative z-10 space-y-4">
-                  <div className="p-3 bg-white/20 w-fit rounded-2xl backdrop-blur-md">
-                      <Camera className="h-8 w-8 text-white" />
-                  </div>
-                  <div>
-                      <h2 className="text-3xl font-bold tracking-tight mb-1">New Analysis</h2>
-                      <p className="text-primary-foreground/80 max-w-xs">
-                          Check for anemia signs instantly using your camera.
-                      </p>
-                  </div>
-                  <Button variant="secondary" size="lg" className="rounded-full px-8 shadow-lg hover:shadow-xl transition-all" asChild>
-                      <Link href="/dashboard/analysis">Start Scan <ArrowUpRight className="ml-2 h-4 w-4" /></Link>
-                  </Button>
-              </div>
-          </BentoCard>
-
-          {/* 3. AI Assistant - Small/Medium */}
-          <BentoCard colSpan="md:col-span-2 lg:col-span-2" className="bg-gradient-to-b from-blue-500/5 to-purple-500/5 p-6 flex flex-col justify-between">
-             <div className="flex items-center gap-3 mb-2">
-                 <div className="p-2 bg-blue-500/10 w-fit rounded-xl text-blue-500">
-                    <MessageSquare className="h-5 w-5" />
+          {/* 3. AI Assistant */}
+          <BentoCard colSpan="md:col-span-2 lg:col-span-3" className="p-8 justify-between hover:bg-blue-500/5 transition-colors duration-500">
+             <div className="flex items-center gap-4">
+                 <div className="p-3 rounded-full bg-blue-500/10 text-blue-500">
+                    <MessageSquare className="h-6 w-6" />
                  </div>
-                 <h3 className="font-bold text-lg">AI Assistant</h3>
+                 <div>
+                    <h3 className="text-xl font-medium tracking-tight">AI Assistant</h3>
+                    <p className="text-sm text-muted-foreground mt-1">Chat with our health intelligence.</p>
+                 </div>
              </div>
-             <p className="text-sm text-muted-foreground mb-4">
-                Questions about symptoms? Ask our health AI.
-             </p>
-             <Button className="w-full rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20" asChild>
-                <Link href="/dashboard/chatbot">Chat Now</Link>
-             </Button>
-          </BentoCard>
-
-          {/* 4. Nearby Care - Small/Medium */}
-          <BentoCard colSpan="md:col-span-1 lg:col-span-2" className="p-6 relative group flex flex-col justify-between">
-             <div className="flex items-center gap-2 mb-2 text-muted-foreground">
-                <MapPin className="h-5 w-5 text-primary" />
-                <span className="text-xs font-semibold uppercase tracking-wider text-primary">Nearby</span>
-             </div>
-             <div>
-                <h3 className="text-lg font-bold mb-1">Find Care</h3>
-                <p className="text-xs text-muted-foreground mb-3 truncate">
-                    {location}
-                </p>
-             </div>
-             <div className="flex items-center justify-between">
-                 <div className="flex -space-x-2 overflow-hidden">
-                    {clinics.slice(0,3).map((c, i) => (
-                    <div key={i} className="h-6 w-6 rounded-full bg-primary/10 border border-background flex items-center justify-center text-[8px] text-primary font-bold">
-                        {c.name[0]}
-                    </div>
-                    ))}
-                </div>
-                <Button variant="outline" size="icon" className="h-8 w-8 rounded-full" asChild>
-                    <Link href="/dashboard/find-doctor"><ArrowUpRight className="h-4 w-4" /></Link>
+             <div className="flex justify-end mt-4">
+                <Button variant="outline" className="rounded-full border-blue-500/20 hover:bg-blue-500/10 hover:text-blue-500 transition-colors" asChild>
+                    <Link href="/dashboard/chatbot">Open Chat</Link>
                 </Button>
              </div>
           </BentoCard>
 
-           {/* 5. Daily Insight - Small/Medium */}
-          <BentoCard colSpan="md:col-span-1 lg:col-span-2" className="p-6 bg-amber-500/5 border-amber-500/10 flex flex-col">
-             <div className="flex items-center gap-2 mb-3 text-amber-600">
-                <Sparkles className="h-4 w-4" />
-                <span className="font-bold text-xs uppercase tracking-wider">Insight</span>
+          {/* 4. Find Care */}
+          <BentoCard colSpan="md:col-span-2 lg:col-span-3" className="p-8 justify-between hover:bg-emerald-500/5 transition-colors duration-500">
+             <div className="flex items-start justify-between">
+                <div className="flex items-center gap-4">
+                    <div className="p-3 rounded-full bg-emerald-500/10 text-emerald-500">
+                        <MapPin className="h-6 w-6" />
+                    </div>
+                    <div>
+                        <h3 className="text-xl font-medium tracking-tight">Find Care</h3>
+                        <p className="text-sm text-muted-foreground mt-1 line-clamp-1 max-w-[150px]">{location}</p>
+                    </div>
+                </div>
+                <div className="flex -space-x-3">
+                    {clinics.slice(0,3).map((c, i) => (
+                    <div key={i} className="h-8 w-8 rounded-full bg-background border border-border flex items-center justify-center text-[10px] font-bold shadow-sm">
+                        {c.name[0]}
+                    </div>
+                    ))}
+                </div>
              </div>
-             <div className="flex-1 flex items-center">
-                 <HealthTipCard variant="minimal" />
+             <div className="flex justify-end mt-4">
+                <Button variant="outline" className="rounded-full border-emerald-500/20 hover:bg-emerald-500/10 hover:text-emerald-500 transition-colors" asChild>
+                    <Link href="/dashboard/find-doctor">Locate Clinics</Link>
+                </Button>
              </div>
           </BentoCard>
 
-          {/* 6. Cycle Tracker (Conditional) - Full Width */}
+          {/* 5. Cycle Tracker (Conditional) */}
           {userSex === 'Female' && (
-             <BentoCard colSpan="md:col-span-4 lg:col-span-6" className="p-0 overflow-hidden bg-gradient-to-r from-pink-500/5 to-rose-500/5 min-h-[250px]">
-                <div className="p-6 h-full flex flex-col md:flex-row gap-6">
-                   <div className="md:w-1/3 space-y-4 flex flex-col justify-center">
+             <BentoCard colSpan="md:col-span-4 lg:col-span-6" className="p-8 bg-gradient-to-r from-rose-500/5 via-transparent to-transparent">
+                <div className="flex flex-col md:flex-row gap-8 items-center h-full">
+                   <div className="md:w-1/3 space-y-4">
                       <div className="flex items-center gap-2 text-rose-500">
                          <Calendar className="h-5 w-5" />
-                         <span className="font-bold text-sm uppercase tracking-wider">Cycle Trends</span>
+                         <span className="font-bold text-xs uppercase tracking-widest">Cycle Correlation</span>
                       </div>
-                      <h3 className="text-2xl font-bold">Health Correlation</h3>
-                      <p className="text-sm text-muted-foreground">
-                         Visualizing the impact of your menstrual cycle on your hemoglobin levels.
+                      <h3 className="text-3xl font-light tracking-tight">Hormonal Insights</h3>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                         Visualize how your cycle phases correlate with your hemoglobin levels to understand your body's rhythm.
                       </p>
-                      <CycleLogForm trigger={<Button variant="outline" className="rounded-full w-fit">Log Symptoms</Button>} />
+                      <CycleLogForm trigger={<Button variant="outline" className="rounded-full border-rose-500/20 text-rose-500 hover:bg-rose-500/10">Log Cycle</Button>} />
                    </div>
-                   <div className="flex-1 w-full h-full min-h-[200px] relative bg-white/40 dark:bg-black/20 rounded-xl border border-white/20 backdrop-blur-sm p-2">
+                   <div className="flex-1 w-full h-[200px] glass-panel rounded-xl flex items-center justify-center overflow-hidden">
                       {(cbcHistory && cbcHistory.length > 0) || (cycleLogs && cycleLogs.length > 0) ? (
                          <MenstrualCycleCorrelator 
                              labReports={cbcHistory ? cbcHistory.map((h: any) => ({...h, type: 'cbc'})) as any : []} 
@@ -346,8 +314,8 @@ export default function DashboardPage() {
                              variant="compact"
                          />
                       ) : (
-                         <div className="absolute inset-0 flex items-center justify-center text-muted-foreground text-xs">
-                            No correlation data available yet.
+                         <div className="text-center opacity-40">
+                            <p className="text-xs uppercase tracking-widest">Insufficient Data</p>
                          </div>
                       )}
                    </div>
