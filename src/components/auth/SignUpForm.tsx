@@ -11,15 +11,9 @@ import {
   updateProfile,
 } from 'firebase/auth';
 import { doc } from 'firebase/firestore';
+import { motion } from 'framer-motion';
 
-import { GlassSurface } from '@/components/ui/glass-surface';
 import { Button } from '@/components/ui/button';
-import {
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import {
   Form,
   FormControl,
@@ -27,7 +21,6 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import {
@@ -40,7 +33,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useAuth, useFirestore } from '@/firebase';
 import HeartLoader from '@/components/ui/HeartLoader';
-import { Eye, EyeOff, User, Mail, Lock, MapPin, Users } from 'lucide-react';
+import { Eye, EyeOff, User, Mail, Lock, MapPin, Users, ArrowRight } from 'lucide-react';
 import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { iloiloMunicipalities } from '@/lib/iloilo-municipalities';
 import { ScrollArea } from '../ui/scroll-area';
@@ -133,147 +126,191 @@ export function SignUpForm() {
     }
   };
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: { 
+        staggerChildren: 0.05,
+        delayChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 15, opacity: 0 },
+    visible: { 
+      y: 0, 
+      opacity: 1,
+      transition: { type: "spring", stiffness: 300, damping: 24 }
+    }
+  };
+
   return (
-    <div>
-      <GlassSurface intensity="medium">
-        <CardHeader>
-          <CardTitle>Create a New Account</CardTitle>
-          <CardDescription>
-            Enter your details to get started.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="firstName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>First Name</FormLabel>
-                      <div className="relative">
-                        <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                        <FormControl>
-                          <Input className="pl-10" placeholder="Zaxius" {...field} />
-                        </FormControl>
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="lastName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Last Name</FormLabel>
-                       <div className="relative">
-                        <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                        <FormControl>
-                          <Input className="pl-10" placeholder="Berina" {...field} />
-                        </FormControl>
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <div className="grid grid-cols-3 gap-4">
-               <FormField
-                  control={form.control}
-                  name="municipality"
-                  render={({ field }) => (
-                    <FormItem className="col-span-2">
-                      <FormLabel>Municipality</FormLabel>
-                       <div className="relative">
-                         <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                          <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
-                          <FormControl>
-                              <SelectTrigger className="pl-10">
-                                <SelectValue placeholder="Select municipality" />
-                              </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                              <ScrollArea className='h-72'>
-                              {iloiloMunicipalities.map((municipality) => (
-                                  <SelectItem key={municipality} value={municipality}>
-                                      {municipality}
-                                  </SelectItem>
-                              ))}
-                              </ScrollArea>
-                          </SelectContent>
-                          </Select>
-                       </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-               <FormField
-                    control={form.control}
-                    name="sex"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Sex</FormLabel>
-                         <div className="relative">
-                          <Users className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                          <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
-                              <FormControl>
-                              <SelectTrigger className="pl-10">
-                                  <SelectValue placeholder="Select sex" />
-                              </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                              <SelectItem value="Male">Male</SelectItem>
-                              <SelectItem value="Female">Female</SelectItem>
-                              </SelectContent>
-                          </Select>
-                         </div>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-              </div>
-              <FormField
+    <motion.div 
+      variants={containerVariants} 
+      initial="hidden" 
+      animate="visible"
+      className="space-y-6"
+    >
+      <motion.div variants={itemVariants} className="flex flex-col space-y-2 mb-6">
+        <h3 className="text-4xl font-light tracking-tighter text-foreground">
+            Create <span className="font-semibold text-primary">Account</span>
+        </h3>
+        <p className="text-muted-foreground text-lg font-light tracking-wide">
+          Join us to start your health journey.
+        </p>
+      </motion.div>
+
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+          <motion.div variants={itemVariants} className="grid grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="firstName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-xs uppercase tracking-widest text-muted-foreground font-semibold ml-1">First Name</FormLabel>
+                  <div className="relative group">
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground/50 transition-colors group-focus-within:text-primary" />
+                    <FormControl>
+                      <Input 
+                        className="pl-12 h-14 bg-muted/20 border-border/50 focus:border-primary/30 focus:bg-background focus:ring-4 focus:ring-primary/5 transition-all duration-300 rounded-2xl text-base shadow-sm" 
+                        placeholder="Zaxius" 
+                        {...field} 
+                    />
+                    </FormControl>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="lastName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-xs uppercase tracking-widest text-muted-foreground font-semibold ml-1">Last Name</FormLabel>
+                   <div className="relative group">
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground/50 transition-colors group-focus-within:text-primary" />
+                    <FormControl>
+                      <Input 
+                        className="pl-12 h-14 bg-muted/20 border-border/50 focus:border-primary/30 focus:bg-background focus:ring-4 focus:ring-primary/5 transition-all duration-300 rounded-2xl text-base shadow-sm" 
+                        placeholder="Berina" 
+                        {...field} 
+                      />
+                    </FormControl>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </motion.div>
+          
+          <motion.div variants={itemVariants} className="grid grid-cols-3 gap-4">
+           <FormField
+              control={form.control}
+              name="municipality"
+              render={({ field }) => (
+                <FormItem className="col-span-2">
+                  <FormLabel className="text-xs uppercase tracking-widest text-muted-foreground font-semibold ml-1">Municipality</FormLabel>
+                   <div className="relative group">
+                     <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground/50 transition-colors group-focus-within:text-primary pointer-events-none z-10" />
+                      <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
+                      <FormControl>
+                          <SelectTrigger className="pl-12 h-14 bg-muted/20 border-border/50 focus:border-primary/30 focus:bg-background focus:ring-4 focus:ring-primary/5 transition-all duration-300 rounded-2xl text-base shadow-sm">
+                            <SelectValue placeholder="Select location" />
+                          </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                          <ScrollArea className='h-72'>
+                          {iloiloMunicipalities.map((municipality) => (
+                              <SelectItem key={municipality} value={municipality}>
+                                  {municipality}
+                              </SelectItem>
+                          ))}
+                          </ScrollArea>
+                      </SelectContent>
+                      </Select>
+                   </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+           <FormField
                 control={form.control}
-                name="email"
+                name="sex"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
-                     <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                      <FormControl>
-                        <Input className="pl-10" placeholder="you@example.com" {...field} />
-                      </FormControl>
-                    </div>
+                    <FormLabel className="text-xs uppercase tracking-widest text-muted-foreground font-semibold ml-1">Sex</FormLabel>
+                     <div className="relative group">
+                      <Users className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground/50 transition-colors group-focus-within:text-primary pointer-events-none z-10" />
+                      <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
+                          <FormControl>
+                          <SelectTrigger className="pl-12 h-14 bg-muted/20 border-border/50 focus:border-primary/30 focus:bg-background focus:ring-4 focus:ring-primary/5 transition-all duration-300 rounded-2xl text-base shadow-sm">
+                              <SelectValue placeholder="Sex" />
+                          </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                          <SelectItem value="Male">Male</SelectItem>
+                          <SelectItem value="Female">Female</SelectItem>
+                          </SelectContent>
+                      </Select>
+                     </div>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+          </motion.div>
+          
+          <motion.div variants={itemVariants}>
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-xs uppercase tracking-widest text-muted-foreground font-semibold ml-1">Email Address</FormLabel>
+                  <div className="relative group">
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground/50 transition-colors group-focus-within:text-primary" />
+                    <FormControl>
+                      <Input 
+                          className="pl-12 h-14 bg-muted/20 border-border/50 focus:border-primary/30 focus:bg-background focus:ring-4 focus:ring-primary/5 transition-all duration-300 rounded-2xl text-base shadow-sm" 
+                          placeholder="name@example.com" 
+                          {...field} 
+                      />
+                    </FormControl>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </motion.div>
+          
+          <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="password"
                 render={({ field, fieldState }) => (
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                    <FormLabel className="text-xs uppercase tracking-widest text-muted-foreground font-semibold ml-1">Password</FormLabel>
+                    <div className="relative group">
+                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground/50 transition-colors group-focus-within:text-primary" />
                       <FormControl>
-                        <Input className="pl-10" type={showPassword ? "text" : "password"} placeholder="••••••••" {...field} />
+                        <Input 
+                            className="pl-12 pr-12 h-14 bg-muted/20 border-border/50 focus:border-primary/30 focus:bg-background focus:ring-4 focus:ring-primary/5 transition-all duration-300 rounded-2xl text-base shadow-sm" 
+                            type={showPassword ? "text" : "password"} 
+                            placeholder="••••••••" 
+                            {...field} 
+                        />
                       </FormControl>
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-foreground"
+                        className="absolute inset-y-0 right-0 flex items-center pr-4 text-muted-foreground/50 hover:text-foreground transition-colors"
                       >
                         {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                       </button>
                     </div>
-                    {fieldState.error && (
-                      <FormDescription>
-                        Must be at least 8 characters and include uppercase, lowercase, number, and special characters.
-                      </FormDescription>
-                    )}
                     <FormMessage />
                   </FormItem>
                 )}
@@ -283,16 +320,21 @@ export function SignUpForm() {
                 name="confirmPassword"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Confirm Password</FormLabel>
-                    <div className="relative">
-                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                    <FormLabel className="text-xs uppercase tracking-widest text-muted-foreground font-semibold ml-1">Confirm</FormLabel>
+                    <div className="relative group">
+                     <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground/50 transition-colors group-focus-within:text-primary" />
                     <FormControl>
-                      <Input className="pl-10" type={showConfirmPassword ? "text" : "password"} placeholder="••••••••" {...field} />
+                      <Input 
+                        className="pl-12 h-14 bg-muted/20 border-border/50 focus:border-primary/30 focus:bg-background focus:ring-4 focus:ring-primary/5 transition-all duration-300 rounded-2xl text-base shadow-sm" 
+                        type={showConfirmPassword ? "text" : "password"} 
+                        placeholder="••••••••" 
+                        {...field} 
+                    />
                     </FormControl>
                     <button
                         type="button"
                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-foreground"
+                        className="absolute inset-y-0 right-0 flex items-center pr-4 text-muted-foreground/50 hover:text-foreground transition-colors"
                       >
                         {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                       </button>
@@ -301,36 +343,37 @@ export function SignUpForm() {
                   </FormItem>
                 )}
               />
-              <FormDescription>
-                For female users, signing up enables the Gemini Women’s Health Mode, which uses optional menstrual data for a more precise anemia analysis. Your data is kept private and secure.
-              </FormDescription>
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading && <HeartLoader size={24} strokeWidth={20} className="mr-2" />}
-                Sign Up
-              </Button>
-            </form>
-          </Form>
-          <p className="mt-4 text-center text-sm text-muted-foreground">
-            Already have an account?{' '}
-            <Link
-              href="/login"
-              className="font-medium text-primary hover:underline"
+          </motion.div>
+
+          <motion.div variants={itemVariants} className="p-4 bg-primary/5 border border-primary/10 rounded-2xl text-sm text-muted-foreground">
+             <p className="leading-relaxed text-center">
+                <span className="font-semibold text-primary block mb-1">Health Note</span> 
+                Female users unlock <span className="text-foreground font-medium">Gemini Women’s Health Mode</span> for cycle-aware analysis.
+             </p>
+          </motion.div>
+
+          <motion.div variants={itemVariants}>
+            <Button 
+              type="submit" 
+              className="w-full h-14 rounded-2xl text-lg font-medium shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all duration-500 hover:scale-[1.01] bg-gradient-to-r from-primary to-rose-600 hover:to-rose-500" 
+              disabled={isLoading}
             >
-              Log in
-            </Link>
-          </p>
-        </CardContent>
-      </GlassSurface>
-      <p className="mt-4 px-8 text-center text-xs text-muted-foreground">
-        By continuing, you agree to our <br />
-        <Link href="/terms-of-service" className="underline underline-offset-4 hover:text-primary">
-            Terms of Service
+              {isLoading && <HeartLoader size={24} strokeWidth={2.5} className="mr-2" />}
+              Create Account <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+          </motion.div>
+        </form>
+      </Form>
+      
+      <motion.p variants={itemVariants} className="text-center text-sm text-muted-foreground/80">
+        Already have an account?{' '}
+        <Link
+          href="/login"
+          className="font-medium text-primary hover:text-primary/80 hover:underline transition-all underline-offset-4"
+        >
+          Log in
         </Link>
-        {' '}and{' '}
-        <Link href="/privacy-policy" className="underline underline-offset-4 hover:text-primary">
-            Privacy Policy
-        </Link>
-      </p>
-    </div>
+      </motion.p>
+    </motion.div>
   );
 }

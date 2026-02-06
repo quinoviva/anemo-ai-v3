@@ -8,6 +8,53 @@ export interface Clinic {
   notes?: string;
 }
 
+export const iloiloMunicipalities = [
+  "Ajuy",
+  "Alimodian",
+  "Anilao",
+  "Badiangan",
+  "Balasan",
+  "Banate",
+  "Barotac Nuevo",
+  "Barotac Viejo",
+  "Batad",
+  "Bingawan",
+  "Cabatuan",
+  "Calinog",
+  "Carles",
+  "Concepcion",
+  "Dingle",
+  "Dueñas",
+  "Dumangas",
+  "Estancia",
+  "Guimbal",
+  "Igbaras",
+  "Iloilo City",
+  "Janiuay",
+  "Lambunao",
+  "Leganes",
+  "Lemery",
+  "Leon",
+  "Maasin",
+  "Miagao",
+  "Mina",
+  "New Lucena",
+  "Oton",
+  "Passi City",
+  "Pavia",
+  "Pototan",
+  "San Dionisio",
+  "San Enrique",
+  "San Joaquin",
+  "San Miguel",
+  "San Rafael",
+  "Santa Barbara",
+  "Sara",
+  "Tigbauan",
+  "Tubungan",
+  "Zarraga"
+];
+
 export const IloiloHealthcareProviders: Clinic[] = [
     // --- ILOILO CITY ---
     
