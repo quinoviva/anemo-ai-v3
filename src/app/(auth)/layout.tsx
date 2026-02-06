@@ -9,7 +9,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           <Logo />
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-foreground">
-              Anemo Check
+              ANEMO
             </h1>
             <p className="text-muted-foreground">
               CNN and AI-Powered Anemia Analysis

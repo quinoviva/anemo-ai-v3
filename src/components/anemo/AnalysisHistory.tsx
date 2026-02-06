@@ -12,7 +12,8 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { CardContent } from '@/components/ui/card';
+import { GlassSurface } from '@/components/ui/glass-surface';
 import { Eye, Plus, LogIn, User, Loader2, FileText, Download, Trash2, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { useUser, useFirestore, useCollection, useMemoFirebase, useDoc } from '@/firebase';
@@ -181,7 +182,7 @@ export function AnalysisHistory() {
 
   if (isGuest) {
     return (
-      <Card className="text-center">
+      <GlassSurface intensity="medium" className="text-center">
         <CardContent className="p-10 flex flex-col items-center justify-center gap-4">
           <div className="p-4 bg-primary/10 rounded-full">
             <User className="h-10 w-10 text-primary" />
@@ -197,7 +198,7 @@ export function AnalysisHistory() {
             </Link>
           </Button>
         </CardContent>
-      </Card>
+      </GlassSurface>
     );
   }
 
@@ -211,7 +212,7 @@ export function AnalysisHistory() {
 
   if (!history || history.length === 0) {
     return (
-      <Card className="text-center">
+      <GlassSurface intensity="medium" className="text-center">
         <CardContent className="p-10 flex flex-col items-center justify-center gap-4">
           <div className="p-4 bg-primary/10 rounded-full">
             <FileText className="h-10 w-10 text-primary" />
@@ -227,7 +228,7 @@ export function AnalysisHistory() {
             </Link>
           </Button>
         </CardContent>
-      </Card>
+      </GlassSurface>
     );
   }
 
@@ -423,7 +424,7 @@ export function AnalysisHistory() {
                 cycleLogs={cycleLogs ? cycleLogs as any : []} 
             />
         )}
-        <Card>
+        <GlassSurface intensity="medium">
           <CardContent className="p-0">
           <Table>
             <TableHeader>
@@ -439,7 +440,7 @@ export function AnalysisHistory() {
             </TableBody>
           </Table>
         </CardContent>
-      </Card>
+      </GlassSurface>
     </div>
       
       {renderReportModal()}

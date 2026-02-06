@@ -1,15 +1,18 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Space_Grotesk } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/components/layout/ThemeProvider';
 import { Toaster } from '@/components/ui/toaster';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 
-const inter = Inter({ subsets: ['latin'] });
+const spaceGrotesk = Space_Grotesk({ 
+  subsets: ['latin'],
+  variable: '--font-space-grotesk',
+});
 
 export const metadata: Metadata = {
-  title: 'AnemoCheck AI',
-  description: 'Intelligent anemia detection using AI',
+  title: 'Anemo',
+  description: 'Intelligent anemia detection using CNN and AI',
   icons: {
     icon: '/favicon.svg',
   }
@@ -25,7 +28,7 @@ export default function RootLayout({
        <head>
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
       </head>
-      <body className={inter.className}>
+      <body className={`${spaceGrotesk.variable} font-sans`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

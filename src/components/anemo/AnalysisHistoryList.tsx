@@ -2,12 +2,12 @@
 
 import React from 'react';
 import {
-  Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { GlassSurface } from '@/components/ui/glass-surface';
 import {
   Table,
   TableBody,
@@ -45,7 +45,7 @@ const getParameterValue = (
 
 const AnalysisHistoryList: React.FC<AnalysisHistoryListProps> = ({ analysisHistory }) => {
   return (
-    <Card>
+    <GlassSurface intensity="medium">
       <CardHeader>
         <CardTitle>Analysis History</CardTitle>
         <CardDescription>View your past CBC report analyses.</CardDescription>
@@ -72,7 +72,7 @@ const AnalysisHistoryList: React.FC<AnalysisHistoryListProps> = ({ analysisHisto
           </TableBody>
         </Table>
       </CardContent>
-    </Card>
+    </GlassSurface>
   );
 };
 

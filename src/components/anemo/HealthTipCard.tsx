@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { GlassSurface } from '@/components/ui/glass-surface';
 import { Button } from '@/components/ui/button';
 import { Lightbulb, RefreshCw } from 'lucide-react';
 
@@ -25,7 +26,7 @@ const getDailyIndex = () => {
     return day % healthTips.length;
 }
 
-export function HealthTipCard() {
+export function HealthTipCard({ variant = 'default' }: { variant?: 'default' | 'minimal' }) {
   const [tipIndex, setTipIndex] = useState(getDailyIndex());
 
   const getNewTip = () => {
@@ -37,8 +38,22 @@ export function HealthTipCard() {
     setTipIndex(newIndex);
   };
 
+  if (variant === 'minimal') {
+    return (
+      <div className="space-y-4">
+        <p className="text-sm font-medium leading-relaxed italic opacity-90">
+          "{healthTips[tipIndex]}"
+        </p>
+        <Button onClick={getNewTip} variant="ghost" size="sm" className="h-6 px-2 text-xs opacity-70 hover:opacity-100">
+          <RefreshCw className="mr-1 h-3 w-3" />
+          New Tip
+        </Button>
+      </div>
+    );
+  }
+
   return (
-    <Card>
+    <GlassSurface intensity="low">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Lightbulb className="text-yellow-400" />
@@ -55,6 +70,6 @@ export function HealthTipCard() {
           Get Another Tip
         </Button>
       </CardContent>
-    </Card>
+    </GlassSurface>
   );
 }

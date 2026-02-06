@@ -1,15 +1,10 @@
 'use client';
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { GlassSurface } from '@/components/ui/glass-surface';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function SettingsPage() {
   return (
@@ -20,7 +15,7 @@ export default function SettingsPage() {
           Manage your account settings and preferences.
         </p>
       </div>
-      <Card>
+      <GlassSurface intensity="medium">
         <CardHeader>
           <CardTitle>Notifications</CardTitle>
           <CardDescription>
@@ -51,8 +46,8 @@ export default function SettingsPage() {
             <Switch id="push-notifications" disabled />
           </div>
         </CardContent>
-      </Card>
-       <Card>
+      </GlassSurface>
+       <GlassSurface intensity="medium">
         <CardHeader>
           <CardTitle>Account</CardTitle>
           <CardDescription>
@@ -63,7 +58,7 @@ export default function SettingsPage() {
             <Button variant="outline">Change Password</Button>
             <Button variant="destructive">Delete Account</Button>
         </CardContent>
-      </Card>
+      </GlassSurface>
     </div>
   );
 }

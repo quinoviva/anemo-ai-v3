@@ -1,0 +1,267 @@
+extend type Query {
+  """
+  ✨ Look up a single `AnemiaAssessment` based on `id`, `key` or `first` and return selected fields (or `null` if not found).
+  """
+  anemiaAssessment(
+    """
+    The unique ID of the object.
+    """
+    id: UUID
+
+    """
+    The key used to identify the object.
+    """
+    key: AnemiaAssessment_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: AnemiaAssessment_FirstRow
+  ): AnemiaAssessment @fdc_generated(from: "AnemiaAssessment", purpose: QUERY_SINGLE)
+  """
+  ✨ Look up a single `DietaryIntake` based on `id`, `key` or `first` and return selected fields (or `null` if not found).
+  """
+  dietaryIntake(
+    """
+    The unique ID of the object.
+    """
+    id: UUID
+
+    """
+    The key used to identify the object.
+    """
+    key: DietaryIntake_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: DietaryIntake_FirstRow
+  ): DietaryIntake @fdc_generated(from: "DietaryIntake", purpose: QUERY_SINGLE)
+  """
+  ✨ Look up a single `HealthMetric` based on `id`, `key` or `first` and return selected fields (or `null` if not found).
+  """
+  healthMetric(
+    """
+    The unique ID of the object.
+    """
+    id: UUID
+
+    """
+    The key used to identify the object.
+    """
+    key: HealthMetric_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: HealthMetric_FirstRow
+  ): HealthMetric @fdc_generated(from: "HealthMetric", purpose: QUERY_SINGLE)
+  """
+  ✨ Look up a single `SymptomEntry` based on `id`, `key` or `first` and return selected fields (or `null` if not found).
+  """
+  symptomEntry(
+    """
+    The unique ID of the object.
+    """
+    id: UUID
+
+    """
+    The key used to identify the object.
+    """
+    key: SymptomEntry_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: SymptomEntry_FirstRow
+  ): SymptomEntry @fdc_generated(from: "SymptomEntry", purpose: QUERY_SINGLE)
+  """
+  ✨ Look up a single `User` based on `id`, `key` or `first` and return selected fields (or `null` if not found).
+  """
+  user(
+    """
+    The unique ID of the object.
+    """
+    id: UUID
+
+    """
+    The key used to identify the object.
+    """
+    key: User_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: User_FirstRow
+  ): User @fdc_generated(from: "User", purpose: QUERY_SINGLE)
+  """
+  ✨ List `AnemiaAssessment` objects in the table and return selected fields, optionally filtered by `where` conditions
+  """
+  anemiaAssessments(
+    """
+    Filter condition to narrow down the query results.
+    """
+    where: AnemiaAssessment_Filter
+
+    """
+    Order the query results by specific fields.
+    """
+    orderBy: [AnemiaAssessment_Order!]
+
+    """
+    Number of rows to skip before starting to return the results.
+    """
+    offset: Int
+
+    """
+    Maximum number of rows to return (defaults to 100 rows).
+    """
+    limit: Int = 100
+
+    """
+    Set to true to return distinct results.
+    """
+    distinct: Boolean = false
+
+    """
+    Filter condition to apply to the groups of aggregate queries.
+    """
+    having: AnemiaAssessment_Having
+  ): [AnemiaAssessment!]! @fdc_generated(from: "AnemiaAssessment", purpose: QUERY_MULTIPLE)
+  """
+  ✨ List `DietaryIntake` objects in the table and return selected fields, optionally filtered by `where` conditions
+  """
+  dietaryIntakes(
+    """
+    Filter condition to narrow down the query results.
+    """
+    where: DietaryIntake_Filter
+
+    """
+    Order the query results by specific fields.
+    """
+    orderBy: [DietaryIntake_Order!]
+
+    """
+    Number of rows to skip before starting to return the results.
+    """
+    offset: Int
+
+    """
+    Maximum number of rows to return (defaults to 100 rows).
+    """
+    limit: Int = 100
+
+    """
+    Set to true to return distinct results.
+    """
+    distinct: Boolean = false
+
+    """
+    Filter condition to apply to the groups of aggregate queries.
+    """
+    having: DietaryIntake_Having
+  ): [DietaryIntake!]! @fdc_generated(from: "DietaryIntake", purpose: QUERY_MULTIPLE)
+  """
+  ✨ List `HealthMetric` objects in the table and return selected fields, optionally filtered by `where` conditions
+  """
+  healthMetrics(
+    """
+    Filter condition to narrow down the query results.
+    """
+    where: HealthMetric_Filter
+
+    """
+    Order the query results by specific fields.
+    """
+    orderBy: [HealthMetric_Order!]
+
+    """
+    Number of rows to skip before starting to return the results.
+    """
+    offset: Int
+
+    """
+    Maximum number of rows to return (defaults to 100 rows).
+    """
+    limit: Int = 100
+
+    """
+    Set to true to return distinct results.
+    """
+    distinct: Boolean = false
+
+    """
+    Filter condition to apply to the groups of aggregate queries.
+    """
+    having: HealthMetric_Having
+  ): [HealthMetric!]! @fdc_generated(from: "HealthMetric", purpose: QUERY_MULTIPLE)
+  """
+  ✨ List `SymptomEntry` objects in the table and return selected fields, optionally filtered by `where` conditions
+  """
+  symptomEntries(
+    """
+    Filter condition to narrow down the query results.
+    """
+    where: SymptomEntry_Filter
+
+    """
+    Order the query results by specific fields.
+    """
+    orderBy: [SymptomEntry_Order!]
+
+    """
+    Number of rows to skip before starting to return the results.
+    """
+    offset: Int
+
+    """
+    Maximum number of rows to return (defaults to 100 rows).
+    """
+    limit: Int = 100
+
+    """
+    Set to true to return distinct results.
+    """
+    distinct: Boolean = false
+
+    """
+    Filter condition to apply to the groups of aggregate queries.
+    """
+    having: SymptomEntry_Having
+  ): [SymptomEntry!]! @fdc_generated(from: "SymptomEntry", purpose: QUERY_MULTIPLE)
+  """
+  ✨ List `User` objects in the table and return selected fields, optionally filtered by `where` conditions
+  """
+  users(
+    """
+    Filter condition to narrow down the query results.
+    """
+    where: User_Filter
+
+    """
+    Order the query results by specific fields.
+    """
+    orderBy: [User_Order!]
+
+    """
+    Number of rows to skip before starting to return the results.
+    """
+    offset: Int
+
+    """
+    Maximum number of rows to return (defaults to 100 rows).
+    """
+    limit: Int = 100
+
+    """
+    Set to true to return distinct results.
+    """
+    distinct: Boolean = false
+
+    """
+    Filter condition to apply to the groups of aggregate queries.
+    """
+    having: User_Having
+  ): [User!]! @fdc_generated(from: "User", purpose: QUERY_MULTIPLE)
+}

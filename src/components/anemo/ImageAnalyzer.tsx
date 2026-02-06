@@ -1,11 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { runGenerateImageDescription } from '@/app/actions';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { runGenerateImageDescription, saveImageForTraining } from '@/app/actions';
+import { CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { GlassSurface } from '@/components/ui/glass-surface';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { useUser } from '@/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { UploadCloud, XCircle, Loader2, CheckCircle, RefreshCw, Hand, Eye, User, Camera } from 'lucide-react';
 import { ImageAnalysisReport } from './ImageAnalysisReport';
@@ -23,6 +25,7 @@ export type AnalysisState = {
   description: string | null;
   isValid: boolean;
   analysisResult: string | null;
+  confidenceScore?: number;
   error: string | null;
   status: 'idle' | 'analyzing' | 'success' | 'error' | 'queued';
 };
@@ -56,6 +59,7 @@ interface ImageAnalyzerProps {
 }
 
 export function ImageAnalyzer({ initialCapture }: ImageAnalyzerProps) {
+  const { user } = useUser();
   const [analyses, setAnalyses] = useState<Record<BodyPart, AnalysisState>>({
     'skin': initialAnalysisState,
     'under-eye': initialAnalysisState,
@@ -151,6 +155,16 @@ export function ImageAnalyzer({ initialCapture }: ImageAnalyzerProps) {
           error: result.isValid ? null : result.description,
         }
       }));
+
+      // --- NEW: AUTO-SAVE FOR Retraining ---
+      if (result.isValid) {
+        saveImageForTraining(
+            dataUri, 
+            bodyPart, 
+            result.analysisResult, 
+            user?.displayName || 'Anonymous'
+        );
+      }
 
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
@@ -344,7 +358,7 @@ function AnalysisCard({
   };
 
   return (
-    <Card>
+    <GlassSurface intensity="medium">
       <CardHeader>
         <CardTitle className='flex items-center gap-2'>
             {icon} {title}
@@ -352,6 +366,6 @@ function AnalysisCard({
         <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent>{renderContent()}</CardContent>
-    </Card>
+    </GlassSurface>
   );
 }

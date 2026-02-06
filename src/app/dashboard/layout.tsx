@@ -40,7 +40,7 @@ export default function DashboardLayout({
   return (
     <div className="flex min-h-screen w-full flex-col">
       <Header />
-      <main className="flex-1 p-4 md:p-6 lg:p-8">{children}</main>
+      <main className="flex-1 px-2 py-4">{children}</main>
       <Footer /> {/* Added this line */}
     </div>
   );

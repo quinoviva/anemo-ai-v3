@@ -1,0 +1,725 @@
+extend type AnemiaAssessment {
+  """
+  Implicit metadata field that cannot be written. It provides extra information about query results.
+  """
+  _metadata: _Metadata @fdc_generated(from: "AnemiaAssessment", purpose: METADATA_FIELD)
+  """
+  ✨ Count the number of rows in the `AnemiaAssessment` table.
+  """
+  _count: Int! @fdc_generated(from: "AnemiaAssessment.", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `AnemiaAssessment` table where the `assessedAt` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  assessedAt_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "AnemiaAssessment.assessedAt", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `AnemiaAssessment` table where the `id` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  id_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "AnemiaAssessment.id", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `AnemiaAssessment` table where the `notes` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  notes_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "AnemiaAssessment.notes", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `AnemiaAssessment` table where the `recommendations` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  recommendations_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "AnemiaAssessment.recommendations", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `AnemiaAssessment` table where the `riskLevel` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  riskLevel_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "AnemiaAssessment.riskLevel", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `AnemiaAssessment` table where the `userId` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  userId_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "AnemiaAssessment.userId", purpose: QUERY_COUNT)
+  """
+  ✨ Minimum of the `assessedAt` field in the `AnemiaAssessment` table.
+  """
+  assessedAt_min: Timestamp @fdc_generated(from: "AnemiaAssessment.assessedAt", purpose: QUERY_MIN)
+  """
+  ✨ Maximum of the `assessedAt` field in the `AnemiaAssessment` table.
+  """
+  assessedAt_max: Timestamp @fdc_generated(from: "AnemiaAssessment.assessedAt", purpose: QUERY_MAX)
+  """
+  A generated field that is used for caching results in SDKs.
+  """
+  _id: ID! @fdc_generated(from: "AnemiaAssessment.id", purpose: GLOBAL_ID)
+}
+extend type DietaryIntake {
+  """
+  Implicit metadata field that cannot be written. It provides extra information about query results.
+  """
+  _metadata: _Metadata @fdc_generated(from: "DietaryIntake", purpose: METADATA_FIELD)
+  """
+  ✨ Count the number of rows in the `DietaryIntake` table.
+  """
+  _count: Int! @fdc_generated(from: "DietaryIntake.", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `DietaryIntake` table where the `consumedAt` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  consumedAt_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "DietaryIntake.consumedAt", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `DietaryIntake` table where the `foodItem` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  foodItem_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "DietaryIntake.foodItem", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `DietaryIntake` table where the `id` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  id_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "DietaryIntake.id", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `DietaryIntake` table where the `ironContentEstimate` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  ironContentEstimate_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "DietaryIntake.ironContentEstimate", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `DietaryIntake` table where the `quantity` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  quantity_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "DietaryIntake.quantity", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `DietaryIntake` table where the `unit` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  unit_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "DietaryIntake.unit", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `DietaryIntake` table where the `userId` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  userId_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "DietaryIntake.userId", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `DietaryIntake` table where the `vitaminCConsumption` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  vitaminCConsumption_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "DietaryIntake.vitaminCConsumption", purpose: QUERY_COUNT)
+  """
+  ✨ Sum the `ironContentEstimate` field in the `DietaryIntake` table.
+  """
+  ironContentEstimate_sum(
+    """
+    Set to true to sum the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "DietaryIntake.ironContentEstimate", purpose: QUERY_SUM)
+  """
+  ✨ Sum the `quantity` field in the `DietaryIntake` table.
+  """
+  quantity_sum(
+    """
+    Set to true to sum the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "DietaryIntake.quantity", purpose: QUERY_SUM)
+  """
+  ✨ Average the `ironContentEstimate` field in the `DietaryIntake` table.
+  """
+  ironContentEstimate_avg(
+    """
+    Set to true to average the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "DietaryIntake.ironContentEstimate", purpose: QUERY_AVG)
+  """
+  ✨ Average the `quantity` field in the `DietaryIntake` table.
+  """
+  quantity_avg(
+    """
+    Set to true to average the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "DietaryIntake.quantity", purpose: QUERY_AVG)
+  """
+  ✨ Minimum of the `consumedAt` field in the `DietaryIntake` table.
+  """
+  consumedAt_min: Timestamp @fdc_generated(from: "DietaryIntake.consumedAt", purpose: QUERY_MIN)
+  """
+  ✨ Minimum of the `ironContentEstimate` field in the `DietaryIntake` table.
+  """
+  ironContentEstimate_min: Float @fdc_generated(from: "DietaryIntake.ironContentEstimate", purpose: QUERY_MIN)
+  """
+  ✨ Minimum of the `quantity` field in the `DietaryIntake` table.
+  """
+  quantity_min: Float @fdc_generated(from: "DietaryIntake.quantity", purpose: QUERY_MIN)
+  """
+  ✨ Maximum of the `consumedAt` field in the `DietaryIntake` table.
+  """
+  consumedAt_max: Timestamp @fdc_generated(from: "DietaryIntake.consumedAt", purpose: QUERY_MAX)
+  """
+  ✨ Maximum of the `ironContentEstimate` field in the `DietaryIntake` table.
+  """
+  ironContentEstimate_max: Float @fdc_generated(from: "DietaryIntake.ironContentEstimate", purpose: QUERY_MAX)
+  """
+  ✨ Maximum of the `quantity` field in the `DietaryIntake` table.
+  """
+  quantity_max: Float @fdc_generated(from: "DietaryIntake.quantity", purpose: QUERY_MAX)
+  """
+  A generated field that is used for caching results in SDKs.
+  """
+  _id: ID! @fdc_generated(from: "DietaryIntake.id", purpose: GLOBAL_ID)
+}
+extend type HealthMetric {
+  """
+  Implicit metadata field that cannot be written. It provides extra information about query results.
+  """
+  _metadata: _Metadata @fdc_generated(from: "HealthMetric", purpose: METADATA_FIELD)
+  """
+  ✨ Count the number of rows in the `HealthMetric` table.
+  """
+  _count: Int! @fdc_generated(from: "HealthMetric.", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `HealthMetric` table where the `id` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  id_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "HealthMetric.id", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `HealthMetric` table where the `metricName` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  metricName_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "HealthMetric.metricName", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `HealthMetric` table where the `notes` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  notes_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "HealthMetric.notes", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `HealthMetric` table where the `recordedAt` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  recordedAt_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "HealthMetric.recordedAt", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `HealthMetric` table where the `unit` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  unit_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "HealthMetric.unit", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `HealthMetric` table where the `userId` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  userId_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "HealthMetric.userId", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `HealthMetric` table where the `value` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  value_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "HealthMetric.value", purpose: QUERY_COUNT)
+  """
+  ✨ Sum the `value` field in the `HealthMetric` table.
+  """
+  value_sum(
+    """
+    Set to true to sum the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "HealthMetric.value", purpose: QUERY_SUM)
+  """
+  ✨ Average the `value` field in the `HealthMetric` table.
+  """
+  value_avg(
+    """
+    Set to true to average the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "HealthMetric.value", purpose: QUERY_AVG)
+  """
+  ✨ Minimum of the `recordedAt` field in the `HealthMetric` table.
+  """
+  recordedAt_min: Timestamp @fdc_generated(from: "HealthMetric.recordedAt", purpose: QUERY_MIN)
+  """
+  ✨ Minimum of the `value` field in the `HealthMetric` table.
+  """
+  value_min: Float @fdc_generated(from: "HealthMetric.value", purpose: QUERY_MIN)
+  """
+  ✨ Maximum of the `recordedAt` field in the `HealthMetric` table.
+  """
+  recordedAt_max: Timestamp @fdc_generated(from: "HealthMetric.recordedAt", purpose: QUERY_MAX)
+  """
+  ✨ Maximum of the `value` field in the `HealthMetric` table.
+  """
+  value_max: Float @fdc_generated(from: "HealthMetric.value", purpose: QUERY_MAX)
+  """
+  A generated field that is used for caching results in SDKs.
+  """
+  _id: ID! @fdc_generated(from: "HealthMetric.id", purpose: GLOBAL_ID)
+}
+extend type SymptomEntry {
+  """
+  Implicit metadata field that cannot be written. It provides extra information about query results.
+  """
+  _metadata: _Metadata @fdc_generated(from: "SymptomEntry", purpose: METADATA_FIELD)
+  """
+  ✨ Count the number of rows in the `SymptomEntry` table.
+  """
+  _count: Int! @fdc_generated(from: "SymptomEntry.", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `SymptomEntry` table where the `description` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  description_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "SymptomEntry.description", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `SymptomEntry` table where the `id` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  id_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "SymptomEntry.id", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `SymptomEntry` table where the `recordedAt` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  recordedAt_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "SymptomEntry.recordedAt", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `SymptomEntry` table where the `severity` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  severity_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "SymptomEntry.severity", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `SymptomEntry` table where the `symptomName` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  symptomName_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "SymptomEntry.symptomName", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `SymptomEntry` table where the `userId` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  userId_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "SymptomEntry.userId", purpose: QUERY_COUNT)
+  """
+  ✨ Sum the `severity` field in the `SymptomEntry` table.
+  """
+  severity_sum(
+    """
+    Set to true to sum the distinct values.
+    """
+    distinct: Boolean = false
+  ): Int @fdc_generated(from: "SymptomEntry.severity", purpose: QUERY_SUM)
+  """
+  ✨ Average the `severity` field in the `SymptomEntry` table.
+  """
+  severity_avg(
+    """
+    Set to true to average the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "SymptomEntry.severity", purpose: QUERY_AVG)
+  """
+  ✨ Minimum of the `recordedAt` field in the `SymptomEntry` table.
+  """
+  recordedAt_min: Timestamp @fdc_generated(from: "SymptomEntry.recordedAt", purpose: QUERY_MIN)
+  """
+  ✨ Minimum of the `severity` field in the `SymptomEntry` table.
+  """
+  severity_min: Int @fdc_generated(from: "SymptomEntry.severity", purpose: QUERY_MIN)
+  """
+  ✨ Maximum of the `recordedAt` field in the `SymptomEntry` table.
+  """
+  recordedAt_max: Timestamp @fdc_generated(from: "SymptomEntry.recordedAt", purpose: QUERY_MAX)
+  """
+  ✨ Maximum of the `severity` field in the `SymptomEntry` table.
+  """
+  severity_max: Int @fdc_generated(from: "SymptomEntry.severity", purpose: QUERY_MAX)
+  """
+  A generated field that is used for caching results in SDKs.
+  """
+  _id: ID! @fdc_generated(from: "SymptomEntry.id", purpose: GLOBAL_ID)
+}
+extend type User {
+  """
+  ✨ List `AnemiaAssessment` objects in a one-to-many relationship (where `AnemiaAssessment`.`user` is this object).
+  """
+  anemiaAssessments_on_user(
+    """
+    Filter condition to narrow down the query results.
+    """
+    where: AnemiaAssessment_Filter
+
+    """
+    Order the query results by specific fields.
+    """
+    orderBy: [AnemiaAssessment_Order!]
+
+    """
+    Number of rows to skip before starting to return the results.
+    """
+    offset: Int
+
+    """
+    Maximum number of rows to return (defaults to 100 rows).
+    """
+    limit: Int = 100
+
+    """
+    Set to true to return distinct results.
+    """
+    distinct: Boolean = false
+
+    """
+    Filter condition to apply to the groups of aggregate queries.
+    """
+    having: AnemiaAssessment_Having
+  ): [AnemiaAssessment!]! @fdc_generated(from: "AnemiaAssessment.user", purpose: QUERY_MULTIPLE_ONE_TO_MANY)
+  """
+  ✨ List `DietaryIntake` objects in a one-to-many relationship (where `DietaryIntake`.`user` is this object).
+  """
+  dietaryIntakes_on_user(
+    """
+    Filter condition to narrow down the query results.
+    """
+    where: DietaryIntake_Filter
+
+    """
+    Order the query results by specific fields.
+    """
+    orderBy: [DietaryIntake_Order!]
+
+    """
+    Number of rows to skip before starting to return the results.
+    """
+    offset: Int
+
+    """
+    Maximum number of rows to return (defaults to 100 rows).
+    """
+    limit: Int = 100
+
+    """
+    Set to true to return distinct results.
+    """
+    distinct: Boolean = false
+
+    """
+    Filter condition to apply to the groups of aggregate queries.
+    """
+    having: DietaryIntake_Having
+  ): [DietaryIntake!]! @fdc_generated(from: "DietaryIntake.user", purpose: QUERY_MULTIPLE_ONE_TO_MANY)
+  """
+  ✨ List `HealthMetric` objects in a one-to-many relationship (where `HealthMetric`.`user` is this object).
+  """
+  healthMetrics_on_user(
+    """
+    Filter condition to narrow down the query results.
+    """
+    where: HealthMetric_Filter
+
+    """
+    Order the query results by specific fields.
+    """
+    orderBy: [HealthMetric_Order!]
+
+    """
+    Number of rows to skip before starting to return the results.
+    """
+    offset: Int
+
+    """
+    Maximum number of rows to return (defaults to 100 rows).
+    """
+    limit: Int = 100
+
+    """
+    Set to true to return distinct results.
+    """
+    distinct: Boolean = false
+
+    """
+    Filter condition to apply to the groups of aggregate queries.
+    """
+    having: HealthMetric_Having
+  ): [HealthMetric!]! @fdc_generated(from: "HealthMetric.user", purpose: QUERY_MULTIPLE_ONE_TO_MANY)
+  """
+  ✨ List `SymptomEntry` objects in a one-to-many relationship (where `SymptomEntry`.`user` is this object).
+  """
+  symptomEntries_on_user(
+    """
+    Filter condition to narrow down the query results.
+    """
+    where: SymptomEntry_Filter
+
+    """
+    Order the query results by specific fields.
+    """
+    orderBy: [SymptomEntry_Order!]
+
+    """
+    Number of rows to skip before starting to return the results.
+    """
+    offset: Int
+
+    """
+    Maximum number of rows to return (defaults to 100 rows).
+    """
+    limit: Int = 100
+
+    """
+    Set to true to return distinct results.
+    """
+    distinct: Boolean = false
+
+    """
+    Filter condition to apply to the groups of aggregate queries.
+    """
+    having: SymptomEntry_Having
+  ): [SymptomEntry!]! @fdc_generated(from: "SymptomEntry.user", purpose: QUERY_MULTIPLE_ONE_TO_MANY)
+  """
+  Implicit metadata field that cannot be written. It provides extra information about query results.
+  """
+  _metadata: _Metadata @fdc_generated(from: "User", purpose: METADATA_FIELD)
+  """
+  ✨ Count the number of rows in the `User` table.
+  """
+  _count: Int! @fdc_generated(from: "User.", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `User` table where the `createdAt` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  createdAt_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "User.createdAt", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `User` table where the `dateOfBirth` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  dateOfBirth_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "User.dateOfBirth", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `User` table where the `displayName` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  displayName_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "User.displayName", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `User` table where the `email` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  email_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "User.email", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `User` table where the `gender` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  gender_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "User.gender", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `User` table where the `height` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  height_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "User.height", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `User` table where the `id` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  id_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "User.id", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `User` table where the `weight` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  weight_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "User.weight", purpose: QUERY_COUNT)
+  """
+  ✨ Sum the `height` field in the `User` table.
+  """
+  height_sum(
+    """
+    Set to true to sum the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "User.height", purpose: QUERY_SUM)
+  """
+  ✨ Sum the `weight` field in the `User` table.
+  """
+  weight_sum(
+    """
+    Set to true to sum the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "User.weight", purpose: QUERY_SUM)
+  """
+  ✨ Average the `height` field in the `User` table.
+  """
+  height_avg(
+    """
+    Set to true to average the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "User.height", purpose: QUERY_AVG)
+  """
+  ✨ Average the `weight` field in the `User` table.
+  """
+  weight_avg(
+    """
+    Set to true to average the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "User.weight", purpose: QUERY_AVG)
+  """
+  ✨ Minimum of the `createdAt` field in the `User` table.
+  """
+  createdAt_min: Timestamp @fdc_generated(from: "User.createdAt", purpose: QUERY_MIN)
+  """
+  ✨ Minimum of the `dateOfBirth` field in the `User` table.
+  """
+  dateOfBirth_min: Date @fdc_generated(from: "User.dateOfBirth", purpose: QUERY_MIN)
+  """
+  ✨ Minimum of the `height` field in the `User` table.
+  """
+  height_min: Float @fdc_generated(from: "User.height", purpose: QUERY_MIN)
+  """
+  ✨ Minimum of the `weight` field in the `User` table.
+  """
+  weight_min: Float @fdc_generated(from: "User.weight", purpose: QUERY_MIN)
+  """
+  ✨ Maximum of the `createdAt` field in the `User` table.
+  """
+  createdAt_max: Timestamp @fdc_generated(from: "User.createdAt", purpose: QUERY_MAX)
+  """
+  ✨ Maximum of the `dateOfBirth` field in the `User` table.
+  """
+  dateOfBirth_max: Date @fdc_generated(from: "User.dateOfBirth", purpose: QUERY_MAX)
+  """
+  ✨ Maximum of the `height` field in the `User` table.
+  """
+  height_max: Float @fdc_generated(from: "User.height", purpose: QUERY_MAX)
+  """
+  ✨ Maximum of the `weight` field in the `User` table.
+  """
+  weight_max: Float @fdc_generated(from: "User.weight", purpose: QUERY_MAX)
+  """
+  A generated field that is used for caching results in SDKs.
+  """
+  _id: ID! @fdc_generated(from: "User.id", purpose: GLOBAL_ID)
+}

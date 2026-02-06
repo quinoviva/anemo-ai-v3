@@ -55,11 +55,15 @@ export const analyzeCbcReport = ai.defineFlow(
       contentType = 'image/webp';
     }
 
-    const { output } = await ai.generate({
-      model: 'googleai/gemini-1.5-flash',
-      config: {
-        temperature: 0.0,
-      },
+        const {output} = await ai.generate({
+
+          model: 'googleai/gemini-2.0-flash',
+
+          config: {
+
+            temperature: 0.0,
+
+          },
       prompt: [
         {
           text: `

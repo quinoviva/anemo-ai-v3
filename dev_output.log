@@ -1,0 +1,35 @@
+
+> nextn@0.1.0 predev
+> rm -f .next/dev/lock
+
+
+> nextn@0.1.0 dev
+> concurrently "next dev" "npm run genkit:dev"
+
+[1] 
+[1] > nextn@0.1.0 genkit:dev
+[1] > echo '' | genkit start -- tsx src/ai/dev.ts
+[1] 
+[0]  ⚠ Port 3000 is in use by an unknown process, using available port 3001 instead.
+[1] Telemetry API running on http://localhost:4034
+[1] Project root: /home/user/anemo-ai
+[1] Genkit Developer UI: http://localhost:4001
+[0]    ▲ Next.js 16.0.10 (Turbopack)
+[0]    - Local:         http://localhost:3001
+[0]    - Network:       http://10.88.0.3:3001
+[0]    - Environments: .env.local, .env
+[0] 
+[0]  ✓ Starting...
+[1] /home/user/anemo-ai/node_modules/genkit-cli/dist/commands/start.js:110
+[1]                     reject(new Error(`app process exited with code ${code}`));
+[1]                            ^
+[1] 
+[1] Error: app process exited with code 143
+[1]     at ChildProcess.<anonymous> (/home/user/anemo-ai/node_modules/genkit-cli/dist/commands/start.js:110:28)
+[1]     at ChildProcess.emit (node:events:524:28)
+[1]     at ChildProcess._handle.onexit (node:internal/child_process:293:12)
+[1] 
+[1] Node.js v20.19.1
+[1] npm run genkit:dev exited with code SIGTERM
+[0] [?25h
+[0] next dev exited with code 0

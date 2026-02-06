@@ -11,9 +11,10 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { Loader2, XCircle, Sparkles, Upload, Send, FileUp, Info, Hospital, Stethoscope } from 'lucide-react';
+import { Loader2, XCircle, Sparkles, Upload, Send, FileUp, Info, Hospital, Stethoscope, Cpu } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { runAnalyzeCbcReport } from '@/app/actions';
+import { runAnalyzeCbcReport, saveLabReportForTraining } from '@/app/actions';
+import { runLocalCbcAnalysis } from '@/ai/local-ai';
 import { useUser, useFirestore } from '@/firebase';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { Badge } from '../ui/badge';
@@ -22,6 +23,7 @@ import { Input } from '../ui/input';
 import { ScrollArea } from '../ui/scroll-area';
 import { Label } from '../ui/label';
 import { AnalyzeCbcReportOutput } from '@/ai/flows/analyze-cbc-report';
+import Tesseract from 'tesseract.js';
 
 type LabReportCaptureProps = {
   isOpen: boolean;
@@ -29,7 +31,7 @@ type LabReportCaptureProps = {
   onAnalysisComplete: (result: AnalyzeCbcReportOutput) => void;
 };
 
-type AnalysisStep = 'upload' | 'analyzing' | 'result' | 'saving';
+type AnalysisStep = 'upload' | 'analyzing' | 'local-ocr' | 'result' | 'saving';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
@@ -40,6 +42,8 @@ export function LabReportCapture({ isOpen, onClose, onAnalysisComplete }: LabRep
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [hospitalName, setHospitalName] = useState('');
   const [doctorName, setDoctorName] = useState('');
+  const [isLocalFallback, setIsLocalFallback] = useState(false);
+  const [ocrProgress, setOcrProgress] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const { toast } = useToast();
@@ -52,6 +56,8 @@ export function LabReportCapture({ isOpen, onClose, onAnalysisComplete }: LabRep
     setSelectedFile(null);
     setHospitalName('');
     setDoctorName('');
+    setIsLocalFallback(false);
+    setOcrProgress(0);
     if (previewUrl) {
       URL.revokeObjectURL(previewUrl);
     }
@@ -86,6 +92,40 @@ export function LabReportCapture({ isOpen, onClose, onAnalysisComplete }: LabRep
     setPreviewUrl(URL.createObjectURL(file));
   };
 
+  const handleLocalFallback = async (dataUri: string) => {
+    setStep('local-ocr');
+    setIsLocalFallback(true);
+    
+    try {
+      // 1. Perform Local OCR
+      const { data: { text } } = await Tesseract.recognize(dataUri, 'eng', {
+        logger: m => {
+          if (m.status === 'recognizing text') setOcrProgress(Math.round(m.progress * 100));
+        }
+      });
+
+      // 2. Analyze with Gemini Nano
+      const result = await runLocalCbcAnalysis(text);
+      
+      if (result.error) {
+        throw new Error(result.error);
+      }
+
+      setAnalysisResult(result);
+      setStep('result');
+      if (onAnalysisComplete) onAnalysisComplete(result);
+      
+    } catch (err) {
+      console.error("Local Analysis Error:", err);
+      toast({
+        title: 'Analysis Failed',
+        description: 'Could not extract data from the image. Please try again with a clearer photo.',
+        variant: 'destructive',
+      });
+      setStep('upload');
+    }
+  };
+
 
   const handleAnalyze = () => {
     if (!selectedFile) return;
@@ -109,14 +149,25 @@ export function LabReportCapture({ isOpen, onClose, onAnalysisComplete }: LabRep
         }
         setAnalysisResult(result);
         setStep('result');
+        
+        // Automatically save lab report for future retraining
+        saveLabReportForTraining(dataUri, result.summary, user?.displayName || 'Anonymous');
+
         if (onAnalysisComplete) onAnalysisComplete(result);
        } catch (err) {
-         toast({
-          title: 'AI Analysis Error',
-          description: err instanceof Error ? err.message : 'An unexpected error occurred.',
-          variant: 'destructive',
-        });
-        setStep('upload');
+         console.error("Lab Analysis Error:", err);
+         const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred.';
+         
+         if (errorMessage.includes('quota') || errorMessage.includes('429')) {
+            handleLocalFallback(dataUri);
+         } else {
+            toast({
+                title: 'AI Analysis Error',
+                description: errorMessage,
+                variant: 'destructive',
+            });
+            setStep('upload');
+         }
        }
     };
     reader.readAsDataURL(selectedFile);
@@ -142,6 +193,7 @@ export function LabReportCapture({ isOpen, onClose, onAnalysisComplete }: LabRep
         doctorName: doctorName,
         userId: user.uid,
         createdAt: serverTimestamp(),
+        isLocalAnalysis: isLocalFallback
       });
       toast({
         title: 'Success',
@@ -252,6 +304,21 @@ export function LabReportCapture({ isOpen, onClose, onAnalysisComplete }: LabRep
       </div>
     </>
   );
+
+  const renderLocalOcrView = () => (
+    <>
+      <DialogHeader>
+        <DialogTitle className="sr-only">AI is Analyzing Your Report</DialogTitle>
+        <DialogDescription className="sr-only">The AI is currently analyzing your lab report. Please wait a moment.</DialogDescription>
+      </DialogHeader>
+      <div className="flex flex-col items-center justify-center text-center p-8 min-h-[400px]">
+        <Sparkles className="h-12 w-12 text-primary mb-4" />
+        <h3 className="text-xl font-semibold">AI is Analyzing Your Report...</h3>
+        <p className="text-muted-foreground">This may take a moment. Please wait.</p>
+        <Loader2 className="h-8 w-8 animate-spin text-primary mt-6" />
+      </div>
+    </>
+  );
   
   const renderResultView = () => {
     const isAnemiaPositive = analysisResult?.summary?.toLowerCase().includes('anemia');
@@ -309,6 +376,8 @@ export function LabReportCapture({ isOpen, onClose, onAnalysisComplete }: LabRep
       case 'analyzing':
       case 'saving':
         return renderAnalyzingView();
+      case 'local-ocr':
+        return renderLocalOcrView();
       case 'result':
         return renderResultView();
       case 'upload':
@@ -319,7 +388,7 @@ export function LabReportCapture({ isOpen, onClose, onAnalysisComplete }: LabRep
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-lg font-sans">
         {renderContent()}
       </DialogContent>
     </Dialog>

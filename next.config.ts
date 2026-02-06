@@ -14,6 +14,7 @@ const withPWAConfig = withPWA({
 
 const nextConfig: NextConfig = {
   devIndicators: false,
+  turbopack: {},
 
   typescript: {
     ignoreBuildErrors: false,
@@ -37,16 +38,6 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
     ],
-  },
-  experimental: {
-    // @ts-ignore - Turbopack type not yet updated in Next.js types
-    turbopack: {
-      resolveAlias: {
-        '@firebase/firestore': '@firebase/firestore/dist/index.esm2017.js',
-      },
-    },
-    // Allow the dev server to accept requests from the cloud workstation proxy
-    allowedDevOrigins: ['*.cloudworkstations.dev'],
   },
 };
 

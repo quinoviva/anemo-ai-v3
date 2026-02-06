@@ -1,0 +1,91 @@
+/* HeartLoader.css */
+.heart-loader-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.heart-loader-container.full-page {
+  height: 100vh;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+}
+
+.heart-loader-container.with-bg {
+  background-color: #0d0d0d;
+}
+
+.heart-loader-container.inline {
+  height: auto;
+  min-height: unset;
+  display: inline-flex;
+  width: auto;
+}
+
+.heart-svg {
+  overflow: visible;
+  /* Ultra-smooth organic breathing effect */
+  animation: svgBreathing 4s ease-in-out infinite;
+  filter: drop-shadow(0 0 15px rgba(255, 71, 112, 0.3));
+}
+
+.heart-path {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  /* Liquid drawing effect */
+  stroke-dasharray: 600;
+  stroke-dashoffset: 600;
+  animation: drawHeartLiquid 3s cubic-bezier(0.65, 0, 0.35, 1) infinite alternate;
+}
+
+.pulse-path {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 400;
+  stroke-dashoffset: 400;
+  /* Sync with heart drawing but with a slight tension */
+  animation: drawPulseLiquid 3s cubic-bezier(0.65, 0, 0.35, 1) infinite alternate;
+}
+
+@keyframes drawHeartLiquid {
+  0% {
+    stroke-dashoffset: 600;
+    opacity: 0.5;
+  }
+  20% {
+    opacity: 1;
+  }
+  80%, 100% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+@keyframes drawPulseLiquid {
+  0%, 30% {
+    stroke-dashoffset: 400;
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  90%, 100% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+@keyframes svgBreathing {
+  0%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 15px rgba(255, 71, 112, 0.3));
+  }
+  50% {
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 30px rgba(255, 71, 112, 0.6));
+  }
+}

@@ -48,3 +48,6 @@ firestore-debug.log
 .env.local
 .env.development
 .env.production
+
+# machine learning data
+/dataset

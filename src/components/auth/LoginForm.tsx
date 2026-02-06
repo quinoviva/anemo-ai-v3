@@ -13,14 +13,8 @@ import {
   signInAnonymously,
 } from 'firebase/auth';
 
+import { GlassSurface } from '@/components/ui/glass-surface';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import {
   Form,
   FormControl,
@@ -32,7 +26,8 @@ import {
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/firebase';
-import { Loader2, Eye, EyeOff, Mail, Lock } from 'lucide-react';
+import HeartLoader from '@/components/ui/HeartLoader';
+import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email.' }),
@@ -109,12 +104,12 @@ export function LoginForm() {
 
   return (
     <div>
-      <Card>
-        <CardHeader>
-          <CardTitle>Log in</CardTitle>
-          <CardDescription>Sign in to access your dashboard.</CardDescription>
-        </CardHeader>
-        <CardContent>
+      <GlassSurface intensity="medium" className="p-6">
+        <div className="flex flex-col space-y-1.5 pb-6">
+          <h3 className="font-semibold tracking-tight text-2xl">Log in</h3>
+          <p className="text-sm text-muted-foreground">Sign in to access your dashboard.</p>
+        </div>
+        <div className="pt-0">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
@@ -126,7 +121,7 @@ export function LoginForm() {
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                       <FormControl>
-                        <Input className="pl-10" placeholder="you@example.com" {...field} />
+                        <Input className="pl-10 bg-background/50" placeholder="you@example.com" {...field} />
                       </FormControl>
                     </div>
                     <FormMessage />
@@ -142,7 +137,7 @@ export function LoginForm() {
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                       <FormControl>
-                        <Input className="pl-10" type={showPassword ? "text" : "password"} placeholder="••••••••" {...field} />
+                        <Input className="pl-10 bg-background/50" type={showPassword ? "text" : "password"} placeholder="••••••••" {...field} />
                       </FormControl>
                       <button
                         type="button"
@@ -157,7 +152,7 @@ export function LoginForm() {
                 )}
               />
               <Button type="submit" className="w-full" disabled={isSigningIn}>
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isLoading && <HeartLoader size={24} strokeWidth={20} className="mr-2" />}
                 Log in
               </Button>
               <div className="text-right text-sm">
@@ -174,10 +169,10 @@ export function LoginForm() {
 
           <div className="relative my-4">
             <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
+              <span className="w-full border-t border-muted-foreground/20" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
+              <span className="bg-transparent px-2 text-muted-foreground">
                 Or continue with
               </span>
             </div>
@@ -186,12 +181,12 @@ export function LoginForm() {
           <div className="space-y-4">
               <Button
                   variant="outline"
-                  className="w-full"
+                  className="w-full bg-background/50"
                   onClick={handleGoogleSignIn}
                   disabled={isSigningIn}
               >
                   {isGoogleLoading ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <HeartLoader size={24} strokeWidth={20} className="mr-2" />
                   ) : (
                     <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" className="mr-2 h-4 w-4"><g><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path><path fill="none" d="M0 0h48v48H0z"></path></g></svg>
                   )}
@@ -200,10 +195,10 @@ export function LoginForm() {
 
               <div className="relative">
                   <div className="absolute inset-0 flex items-center">
-                      <span className="w-full border-t" />
+                      <span className="w-full border-t border-muted-foreground/20" />
                   </div>
                   <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-background px-2 text-muted-foreground">
+                      <span className="bg-transparent px-2 text-muted-foreground">
                       Or
                       </span>
                   </div>
@@ -212,12 +207,12 @@ export function LoginForm() {
               <div>
                   <Button
                       variant="secondary"
-                      className="w-full"
+                      className="w-full bg-secondary/80 hover:bg-secondary"
                       onClick={handleGuestSignIn}
                       disabled={isSigningIn}
                       >
                       {isGuestLoading ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <HeartLoader size={24} strokeWidth={20} className="mr-2" />
                       ) : (
                       <svg xmlns="http://www.w3.org/2000/svg" className="mr-2 h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                       )}
@@ -238,8 +233,8 @@ export function LoginForm() {
               Sign up
             </Link>
           </p>
-        </CardContent>
-      </Card>
+        </div>
+      </GlassSurface>
       <p className="mt-4 px-8 text-center text-xs text-muted-foreground">
         By continuing, you agree to our <br />
         <Link href="/terms-of-service" className="underline underline-offset-4 hover:text-primary">

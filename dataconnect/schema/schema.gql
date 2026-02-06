@@ -1,0 +1,44 @@
+type User @table {
+  displayName: String!
+  createdAt: Timestamp!
+  email: String
+  dateOfBirth: Date
+  gender: String
+  weight: Float
+  height: Float
+}
+
+type HealthMetric @table {
+  user: User
+  metricName: String!
+  value: Float!
+  unit: String!
+  recordedAt: Timestamp!
+  notes: String
+}
+
+type SymptomEntry @table {
+  user: User
+  symptomName: String!
+  severity: Int!
+  recordedAt: Timestamp!
+  description: String
+}
+
+type DietaryIntake @table {
+  user: User
+  foodItem: String!
+  quantity: Float!
+  unit: String!
+  consumedAt: Timestamp!
+  ironContentEstimate: Float
+  vitaminCConsumption: Boolean
+}
+
+type AnemiaAssessment @table {
+  user: User
+  riskLevel: String!
+  assessedAt: Timestamp!
+  recommendations: String
+  notes: String
+}

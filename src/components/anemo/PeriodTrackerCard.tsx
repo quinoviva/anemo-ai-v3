@@ -1,7 +1,8 @@
 
 'use client';
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { GlassSurface } from '@/components/ui/glass-surface';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Droplets, CalendarHeart, Plus } from 'lucide-react';
@@ -19,7 +20,7 @@ interface PeriodTrackerCardProps {
 export function PeriodTrackerCard({ lastPeriodStart, cycleLength = 28, periodLength = 5, className }: PeriodTrackerCardProps) {
     if (!lastPeriodStart) {
         return (
-            <Card className={className}>
+            <GlassSurface intensity="low" className={className}>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-pink-600">
                         <Droplets className="h-5 w-5" />
@@ -42,7 +43,7 @@ export function PeriodTrackerCard({ lastPeriodStart, cycleLength = 28, periodLen
                         />
                     </div>
                 </CardContent>
-            </Card>
+            </GlassSurface>
         );
     }
 
@@ -87,7 +88,7 @@ export function PeriodTrackerCard({ lastPeriodStart, cycleLength = 28, periodLen
     }
 
     return (
-        <Card className={cn("overflow-hidden border-pink-100 dark:border-pink-900/20", className)}>
+        <GlassSurface intensity="medium" className={cn("overflow-hidden border-pink-100 dark:border-pink-900/20", className)}>
              <div className="h-1 w-full bg-pink-100 dark:bg-pink-900/20">
                 <div className={`h-full ${statusColor}`} style={{ width: `${Math.max(0, Math.min(progressValue, 100))}%` }} />
             </div>
@@ -140,6 +141,6 @@ export function PeriodTrackerCard({ lastPeriodStart, cycleLength = 28, periodLen
                 </div>
             </CardContent>
             
-        </Card>
+        </GlassSurface>
     );
 }

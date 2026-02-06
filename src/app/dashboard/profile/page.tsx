@@ -20,7 +20,8 @@ import { useUser, useFirestore, useAuth, useDoc, useMemoFirebase } from '@/fireb
 
 import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, } from '@/components/ui/card';
+import { CardContent, CardDescription, CardHeader, CardTitle, } from '@/components/ui/card';
+import { GlassSurface } from '@/components/ui/glass-surface';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
@@ -462,7 +463,7 @@ export default function ProfilePage() {
 
   if (isGuest) {
     return (
-        <Card className="text-center">
+        <GlassSurface intensity="medium" className="text-center">
             <CardContent className="p-10 flex flex-col items-center justify-center gap-4">
                  <div className="p-4 bg-primary/10 rounded-full">
                     <User className="h-10 w-10 text-primary" />
@@ -478,7 +479,7 @@ export default function ProfilePage() {
                     </Link>
                 </Button>
             </CardContent>
-        </Card>
+        </GlassSurface>
     )
   }
 
@@ -492,7 +493,7 @@ export default function ProfilePage() {
       </div>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          <Card>
+          <GlassSurface intensity="medium">
             <CardHeader>
               <CardTitle>Personal Information</CardTitle>
               <CardDescription>
@@ -577,9 +578,9 @@ export default function ProfilePage() {
                   )}
                 />
             </CardContent>
-          </Card>
+          </GlassSurface>
 
-          <Card>
+          <GlassSurface intensity="medium">
             <CardHeader>
               <CardTitle>Medical Record</CardTitle>
               <CardDescription>
@@ -762,10 +763,10 @@ export default function ProfilePage() {
                 />
               </div>
             </CardContent>
-          </Card>
+          </GlassSurface>
 
           {isFemale && (
-            <Card>
+            <GlassSurface intensity="medium">
                 <CardHeader>
                     <CardTitle>Women's Health Mode</CardTitle>
                     <CardDescription>
@@ -848,7 +849,7 @@ export default function ProfilePage() {
                         />
                     </div>
                 </CardContent>
-            </Card>
+            </GlassSurface>
           )}
 
           <div className="flex justify-end">

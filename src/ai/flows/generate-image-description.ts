@@ -25,6 +25,8 @@ const GenerateImageDescriptionOutputSchema = z.object({
   description: z.string().describe('A description of the image, including any warnings about makeup or other obstructions.'),
   isValid: z.boolean().describe('Whether the image is valid for anemia detection (a clear photo of the specified body part).'),
   analysisResult: z.string().describe('A non-medical summary of the analysis for the specific body part, e.g., "Mild pallor detected." or "No visible signs of anemia."'),
+  confidenceScore: z.number().min(0).max(100).optional().describe('Confidence level of the AI analysis from 0-100.'),
+  recommendations: z.string().optional().describe('Brief specific observation for this image.'),
 });
 export type GenerateImageDescriptionOutput = z.infer<typeof GenerateImageDescriptionOutputSchema>;
 
@@ -41,50 +43,44 @@ const generateImageDescriptionFlow = ai.defineFlow(
     outputSchema: GenerateImageDescriptionOutputSchema,
   },
   async input => {
+    let contentType = 'image/jpeg';
+    if (input.photoDataUri.startsWith('data:')) {
+      const match = input.photoDataUri.match(/^data:(image\/[a-z+]+);/);
+      if (match) contentType = match[1];
+    }
+
     const {output} = await ai.generate({
-      model: 'googleai/gemini-1.5-flash',
+      model: 'googleai/gemini-2.0-flash',
       config: {
         temperature: 0.0,
       },
       prompt: [
         {
-          text: `You are an expert medical image analyst with a critical task. Your analysis must be consistent and 100% accurate according to the rules provided.
+          text: `You are a medical image validator. You will receive a photo intended to represent the human: ${input.bodyPart}.
 
-You will receive a photo of a specific body part: ${input.bodyPart}.
+### VALIDATION RULES:
+1. **Body Part Match**: Is this actually a photo of ${input.bodyPart}? 
+2. **Bare State**: For 'under-eye', there must be NO eye makeup, eyeliner, or mascara. For 'fingernails', there must be NO nail polish or artificial nails. For 'skin', it must be bare skin (palm preferred).
+3. **Quality**: Is the image clear and showing a significant portion of the area (not just a tiny zoomed-in blur)?
 
-Your primary job is to determine if it is a valid image for anemia detection. A valid image must meet ALL of the following criteria. There are no exceptions.
+### ANALYSIS RULES:
+If the image passes validation, analyze it for signs of anemia:
+- **Skin (Palm)**: Check for significant pallor (paleness) in the skin creases.
+- **Under-eye**: Check for paleness in the palpebral conjunctiva.
+- **Fingernails**: Check for a pale nail bed or loss of the healthy pink color.
 
-1.  **Subject Requirement:** The image's main subject MUST be a clear, close-up view of the specified human body part: ${input.bodyPart}. If the picture is mostly showing this, it is valid.
-2.  **Obstruction-Free Requirement:** The area in the image MUST BE COMPLETELY FREE of any substances that could alter its natural appearance. This includes, but is not limited to: makeup (for under-eye), nail polish/art (for fingernails), or heavy lotions/creams. The image must show the subject in its natural, bare state.
-
-**Analysis Process:**
-
-1.  **Validation:**
-    - First, briefly describe the main subject of the image.
-    - Next, you MUST determine if the image is valid by strictly applying the two rules above for the specified ${input.bodyPart}.
-    - If the image's primary subject is anything other than the specified human body part, it is INVALID.
-    - If the image shows the correct body part but has ANY obstructions (makeup, nail polish, etc.), it is INVALID.
-    - Set the 'isValid' field to true or false.
-
-2.  **Description and Analysis:**
-    - **If the image is valid:**
-        - Your description must confirm this clearly (e.g., "A clear, unobstructed photo of an under-eye area, suitable for analysis.").
-        - Then, analyze the image for signs related to anemia for that specific body part. Provide a short, non-medical summary in the 'analysisResult' field.
-          - For 'skin', look for pallor. Result example: "Mild pallor detected on the skin surface." or "Skin tone appears normal."
-          - For 'under-eye', look for discoloration in the palpebral conjunctiva. Result example: "Slight reddish discoloration observed under the eyes." or "Under-eye area appears normal."
-          - For 'fingernails', look at the nail bed color. Result example: "Fingernails appear pale." or "Fingernails appear normal with no visible signs of anemia."
-    - **If the image is invalid:**
-        - Your 'analysisResult' field MUST be "Analysis not performed."
-        - The 'description' MUST explain why it's invalid. Examples:
-          - "This is a photo of a car. To check for anemia, a clear, close-up picture of the ${input.bodyPart} is required."
-          - "This photo of fingernails cannot be used because nail polish is present, which prevents an accurate analysis. Please upload a clear photo of bare fingernails."
-          - "This photo of an under-eye area cannot be used because makeup is present. Please upload a clear photo without any makeup."
-
-This is a critical step for a health application. Inconsistency is not acceptable. Apply these rules without deviation.`
+### OUTPUT FORMAT:
+You must return a JSON object with:
+- **isValid**: true/false
+- **description**: A brief explanation of what you see. If invalid, explain exactly why (e.g., "Makeup detected").
+- **analysisResult**: "Anemia Signs Detected", "Normal Range", or "Inconclusive".
+- **confidenceScore**: A number from 0 to 100 representing your certainty.
+- **recommendations**: (Only if valid) Short specific observation.`
         },
         {
           media: {
-            url: input.photoDataUri
+            url: input.photoDataUri,
+            contentType: contentType
           }
         }
       ],

@@ -1,0 +1,72 @@
+mutation CreateDemoData @auth(level: NO_ACCESS) @transaction {
+  user_insertMany(data: [
+    {
+      id: "550e8400-e29b-41d4-a716-446655440000",
+      createdAt: "2024-03-15T12:00:00Z",
+      displayName: "demouser1",
+    },
+    {
+      id: "550e8400-e29b-41d4-a716-446655440001",
+      createdAt: "2024-03-15T12:00:00Z",
+      displayName: "demouser2",
+    }
+  ])
+  symptomEntry_insertMany(data: [
+    {
+      userId: "550e8400-e29b-41d4-a716-446655440000",
+      symptomName: "Fatigue",
+      severity: 3,
+      recordedAt: "2024-03-15T12:00:00Z"
+    },
+    {
+      userId: "550e8400-e29b-41d4-a716-446655440001",
+      symptomName: "Dizziness",
+      severity: 2,
+      recordedAt: "2024-03-15T12:00:00Z"
+    }
+  ])
+   healthMetric_insertMany(data: [
+    {
+      userId: "550e8400-e29b-41d4-a716-446655440000",
+      metricName: "Heart Rate",
+      value: 72.0,
+      unit: "bpm",
+      recordedAt: "2024-03-15T12:00:00Z"
+    },
+    {
+      userId: "550e8400-e29b-41d4-a716-446655440001",
+      metricName: "Blood Pressure",
+      value: 120.0,
+      unit: "mmHg",
+      recordedAt: "2024-03-15T12:00:00Z"
+    }
+  ])
+  dietaryIntake_insertMany(data: [
+    {
+      userId: "550e8400-e29b-41d4-a716-446655440000",
+      foodItem: "Spinach",
+      quantity: 1.0,
+      unit: "cup",
+      consumedAt: "2024-03-15T12:00:00Z"
+    },
+    {
+      userId: "550e8400-e29b-41d4-a716-446655440001",
+      foodItem: "Lentils",
+      quantity: 0.5,
+      unit: "cup",
+      consumedAt: "2024-03-15T12:00:00Z"
+    }
+  ])
+  anemiaAssessment_insertMany(data: [
+    {
+      userId: "550e8400-e29b-41d4-a716-446655440000",
+      riskLevel: "Low",
+      assessedAt: "2024-03-15T12:00:00Z"
+    },
+    {
+      userId: "550e8400-e29b-41d4-a716-446655440001",
+      riskLevel: "Medium",
+      assessedAt: "2024-03-15T12:00:00Z"
+    }
+  ])
+}

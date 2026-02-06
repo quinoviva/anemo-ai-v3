@@ -12,9 +12,9 @@ import {
 } from 'firebase/auth';
 import { doc } from 'firebase/firestore';
 
+import { GlassSurface } from '@/components/ui/glass-surface';
 import { Button } from '@/components/ui/button';
 import {
-  Card,
   CardContent,
   CardDescription,
   CardHeader,
@@ -39,7 +39,8 @@ import {
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth, useFirestore } from '@/firebase';
-import { Loader2, Eye, EyeOff, User, Mail, Lock, MapPin, Users } from 'lucide-react';
+import HeartLoader from '@/components/ui/HeartLoader';
+import { Eye, EyeOff, User, Mail, Lock, MapPin, Users } from 'lucide-react';
 import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { iloiloMunicipalities } from '@/lib/iloilo-municipalities';
 import { ScrollArea } from '../ui/scroll-area';
@@ -134,7 +135,7 @@ export function SignUpForm() {
 
   return (
     <div>
-      <Card>
+      <GlassSurface intensity="medium">
         <CardHeader>
           <CardTitle>Create a New Account</CardTitle>
           <CardDescription>
@@ -304,7 +305,7 @@ export function SignUpForm() {
                 For female users, signing up enables the Gemini Women’s Health Mode, which uses optional menstrual data for a more precise anemia analysis. Your data is kept private and secure.
               </FormDescription>
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isLoading && <HeartLoader size={24} strokeWidth={20} className="mr-2" />}
                 Sign Up
               </Button>
             </form>
@@ -319,7 +320,7 @@ export function SignUpForm() {
             </Link>
           </p>
         </CardContent>
-      </Card>
+      </GlassSurface>
       <p className="mt-4 px-8 text-center text-xs text-muted-foreground">
         By continuing, you agree to our <br />
         <Link href="/terms-of-service" className="underline underline-offset-4 hover:text-primary">

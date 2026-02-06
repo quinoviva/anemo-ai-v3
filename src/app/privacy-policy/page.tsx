@@ -1,6 +1,7 @@
 'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { GlassSurface } from '@/components/ui/glass-surface';
+import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
@@ -17,7 +18,7 @@ export default function PrivacyPolicyPage() {
             Back
           </Button>
         </div>
-        <Card>
+        <GlassSurface intensity="medium">
           <CardHeader>
             <CardTitle className="text-3xl font-bold tracking-tight text-center">Privacy Policy</CardTitle>
           </CardHeader>
@@ -160,7 +161,7 @@ export default function PrivacyPolicyPage() {
             </p>
 
           </CardContent>
-        </Card>
+        </GlassSurface>
       </div>
     </div>
   );

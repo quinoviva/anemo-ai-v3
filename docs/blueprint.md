@@ -16,7 +16,7 @@
 - Primary color: Light blue (#B0E2FF) to evoke a sense of calmness and health.
 - Background color: Very light blue (#E6F7FF) to complement the primary color without overwhelming it.
 - Accent color: Soft green (#C2FFB0) to highlight positive indicators and interactive elements.
-- Body and headline font: 'Inter' for a modern, neutral, and readable feel.
+- Body and headline font: 'Space Grotesk' for a modern, tech-forward, and readable feel.
 - Use clean, minimalist icons to represent health indicators and app features.
 - Employ a clean, responsive layout optimized for mobile and desktop use, ensuring accessibility and ease of navigation.
 - Incorporate subtle animations for user feedback and transitions to enhance the user experience.

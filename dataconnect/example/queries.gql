@@ -1,0 +1,29 @@
+mutation CreateUser($displayName: String!, $email: String, $gender: String, $height: Float, $weight: Float, $dateOfBirth: Date) @auth(level: USER, insecureReason: "This operation is safe to expose to all logged in users.") {
+  user_insert(data: {displayName: $displayName, email: $email, gender: $gender, height: $height, weight: $weight, createdAt_expr: "request.time", dateOfBirth: $dateOfBirth})
+}
+
+query GetUser @auth(level: USER) {
+  user(key: {id_expr: "auth.uid"}) {
+    id
+    displayName
+    email
+    gender
+    height
+    weight
+    dateOfBirth
+  }
+}
+
+mutation CreateSymptomEntry($symptomName: String!, $severity: Int!, $description: String) @auth(level: USER) {
+  symptomEntry_insert(data: {symptomName: $symptomName, severity: $severity, description: $description, userId_expr: "auth.uid", recordedAt_expr: "request.time"})
+}
+
+query ListSymptomEntries @auth(level: USER) {
+  symptomEntries(where: {userId: {eq_expr: "auth.uid"}}) {
+    id
+    symptomName
+    severity
+    description
+    recordedAt
+  }
+}

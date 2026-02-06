@@ -1,0 +1,1769 @@
+"""
+✨ `AnemiaAssessment_KeyOutput` returns the primary key fields of table type `AnemiaAssessment`.
+
+It has the same format as `AnemiaAssessment_Key`, but is only used as mutation return value.
+"""
+scalar AnemiaAssessment_KeyOutput
+"""
+✨ `DietaryIntake_KeyOutput` returns the primary key fields of table type `DietaryIntake`.
+
+It has the same format as `DietaryIntake_Key`, but is only used as mutation return value.
+"""
+scalar DietaryIntake_KeyOutput
+"""
+✨ `HealthMetric_KeyOutput` returns the primary key fields of table type `HealthMetric`.
+
+It has the same format as `HealthMetric_Key`, but is only used as mutation return value.
+"""
+scalar HealthMetric_KeyOutput
+"""
+✨ `SymptomEntry_KeyOutput` returns the primary key fields of table type `SymptomEntry`.
+
+It has the same format as `SymptomEntry_Key`, but is only used as mutation return value.
+"""
+scalar SymptomEntry_KeyOutput
+"""
+✨ `User_KeyOutput` returns the primary key fields of table type `User`.
+
+It has the same format as `User_Key`, but is only used as mutation return value.
+"""
+scalar User_KeyOutput
+"""
+✨ Generated data input type for table 'AnemiaAssessment'. It includes all necessary fields for creating or upserting rows into table.
+"""
+input AnemiaAssessment_Data {
+  """
+  ✨ Generated from Field `AnemiaAssessment`.`id` of type `UUID!`
+  """
+  id: UUID
+  """
+  ✨ `_expr` server value variant of `id` (✨ Generated from Field `AnemiaAssessment`.`id` of type `UUID!`)
+  """
+  id_expr: UUID_Expr
+  """
+  ✨ Generated from Field `AnemiaAssessment`.`userId` of type `UUID`
+  """
+  userId: UUID
+  """
+  ✨ `_expr` server value variant of `userId` (✨ Generated from Field `AnemiaAssessment`.`userId` of type `UUID`)
+  """
+  userId_expr: UUID_Expr
+  """
+  ✨ Generated from Field `AnemiaAssessment`.`user` of type `User`
+  """
+  user: User_Key
+  """
+  ✨ Generated from Field `AnemiaAssessment`.`assessedAt` of type `Timestamp!`
+  """
+  assessedAt: Timestamp
+  """
+  ✨ `_expr` server value variant of `assessedAt` (✨ Generated from Field `AnemiaAssessment`.`assessedAt` of type `Timestamp!`)
+  """
+  assessedAt_expr: Timestamp_Expr
+  """
+  ✨ `_time` server value variant of `assessedAt` (✨ Generated from Field `AnemiaAssessment`.`assessedAt` of type `Timestamp!`)
+  """
+  assessedAt_time: Timestamp_Relative
+  """
+  ✨ `_update` server value variant of `assessedAt` (✨ Generated from Field `AnemiaAssessment`.`assessedAt` of type `Timestamp!`)
+  """
+  assessedAt_update: [Timestamp_Update!]
+  """
+  ✨ Generated from Field `AnemiaAssessment`.`notes` of type `String`
+  """
+  notes: String
+  """
+  ✨ `_expr` server value variant of `notes` (✨ Generated from Field `AnemiaAssessment`.`notes` of type `String`)
+  """
+  notes_expr: String_Expr
+  """
+  ✨ Generated from Field `AnemiaAssessment`.`recommendations` of type `String`
+  """
+  recommendations: String
+  """
+  ✨ `_expr` server value variant of `recommendations` (✨ Generated from Field `AnemiaAssessment`.`recommendations` of type `String`)
+  """
+  recommendations_expr: String_Expr
+  """
+  ✨ Generated from Field `AnemiaAssessment`.`riskLevel` of type `String!`
+  """
+  riskLevel: String
+  """
+  ✨ `_expr` server value variant of `riskLevel` (✨ Generated from Field `AnemiaAssessment`.`riskLevel` of type `String!`)
+  """
+  riskLevel_expr: String_Expr
+}
+"""
+✨ Generated filter input type for table 'AnemiaAssessment'. This input allows filtering objects using various conditions. Use `_or`, `_and`, and `_not` to compose complex filters.
+"""
+input AnemiaAssessment_Filter {
+  """
+  Apply multiple filter conditions using `AND` logic.
+  """
+  _and: [AnemiaAssessment_Filter!]
+  """
+  Negate the result of the provided filter condition.
+  """
+  _not: AnemiaAssessment_Filter
+  """
+  Apply multiple filter conditions using `OR` logic.
+  """
+  _or: [AnemiaAssessment_Filter!]
+  """
+  ✨ Generated from Field `AnemiaAssessment`.`id` of type `UUID!`
+  """
+  id: UUID_Filter
+  """
+  ✨ Generated from Field `AnemiaAssessment`.`userId` of type `UUID`
+  """
+  userId: UUID_Filter
+  """
+  ✨ Generated from Field `AnemiaAssessment`.`user` of type `User`
+  """
+  user: User_Filter
+  """
+  ✨ Generated from Field `AnemiaAssessment`.`assessedAt` of type `Timestamp!`
+  """
+  assessedAt: Timestamp_Filter
+  """
+  ✨ Generated from Field `AnemiaAssessment`.`notes` of type `String`
+  """
+  notes: String_Filter
+  """
+  ✨ Generated from Field `AnemiaAssessment`.`recommendations` of type `String`
+  """
+  recommendations: String_Filter
+  """
+  ✨ Generated from Field `AnemiaAssessment`.`riskLevel` of type `String!`
+  """
+  riskLevel: String_Filter
+}
+"""
+✨ Generated first-row input type for table 'AnemiaAssessment'. This input selects the first row matching the filter criteria, ordered according to the specified conditions.
+"""
+input AnemiaAssessment_FirstRow {
+  """
+  Order the result by the specified fields.
+  """
+  orderBy: [AnemiaAssessment_Order!]
+  """
+  Filters rows based on the specified conditions.
+  """
+  where: AnemiaAssessment_Filter
+}
+"""
+✨ Generated having input type for table 'AnemiaAssessment'. This input allows you to filter groups during aggregate queries using various conditions. Use `_or`, `_and`, and `_not` to compose complex filters.
+"""
+input AnemiaAssessment_Having {
+  """
+  Apply multiple Having conditions using `AND` logic.
+  """
+  _and: [AnemiaAssessment_Having!]
+  """
+  Whether to apply DISTINCT to the aggregate function.
+  """
+  _distinct: Boolean
+  """
+  Negate the result of the provided Having condition.
+  """
+  _not: AnemiaAssessment_Having
+  """
+  Apply multiple Having conditions using `OR` logic.
+  """
+  _or: [AnemiaAssessment_Having!]
+  """
+  ✨ Generated from Field `AnemiaAssessment`.`_count` of type `Int!`
+  """
+  _count: Int_Filter
+  """
+  ✨ Generated from Field `AnemiaAssessment`.`assessedAt_count` of type `Int!`
+  """
+  assessedAt_count: Int_Filter
+  """
+  ✨ Generated from Field `AnemiaAssessment`.`id_count` of type `Int!`
+  """
+  id_count: Int_Filter
+  """
+  ✨ Generated from Field `AnemiaAssessment`.`notes_count` of type `Int!`
+  """
+  notes_count: Int_Filter
+  """
+  ✨ Generated from Field `AnemiaAssessment`.`recommendations_count` of type `Int!`
+  """
+  recommendations_count: Int_Filter
+  """
+  ✨ Generated from Field `AnemiaAssessment`.`riskLevel_count` of type `Int!`
+  """
+  riskLevel_count: Int_Filter
+  """
+  ✨ Generated from Field `AnemiaAssessment`.`userId_count` of type `Int!`
+  """
+  userId_count: Int_Filter
+  """
+  ✨ Generated from Field `AnemiaAssessment`.`assessedAt_min` of type `Timestamp`
+  """
+  assessedAt_min: Timestamp_Filter
+  """
+  ✨ Generated from Field `AnemiaAssessment`.`assessedAt_max` of type `Timestamp`
+  """
+  assessedAt_max: Timestamp_Filter
+}
+"""
+✨ Generated key input type for table 'AnemiaAssessment'. It represents the primary key fields used to uniquely identify a row in the table.
+"""
+input AnemiaAssessment_Key {
+  """
+  ✨ Generated from Field `AnemiaAssessment`.`id` of type `UUID!`
+  """
+  id: UUID
+  """
+  ✨ `_expr` server value variant of `id` (✨ Generated from Field `AnemiaAssessment`.`id` of type `UUID!`)
+  """
+  id_expr: UUID_Expr
+}
+"""
+✨ Generated list filter input type for table 'AnemiaAssessment'. This input applies filtering logic based on the count or existence of related objects that matches certain criteria.
+"""
+input AnemiaAssessment_ListFilter {
+  """
+  The desired number of objects that match the condition (defaults to at least one).
+  """
+  count: Int_Filter = {gt:0}
+  """
+  Condition of the related objects to filter for.
+  """
+  exist: AnemiaAssessment_Filter
+}
+"""
+✨ Generated order input type for table 'AnemiaAssessment'. This input defines the sorting order of rows in query results based on one or more fields.
+"""
+input AnemiaAssessment_Order {
+  """
+  ✨ Generated from Field `AnemiaAssessment`.`id` of type `UUID!`
+  """
+  id: OrderDirection
+  """
+  ✨ Generated from Field `AnemiaAssessment`.`userId` of type `UUID`
+  """
+  userId: OrderDirection
+  """
+  ✨ Generated from Field `AnemiaAssessment`.`user` of type `User`
+  """
+  user: User_Order
+  """
+  ✨ Generated from Field `AnemiaAssessment`.`assessedAt` of type `Timestamp!`
+  """
+  assessedAt: OrderDirection
+  """
+  ✨ Generated from Field `AnemiaAssessment`.`notes` of type `String`
+  """
+  notes: OrderDirection
+  """
+  ✨ Generated from Field `AnemiaAssessment`.`recommendations` of type `String`
+  """
+  recommendations: OrderDirection
+  """
+  ✨ Generated from Field `AnemiaAssessment`.`riskLevel` of type `String!`
+  """
+  riskLevel: OrderDirection
+  """
+  ✨ Generated from Field `AnemiaAssessment`.`_count` of type `Int!`
+  """
+  _count: OrderDirection
+  """
+  ✨ Generated from Field `AnemiaAssessment`.`assessedAt_count` of type `Int!`
+  """
+  assessedAt_count: OrderDirection
+  """
+  ✨ Generated from Field `AnemiaAssessment`.`id_count` of type `Int!`
+  """
+  id_count: OrderDirection
+  """
+  ✨ Generated from Field `AnemiaAssessment`.`notes_count` of type `Int!`
+  """
+  notes_count: OrderDirection
+  """
+  ✨ Generated from Field `AnemiaAssessment`.`recommendations_count` of type `Int!`
+  """
+  recommendations_count: OrderDirection
+  """
+  ✨ Generated from Field `AnemiaAssessment`.`riskLevel_count` of type `Int!`
+  """
+  riskLevel_count: OrderDirection
+  """
+  ✨ Generated from Field `AnemiaAssessment`.`userId_count` of type `Int!`
+  """
+  userId_count: OrderDirection
+  """
+  ✨ Generated from Field `AnemiaAssessment`.`assessedAt_min` of type `Timestamp`
+  """
+  assessedAt_min: OrderDirection
+  """
+  ✨ Generated from Field `AnemiaAssessment`.`assessedAt_max` of type `Timestamp`
+  """
+  assessedAt_max: OrderDirection
+}
+"""
+✨ Generated data input type for table 'DietaryIntake'. It includes all necessary fields for creating or upserting rows into table.
+"""
+input DietaryIntake_Data {
+  """
+  ✨ Generated from Field `DietaryIntake`.`id` of type `UUID!`
+  """
+  id: UUID
+  """
+  ✨ `_expr` server value variant of `id` (✨ Generated from Field `DietaryIntake`.`id` of type `UUID!`)
+  """
+  id_expr: UUID_Expr
+  """
+  ✨ Generated from Field `DietaryIntake`.`userId` of type `UUID`
+  """
+  userId: UUID
+  """
+  ✨ `_expr` server value variant of `userId` (✨ Generated from Field `DietaryIntake`.`userId` of type `UUID`)
+  """
+  userId_expr: UUID_Expr
+  """
+  ✨ Generated from Field `DietaryIntake`.`user` of type `User`
+  """
+  user: User_Key
+  """
+  ✨ Generated from Field `DietaryIntake`.`consumedAt` of type `Timestamp!`
+  """
+  consumedAt: Timestamp
+  """
+  ✨ `_expr` server value variant of `consumedAt` (✨ Generated from Field `DietaryIntake`.`consumedAt` of type `Timestamp!`)
+  """
+  consumedAt_expr: Timestamp_Expr
+  """
+  ✨ `_time` server value variant of `consumedAt` (✨ Generated from Field `DietaryIntake`.`consumedAt` of type `Timestamp!`)
+  """
+  consumedAt_time: Timestamp_Relative
+  """
+  ✨ `_update` server value variant of `consumedAt` (✨ Generated from Field `DietaryIntake`.`consumedAt` of type `Timestamp!`)
+  """
+  consumedAt_update: [Timestamp_Update!]
+  """
+  ✨ Generated from Field `DietaryIntake`.`foodItem` of type `String!`
+  """
+  foodItem: String
+  """
+  ✨ `_expr` server value variant of `foodItem` (✨ Generated from Field `DietaryIntake`.`foodItem` of type `String!`)
+  """
+  foodItem_expr: String_Expr
+  """
+  ✨ Generated from Field `DietaryIntake`.`ironContentEstimate` of type `Float`
+  """
+  ironContentEstimate: Float
+  """
+  ✨ `_expr` server value variant of `ironContentEstimate` (✨ Generated from Field `DietaryIntake`.`ironContentEstimate` of type `Float`)
+  """
+  ironContentEstimate_expr: Float_Expr
+  """
+  ✨ `_update` server value variant of `ironContentEstimate` (✨ Generated from Field `DietaryIntake`.`ironContentEstimate` of type `Float`)
+  """
+  ironContentEstimate_update: [Float_Update!]
+  """
+  ✨ Generated from Field `DietaryIntake`.`quantity` of type `Float!`
+  """
+  quantity: Float
+  """
+  ✨ `_expr` server value variant of `quantity` (✨ Generated from Field `DietaryIntake`.`quantity` of type `Float!`)
+  """
+  quantity_expr: Float_Expr
+  """
+  ✨ `_update` server value variant of `quantity` (✨ Generated from Field `DietaryIntake`.`quantity` of type `Float!`)
+  """
+  quantity_update: [Float_Update!]
+  """
+  ✨ Generated from Field `DietaryIntake`.`unit` of type `String!`
+  """
+  unit: String
+  """
+  ✨ `_expr` server value variant of `unit` (✨ Generated from Field `DietaryIntake`.`unit` of type `String!`)
+  """
+  unit_expr: String_Expr
+  """
+  ✨ Generated from Field `DietaryIntake`.`vitaminCConsumption` of type `Boolean`
+  """
+  vitaminCConsumption: Boolean
+  """
+  ✨ `_expr` server value variant of `vitaminCConsumption` (✨ Generated from Field `DietaryIntake`.`vitaminCConsumption` of type `Boolean`)
+  """
+  vitaminCConsumption_expr: Boolean_Expr
+}
+"""
+✨ Generated filter input type for table 'DietaryIntake'. This input allows filtering objects using various conditions. Use `_or`, `_and`, and `_not` to compose complex filters.
+"""
+input DietaryIntake_Filter {
+  """
+  Apply multiple filter conditions using `AND` logic.
+  """
+  _and: [DietaryIntake_Filter!]
+  """
+  Negate the result of the provided filter condition.
+  """
+  _not: DietaryIntake_Filter
+  """
+  Apply multiple filter conditions using `OR` logic.
+  """
+  _or: [DietaryIntake_Filter!]
+  """
+  ✨ Generated from Field `DietaryIntake`.`id` of type `UUID!`
+  """
+  id: UUID_Filter
+  """
+  ✨ Generated from Field `DietaryIntake`.`userId` of type `UUID`
+  """
+  userId: UUID_Filter
+  """
+  ✨ Generated from Field `DietaryIntake`.`user` of type `User`
+  """
+  user: User_Filter
+  """
+  ✨ Generated from Field `DietaryIntake`.`consumedAt` of type `Timestamp!`
+  """
+  consumedAt: Timestamp_Filter
+  """
+  ✨ Generated from Field `DietaryIntake`.`foodItem` of type `String!`
+  """
+  foodItem: String_Filter
+  """
+  ✨ Generated from Field `DietaryIntake`.`ironContentEstimate` of type `Float`
+  """
+  ironContentEstimate: Float_Filter
+  """
+  ✨ Generated from Field `DietaryIntake`.`quantity` of type `Float!`
+  """
+  quantity: Float_Filter
+  """
+  ✨ Generated from Field `DietaryIntake`.`unit` of type `String!`
+  """
+  unit: String_Filter
+  """
+  ✨ Generated from Field `DietaryIntake`.`vitaminCConsumption` of type `Boolean`
+  """
+  vitaminCConsumption: Boolean_Filter
+}
+"""
+✨ Generated first-row input type for table 'DietaryIntake'. This input selects the first row matching the filter criteria, ordered according to the specified conditions.
+"""
+input DietaryIntake_FirstRow {
+  """
+  Order the result by the specified fields.
+  """
+  orderBy: [DietaryIntake_Order!]
+  """
+  Filters rows based on the specified conditions.
+  """
+  where: DietaryIntake_Filter
+}
+"""
+✨ Generated having input type for table 'DietaryIntake'. This input allows you to filter groups during aggregate queries using various conditions. Use `_or`, `_and`, and `_not` to compose complex filters.
+"""
+input DietaryIntake_Having {
+  """
+  Apply multiple Having conditions using `AND` logic.
+  """
+  _and: [DietaryIntake_Having!]
+  """
+  Whether to apply DISTINCT to the aggregate function.
+  """
+  _distinct: Boolean
+  """
+  Negate the result of the provided Having condition.
+  """
+  _not: DietaryIntake_Having
+  """
+  Apply multiple Having conditions using `OR` logic.
+  """
+  _or: [DietaryIntake_Having!]
+  """
+  ✨ Generated from Field `DietaryIntake`.`_count` of type `Int!`
+  """
+  _count: Int_Filter
+  """
+  ✨ Generated from Field `DietaryIntake`.`consumedAt_count` of type `Int!`
+  """
+  consumedAt_count: Int_Filter
+  """
+  ✨ Generated from Field `DietaryIntake`.`foodItem_count` of type `Int!`
+  """
+  foodItem_count: Int_Filter
+  """
+  ✨ Generated from Field `DietaryIntake`.`id_count` of type `Int!`
+  """
+  id_count: Int_Filter
+  """
+  ✨ Generated from Field `DietaryIntake`.`ironContentEstimate_count` of type `Int!`
+  """
+  ironContentEstimate_count: Int_Filter
+  """
+  ✨ Generated from Field `DietaryIntake`.`quantity_count` of type `Int!`
+  """
+  quantity_count: Int_Filter
+  """
+  ✨ Generated from Field `DietaryIntake`.`unit_count` of type `Int!`
+  """
+  unit_count: Int_Filter
+  """
+  ✨ Generated from Field `DietaryIntake`.`userId_count` of type `Int!`
+  """
+  userId_count: Int_Filter
+  """
+  ✨ Generated from Field `DietaryIntake`.`vitaminCConsumption_count` of type `Int!`
+  """
+  vitaminCConsumption_count: Int_Filter
+  """
+  ✨ Generated from Field `DietaryIntake`.`ironContentEstimate_sum` of type `Float`
+  """
+  ironContentEstimate_sum: Float_Filter
+  """
+  ✨ Generated from Field `DietaryIntake`.`quantity_sum` of type `Float`
+  """
+  quantity_sum: Float_Filter
+  """
+  ✨ Generated from Field `DietaryIntake`.`ironContentEstimate_avg` of type `Float`
+  """
+  ironContentEstimate_avg: Float_Filter
+  """
+  ✨ Generated from Field `DietaryIntake`.`quantity_avg` of type `Float`
+  """
+  quantity_avg: Float_Filter
+  """
+  ✨ Generated from Field `DietaryIntake`.`consumedAt_min` of type `Timestamp`
+  """
+  consumedAt_min: Timestamp_Filter
+  """
+  ✨ Generated from Field `DietaryIntake`.`ironContentEstimate_min` of type `Float`
+  """
+  ironContentEstimate_min: Float_Filter
+  """
+  ✨ Generated from Field `DietaryIntake`.`quantity_min` of type `Float`
+  """
+  quantity_min: Float_Filter
+  """
+  ✨ Generated from Field `DietaryIntake`.`consumedAt_max` of type `Timestamp`
+  """
+  consumedAt_max: Timestamp_Filter
+  """
+  ✨ Generated from Field `DietaryIntake`.`ironContentEstimate_max` of type `Float`
+  """
+  ironContentEstimate_max: Float_Filter
+  """
+  ✨ Generated from Field `DietaryIntake`.`quantity_max` of type `Float`
+  """
+  quantity_max: Float_Filter
+}
+"""
+✨ Generated key input type for table 'DietaryIntake'. It represents the primary key fields used to uniquely identify a row in the table.
+"""
+input DietaryIntake_Key {
+  """
+  ✨ Generated from Field `DietaryIntake`.`id` of type `UUID!`
+  """
+  id: UUID
+  """
+  ✨ `_expr` server value variant of `id` (✨ Generated from Field `DietaryIntake`.`id` of type `UUID!`)
+  """
+  id_expr: UUID_Expr
+}
+"""
+✨ Generated list filter input type for table 'DietaryIntake'. This input applies filtering logic based on the count or existence of related objects that matches certain criteria.
+"""
+input DietaryIntake_ListFilter {
+  """
+  The desired number of objects that match the condition (defaults to at least one).
+  """
+  count: Int_Filter = {gt:0}
+  """
+  Condition of the related objects to filter for.
+  """
+  exist: DietaryIntake_Filter
+}
+"""
+✨ Generated order input type for table 'DietaryIntake'. This input defines the sorting order of rows in query results based on one or more fields.
+"""
+input DietaryIntake_Order {
+  """
+  ✨ Generated from Field `DietaryIntake`.`id` of type `UUID!`
+  """
+  id: OrderDirection
+  """
+  ✨ Generated from Field `DietaryIntake`.`userId` of type `UUID`
+  """
+  userId: OrderDirection
+  """
+  ✨ Generated from Field `DietaryIntake`.`user` of type `User`
+  """
+  user: User_Order
+  """
+  ✨ Generated from Field `DietaryIntake`.`consumedAt` of type `Timestamp!`
+  """
+  consumedAt: OrderDirection
+  """
+  ✨ Generated from Field `DietaryIntake`.`foodItem` of type `String!`
+  """
+  foodItem: OrderDirection
+  """
+  ✨ Generated from Field `DietaryIntake`.`ironContentEstimate` of type `Float`
+  """
+  ironContentEstimate: OrderDirection
+  """
+  ✨ Generated from Field `DietaryIntake`.`quantity` of type `Float!`
+  """
+  quantity: OrderDirection
+  """
+  ✨ Generated from Field `DietaryIntake`.`unit` of type `String!`
+  """
+  unit: OrderDirection
+  """
+  ✨ Generated from Field `DietaryIntake`.`vitaminCConsumption` of type `Boolean`
+  """
+  vitaminCConsumption: OrderDirection
+  """
+  ✨ Generated from Field `DietaryIntake`.`_count` of type `Int!`
+  """
+  _count: OrderDirection
+  """
+  ✨ Generated from Field `DietaryIntake`.`consumedAt_count` of type `Int!`
+  """
+  consumedAt_count: OrderDirection
+  """
+  ✨ Generated from Field `DietaryIntake`.`foodItem_count` of type `Int!`
+  """
+  foodItem_count: OrderDirection
+  """
+  ✨ Generated from Field `DietaryIntake`.`id_count` of type `Int!`
+  """
+  id_count: OrderDirection
+  """
+  ✨ Generated from Field `DietaryIntake`.`ironContentEstimate_count` of type `Int!`
+  """
+  ironContentEstimate_count: OrderDirection
+  """
+  ✨ Generated from Field `DietaryIntake`.`quantity_count` of type `Int!`
+  """
+  quantity_count: OrderDirection
+  """
+  ✨ Generated from Field `DietaryIntake`.`unit_count` of type `Int!`
+  """
+  unit_count: OrderDirection
+  """
+  ✨ Generated from Field `DietaryIntake`.`userId_count` of type `Int!`
+  """
+  userId_count: OrderDirection
+  """
+  ✨ Generated from Field `DietaryIntake`.`vitaminCConsumption_count` of type `Int!`
+  """
+  vitaminCConsumption_count: OrderDirection
+  """
+  ✨ Generated from Field `DietaryIntake`.`ironContentEstimate_sum` of type `Float`
+  """
+  ironContentEstimate_sum: OrderDirection
+  """
+  ✨ Generated from Field `DietaryIntake`.`quantity_sum` of type `Float`
+  """
+  quantity_sum: OrderDirection
+  """
+  ✨ Generated from Field `DietaryIntake`.`ironContentEstimate_avg` of type `Float`
+  """
+  ironContentEstimate_avg: OrderDirection
+  """
+  ✨ Generated from Field `DietaryIntake`.`quantity_avg` of type `Float`
+  """
+  quantity_avg: OrderDirection
+  """
+  ✨ Generated from Field `DietaryIntake`.`consumedAt_min` of type `Timestamp`
+  """
+  consumedAt_min: OrderDirection
+  """
+  ✨ Generated from Field `DietaryIntake`.`ironContentEstimate_min` of type `Float`
+  """
+  ironContentEstimate_min: OrderDirection
+  """
+  ✨ Generated from Field `DietaryIntake`.`quantity_min` of type `Float`
+  """
+  quantity_min: OrderDirection
+  """
+  ✨ Generated from Field `DietaryIntake`.`consumedAt_max` of type `Timestamp`
+  """
+  consumedAt_max: OrderDirection
+  """
+  ✨ Generated from Field `DietaryIntake`.`ironContentEstimate_max` of type `Float`
+  """
+  ironContentEstimate_max: OrderDirection
+  """
+  ✨ Generated from Field `DietaryIntake`.`quantity_max` of type `Float`
+  """
+  quantity_max: OrderDirection
+}
+"""
+✨ Generated data input type for table 'HealthMetric'. It includes all necessary fields for creating or upserting rows into table.
+"""
+input HealthMetric_Data {
+  """
+  ✨ Generated from Field `HealthMetric`.`id` of type `UUID!`
+  """
+  id: UUID
+  """
+  ✨ `_expr` server value variant of `id` (✨ Generated from Field `HealthMetric`.`id` of type `UUID!`)
+  """
+  id_expr: UUID_Expr
+  """
+  ✨ Generated from Field `HealthMetric`.`userId` of type `UUID`
+  """
+  userId: UUID
+  """
+  ✨ `_expr` server value variant of `userId` (✨ Generated from Field `HealthMetric`.`userId` of type `UUID`)
+  """
+  userId_expr: UUID_Expr
+  """
+  ✨ Generated from Field `HealthMetric`.`user` of type `User`
+  """
+  user: User_Key
+  """
+  ✨ Generated from Field `HealthMetric`.`metricName` of type `String!`
+  """
+  metricName: String
+  """
+  ✨ `_expr` server value variant of `metricName` (✨ Generated from Field `HealthMetric`.`metricName` of type `String!`)
+  """
+  metricName_expr: String_Expr
+  """
+  ✨ Generated from Field `HealthMetric`.`notes` of type `String`
+  """
+  notes: String
+  """
+  ✨ `_expr` server value variant of `notes` (✨ Generated from Field `HealthMetric`.`notes` of type `String`)
+  """
+  notes_expr: String_Expr
+  """
+  ✨ Generated from Field `HealthMetric`.`recordedAt` of type `Timestamp!`
+  """
+  recordedAt: Timestamp
+  """
+  ✨ `_expr` server value variant of `recordedAt` (✨ Generated from Field `HealthMetric`.`recordedAt` of type `Timestamp!`)
+  """
+  recordedAt_expr: Timestamp_Expr
+  """
+  ✨ `_time` server value variant of `recordedAt` (✨ Generated from Field `HealthMetric`.`recordedAt` of type `Timestamp!`)
+  """
+  recordedAt_time: Timestamp_Relative
+  """
+  ✨ `_update` server value variant of `recordedAt` (✨ Generated from Field `HealthMetric`.`recordedAt` of type `Timestamp!`)
+  """
+  recordedAt_update: [Timestamp_Update!]
+  """
+  ✨ Generated from Field `HealthMetric`.`unit` of type `String!`
+  """
+  unit: String
+  """
+  ✨ `_expr` server value variant of `unit` (✨ Generated from Field `HealthMetric`.`unit` of type `String!`)
+  """
+  unit_expr: String_Expr
+  """
+  ✨ Generated from Field `HealthMetric`.`value` of type `Float!`
+  """
+  value: Float
+  """
+  ✨ `_expr` server value variant of `value` (✨ Generated from Field `HealthMetric`.`value` of type `Float!`)
+  """
+  value_expr: Float_Expr
+  """
+  ✨ `_update` server value variant of `value` (✨ Generated from Field `HealthMetric`.`value` of type `Float!`)
+  """
+  value_update: [Float_Update!]
+}
+"""
+✨ Generated filter input type for table 'HealthMetric'. This input allows filtering objects using various conditions. Use `_or`, `_and`, and `_not` to compose complex filters.
+"""
+input HealthMetric_Filter {
+  """
+  Apply multiple filter conditions using `AND` logic.
+  """
+  _and: [HealthMetric_Filter!]
+  """
+  Negate the result of the provided filter condition.
+  """
+  _not: HealthMetric_Filter
+  """
+  Apply multiple filter conditions using `OR` logic.
+  """
+  _or: [HealthMetric_Filter!]
+  """
+  ✨ Generated from Field `HealthMetric`.`id` of type `UUID!`
+  """
+  id: UUID_Filter
+  """
+  ✨ Generated from Field `HealthMetric`.`userId` of type `UUID`
+  """
+  userId: UUID_Filter
+  """
+  ✨ Generated from Field `HealthMetric`.`user` of type `User`
+  """
+  user: User_Filter
+  """
+  ✨ Generated from Field `HealthMetric`.`metricName` of type `String!`
+  """
+  metricName: String_Filter
+  """
+  ✨ Generated from Field `HealthMetric`.`notes` of type `String`
+  """
+  notes: String_Filter
+  """
+  ✨ Generated from Field `HealthMetric`.`recordedAt` of type `Timestamp!`
+  """
+  recordedAt: Timestamp_Filter
+  """
+  ✨ Generated from Field `HealthMetric`.`unit` of type `String!`
+  """
+  unit: String_Filter
+  """
+  ✨ Generated from Field `HealthMetric`.`value` of type `Float!`
+  """
+  value: Float_Filter
+}
+"""
+✨ Generated first-row input type for table 'HealthMetric'. This input selects the first row matching the filter criteria, ordered according to the specified conditions.
+"""
+input HealthMetric_FirstRow {
+  """
+  Order the result by the specified fields.
+  """
+  orderBy: [HealthMetric_Order!]
+  """
+  Filters rows based on the specified conditions.
+  """
+  where: HealthMetric_Filter
+}
+"""
+✨ Generated having input type for table 'HealthMetric'. This input allows you to filter groups during aggregate queries using various conditions. Use `_or`, `_and`, and `_not` to compose complex filters.
+"""
+input HealthMetric_Having {
+  """
+  Apply multiple Having conditions using `AND` logic.
+  """
+  _and: [HealthMetric_Having!]
+  """
+  Whether to apply DISTINCT to the aggregate function.
+  """
+  _distinct: Boolean
+  """
+  Negate the result of the provided Having condition.
+  """
+  _not: HealthMetric_Having
+  """
+  Apply multiple Having conditions using `OR` logic.
+  """
+  _or: [HealthMetric_Having!]
+  """
+  ✨ Generated from Field `HealthMetric`.`_count` of type `Int!`
+  """
+  _count: Int_Filter
+  """
+  ✨ Generated from Field `HealthMetric`.`id_count` of type `Int!`
+  """
+  id_count: Int_Filter
+  """
+  ✨ Generated from Field `HealthMetric`.`metricName_count` of type `Int!`
+  """
+  metricName_count: Int_Filter
+  """
+  ✨ Generated from Field `HealthMetric`.`notes_count` of type `Int!`
+  """
+  notes_count: Int_Filter
+  """
+  ✨ Generated from Field `HealthMetric`.`recordedAt_count` of type `Int!`
+  """
+  recordedAt_count: Int_Filter
+  """
+  ✨ Generated from Field `HealthMetric`.`unit_count` of type `Int!`
+  """
+  unit_count: Int_Filter
+  """
+  ✨ Generated from Field `HealthMetric`.`userId_count` of type `Int!`
+  """
+  userId_count: Int_Filter
+  """
+  ✨ Generated from Field `HealthMetric`.`value_count` of type `Int!`
+  """
+  value_count: Int_Filter
+  """
+  ✨ Generated from Field `HealthMetric`.`value_sum` of type `Float`
+  """
+  value_sum: Float_Filter
+  """
+  ✨ Generated from Field `HealthMetric`.`value_avg` of type `Float`
+  """
+  value_avg: Float_Filter
+  """
+  ✨ Generated from Field `HealthMetric`.`recordedAt_min` of type `Timestamp`
+  """
+  recordedAt_min: Timestamp_Filter
+  """
+  ✨ Generated from Field `HealthMetric`.`value_min` of type `Float`
+  """
+  value_min: Float_Filter
+  """
+  ✨ Generated from Field `HealthMetric`.`recordedAt_max` of type `Timestamp`
+  """
+  recordedAt_max: Timestamp_Filter
+  """
+  ✨ Generated from Field `HealthMetric`.`value_max` of type `Float`
+  """
+  value_max: Float_Filter
+}
+"""
+✨ Generated key input type for table 'HealthMetric'. It represents the primary key fields used to uniquely identify a row in the table.
+"""
+input HealthMetric_Key {
+  """
+  ✨ Generated from Field `HealthMetric`.`id` of type `UUID!`
+  """
+  id: UUID
+  """
+  ✨ `_expr` server value variant of `id` (✨ Generated from Field `HealthMetric`.`id` of type `UUID!`)
+  """
+  id_expr: UUID_Expr
+}
+"""
+✨ Generated list filter input type for table 'HealthMetric'. This input applies filtering logic based on the count or existence of related objects that matches certain criteria.
+"""
+input HealthMetric_ListFilter {
+  """
+  The desired number of objects that match the condition (defaults to at least one).
+  """
+  count: Int_Filter = {gt:0}
+  """
+  Condition of the related objects to filter for.
+  """
+  exist: HealthMetric_Filter
+}
+"""
+✨ Generated order input type for table 'HealthMetric'. This input defines the sorting order of rows in query results based on one or more fields.
+"""
+input HealthMetric_Order {
+  """
+  ✨ Generated from Field `HealthMetric`.`id` of type `UUID!`
+  """
+  id: OrderDirection
+  """
+  ✨ Generated from Field `HealthMetric`.`userId` of type `UUID`
+  """
+  userId: OrderDirection
+  """
+  ✨ Generated from Field `HealthMetric`.`user` of type `User`
+  """
+  user: User_Order
+  """
+  ✨ Generated from Field `HealthMetric`.`metricName` of type `String!`
+  """
+  metricName: OrderDirection
+  """
+  ✨ Generated from Field `HealthMetric`.`notes` of type `String`
+  """
+  notes: OrderDirection
+  """
+  ✨ Generated from Field `HealthMetric`.`recordedAt` of type `Timestamp!`
+  """
+  recordedAt: OrderDirection
+  """
+  ✨ Generated from Field `HealthMetric`.`unit` of type `String!`
+  """
+  unit: OrderDirection
+  """
+  ✨ Generated from Field `HealthMetric`.`value` of type `Float!`
+  """
+  value: OrderDirection
+  """
+  ✨ Generated from Field `HealthMetric`.`_count` of type `Int!`
+  """
+  _count: OrderDirection
+  """
+  ✨ Generated from Field `HealthMetric`.`id_count` of type `Int!`
+  """
+  id_count: OrderDirection
+  """
+  ✨ Generated from Field `HealthMetric`.`metricName_count` of type `Int!`
+  """
+  metricName_count: OrderDirection
+  """
+  ✨ Generated from Field `HealthMetric`.`notes_count` of type `Int!`
+  """
+  notes_count: OrderDirection
+  """
+  ✨ Generated from Field `HealthMetric`.`recordedAt_count` of type `Int!`
+  """
+  recordedAt_count: OrderDirection
+  """
+  ✨ Generated from Field `HealthMetric`.`unit_count` of type `Int!`
+  """
+  unit_count: OrderDirection
+  """
+  ✨ Generated from Field `HealthMetric`.`userId_count` of type `Int!`
+  """
+  userId_count: OrderDirection
+  """
+  ✨ Generated from Field `HealthMetric`.`value_count` of type `Int!`
+  """
+  value_count: OrderDirection
+  """
+  ✨ Generated from Field `HealthMetric`.`value_sum` of type `Float`
+  """
+  value_sum: OrderDirection
+  """
+  ✨ Generated from Field `HealthMetric`.`value_avg` of type `Float`
+  """
+  value_avg: OrderDirection
+  """
+  ✨ Generated from Field `HealthMetric`.`recordedAt_min` of type `Timestamp`
+  """
+  recordedAt_min: OrderDirection
+  """
+  ✨ Generated from Field `HealthMetric`.`value_min` of type `Float`
+  """
+  value_min: OrderDirection
+  """
+  ✨ Generated from Field `HealthMetric`.`recordedAt_max` of type `Timestamp`
+  """
+  recordedAt_max: OrderDirection
+  """
+  ✨ Generated from Field `HealthMetric`.`value_max` of type `Float`
+  """
+  value_max: OrderDirection
+}
+"""
+✨ Generated data input type for table 'SymptomEntry'. It includes all necessary fields for creating or upserting rows into table.
+"""
+input SymptomEntry_Data {
+  """
+  ✨ Generated from Field `SymptomEntry`.`id` of type `UUID!`
+  """
+  id: UUID
+  """
+  ✨ `_expr` server value variant of `id` (✨ Generated from Field `SymptomEntry`.`id` of type `UUID!`)
+  """
+  id_expr: UUID_Expr
+  """
+  ✨ Generated from Field `SymptomEntry`.`userId` of type `UUID`
+  """
+  userId: UUID
+  """
+  ✨ `_expr` server value variant of `userId` (✨ Generated from Field `SymptomEntry`.`userId` of type `UUID`)
+  """
+  userId_expr: UUID_Expr
+  """
+  ✨ Generated from Field `SymptomEntry`.`user` of type `User`
+  """
+  user: User_Key
+  """
+  ✨ Generated from Field `SymptomEntry`.`description` of type `String`
+  """
+  description: String
+  """
+  ✨ `_expr` server value variant of `description` (✨ Generated from Field `SymptomEntry`.`description` of type `String`)
+  """
+  description_expr: String_Expr
+  """
+  ✨ Generated from Field `SymptomEntry`.`recordedAt` of type `Timestamp!`
+  """
+  recordedAt: Timestamp
+  """
+  ✨ `_expr` server value variant of `recordedAt` (✨ Generated from Field `SymptomEntry`.`recordedAt` of type `Timestamp!`)
+  """
+  recordedAt_expr: Timestamp_Expr
+  """
+  ✨ `_time` server value variant of `recordedAt` (✨ Generated from Field `SymptomEntry`.`recordedAt` of type `Timestamp!`)
+  """
+  recordedAt_time: Timestamp_Relative
+  """
+  ✨ `_update` server value variant of `recordedAt` (✨ Generated from Field `SymptomEntry`.`recordedAt` of type `Timestamp!`)
+  """
+  recordedAt_update: [Timestamp_Update!]
+  """
+  ✨ Generated from Field `SymptomEntry`.`severity` of type `Int!`
+  """
+  severity: Int
+  """
+  ✨ `_expr` server value variant of `severity` (✨ Generated from Field `SymptomEntry`.`severity` of type `Int!`)
+  """
+  severity_expr: Int_Expr
+  """
+  ✨ `_update` server value variant of `severity` (✨ Generated from Field `SymptomEntry`.`severity` of type `Int!`)
+  """
+  severity_update: [Int_Update!]
+  """
+  ✨ Generated from Field `SymptomEntry`.`symptomName` of type `String!`
+  """
+  symptomName: String
+  """
+  ✨ `_expr` server value variant of `symptomName` (✨ Generated from Field `SymptomEntry`.`symptomName` of type `String!`)
+  """
+  symptomName_expr: String_Expr
+}
+"""
+✨ Generated filter input type for table 'SymptomEntry'. This input allows filtering objects using various conditions. Use `_or`, `_and`, and `_not` to compose complex filters.
+"""
+input SymptomEntry_Filter {
+  """
+  Apply multiple filter conditions using `AND` logic.
+  """
+  _and: [SymptomEntry_Filter!]
+  """
+  Negate the result of the provided filter condition.
+  """
+  _not: SymptomEntry_Filter
+  """
+  Apply multiple filter conditions using `OR` logic.
+  """
+  _or: [SymptomEntry_Filter!]
+  """
+  ✨ Generated from Field `SymptomEntry`.`id` of type `UUID!`
+  """
+  id: UUID_Filter
+  """
+  ✨ Generated from Field `SymptomEntry`.`userId` of type `UUID`
+  """
+  userId: UUID_Filter
+  """
+  ✨ Generated from Field `SymptomEntry`.`user` of type `User`
+  """
+  user: User_Filter
+  """
+  ✨ Generated from Field `SymptomEntry`.`description` of type `String`
+  """
+  description: String_Filter
+  """
+  ✨ Generated from Field `SymptomEntry`.`recordedAt` of type `Timestamp!`
+  """
+  recordedAt: Timestamp_Filter
+  """
+  ✨ Generated from Field `SymptomEntry`.`severity` of type `Int!`
+  """
+  severity: Int_Filter
+  """
+  ✨ Generated from Field `SymptomEntry`.`symptomName` of type `String!`
+  """
+  symptomName: String_Filter
+}
+"""
+✨ Generated first-row input type for table 'SymptomEntry'. This input selects the first row matching the filter criteria, ordered according to the specified conditions.
+"""
+input SymptomEntry_FirstRow {
+  """
+  Order the result by the specified fields.
+  """
+  orderBy: [SymptomEntry_Order!]
+  """
+  Filters rows based on the specified conditions.
+  """
+  where: SymptomEntry_Filter
+}
+"""
+✨ Generated having input type for table 'SymptomEntry'. This input allows you to filter groups during aggregate queries using various conditions. Use `_or`, `_and`, and `_not` to compose complex filters.
+"""
+input SymptomEntry_Having {
+  """
+  Apply multiple Having conditions using `AND` logic.
+  """
+  _and: [SymptomEntry_Having!]
+  """
+  Whether to apply DISTINCT to the aggregate function.
+  """
+  _distinct: Boolean
+  """
+  Negate the result of the provided Having condition.
+  """
+  _not: SymptomEntry_Having
+  """
+  Apply multiple Having conditions using `OR` logic.
+  """
+  _or: [SymptomEntry_Having!]
+  """
+  ✨ Generated from Field `SymptomEntry`.`_count` of type `Int!`
+  """
+  _count: Int_Filter
+  """
+  ✨ Generated from Field `SymptomEntry`.`description_count` of type `Int!`
+  """
+  description_count: Int_Filter
+  """
+  ✨ Generated from Field `SymptomEntry`.`id_count` of type `Int!`
+  """
+  id_count: Int_Filter
+  """
+  ✨ Generated from Field `SymptomEntry`.`recordedAt_count` of type `Int!`
+  """
+  recordedAt_count: Int_Filter
+  """
+  ✨ Generated from Field `SymptomEntry`.`severity_count` of type `Int!`
+  """
+  severity_count: Int_Filter
+  """
+  ✨ Generated from Field `SymptomEntry`.`symptomName_count` of type `Int!`
+  """
+  symptomName_count: Int_Filter
+  """
+  ✨ Generated from Field `SymptomEntry`.`userId_count` of type `Int!`
+  """
+  userId_count: Int_Filter
+  """
+  ✨ Generated from Field `SymptomEntry`.`severity_sum` of type `Int`
+  """
+  severity_sum: Int_Filter
+  """
+  ✨ Generated from Field `SymptomEntry`.`severity_avg` of type `Float`
+  """
+  severity_avg: Float_Filter
+  """
+  ✨ Generated from Field `SymptomEntry`.`recordedAt_min` of type `Timestamp`
+  """
+  recordedAt_min: Timestamp_Filter
+  """
+  ✨ Generated from Field `SymptomEntry`.`severity_min` of type `Int`
+  """
+  severity_min: Int_Filter
+  """
+  ✨ Generated from Field `SymptomEntry`.`recordedAt_max` of type `Timestamp`
+  """
+  recordedAt_max: Timestamp_Filter
+  """
+  ✨ Generated from Field `SymptomEntry`.`severity_max` of type `Int`
+  """
+  severity_max: Int_Filter
+}
+"""
+✨ Generated key input type for table 'SymptomEntry'. It represents the primary key fields used to uniquely identify a row in the table.
+"""
+input SymptomEntry_Key {
+  """
+  ✨ Generated from Field `SymptomEntry`.`id` of type `UUID!`
+  """
+  id: UUID
+  """
+  ✨ `_expr` server value variant of `id` (✨ Generated from Field `SymptomEntry`.`id` of type `UUID!`)
+  """
+  id_expr: UUID_Expr
+}
+"""
+✨ Generated list filter input type for table 'SymptomEntry'. This input applies filtering logic based on the count or existence of related objects that matches certain criteria.
+"""
+input SymptomEntry_ListFilter {
+  """
+  The desired number of objects that match the condition (defaults to at least one).
+  """
+  count: Int_Filter = {gt:0}
+  """
+  Condition of the related objects to filter for.
+  """
+  exist: SymptomEntry_Filter
+}
+"""
+✨ Generated order input type for table 'SymptomEntry'. This input defines the sorting order of rows in query results based on one or more fields.
+"""
+input SymptomEntry_Order {
+  """
+  ✨ Generated from Field `SymptomEntry`.`id` of type `UUID!`
+  """
+  id: OrderDirection
+  """
+  ✨ Generated from Field `SymptomEntry`.`userId` of type `UUID`
+  """
+  userId: OrderDirection
+  """
+  ✨ Generated from Field `SymptomEntry`.`user` of type `User`
+  """
+  user: User_Order
+  """
+  ✨ Generated from Field `SymptomEntry`.`description` of type `String`
+  """
+  description: OrderDirection
+  """
+  ✨ Generated from Field `SymptomEntry`.`recordedAt` of type `Timestamp!`
+  """
+  recordedAt: OrderDirection
+  """
+  ✨ Generated from Field `SymptomEntry`.`severity` of type `Int!`
+  """
+  severity: OrderDirection
+  """
+  ✨ Generated from Field `SymptomEntry`.`symptomName` of type `String!`
+  """
+  symptomName: OrderDirection
+  """
+  ✨ Generated from Field `SymptomEntry`.`_count` of type `Int!`
+  """
+  _count: OrderDirection
+  """
+  ✨ Generated from Field `SymptomEntry`.`description_count` of type `Int!`
+  """
+  description_count: OrderDirection
+  """
+  ✨ Generated from Field `SymptomEntry`.`id_count` of type `Int!`
+  """
+  id_count: OrderDirection
+  """
+  ✨ Generated from Field `SymptomEntry`.`recordedAt_count` of type `Int!`
+  """
+  recordedAt_count: OrderDirection
+  """
+  ✨ Generated from Field `SymptomEntry`.`severity_count` of type `Int!`
+  """
+  severity_count: OrderDirection
+  """
+  ✨ Generated from Field `SymptomEntry`.`symptomName_count` of type `Int!`
+  """
+  symptomName_count: OrderDirection
+  """
+  ✨ Generated from Field `SymptomEntry`.`userId_count` of type `Int!`
+  """
+  userId_count: OrderDirection
+  """
+  ✨ Generated from Field `SymptomEntry`.`severity_sum` of type `Int`
+  """
+  severity_sum: OrderDirection
+  """
+  ✨ Generated from Field `SymptomEntry`.`severity_avg` of type `Float`
+  """
+  severity_avg: OrderDirection
+  """
+  ✨ Generated from Field `SymptomEntry`.`recordedAt_min` of type `Timestamp`
+  """
+  recordedAt_min: OrderDirection
+  """
+  ✨ Generated from Field `SymptomEntry`.`severity_min` of type `Int`
+  """
+  severity_min: OrderDirection
+  """
+  ✨ Generated from Field `SymptomEntry`.`recordedAt_max` of type `Timestamp`
+  """
+  recordedAt_max: OrderDirection
+  """
+  ✨ Generated from Field `SymptomEntry`.`severity_max` of type `Int`
+  """
+  severity_max: OrderDirection
+}
+"""
+✨ Generated data input type for table 'User'. It includes all necessary fields for creating or upserting rows into table.
+"""
+input User_Data {
+  """
+  ✨ Generated from Field `User`.`id` of type `UUID!`
+  """
+  id: UUID
+  """
+  ✨ `_expr` server value variant of `id` (✨ Generated from Field `User`.`id` of type `UUID!`)
+  """
+  id_expr: UUID_Expr
+  """
+  ✨ Generated from Field `User`.`createdAt` of type `Timestamp!`
+  """
+  createdAt: Timestamp
+  """
+  ✨ `_expr` server value variant of `createdAt` (✨ Generated from Field `User`.`createdAt` of type `Timestamp!`)
+  """
+  createdAt_expr: Timestamp_Expr
+  """
+  ✨ `_time` server value variant of `createdAt` (✨ Generated from Field `User`.`createdAt` of type `Timestamp!`)
+  """
+  createdAt_time: Timestamp_Relative
+  """
+  ✨ `_update` server value variant of `createdAt` (✨ Generated from Field `User`.`createdAt` of type `Timestamp!`)
+  """
+  createdAt_update: [Timestamp_Update!]
+  """
+  ✨ Generated from Field `User`.`dateOfBirth` of type `Date`
+  """
+  dateOfBirth: Date
+  """
+  ✨ `_date` server value variant of `dateOfBirth` (✨ Generated from Field `User`.`dateOfBirth` of type `Date`)
+  """
+  dateOfBirth_date: Date_Relative
+  """
+  ✨ `_expr` server value variant of `dateOfBirth` (✨ Generated from Field `User`.`dateOfBirth` of type `Date`)
+  """
+  dateOfBirth_expr: Date_Expr
+  """
+  ✨ `_update` server value variant of `dateOfBirth` (✨ Generated from Field `User`.`dateOfBirth` of type `Date`)
+  """
+  dateOfBirth_update: [Date_Update!]
+  """
+  ✨ Generated from Field `User`.`displayName` of type `String!`
+  """
+  displayName: String
+  """
+  ✨ `_expr` server value variant of `displayName` (✨ Generated from Field `User`.`displayName` of type `String!`)
+  """
+  displayName_expr: String_Expr
+  """
+  ✨ Generated from Field `User`.`email` of type `String`
+  """
+  email: String
+  """
+  ✨ `_expr` server value variant of `email` (✨ Generated from Field `User`.`email` of type `String`)
+  """
+  email_expr: String_Expr
+  """
+  ✨ Generated from Field `User`.`gender` of type `String`
+  """
+  gender: String
+  """
+  ✨ `_expr` server value variant of `gender` (✨ Generated from Field `User`.`gender` of type `String`)
+  """
+  gender_expr: String_Expr
+  """
+  ✨ Generated from Field `User`.`height` of type `Float`
+  """
+  height: Float
+  """
+  ✨ `_expr` server value variant of `height` (✨ Generated from Field `User`.`height` of type `Float`)
+  """
+  height_expr: Float_Expr
+  """
+  ✨ `_update` server value variant of `height` (✨ Generated from Field `User`.`height` of type `Float`)
+  """
+  height_update: [Float_Update!]
+  """
+  ✨ Generated from Field `User`.`weight` of type `Float`
+  """
+  weight: Float
+  """
+  ✨ `_expr` server value variant of `weight` (✨ Generated from Field `User`.`weight` of type `Float`)
+  """
+  weight_expr: Float_Expr
+  """
+  ✨ `_update` server value variant of `weight` (✨ Generated from Field `User`.`weight` of type `Float`)
+  """
+  weight_update: [Float_Update!]
+}
+"""
+✨ Generated filter input type for table 'User'. This input allows filtering objects using various conditions. Use `_or`, `_and`, and `_not` to compose complex filters.
+"""
+input User_Filter {
+  """
+  Apply multiple filter conditions using `AND` logic.
+  """
+  _and: [User_Filter!]
+  """
+  Negate the result of the provided filter condition.
+  """
+  _not: User_Filter
+  """
+  Apply multiple filter conditions using `OR` logic.
+  """
+  _or: [User_Filter!]
+  """
+  ✨ Generated from Field `User`.`id` of type `UUID!`
+  """
+  id: UUID_Filter
+  """
+  ✨ Generated from Field `User`.`createdAt` of type `Timestamp!`
+  """
+  createdAt: Timestamp_Filter
+  """
+  ✨ Generated from Field `User`.`dateOfBirth` of type `Date`
+  """
+  dateOfBirth: Date_Filter
+  """
+  ✨ Generated from Field `User`.`displayName` of type `String!`
+  """
+  displayName: String_Filter
+  """
+  ✨ Generated from Field `User`.`email` of type `String`
+  """
+  email: String_Filter
+  """
+  ✨ Generated from Field `User`.`gender` of type `String`
+  """
+  gender: String_Filter
+  """
+  ✨ Generated from Field `User`.`height` of type `Float`
+  """
+  height: Float_Filter
+  """
+  ✨ Generated from Field `User`.`weight` of type `Float`
+  """
+  weight: Float_Filter
+  """
+  ✨ Generated from Field `User`.`anemiaAssessments_on_user` of type `[AnemiaAssessment!]!`
+  """
+  anemiaAssessments_on_user: AnemiaAssessment_ListFilter
+  """
+  ✨ Generated from Field `User`.`dietaryIntakes_on_user` of type `[DietaryIntake!]!`
+  """
+  dietaryIntakes_on_user: DietaryIntake_ListFilter
+  """
+  ✨ Generated from Field `User`.`healthMetrics_on_user` of type `[HealthMetric!]!`
+  """
+  healthMetrics_on_user: HealthMetric_ListFilter
+  """
+  ✨ Generated from Field `User`.`symptomEntries_on_user` of type `[SymptomEntry!]!`
+  """
+  symptomEntries_on_user: SymptomEntry_ListFilter
+}
+"""
+✨ Generated first-row input type for table 'User'. This input selects the first row matching the filter criteria, ordered according to the specified conditions.
+"""
+input User_FirstRow {
+  """
+  Order the result by the specified fields.
+  """
+  orderBy: [User_Order!]
+  """
+  Filters rows based on the specified conditions.
+  """
+  where: User_Filter
+}
+"""
+✨ Generated having input type for table 'User'. This input allows you to filter groups during aggregate queries using various conditions. Use `_or`, `_and`, and `_not` to compose complex filters.
+"""
+input User_Having {
+  """
+  Apply multiple Having conditions using `AND` logic.
+  """
+  _and: [User_Having!]
+  """
+  Whether to apply DISTINCT to the aggregate function.
+  """
+  _distinct: Boolean
+  """
+  Negate the result of the provided Having condition.
+  """
+  _not: User_Having
+  """
+  Apply multiple Having conditions using `OR` logic.
+  """
+  _or: [User_Having!]
+  """
+  ✨ Generated from Field `User`.`_count` of type `Int!`
+  """
+  _count: Int_Filter
+  """
+  ✨ Generated from Field `User`.`createdAt_count` of type `Int!`
+  """
+  createdAt_count: Int_Filter
+  """
+  ✨ Generated from Field `User`.`dateOfBirth_count` of type `Int!`
+  """
+  dateOfBirth_count: Int_Filter
+  """
+  ✨ Generated from Field `User`.`displayName_count` of type `Int!`
+  """
+  displayName_count: Int_Filter
+  """
+  ✨ Generated from Field `User`.`email_count` of type `Int!`
+  """
+  email_count: Int_Filter
+  """
+  ✨ Generated from Field `User`.`gender_count` of type `Int!`
+  """
+  gender_count: Int_Filter
+  """
+  ✨ Generated from Field `User`.`height_count` of type `Int!`
+  """
+  height_count: Int_Filter
+  """
+  ✨ Generated from Field `User`.`id_count` of type `Int!`
+  """
+  id_count: Int_Filter
+  """
+  ✨ Generated from Field `User`.`weight_count` of type `Int!`
+  """
+  weight_count: Int_Filter
+  """
+  ✨ Generated from Field `User`.`height_sum` of type `Float`
+  """
+  height_sum: Float_Filter
+  """
+  ✨ Generated from Field `User`.`weight_sum` of type `Float`
+  """
+  weight_sum: Float_Filter
+  """
+  ✨ Generated from Field `User`.`height_avg` of type `Float`
+  """
+  height_avg: Float_Filter
+  """
+  ✨ Generated from Field `User`.`weight_avg` of type `Float`
+  """
+  weight_avg: Float_Filter
+  """
+  ✨ Generated from Field `User`.`createdAt_min` of type `Timestamp`
+  """
+  createdAt_min: Timestamp_Filter
+  """
+  ✨ Generated from Field `User`.`dateOfBirth_min` of type `Date`
+  """
+  dateOfBirth_min: Date_Filter
+  """
+  ✨ Generated from Field `User`.`height_min` of type `Float`
+  """
+  height_min: Float_Filter
+  """
+  ✨ Generated from Field `User`.`weight_min` of type `Float`
+  """
+  weight_min: Float_Filter
+  """
+  ✨ Generated from Field `User`.`createdAt_max` of type `Timestamp`
+  """
+  createdAt_max: Timestamp_Filter
+  """
+  ✨ Generated from Field `User`.`dateOfBirth_max` of type `Date`
+  """
+  dateOfBirth_max: Date_Filter
+  """
+  ✨ Generated from Field `User`.`height_max` of type `Float`
+  """
+  height_max: Float_Filter
+  """
+  ✨ Generated from Field `User`.`weight_max` of type `Float`
+  """
+  weight_max: Float_Filter
+}
+"""
+✨ Generated key input type for table 'User'. It represents the primary key fields used to uniquely identify a row in the table.
+"""
+input User_Key {
+  """
+  ✨ Generated from Field `User`.`id` of type `UUID!`
+  """
+  id: UUID
+  """
+  ✨ `_expr` server value variant of `id` (✨ Generated from Field `User`.`id` of type `UUID!`)
+  """
+  id_expr: UUID_Expr
+}
+"""
+✨ Generated list filter input type for table 'User'. This input applies filtering logic based on the count or existence of related objects that matches certain criteria.
+"""
+input User_ListFilter {
+  """
+  The desired number of objects that match the condition (defaults to at least one).
+  """
+  count: Int_Filter = {gt:0}
+  """
+  Condition of the related objects to filter for.
+  """
+  exist: User_Filter
+}
+"""
+✨ Generated order input type for table 'User'. This input defines the sorting order of rows in query results based on one or more fields.
+"""
+input User_Order {
+  """
+  ✨ Generated from Field `User`.`id` of type `UUID!`
+  """
+  id: OrderDirection
+  """
+  ✨ Generated from Field `User`.`createdAt` of type `Timestamp!`
+  """
+  createdAt: OrderDirection
+  """
+  ✨ Generated from Field `User`.`dateOfBirth` of type `Date`
+  """
+  dateOfBirth: OrderDirection
+  """
+  ✨ Generated from Field `User`.`displayName` of type `String!`
+  """
+  displayName: OrderDirection
+  """
+  ✨ Generated from Field `User`.`email` of type `String`
+  """
+  email: OrderDirection
+  """
+  ✨ Generated from Field `User`.`gender` of type `String`
+  """
+  gender: OrderDirection
+  """
+  ✨ Generated from Field `User`.`height` of type `Float`
+  """
+  height: OrderDirection
+  """
+  ✨ Generated from Field `User`.`weight` of type `Float`
+  """
+  weight: OrderDirection
+  """
+  ✨ Generated from Field `User`.`_count` of type `Int!`
+  """
+  _count: OrderDirection
+  """
+  ✨ Generated from Field `User`.`createdAt_count` of type `Int!`
+  """
+  createdAt_count: OrderDirection
+  """
+  ✨ Generated from Field `User`.`dateOfBirth_count` of type `Int!`
+  """
+  dateOfBirth_count: OrderDirection
+  """
+  ✨ Generated from Field `User`.`displayName_count` of type `Int!`
+  """
+  displayName_count: OrderDirection
+  """
+  ✨ Generated from Field `User`.`email_count` of type `Int!`
+  """
+  email_count: OrderDirection
+  """
+  ✨ Generated from Field `User`.`gender_count` of type `Int!`
+  """
+  gender_count: OrderDirection
+  """
+  ✨ Generated from Field `User`.`height_count` of type `Int!`
+  """
+  height_count: OrderDirection
+  """
+  ✨ Generated from Field `User`.`id_count` of type `Int!`
+  """
+  id_count: OrderDirection
+  """
+  ✨ Generated from Field `User`.`weight_count` of type `Int!`
+  """
+  weight_count: OrderDirection
+  """
+  ✨ Generated from Field `User`.`height_sum` of type `Float`
+  """
+  height_sum: OrderDirection
+  """
+  ✨ Generated from Field `User`.`weight_sum` of type `Float`
+  """
+  weight_sum: OrderDirection
+  """
+  ✨ Generated from Field `User`.`height_avg` of type `Float`
+  """
+  height_avg: OrderDirection
+  """
+  ✨ Generated from Field `User`.`weight_avg` of type `Float`
+  """
+  weight_avg: OrderDirection
+  """
+  ✨ Generated from Field `User`.`createdAt_min` of type `Timestamp`
+  """
+  createdAt_min: OrderDirection
+  """
+  ✨ Generated from Field `User`.`dateOfBirth_min` of type `Date`
+  """
+  dateOfBirth_min: OrderDirection
+  """
+  ✨ Generated from Field `User`.`height_min` of type `Float`
+  """
+  height_min: OrderDirection
+  """
+  ✨ Generated from Field `User`.`weight_min` of type `Float`
+  """
+  weight_min: OrderDirection
+  """
+  ✨ Generated from Field `User`.`createdAt_max` of type `Timestamp`
+  """
+  createdAt_max: OrderDirection
+  """
+  ✨ Generated from Field `User`.`dateOfBirth_max` of type `Date`
+  """
+  dateOfBirth_max: OrderDirection
+  """
+  ✨ Generated from Field `User`.`height_max` of type `Float`
+  """
+  height_max: OrderDirection
+  """
+  ✨ Generated from Field `User`.`weight_max` of type `Float`
+  """
+  weight_max: OrderDirection
+}

@@ -7,17 +7,19 @@ import {
   runProvidePersonalizedRecommendations,
   runFindNearbyClinics,
 } from '@/app/actions';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { GlassSurface } from '@/components/ui/glass-surface';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
-import { Loader2, Sparkles, Download, FileText, Hospital, Stethoscope, HeartPulse, MapPin } from 'lucide-react';
+import { Download, FileText, Hospital, Stethoscope, HeartPulse, MapPin, Sparkles, Loader2 } from 'lucide-react';
 import type { PersonalizedRecommendationsOutput } from '@/ai/flows/provide-personalized-recommendations';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { collection, addDoc, serverTimestamp, doc } from 'firebase/firestore';
 import { ScrollArea } from '../ui/scroll-area';
 import { AnalyzeCbcReportOutput } from '@/ai/flows/analyze-cbc-report';
+import { AnemoLoading } from '../ui/anemo-loading';
 
 export type AnalysisState = {
   file: File | null;
@@ -27,6 +29,7 @@ export type AnalysisState = {
   description: string | null;
   isValid: boolean;
   analysisResult: string | null;
+  confidenceScore?: number;
   error: string | null;
   status: 'idle' | 'analyzing' | 'success' | 'error' | 'queued';
 };
@@ -108,6 +111,7 @@ export function ImageAnalysisReport({ analyses, labReport, onReset }: ImageAnaly
       if (!isOnline) throw new Error("Offline");
       reportResult = await runProvidePersonalizedRecommendations({
           imageAnalysis: allImageDescriptions,
+          labReport: labReportSummary,
           userProfile: userProfileString,
       });
 
@@ -215,21 +219,19 @@ export function ImageAnalysisReport({ analyses, labReport, onReset }: ImageAnaly
 
   if (isLoading) {
     return (
-      <Card className="flex-1 flex flex-col items-center justify-center min-h-[400px]">
+      <GlassSurface intensity="medium" className="flex-1 flex flex-col items-center justify-center min-h-[400px]">
+        <AnemoLoading />
         <CardHeader className="text-center">
-          <CardTitle className="flex items-center gap-2 justify-center"><Sparkles /> Generating Report</CardTitle>
+          <CardTitle className="flex items-center gap-2 justify-center">Generating Report</CardTitle>
           <CardDescription>Our AI is compiling your personalized health insights...</CardDescription>
         </CardHeader>
-        <CardContent>
-          <Loader2 className="h-10 w-10 animate-spin text-primary" />
-        </CardContent>
-      </Card>
+      </GlassSurface>
     );
   }
   
   if (!report) {
     return (
-         <Card className="flex-1 flex flex-col items-center justify-center min-h-[400px]">
+         <GlassSurface intensity="medium" className="flex-1 flex flex-col items-center justify-center min-h-[400px]">
             <CardHeader className="text-center">
                 <CardTitle>Error</CardTitle>
                 <CardDescription>Could not generate the report. Please try again.</CardDescription>
@@ -237,12 +239,12 @@ export function ImageAnalysisReport({ analyses, labReport, onReset }: ImageAnaly
             <CardContent>
                 <Button onClick={onReset}>Start Over</Button>
             </CardContent>
-        </Card>
+        </GlassSurface>
     )
   }
 
   return (
-    <Card className="flex-1">
+    <GlassSurface intensity="medium" className="flex-1">
       <CardHeader>
         <CardTitle className="flex items-center gap-2"><FileText /> Your Anemia Risk Report</CardTitle>
         <CardDescription>
@@ -281,33 +283,99 @@ export function ImageAnalysisReport({ analyses, labReport, onReset }: ImageAnaly
             </header>
 
             <div className="space-y-6">
-                 {/* Risk Score */}
+                {/* Risk Score */}
                 <div>
                     <div className="flex justify-between items-center mb-1">
-                        <span className="font-medium text-lg">Anemia Risk Score</span>
+                        <span className="font-medium text-lg">Overall Anemia Risk Score</span>
                         <span className="font-bold text-2xl text-primary">{report.riskScore}/100</span>
                     </div>
                     <Progress value={report.riskScore} className="h-3"/>
+                    <p className="text-xs text-muted-foreground mt-2 italic">
+                        *Higher score indicates a higher probability of anemia signs based on visual assessment.
+                    </p>
                 </div>
 
-                {/* Uploaded Images */}
-                <div>
-                    <h3 className="font-semibold text-lg mb-2">Uploaded Images</h3>
-                    <div className="grid grid-cols-3 gap-4">
+                {/* Detailed Parameters Analysis */}
+                <div className="space-y-4">
+                    <h3 className="font-semibold text-lg border-b pb-1">Multimodal Parameter Analysis</h3>
+                    <div className="grid gap-4 sm:grid-cols-3">
                         {Object.entries(analyses).map(([key, value]) => (
-                            <div key={key} className="space-y-2 text-center">
-                                <img src={value.imageUrl!} alt={`Uploaded ${key}`} className="rounded-md border object-cover aspect-square" />
-                                <p className="text-xs font-medium capitalize text-muted-foreground">{key.replace('-', ' ')}</p>
+                            <div key={key} className="p-3 rounded-lg border bg-muted/30 space-y-2">
+                                <div className="aspect-square rounded-md overflow-hidden border mb-2">
+                                    <img src={value.imageUrl!} alt={key} className="w-full h-full object-cover" />
+                                </div>
+                                <p className="font-bold text-sm capitalize">{key.replace('-', ' ')}</p>
+                                <div className="space-y-1">
+                                    <p className="text-xs font-medium text-primary uppercase tracking-wider">{value.analysisResult}</p>
+                                    {value.confidenceScore !== undefined && (
+                                        <div className="flex justify-between items-center text-[10px] text-muted-foreground">
+                                            <span>AI Confidence:</span>
+                                            <span className="font-bold text-foreground">{value.confidenceScore}%</span> 
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         ))}
+                        {labReport && labReport.parameters && labReport.parameters.length > 0 && (
+                            <div className="p-3 rounded-lg border bg-blue-50/30 dark:bg-blue-900/10 space-y-2 sm:col-span-3">
+                                <p className="font-bold text-sm flex items-center gap-2">
+                                    <FileText className="h-4 w-4 text-primary" />
+                                    Extracted Lab Report Data
+                                </p>
+                                <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+                                    {labReport.parameters.map((p, idx) => (
+                                        <div key={idx} className="bg-background/50 p-2 rounded border text-center">
+                                            <p className="text-[10px] text-muted-foreground uppercase">{p.parameter}</p>
+                                            <p className="text-sm font-bold">{p.value}</p>
+                                            <p className="text-[10px] text-muted-foreground">{p.unit}</p>
+                                            <div className={`mt-1 h-1 w-full rounded-full ${p.isNormal ? 'bg-green-500' : 'bg-red-500'}`} />
+                                        </div>
+                                    ))}
+                                </div>
+                                <p className="text-xs italic text-muted-foreground mt-2 border-t pt-2">
+                                    Summary: {labReport.summary}
+                                </p>
+                            </div>
+                        )}
                     </div>
                 </div>
                 
                  {/* Recommendations */}
-                <div>
-                    <h3 className="font-semibold text-lg mb-2">AI-Powered Recommendations</h3>
-                    <div className="p-4 border rounded-md bg-muted/50 whitespace-pre-wrap text-sm">
+                <div className="space-y-4">
+                    <h3 className="font-semibold text-lg border-b pb-1 flex items-center gap-2">
+                        <Sparkles className="h-5 w-5 text-primary" />
+                        AI Clinical Observations
+                    </h3>
+                    <div className="p-4 border rounded-md bg-muted/50 whitespace-pre-wrap text-sm leading-relaxed">
                         {report.recommendations}
+                    </div>
+                </div>
+
+                {/* Home Remedies Section */}
+                <div className="space-y-4">
+                    <h3 className="font-semibold text-lg border-b pb-1 flex items-center gap-2">
+                        <HeartPulse className="h-5 w-5 text-red-500" />
+                        Suggested Home Remedies & Treatment
+                    </h3>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="p-4 rounded-lg border bg-green-50/30 dark:bg-green-900/10">
+                            <h4 className="font-bold text-sm mb-2 text-green-700 dark:text-green-400 uppercase tracking-tight">Iron-Rich Diet</h4>
+                            <ul className="text-xs space-y-1.5 list-disc list-inside">
+                                <li>Increase intake of leafy greens (Malunggay, Spinach).</li>
+                                <li>Consume lean red meats, poultry, and seafood.</li>
+                                <li>Eat iron-fortified cereals and legumes (Beans, Lentils).</li>
+                                <li>Pair iron foods with Vitamin C (Citrus, Tomatoes) for better absorption.</li>
+                            </ul>
+                        </div>
+                        <div className="p-4 rounded-lg border bg-blue-50/30 dark:bg-blue-900/10">
+                            <h4 className="font-bold text-sm mb-2 text-blue-700 dark:text-blue-400 uppercase tracking-tight">Lifestyle Habits</h4>
+                            <ul className="text-xs space-y-1.5 list-disc list-inside">
+                                <li>Avoid drinking tea or coffee during meals (inhibits iron absorption).</li>
+                                <li>Ensure adequate rest and manage fatigue levels.</li>
+                                <li>Stay hydrated throughout the day.</li>
+                                <li>Monitor symptoms like dizziness or shortness of breath.</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
                 
@@ -343,6 +411,6 @@ export function ImageAnalysisReport({ analyses, labReport, onReset }: ImageAnaly
           </Button>
         </div>
       </CardContent>
-    </Card>
+    </GlassSurface>
   );
 }

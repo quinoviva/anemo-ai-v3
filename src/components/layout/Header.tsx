@@ -75,7 +75,7 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border/40 bg-background/60 backdrop-blur-xl supports-[backdrop-filter]:bg-background/30 shadow-sm transition-all duration-300">
-      <div className="flex h-16 items-center justify-between px-4 md:px-8 max-w-7xl mx-auto relative">
+      <div className="flex h-16 items-center justify-between px-4 md:px-6 w-full relative">
         {/* Left: Logo */}
         <div className="flex items-center shrink-0">
           <Link href="/dashboard" className="flex items-center gap-2 transition-opacity hover:opacity-90">
@@ -91,7 +91,7 @@ export function Header() {
               key={href}
               href={href}
               className={cn(
-                'px-3 md:px-5 py-2 text-[10px] md:text-sm font-bold tracking-wider rounded-full transition-all',
+                'px-3 md:px-5 py-2 text-sm md:text-base font-bold tracking-wider rounded-full transition-all',
                 pathname === href 
                   ? 'text-primary bg-primary/10 shadow-sm' 
                   : 'text-muted-foreground hover:text-foreground hover:bg-accent'

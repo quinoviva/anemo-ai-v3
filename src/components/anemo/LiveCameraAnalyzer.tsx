@@ -2,9 +2,10 @@
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { GlassSurface } from '@/components/ui/glass-surface';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Camera, Video, RefreshCw, XCircle, FlipHorizontal, Sun, Target, CheckCircle } from 'lucide-react';
+import { Loader2, Camera, Video, RefreshCw, XCircle, FlipHorizontal, Sun, Target, CheckCircle, UploadCloud } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { useColorNormalization } from '@/hooks/use-color-normalization'; // Import the hook
@@ -19,6 +20,7 @@ export type CalibrationMetadata = {
 
 type LiveCameraAnalyzerProps = {
   onCapture: (file: File, dataUri: string, calibrationMetadata: CalibrationMetadata) => void;
+  onFileUpload?: (file: File) => void;
   bodyPart?: BodyPart;
 };
 
@@ -29,10 +31,12 @@ declare global {
   }
 }
 
-export function LiveCameraAnalyzer({ onCapture, bodyPart }: LiveCameraAnalyzerProps) {
+export function LiveCameraAnalyzer({ onCapture, onFileUpload, bodyPart }: LiveCameraAnalyzerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
+  const [cameraError, setCameraError] = useState<string | null>(null);
   const [isCapturing, setIsCapturing] = useState(false);
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
   const [stream, setStream] = useState<MediaStream | null>(null);
@@ -63,6 +67,7 @@ export function LiveCameraAnalyzer({ onCapture, bodyPart }: LiveCameraAnalyzerPr
         });
         setStream(newStream);
         setHasCameraPermission(true);
+        setCameraError(null);
 
         if (videoRef.current) {
           videoRef.current.srcObject = newStream;
@@ -70,11 +75,15 @@ export function LiveCameraAnalyzer({ onCapture, bodyPart }: LiveCameraAnalyzerPr
       } catch (error) {
         console.error('Error accessing camera:', error);
         setHasCameraPermission(false);
-        toast({
-          variant: 'destructive',
-          title: 'Camera Access Denied',
-          description: 'Please enable camera permissions in your browser settings to use this app.',
-        });
+        if (error instanceof Error) {
+            if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
+                setCameraError('no-device');
+            } else if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+                setCameraError('permission-denied');
+            } else {
+                setCameraError('unknown');
+            }
+        }
       }
     };
 
@@ -97,10 +106,6 @@ export function LiveCameraAnalyzer({ onCapture, bodyPart }: LiveCameraAnalyzerPr
 
       sensor.onerror = (event: any) => {
         console.error('AmbientLightSensor error:', event.error.name, event.error.message);
-        toast({
-          title: 'Ambient Light Sensor Error',
-          description: `Could not read ambient light: ${event.error.message}`,
-        });
       };
 
       sensor.start();
@@ -111,7 +116,7 @@ export function LiveCameraAnalyzer({ onCapture, bodyPart }: LiveCameraAnalyzerPr
     } else {
       console.warn('AmbientLightSensor not supported in this browser.');
     }
-  }, [toast]);
+  }, []);
 
   // Luminance Guardrail effect
   useEffect(() => {
@@ -293,31 +298,51 @@ export function LiveCameraAnalyzer({ onCapture, bodyPart }: LiveCameraAnalyzerPr
       return (
         <div className="flex flex-col items-center justify-center text-center p-8 h-full">
           <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
-          <p className="text-muted-foreground">Requesting camera access...</p>
+          <p className="text-muted-foreground">Checking camera...</p>
         </div>
       );
     }
     
     if (!hasCameraPermission) {
          return (
-             <div className="flex flex-col items-center justify-center text-center p-8 h-full">
-                <Alert variant="destructive" className="max-w-md">
-                    <XCircle className="h-4 w-4" />
-                    <AlertTitle>Camera Access Required</AlertTitle>
-                    <AlertDescription>
-                        Anemo Check needs permission to use your camera for live analysis. Please grant access in your browser's settings.
-                    </AlertDescription>
-                </Alert>
-                <Button variant="outline" className="mt-4" onClick={() => window.location.reload()}>
-                  <RefreshCw className="mr-2" />
-                  Retry
-                </Button>
+             <div className="flex flex-col items-center justify-center text-center p-12 h-full space-y-6">
+                <div className="p-6 bg-muted rounded-full">
+                    <Camera className="h-12 w-12 text-muted-foreground" />
+                </div>
+                <div className="space-y-2">
+                    <h3 className="text-xl font-semibold">Camera Unavailable</h3>
+                    <p className="text-muted-foreground max-w-sm">
+                        {cameraError === 'no-device' 
+                            ? "No camera was detected on this device. You can upload a photo from your gallery instead."
+                            : "Camera access was denied. Please enable permissions or upload a photo manually."}
+                    </p>
+                </div>
+                <div className="flex flex-col gap-3 w-full max-w-xs">
+                    <Button onClick={() => fileInputRef.current?.click()} className="w-full h-12 rounded-full">
+                        <UploadCloud className="mr-2" />
+                        Upload from Gallery
+                    </Button>
+                    <input 
+                        type="file" 
+                        ref={fileInputRef} 
+                        className="hidden" 
+                        accept="image/*" 
+                        onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file && onFileUpload) onFileUpload(file);
+                        }}
+                    />
+                    <Button variant="ghost" onClick={() => window.location.reload()}>
+                        <RefreshCw className="mr-2 h-4 w-4" />
+                        Try Camera Again
+                    </Button>
+                </div>
             </div>
          );
     }
 
     return (
-        <Card className="h-full flex flex-col">
+        <GlassSurface intensity="medium" className="h-full flex flex-col">
             <CardHeader>
                 <CardTitle className="flex items-center gap-2"><Video /> Live Camera Analysis</CardTitle>
                 <CardDescription>Position your camera over your skin, under-eye, or fingernails and capture an image for analysis.</CardDescription>
@@ -360,6 +385,19 @@ export function LiveCameraAnalyzer({ onCapture, bodyPart }: LiveCameraAnalyzerPr
                     <Button onClick={handleFlipCamera} variant="outline" size="icon" aria-label="Flip camera">
                         <FlipHorizontal />
                     </Button>
+                    <Button variant="ghost" size="icon" onClick={() => fileInputRef.current?.click()} title="Upload instead">
+                        <UploadCloud />
+                    </Button>
+                    <input 
+                        type="file" 
+                        ref={fileInputRef} 
+                        className="hidden" 
+                        accept="image/*" 
+                        onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file && onFileUpload) onFileUpload(file);
+                        }}
+                    />
                 </div>
                 {calibrationStage !== 'idle' && (
                     <Button variant="ghost" onClick={() => {
@@ -370,7 +408,7 @@ export function LiveCameraAnalyzer({ onCapture, bodyPart }: LiveCameraAnalyzerPr
                     </Button>
                 )}
             </CardContent>
-        </Card>
+        </GlassSurface>
     );
   };
   

@@ -7,9 +7,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { sendPasswordResetEmail } from 'firebase/auth';
 
+import { GlassSurface } from '@/components/ui/glass-surface';
 import { Button } from '@/components/ui/button';
 import {
-  Card,
   CardContent,
   CardDescription,
   CardHeader,
@@ -66,7 +66,7 @@ export function ForgotPasswordForm() {
   };
 
   return (
-    <Card>
+    <GlassSurface intensity="medium">
       <CardHeader>
         <CardTitle>Forgot Password?</CardTitle>
         <CardDescription>
@@ -109,6 +109,6 @@ export function ForgotPasswordForm() {
           </Link>
         </p>
       </CardContent>
-    </Card>
+    </GlassSurface>
   );
 }

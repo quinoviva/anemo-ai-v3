@@ -4,7 +4,8 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    /* Premium Light Mode: "Porcelain & Rouge" */
+    --background: 240 5% 98%; /* Slightly cooler white */
     --foreground: 240 10% 3.9%;
     --card: 0 0% 100%;
     --card-foreground: 240 10% 3.9%;
@@ -15,7 +16,7 @@
     --secondary: 240 4.8% 95.9%;
     --secondary-foreground: 240 5.9% 10%;
     --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
+    --muted-foreground: 240 3.8% 40%; /* Darker for better readability */
     --accent: 240 4.8% 95.9%;
     --accent-foreground: 240 5.9% 10%;
     --destructive: 0 84.2% 60.2%;
@@ -23,7 +24,7 @@
     --border: 240 5.9% 90%;
     --input: 240 5.9% 90%;
     --ring: 346 87% 60%;
-    --radius: 0.75rem;
+    --radius: 1rem; /* More rounded, modern feel */
     --chart-1: 346 87% 60%;
     --chart-2: 240 4.8% 95.9%;
     --chart-3: 200 80% 50%;
@@ -32,24 +33,25 @@
   }
 
   .dark {
-    --background: 222.2 47.4% 11.2%; /* Slate 900 */
-    --foreground: 210 40% 98%;
-    --card: 222.2 47.4% 11.2%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 47.4% 11.2%;
-    --popover-foreground: 210 40% 98%;
+    /* Premium Dark Mode: "Deep Space & Neon" */
+    --background: 240 10% 4%; /* Almost black, slight blue tint */
+    --foreground: 0 0% 98%;
+    --card: 240 10% 6%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 6%;
+    --popover-foreground: 0 0% 98%;
     --primary: 346 87% 60%;
     --primary-foreground: 355.7 100% 97.3%;
-    --secondary: 217.2 32.6% 17.5%; /* Slate 800 */
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --secondary: 240 4% 16%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 4% 16%;
+    --muted-foreground: 240 5% 65%;
+    --accent: 240 4% 16%;
+    --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 4% 16%;
+    --input: 240 4% 16%;
     --ring: 346 87% 60%;
     --chart-1: 346 87% 60%;
     --chart-2: 240 3.7% 15.9%;
@@ -64,27 +66,25 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground antialiased;
-    background-image: 
-      radial-gradient(at 0% 0%, hsla(346, 87%, 60%, 0.05) 0, transparent 50%),
-      radial-gradient(at 100% 100%, hsla(200, 80%, 50%, 0.05) 0, transparent 50%),
-      radial-gradient(var(--border) 1px, transparent 1px);
-    background-size: 100% 100%, 100% 100%, 24px 24px;
-    background-attachment: fixed;
+    @apply bg-background text-foreground antialiased overflow-x-hidden;
+    font-feature-settings: "ss01", "ss02", "cv01", "cv02";
   }
   
-  /* Selection color */
   ::selection {
     @apply bg-primary/20 text-primary;
   }
 }
 
-@layer components {
-  .glass {
-    @apply bg-background/60 backdrop-blur-xl border border-border/40 shadow-sm transition-all duration-300;
+@layer utilities {
+  .glass-panel {
+    @apply bg-background/60 backdrop-blur-xl border border-white/10 shadow-lg supports-[backdrop-filter]:bg-background/60;
   }
   
-  .glass-hover {
-    @apply hover:bg-background/80 hover:shadow-md hover:border-border/60;
+  .glass-panel-hover {
+    @apply hover:bg-background/80 hover:border-primary/20 hover:shadow-xl transition-all duration-300;
+  }
+
+  .text-balance {
+    text-wrap: balance;
   }
 }

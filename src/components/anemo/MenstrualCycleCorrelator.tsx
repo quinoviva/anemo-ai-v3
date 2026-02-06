@@ -13,7 +13,8 @@ import {
   ReferenceArea,
   ReferenceLine
 } from 'recharts';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { GlassSurface } from '@/components/ui/glass-surface';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { format, addDays, isWithinInterval, differenceInDays } from 'date-fns';
@@ -30,9 +31,10 @@ export type CycleLogType = {
 interface MenstrualCycleCorrelatorProps {
   labReports: HistoryItem[];
   cycleLogs: CycleLogType[];
+  variant?: 'default' | 'compact';
 }
 
-export function MenstrualCycleCorrelator({ labReports, cycleLogs }: MenstrualCycleCorrelatorProps) {
+export function MenstrualCycleCorrelator({ labReports, cycleLogs, variant = 'default' }: MenstrualCycleCorrelatorProps) {
 
   const data = useMemo(() => {
     // 1. Process Lab Reports to get Hemoglobin points
@@ -106,6 +108,60 @@ export function MenstrualCycleCorrelator({ labReports, cycleLogs }: MenstrualCyc
       return format(new Date(tick), 'MMM d');
   };
 
+  const ChartContent = (
+    <div className="h-full w-full min-h-[200px]">
+        <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={data} margin={{ top: 5, right: 10, left: -25, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.5} />
+                <XAxis 
+                    dataKey="date" 
+                    domain={['auto', 'auto']} 
+                    tickFormatter={formatDateTick}
+                    type="number"
+                    scale="time"
+                    tick={{ fontSize: 10 }}
+                    tickLine={false}
+                    axisLine={false}
+                />
+                <YAxis 
+                    domain={['dataMin - 1', 'dataMax + 1']} 
+                    tick={{ fontSize: 10 }}
+                    tickLine={false}
+                    axisLine={false}
+                />
+                <Tooltip 
+                    labelFormatter={(label) => format(new Date(label), 'MMM d')}
+                    formatter={(value: number) => [`${value} g/dL`, 'Hb']}
+                    contentStyle={{ fontSize: '12px', padding: '8px', borderRadius: '8px' }}
+                />
+                
+                {cycleAreas.map((area, index) => (
+                    <ReferenceArea 
+                        key={index} 
+                        x1={area.x1} 
+                        x2={area.x2} 
+                        fill="#ec4899" 
+                        fillOpacity={0.2}
+                    />
+                ))}
+
+                <Line 
+                    type="monotone" 
+                    dataKey="hemoglobin" 
+                    stroke="hsl(var(--primary))" 
+                    strokeWidth={2} 
+                    dot={{ r: 3 }} 
+                    activeDot={{ r: 5 }} 
+                />
+            </LineChart>
+        </ResponsiveContainer>
+    </div>
+  );
+
+  if (variant === 'compact') {
+      return ChartContent;
+  }
+
   return (
     <div className="space-y-6">
         {correlationInsight && (
@@ -136,7 +192,7 @@ export function MenstrualCycleCorrelator({ labReports, cycleLogs }: MenstrualCyc
             </Alert>
         )}
 
-        <Card>
+        <GlassSurface intensity="medium">
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                     <TrendingDown className="h-5 w-5 text-primary" />
@@ -166,6 +222,7 @@ export function MenstrualCycleCorrelator({ labReports, cycleLogs }: MenstrualCyc
                             <Tooltip 
                                 labelFormatter={(label) => format(new Date(label), 'PPP')}
                                 formatter={(value: number) => [`${value} g/dL`, 'Hemoglobin']}
+                                contentStyle={{ backgroundColor: 'hsl(var(--background) / 0.8)', backdropFilter: 'blur(8px)', borderRadius: '8px', border: '1px solid hsl(var(--border))' }}
                             />
                             <Legend />
                             
@@ -207,7 +264,7 @@ export function MenstrualCycleCorrelator({ labReports, cycleLogs }: MenstrualCyc
                     </div>
                 </div>
             </CardContent>
-        </Card>
+        </GlassSurface>
     </div>
   );
 }

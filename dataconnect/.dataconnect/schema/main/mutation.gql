@@ -1,0 +1,562 @@
+extend type Mutation {
+  """
+  ✨ Insert a single `AnemiaAssessment` into the table and return its key. Columns not specified in `data` will receive defaults (e.g. `null`).
+  """
+  anemiaAssessment_insert(
+    """
+    Data object to insert into the table.
+    """
+    data: AnemiaAssessment_Data!
+  ): AnemiaAssessment_KeyOutput! @fdc_generated(from: "AnemiaAssessment", purpose: INSERT_SINGLE)
+  """
+  ✨ Insert a single `DietaryIntake` into the table and return its key. Columns not specified in `data` will receive defaults (e.g. `null`).
+  """
+  dietaryIntake_insert(
+    """
+    Data object to insert into the table.
+    """
+    data: DietaryIntake_Data!
+  ): DietaryIntake_KeyOutput! @fdc_generated(from: "DietaryIntake", purpose: INSERT_SINGLE)
+  """
+  ✨ Insert a single `HealthMetric` into the table and return its key. Columns not specified in `data` will receive defaults (e.g. `null`).
+  """
+  healthMetric_insert(
+    """
+    Data object to insert into the table.
+    """
+    data: HealthMetric_Data!
+  ): HealthMetric_KeyOutput! @fdc_generated(from: "HealthMetric", purpose: INSERT_SINGLE)
+  """
+  ✨ Insert a single `SymptomEntry` into the table and return its key. Columns not specified in `data` will receive defaults (e.g. `null`).
+  """
+  symptomEntry_insert(
+    """
+    Data object to insert into the table.
+    """
+    data: SymptomEntry_Data!
+  ): SymptomEntry_KeyOutput! @fdc_generated(from: "SymptomEntry", purpose: INSERT_SINGLE)
+  """
+  ✨ Insert a single `User` into the table and return its key. Columns not specified in `data` will receive defaults (e.g. `null`).
+  """
+  user_insert(
+    """
+    Data object to insert into the table.
+    """
+    data: User_Data!
+  ): User_KeyOutput! @fdc_generated(from: "User", purpose: INSERT_SINGLE)
+  """
+  ✨ Insert `AnemiaAssessment` objects into the table and return their keys. Columns not specified in `data` will receive defaults (e.g. `null`).
+  """
+  anemiaAssessment_insertMany(
+    """
+    List of data objects to insert into the table.
+    """
+    data: [AnemiaAssessment_Data!]!
+  ): [AnemiaAssessment_KeyOutput!]! @fdc_generated(from: "AnemiaAssessment", purpose: INSERT_MULTIPLE)
+  """
+  ✨ Insert `DietaryIntake` objects into the table and return their keys. Columns not specified in `data` will receive defaults (e.g. `null`).
+  """
+  dietaryIntake_insertMany(
+    """
+    List of data objects to insert into the table.
+    """
+    data: [DietaryIntake_Data!]!
+  ): [DietaryIntake_KeyOutput!]! @fdc_generated(from: "DietaryIntake", purpose: INSERT_MULTIPLE)
+  """
+  ✨ Insert `HealthMetric` objects into the table and return their keys. Columns not specified in `data` will receive defaults (e.g. `null`).
+  """
+  healthMetric_insertMany(
+    """
+    List of data objects to insert into the table.
+    """
+    data: [HealthMetric_Data!]!
+  ): [HealthMetric_KeyOutput!]! @fdc_generated(from: "HealthMetric", purpose: INSERT_MULTIPLE)
+  """
+  ✨ Insert `SymptomEntry` objects into the table and return their keys. Columns not specified in `data` will receive defaults (e.g. `null`).
+  """
+  symptomEntry_insertMany(
+    """
+    List of data objects to insert into the table.
+    """
+    data: [SymptomEntry_Data!]!
+  ): [SymptomEntry_KeyOutput!]! @fdc_generated(from: "SymptomEntry", purpose: INSERT_MULTIPLE)
+  """
+  ✨ Insert `User` objects into the table and return their keys. Columns not specified in `data` will receive defaults (e.g. `null`).
+  """
+  user_insertMany(
+    """
+    List of data objects to insert into the table.
+    """
+    data: [User_Data!]!
+  ): [User_KeyOutput!]! @fdc_generated(from: "User", purpose: INSERT_MULTIPLE)
+  """
+  ✨ Insert or update a single `AnemiaAssessment` into the table, based on the primary key. Returns the key of the newly inserted or existing updated `AnemiaAssessment`.
+  """
+  anemiaAssessment_upsert(
+    """
+    Data object to insert or update if it already exists.
+    """
+    data: AnemiaAssessment_Data!
+  ): AnemiaAssessment_KeyOutput! @fdc_generated(from: "AnemiaAssessment", purpose: UPSERT_SINGLE)
+  """
+  ✨ Insert or update a single `DietaryIntake` into the table, based on the primary key. Returns the key of the newly inserted or existing updated `DietaryIntake`.
+  """
+  dietaryIntake_upsert(
+    """
+    Data object to insert or update if it already exists.
+    """
+    data: DietaryIntake_Data!
+  ): DietaryIntake_KeyOutput! @fdc_generated(from: "DietaryIntake", purpose: UPSERT_SINGLE)
+  """
+  ✨ Insert or update a single `HealthMetric` into the table, based on the primary key. Returns the key of the newly inserted or existing updated `HealthMetric`.
+  """
+  healthMetric_upsert(
+    """
+    Data object to insert or update if it already exists.
+    """
+    data: HealthMetric_Data!
+  ): HealthMetric_KeyOutput! @fdc_generated(from: "HealthMetric", purpose: UPSERT_SINGLE)
+  """
+  ✨ Insert or update a single `SymptomEntry` into the table, based on the primary key. Returns the key of the newly inserted or existing updated `SymptomEntry`.
+  """
+  symptomEntry_upsert(
+    """
+    Data object to insert or update if it already exists.
+    """
+    data: SymptomEntry_Data!
+  ): SymptomEntry_KeyOutput! @fdc_generated(from: "SymptomEntry", purpose: UPSERT_SINGLE)
+  """
+  ✨ Insert or update a single `User` into the table, based on the primary key. Returns the key of the newly inserted or existing updated `User`.
+  """
+  user_upsert(
+    """
+    Data object to insert or update if it already exists.
+    """
+    data: User_Data!
+  ): User_KeyOutput! @fdc_generated(from: "User", purpose: UPSERT_SINGLE)
+  """
+  ✨ Insert or update `AnemiaAssessment` objects into the table, based on the primary key. Returns the key of the newly inserted or existing updated `AnemiaAssessment`.
+  """
+  anemiaAssessment_upsertMany(
+    """
+    List of data objects to insert or update if it already exists.
+    """
+    data: [AnemiaAssessment_Data!]!
+  ): [AnemiaAssessment_KeyOutput!]! @fdc_generated(from: "AnemiaAssessment", purpose: UPSERT_MULTIPLE)
+  """
+  ✨ Insert or update `DietaryIntake` objects into the table, based on the primary key. Returns the key of the newly inserted or existing updated `DietaryIntake`.
+  """
+  dietaryIntake_upsertMany(
+    """
+    List of data objects to insert or update if it already exists.
+    """
+    data: [DietaryIntake_Data!]!
+  ): [DietaryIntake_KeyOutput!]! @fdc_generated(from: "DietaryIntake", purpose: UPSERT_MULTIPLE)
+  """
+  ✨ Insert or update `HealthMetric` objects into the table, based on the primary key. Returns the key of the newly inserted or existing updated `HealthMetric`.
+  """
+  healthMetric_upsertMany(
+    """
+    List of data objects to insert or update if it already exists.
+    """
+    data: [HealthMetric_Data!]!
+  ): [HealthMetric_KeyOutput!]! @fdc_generated(from: "HealthMetric", purpose: UPSERT_MULTIPLE)
+  """
+  ✨ Insert or update `SymptomEntry` objects into the table, based on the primary key. Returns the key of the newly inserted or existing updated `SymptomEntry`.
+  """
+  symptomEntry_upsertMany(
+    """
+    List of data objects to insert or update if it already exists.
+    """
+    data: [SymptomEntry_Data!]!
+  ): [SymptomEntry_KeyOutput!]! @fdc_generated(from: "SymptomEntry", purpose: UPSERT_MULTIPLE)
+  """
+  ✨ Insert or update `User` objects into the table, based on the primary key. Returns the key of the newly inserted or existing updated `User`.
+  """
+  user_upsertMany(
+    """
+    List of data objects to insert or update if it already exists.
+    """
+    data: [User_Data!]!
+  ): [User_KeyOutput!]! @fdc_generated(from: "User", purpose: UPSERT_MULTIPLE)
+  """
+  ✨ Update a single `AnemiaAssessment` based on `id`, `key` or `first`, setting columns specified in `data`. Returns the key of the updated `AnemiaAssessment` or `null` if not found.
+  """
+  anemiaAssessment_update(
+    """
+    The unique ID of the object.
+    """
+    id: UUID
+
+    """
+    The key used to identify the object.
+    """
+    key: AnemiaAssessment_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: AnemiaAssessment_FirstRow
+
+    """
+    Data object containing fields to be updated.
+    """
+    data: AnemiaAssessment_Data!
+  ): AnemiaAssessment_KeyOutput @fdc_generated(from: "AnemiaAssessment", purpose: UPDATE_SINGLE)
+  """
+  ✨ Update a single `DietaryIntake` based on `id`, `key` or `first`, setting columns specified in `data`. Returns the key of the updated `DietaryIntake` or `null` if not found.
+  """
+  dietaryIntake_update(
+    """
+    The unique ID of the object.
+    """
+    id: UUID
+
+    """
+    The key used to identify the object.
+    """
+    key: DietaryIntake_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: DietaryIntake_FirstRow
+
+    """
+    Data object containing fields to be updated.
+    """
+    data: DietaryIntake_Data!
+  ): DietaryIntake_KeyOutput @fdc_generated(from: "DietaryIntake", purpose: UPDATE_SINGLE)
+  """
+  ✨ Update a single `HealthMetric` based on `id`, `key` or `first`, setting columns specified in `data`. Returns the key of the updated `HealthMetric` or `null` if not found.
+  """
+  healthMetric_update(
+    """
+    The unique ID of the object.
+    """
+    id: UUID
+
+    """
+    The key used to identify the object.
+    """
+    key: HealthMetric_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: HealthMetric_FirstRow
+
+    """
+    Data object containing fields to be updated.
+    """
+    data: HealthMetric_Data!
+  ): HealthMetric_KeyOutput @fdc_generated(from: "HealthMetric", purpose: UPDATE_SINGLE)
+  """
+  ✨ Update a single `SymptomEntry` based on `id`, `key` or `first`, setting columns specified in `data`. Returns the key of the updated `SymptomEntry` or `null` if not found.
+  """
+  symptomEntry_update(
+    """
+    The unique ID of the object.
+    """
+    id: UUID
+
+    """
+    The key used to identify the object.
+    """
+    key: SymptomEntry_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: SymptomEntry_FirstRow
+
+    """
+    Data object containing fields to be updated.
+    """
+    data: SymptomEntry_Data!
+  ): SymptomEntry_KeyOutput @fdc_generated(from: "SymptomEntry", purpose: UPDATE_SINGLE)
+  """
+  ✨ Update a single `User` based on `id`, `key` or `first`, setting columns specified in `data`. Returns the key of the updated `User` or `null` if not found.
+  """
+  user_update(
+    """
+    The unique ID of the object.
+    """
+    id: UUID
+
+    """
+    The key used to identify the object.
+    """
+    key: User_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: User_FirstRow
+
+    """
+    Data object containing fields to be updated.
+    """
+    data: User_Data!
+  ): User_KeyOutput @fdc_generated(from: "User", purpose: UPDATE_SINGLE)
+  """
+  ✨ Update `AnemiaAssessment` objects matching `where` conditions (or `all`, if true) according to `data`. Returns the number of rows updated.
+  """
+  anemiaAssessment_updateMany(
+    """
+    Filter condition to specify which rows to update.
+    """
+    where: AnemiaAssessment_Filter
+
+    """
+    Set to true to update all rows.
+    """
+    all: Boolean = false
+
+    """
+    Data object containing fields to update.
+    """
+    data: AnemiaAssessment_Data!
+  ): Int! @fdc_generated(from: "AnemiaAssessment", purpose: UPDATE_MULTIPLE)
+  """
+  ✨ Update `DietaryIntake` objects matching `where` conditions (or `all`, if true) according to `data`. Returns the number of rows updated.
+  """
+  dietaryIntake_updateMany(
+    """
+    Filter condition to specify which rows to update.
+    """
+    where: DietaryIntake_Filter
+
+    """
+    Set to true to update all rows.
+    """
+    all: Boolean = false
+
+    """
+    Data object containing fields to update.
+    """
+    data: DietaryIntake_Data!
+  ): Int! @fdc_generated(from: "DietaryIntake", purpose: UPDATE_MULTIPLE)
+  """
+  ✨ Update `HealthMetric` objects matching `where` conditions (or `all`, if true) according to `data`. Returns the number of rows updated.
+  """
+  healthMetric_updateMany(
+    """
+    Filter condition to specify which rows to update.
+    """
+    where: HealthMetric_Filter
+
+    """
+    Set to true to update all rows.
+    """
+    all: Boolean = false
+
+    """
+    Data object containing fields to update.
+    """
+    data: HealthMetric_Data!
+  ): Int! @fdc_generated(from: "HealthMetric", purpose: UPDATE_MULTIPLE)
+  """
+  ✨ Update `SymptomEntry` objects matching `where` conditions (or `all`, if true) according to `data`. Returns the number of rows updated.
+  """
+  symptomEntry_updateMany(
+    """
+    Filter condition to specify which rows to update.
+    """
+    where: SymptomEntry_Filter
+
+    """
+    Set to true to update all rows.
+    """
+    all: Boolean = false
+
+    """
+    Data object containing fields to update.
+    """
+    data: SymptomEntry_Data!
+  ): Int! @fdc_generated(from: "SymptomEntry", purpose: UPDATE_MULTIPLE)
+  """
+  ✨ Update `User` objects matching `where` conditions (or `all`, if true) according to `data`. Returns the number of rows updated.
+  """
+  user_updateMany(
+    """
+    Filter condition to specify which rows to update.
+    """
+    where: User_Filter
+
+    """
+    Set to true to update all rows.
+    """
+    all: Boolean = false
+
+    """
+    Data object containing fields to update.
+    """
+    data: User_Data!
+  ): Int! @fdc_generated(from: "User", purpose: UPDATE_MULTIPLE)
+  """
+  ✨ Delete a single `AnemiaAssessment` based on `id`, `key` or `first` and return its key (or `null` if not found).
+  """
+  anemiaAssessment_delete(
+    """
+    The unique ID of the object.
+    """
+    id: UUID
+
+    """
+    The key used to identify the object.
+    """
+    key: AnemiaAssessment_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: AnemiaAssessment_FirstRow
+  ): AnemiaAssessment_KeyOutput @fdc_generated(from: "AnemiaAssessment", purpose: DELETE_SINGLE)
+  """
+  ✨ Delete a single `DietaryIntake` based on `id`, `key` or `first` and return its key (or `null` if not found).
+  """
+  dietaryIntake_delete(
+    """
+    The unique ID of the object.
+    """
+    id: UUID
+
+    """
+    The key used to identify the object.
+    """
+    key: DietaryIntake_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: DietaryIntake_FirstRow
+  ): DietaryIntake_KeyOutput @fdc_generated(from: "DietaryIntake", purpose: DELETE_SINGLE)
+  """
+  ✨ Delete a single `HealthMetric` based on `id`, `key` or `first` and return its key (or `null` if not found).
+  """
+  healthMetric_delete(
+    """
+    The unique ID of the object.
+    """
+    id: UUID
+
+    """
+    The key used to identify the object.
+    """
+    key: HealthMetric_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: HealthMetric_FirstRow
+  ): HealthMetric_KeyOutput @fdc_generated(from: "HealthMetric", purpose: DELETE_SINGLE)
+  """
+  ✨ Delete a single `SymptomEntry` based on `id`, `key` or `first` and return its key (or `null` if not found).
+  """
+  symptomEntry_delete(
+    """
+    The unique ID of the object.
+    """
+    id: UUID
+
+    """
+    The key used to identify the object.
+    """
+    key: SymptomEntry_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: SymptomEntry_FirstRow
+  ): SymptomEntry_KeyOutput @fdc_generated(from: "SymptomEntry", purpose: DELETE_SINGLE)
+  """
+  ✨ Delete a single `User` based on `id`, `key` or `first` and return its key (or `null` if not found).
+  """
+  user_delete(
+    """
+    The unique ID of the object.
+    """
+    id: UUID
+
+    """
+    The key used to identify the object.
+    """
+    key: User_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: User_FirstRow
+  ): User_KeyOutput @fdc_generated(from: "User", purpose: DELETE_SINGLE)
+  """
+  ✨ Delete `AnemiaAssessment` objects matching `where` conditions (or `all`, if true). Returns the number of rows deleted.
+  """
+  anemiaAssessment_deleteMany(
+    """
+    Filter condition to specify which rows to delete.
+    """
+    where: AnemiaAssessment_Filter
+
+    """
+    Set to true to delete all rows.
+    """
+    all: Boolean = false
+  ): Int! @fdc_generated(from: "AnemiaAssessment", purpose: DELETE_MULTIPLE)
+  """
+  ✨ Delete `DietaryIntake` objects matching `where` conditions (or `all`, if true). Returns the number of rows deleted.
+  """
+  dietaryIntake_deleteMany(
+    """
+    Filter condition to specify which rows to delete.
+    """
+    where: DietaryIntake_Filter
+
+    """
+    Set to true to delete all rows.
+    """
+    all: Boolean = false
+  ): Int! @fdc_generated(from: "DietaryIntake", purpose: DELETE_MULTIPLE)
+  """
+  ✨ Delete `HealthMetric` objects matching `where` conditions (or `all`, if true). Returns the number of rows deleted.
+  """
+  healthMetric_deleteMany(
+    """
+    Filter condition to specify which rows to delete.
+    """
+    where: HealthMetric_Filter
+
+    """
+    Set to true to delete all rows.
+    """
+    all: Boolean = false
+  ): Int! @fdc_generated(from: "HealthMetric", purpose: DELETE_MULTIPLE)
+  """
+  ✨ Delete `SymptomEntry` objects matching `where` conditions (or `all`, if true). Returns the number of rows deleted.
+  """
+  symptomEntry_deleteMany(
+    """
+    Filter condition to specify which rows to delete.
+    """
+    where: SymptomEntry_Filter
+
+    """
+    Set to true to delete all rows.
+    """
+    all: Boolean = false
+  ): Int! @fdc_generated(from: "SymptomEntry", purpose: DELETE_MULTIPLE)
+  """
+  ✨ Delete `User` objects matching `where` conditions (or `all`, if true). Returns the number of rows deleted.
+  """
+  user_deleteMany(
+    """
+    Filter condition to specify which rows to delete.
+    """
+    where: User_Filter
+
+    """
+    Set to true to delete all rows.
+    """
+    all: Boolean = false
+  ): Int! @fdc_generated(from: "User", purpose: DELETE_MULTIPLE)
+}
