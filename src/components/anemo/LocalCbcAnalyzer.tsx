@@ -7,7 +7,8 @@ import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHeader, TableHead, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
-import { Loader2, Upload, FileText, Download, RefreshCw, AlertTriangle, CheckCircle, Cpu, FileUp } from 'lucide-react';
+import { Upload, FileText, Download, RefreshCw, AlertTriangle, CheckCircle, Cpu, FileUp } from 'lucide-react';
+import HeartLoader from '@/components/ui/HeartLoader';
 import { useToast } from '@/hooks/use-toast';
 import { runLocalCbcAnalysis } from '@/ai/local-ai';
 import Tesseract from 'tesseract.js';
@@ -201,7 +202,7 @@ export function LocalCbcAnalyzer({ onBack }: LocalCbcAnalyzerProps) {
 
              {(status === 'ocr' || status === 'analyzing') && (
                 <div className="space-y-2 text-center py-4">
-                   <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+                   <HeartLoader size={32} strokeWidth={3} className="mx-auto" />
                    <p className="text-sm font-medium">
                       {status === 'ocr' ? `Reading Text (${progress}%)` : 'Local AI Processing...'}
                    </p>

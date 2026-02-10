@@ -11,7 +11,7 @@ import {
   updateProfile,
 } from 'firebase/auth';
 import { doc } from 'firebase/firestore';
-import { motion } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -126,7 +126,7 @@ export function SignUpForm() {
     }
   };
 
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: { 
       opacity: 1,
@@ -137,7 +137,7 @@ export function SignUpForm() {
     }
   };
 
-  const itemVariants = {
+  const itemVariants: Variants = {
     hidden: { y: 15, opacity: 0 },
     visible: { 
       y: 0, 

@@ -5,7 +5,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { format } from 'date-fns';
-import { CalendarIcon, Loader2 } from 'lucide-react';
+import { CalendarIcon } from 'lucide-react';
+import HeartLoader from '@/components/ui/HeartLoader';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -375,7 +376,7 @@ export function CycleLogForm({ open, onOpenChange, trigger, onFormSubmit }: Cycl
 
                 <div className="flex justify-end">
                     <Button type="submit" disabled={isSubmitting}>
-                        {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        {isSubmitting && <HeartLoader size={16} strokeWidth={3} className="mr-2" />}
                         Save Information
                     </Button>
                 </div>

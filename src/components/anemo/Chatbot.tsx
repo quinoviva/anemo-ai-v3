@@ -1,17 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { runAnswerAnemiaQuestion } from '@/app/actions';
 import { CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { GlassSurface } from '@/components/ui/glass-surface';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
-import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase'; // Added hooks
-import { addDoc, collection, serverTimestamp, query, orderBy } from 'firebase/firestore'; // Added firestore methods
-import { Bot, User, Send, Loader2, Sparkles, Trash2, RefreshCw } from 'lucide-react';
+import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
+import { addDoc, collection, serverTimestamp, query, orderBy } from 'firebase/firestore';
+import { Bot, User, Send, Sparkles, Trash2, RefreshCw, Minus, X, Zap } from 'lucide-react';
+import HeartLoader from '@/components/ui/HeartLoader';
 import { cn } from '@/lib/utils';
-import { Minus, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 type Message = { role: 'user' | 'assistant'; content: string; id?: string };
 type ChatbotProps = {
@@ -32,7 +32,7 @@ export function Chatbot({ isPopup = false, onClose, onMinimize }: ChatbotProps) 
   const firestore = useFirestore();
   const [userInput, setUserInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isInitializing, setIsInitializing] = useState(true); // New state to track initial load
+  const [isInitializing, setIsInitializing] = useState(true);
   const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -47,7 +47,6 @@ export function Chatbot({ isPopup = false, onClose, onMinimize }: ChatbotProps) 
 
   const { data: historyData } = useCollection<any>(messagesQuery);
   
-  // Transform Firestore data to local Message type
   const history: Message[] = historyData ? historyData.map(doc => ({
       role: doc.role,
       content: doc.content,
@@ -57,7 +56,6 @@ export function Chatbot({ isPopup = false, onClose, onMinimize }: ChatbotProps) 
   // Initialization Effect
   useEffect(() => {
     const initChat = async () => {
-        // Wait for data to load (handle null/undefined)
         if (!user || !firestore || !historyData) return;
 
         if (historyData.length === 0) {
@@ -78,7 +76,7 @@ export function Chatbot({ isPopup = false, onClose, onMinimize }: ChatbotProps) 
     };
 
     initChat();
-  }, [user, firestore, historyData?.length]); // simplified dependency to length to avoid loops
+  }, [user, firestore, historyData?.length]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -95,19 +93,16 @@ export function Chatbot({ isPopup = false, onClose, onMinimize }: ChatbotProps) 
     setIsLoading(true);
 
     try {
-      // 1. Save User Message
       await addDoc(collection(firestore, `users/${user.uid}/chatHistory`), {
           role: 'user',
           content: message,
           createdAt: serverTimestamp()
       });
 
-      // 2. Get AI Response
       const result = await runAnswerAnemiaQuestion({
         question: message,
       });
 
-      // 3. Save AI Message
       await addDoc(collection(firestore, `users/${user.uid}/chatHistory`), {
           role: 'assistant',
           content: result.answer,
@@ -118,12 +113,10 @@ export function Chatbot({ isPopup = false, onClose, onMinimize }: ChatbotProps) 
       const errorMessage = err instanceof Error ? err.message : "An unknown error occurred.";
        let displayMessage = `I'm sorry, but I encountered an error. Please try again.`;
        
-       // Handle known API errors gracefully
        if (errorMessage.includes('API key')) {
          displayMessage = "Configuration Error: Please check the API key."
        }
 
-      // Save error message as assistant response so user sees it
       await addDoc(collection(firestore, `users/${user.uid}/chatHistory`), {
           role: 'assistant',
           content: displayMessage,
@@ -137,15 +130,6 @@ export function Chatbot({ isPopup = false, onClose, onMinimize }: ChatbotProps) 
   };
 
   const handleClearChat = async () => {
-      // Note: A true "clear" might involve deleting the collection or setting a 'hidden' flag.
-      // For simplicity here, we'll just re-greet or maybe the user wants to *delete* history?
-      // The prompt said "always save the chats do not remove".
-      // So 'Clear' might just mean "Reset View" locally, but if we persist, it should probably reload.
-      // If the requirement is "do not remove", we should probably hide/disable the Clear button or 
-      // make it archive the session. 
-      // For now, I'll keep the button but make it send a "System cleared" message or similar, 
-      // OR actually delete if that's what "Clear" implies in UI, but the prompt says "do not remove".
-      // I will DISABLE the clear button functionality for now to respect "always save".
       toast({ title: "History Preserved", description: "Chat history is saved securely." });
   };
 
@@ -158,7 +142,6 @@ export function Chatbot({ isPopup = false, onClose, onMinimize }: ChatbotProps) 
     sendMessage(question);
   };
 
-  // Simple parser for bold text (**text**)
   const formatMessage = (content: string) => {
     const parts = content.split(/(\*\*.*?\*\*)/g);
     return parts.map((part, i) => {
@@ -170,145 +153,190 @@ export function Chatbot({ isPopup = false, onClose, onMinimize }: ChatbotProps) 
   };
 
   const ChatHeader = () => (
-    <CardHeader className="border-b p-3 flex flex-row items-center justify-between space-y-0 sticky top-0 bg-background/80 backdrop-blur-md z-10 shadow-sm">
-      <div className='flex items-center gap-3'>
-        <div className="relative">
-            <div className="p-1.5 bg-primary rounded-full">
-                <Bot className="h-5 w-5 text-primary-foreground" />
+    <div className="relative border-b border-white/5 px-6 py-4 flex flex-row items-center justify-between z-20 bg-background/50 backdrop-blur-2xl shrink-0">
+      <div className='flex items-center gap-4 relative'>
+        {/* Tricolor Identity Element - Blue Theme */}
+        <div className="relative w-10 h-10 flex items-center justify-center">
+            <div className="absolute inset-0 bg-gradient-to-tr from-blue-600 via-cyan-400 to-indigo-600 rounded-full blur-[8px] opacity-60 animate-pulse" />
+            <div className="relative z-10 w-full h-full bg-background/80 rounded-full border border-white/10 flex items-center justify-center backdrop-blur-md shadow-xl">
+                <Bot className="h-5 w-5 text-cyan-400" />
             </div>
-            <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-background rounded-full"></span>
+            {/* Status Dot */}
+            <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-cyan-400 rounded-full border-2 border-background shadow-[0_0_8px_rgba(34,211,238,0.6)]"></div>
         </div>
-        <div className="flex flex-col">
-            <span className="font-bold text-sm leading-none">Anemo Bot</span>
-            <span className="text-[10px] text-muted-foreground mt-0.5">AI Health Assistant</span>
+
+        <div className="flex flex-col justify-center h-10">
+            <h3 className="font-bold text-lg tracking-tight flex items-center gap-2 text-foreground/90">
+              ANEMO BOT 
+            </h3>
         </div>
       </div>
-      <div className="flex items-center gap-1">
+
+      <div className="flex items-center gap-2">
         {isPopup && (
             <>
-                <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full hover:bg-muted" onClick={onMinimize}>
+                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-white/5" onClick={onMinimize}>
                     <Minus className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full hover:bg-destructive/10 hover:text-destructive" onClick={onClose}>
+                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-red-500/20 hover:text-red-500 transition-colors" onClick={onClose}>
                     <X className="h-4 w-4" />
                 </Button>
             </>
         )}
         {!isPopup && (
-             <Button variant="ghost" size="icon" onClick={handleClearChat} title="Clear Chat">
-                <Trash2 className="h-4 w-4 text-muted-foreground" />
+             <Button variant="ghost" size="sm" onClick={handleClearChat} className="text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 rounded-full px-4 border border-transparent hover:border-white/10 transition-all">
+                <Trash2 className="h-3.5 w-3.5 mr-2" />
+                Clear
              </Button>
         )}
       </div>
-    </CardHeader>
-  )
+    </div>
+  );
 
   return (
-    <GlassSurface intensity="high" className={cn("h-full", isPopup ? "border-0 shadow-none bg-background/90 backdrop-blur-xl" : "")}>
-      <div className="flex flex-col h-full overflow-hidden">
-        {!isPopup ? (
-           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 border-b shrink-0">
-            <div className="flex items-center gap-2">
-              <div className="p-2 bg-primary/10 rounded-full">
-                  <Bot className="h-6 w-6 text-primary" />
-              </div>
-              <div>
-                  <CardTitle>ANEMO BOT</CardTitle>
-                  <CardDescription>Ask me anything about anemia.</CardDescription>
-              </div>
-            </div>
-            <Button variant="outline" size="sm" onClick={handleClearChat}>
-              <RefreshCw className="mr-2 h-3 w-3" />
-              Clear
-            </Button>
-          </CardHeader>
-        ) : <ChatHeader />}
-        
-        <CardContent className="p-0 flex-1 flex flex-col min-h-0 overflow-hidden bg-transparent">
-          <ScrollArea className="flex-1 px-4 py-4 min-h-0">
-            <div className="space-y-6">
+    <div className={cn(
+      "h-full flex flex-col overflow-hidden relative font-sans",
+      isPopup 
+        ? "bg-background/90 backdrop-blur-2xl" 
+        : "bg-transparent"
+    )}>
+      
+      {/* Dynamic Glows behind content - Blue Theme */}
+      {!isPopup && (
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+             <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-cyan-500/5 rounded-full blur-[100px]" />
+             <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-indigo-600/5 rounded-full blur-[100px]" />
+        </div>
+      )}
+
+      <ChatHeader />
+      
+      <CardContent className="flex-1 flex flex-col min-h-0 overflow-hidden p-0 relative z-10">
+        <ScrollArea className="flex-1 w-full h-full">
+          <div className="space-y-6 max-w-4xl mx-auto px-4 py-8 md:px-8">
+            <AnimatePresence initial={false}>
             {history.map((msg, i) => (
-              <div key={i} className={cn("flex gap-3", msg.role === 'user' ? "flex-row-reverse" : "flex-row")}>
-                {msg.role === 'assistant' && (
-                    <Avatar className="h-8 w-8 border border-primary/20 bg-background/50">
-                        <AvatarFallback><Bot size={16} className="text-primary"/></AvatarFallback>
-                    </Avatar>
-                )}
-                {msg.role === 'user' && (
-                    <Avatar className="h-8 w-8 border border-border bg-background/50">
-                        <AvatarFallback><User size={16} className="text-muted-foreground"/></AvatarFallback>
-                    </Avatar>
-                )}
+              <motion.div 
+                key={i} 
+                initial={{ opacity: 0, y: 15, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0.35, ease: "easeOut" }}
+                className={cn("flex gap-4 group", msg.role === 'user' ? "flex-row-reverse" : "flex-row")}
+              >
+                {/* Avatars */}
+                <div className="shrink-0 pt-1">
+                    {msg.role === 'assistant' ? (
+                        <div className="h-9 w-9 rounded-full bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border border-cyan-500/20 flex items-center justify-center backdrop-blur-md shadow-lg">
+                            <Bot size={16} className="text-cyan-400"/>
+                        </div>
+                    ) : (
+                        <div className="h-9 w-9 rounded-full bg-gradient-to-br from-indigo-500 to-blue-600 border border-indigo-400/30 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                            <User size={16} className="text-white"/>
+                        </div>
+                    )}
+                </div>
                 
+                {/* Message Bubbles */}
                 <div className={cn(
-                    "max-w-[85%] rounded-2xl px-4 py-3 text-sm shadow-sm",
+                    "max-w-[85%] md:max-w-[75%] rounded-[1.25rem] px-5 py-3.5 text-sm leading-relaxed shadow-sm transition-all duration-300",
                     msg.role === 'assistant' 
-                        ? "bg-background/60 border border-border/50 text-foreground rounded-tl-none backdrop-blur-sm" 
-                        : "bg-primary text-primary-foreground rounded-tr-none"
+                        ? "bg-white/5 hover:bg-white/10 border border-white/5 text-foreground rounded-tl-sm" 
+                        : "bg-gradient-to-br from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-600/10 rounded-tr-sm border border-indigo-500/50"
                 )}>
-                  <div className="whitespace-pre-wrap leading-relaxed">
+                  <div className="whitespace-pre-wrap tracking-wide font-light">
                     {formatMessage(msg.content)}
                   </div>
                 </div>
-              </div>
+              </motion.div>
             ))}
+            </AnimatePresence>
             
              {history.length === 1 && !isLoading && (
-              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <div className="flex items-center gap-2 mb-3 px-1">
-                  <Sparkles className="h-4 w-4 text-primary" />
-                  <p className="text-xs font-medium text-muted-foreground">Suggested questions</p>
-                </div>
-                <div className="grid grid-cols-1 gap-2">
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-6"
+              >
                   {sampleQuestions.map((q, i) => (
-                    <Button 
+                    <motion.button
+                      whileHover={{ scale: 1.02, backgroundColor: "rgba(255, 255, 255, 0.08)" }}
+                      whileTap={{ scale: 0.98 }}
                       key={i} 
-                      variant="outline" 
-                      className="text-left h-auto justify-start py-3 px-4 whitespace-normal font-normal bg-background/50 hover:bg-primary/5 hover:border-primary/30 transition-colors backdrop-blur-sm"
+                      className="text-left px-5 py-4 bg-white/5 border border-white/5 hover:border-cyan-500/30 transition-all rounded-2xl group flex flex-col gap-2"
                       onClick={() => handleSampleQuestionClick(q)}
                     >
-                      {q}
-                    </Button>
+                      <Zap className="h-4 w-4 text-cyan-400 group-hover:drop-shadow-[0_0_8px_rgba(34,211,238,0.5)] transition-all" />
+                      <span className="text-sm text-foreground/80 group-hover:text-foreground font-medium">{q}</span>
+                    </motion.button>
                   ))}
-                </div>
-              </div>
+              </motion.div>
             )}
 
             {isLoading && (
-              <div className="flex items-end gap-3">
-                 <Avatar className="h-8 w-8 border border-primary/20 bg-background/50">
-                    <AvatarFallback><Bot size={16} className="text-primary"/></AvatarFallback>
-                </Avatar>
-                <div className="rounded-2xl rounded-tl-none bg-background/60 border border-border/50 px-4 py-3 shadow-sm backdrop-blur-sm">
-                  <div className="flex space-x-1.5 items-center h-5">
-                    <div className="w-2 h-2 bg-primary/40 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-                    <div className="w-2 h-2 bg-primary/40 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                    <div className="w-2 h-2 bg-primary/40 rounded-full animate-bounce"></div>
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="flex items-end gap-4"
+              >
+                 <div className="h-9 w-9 rounded-full bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border border-cyan-500/20 flex items-center justify-center backdrop-blur-md">
+                    <Bot size={16} className="text-cyan-400"/>
+                </div>
+                <div className="rounded-[1.25rem] rounded-tl-sm bg-white/5 border border-white/5 px-6 py-4 shadow-lg backdrop-blur-md">
+                  <div className="flex items-center gap-1.5">
+                     <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 1.2 }} className="w-2 h-2 bg-cyan-400 rounded-full" />
+                     <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 1.2, delay: 0.2 }} className="w-2 h-2 bg-blue-500 rounded-full" />
+                     <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 1.2, delay: 0.4 }} className="w-2 h-2 bg-indigo-500 rounded-full" />
                   </div>
                 </div>
-              </div>
+              </motion.div>
             )}
-            <div ref={messagesEndRef} />
+            <div ref={messagesEndRef} className="h-4" />
           </div>
         </ScrollArea>
         
-        <div className="p-4 bg-background/40 border-t backdrop-blur-md">
-            <form onSubmit={handleSubmit} className="flex items-center gap-2">
-            <Input 
-                placeholder="Type your question..." 
-                value={userInput} 
-                onChange={(e) => setUserInput(e.target.value)} 
-                disabled={isLoading}
-                className="flex-1 bg-background/50 focus-visible:bg-background transition-colors"
-                aria-label="Your question about anemia"
-            />
-            <Button type="submit" size="icon" disabled={!userInput.trim() || isLoading} className="shrink-0 rounded-full w-10 h-10 shadow-sm" aria-label="Send message">
-                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-            </Button>
+        {/* Input Area */}
+        <div className="p-4 md:p-6 bg-gradient-to-t from-background/80 to-transparent backdrop-blur-sm relative z-20">
+            <form onSubmit={handleSubmit} className="relative max-w-4xl mx-auto flex items-end gap-3">
+                <div className="relative flex-1 group">
+                    <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500 rounded-full blur opacity-10 group-focus-within:opacity-40 transition duration-1000 group-hover:opacity-30" />
+                    <Input 
+                        placeholder="Ask Anemo Bot about anemia..." 
+                        value={userInput} 
+                        onChange={(e) => setUserInput(e.target.value)} 
+                        disabled={isLoading}
+                        className="relative bg-background/50 border-white/10 hover:border-white/20 focus-visible:border-white/20 focus-visible:ring-0 rounded-full h-14 pl-6 pr-12 transition-all shadow-inner text-base backdrop-blur-xl"
+                    />
+                     <div className="absolute right-2 top-1/2 -translate-y-1/2">
+                        {userInput && (
+                            <Button 
+                                type="button" 
+                                variant="ghost" 
+                                size="icon" 
+                                className="h-8 w-8 rounded-full hover:bg-white/10 text-muted-foreground"
+                                onClick={() => setUserInput('')}
+                            >
+                                <X className="h-4 w-4" />
+                            </Button> 
+                        )}
+                    </div>
+                </div>
+                
+                <Button 
+                    type="submit" 
+                    
+                    size="icon" 
+                    disabled={!userInput.trim() || isLoading} 
+                    className={cn(
+                        "shrink-0 rounded-full w-14 h-14 shadow-xl transition-all duration-300 bg-gradient-to-br from-cyan-500 to-blue-600 hover:scale-105 hover:shadow-cyan-500/25 border border-white/10",
+                        !userInput.trim() && "opacity-50 grayscale cursor-not-allowed"
+                    )}
+                >
+                    {isLoading ? <HeartLoader size={24} strokeWidth={3} className="text-white" /> : <Send className="h-6 w-6 text-white ml-0.5" />}
+                </Button>
             </form>
         </div>
       </CardContent>
-      </div>
-    </GlassSurface>
+    </div>
   );
 }

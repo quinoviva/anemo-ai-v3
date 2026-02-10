@@ -1,0 +1,177 @@
+@keyframes liquid-rise {
+  0% { height: var(--prev-level); }
+  100% { height: var(--new-level); }
+}
+
+@keyframes bubble-rise {
+  0% { transform: translateY(0) scale(1); opacity: 0; }
+  50% { opacity: 0.8; }
+  100% { transform: translateY(-100px) scale(0.5); opacity: 0; }
+}
+
+/* Person Drinking Animations */
+@keyframes arm-lift {
+  0% { transform: rotate(0deg) translateX(0); }
+  20% { transform: rotate(-20deg) translateX(-2px) translateY(-5px); }
+  50% { transform: rotate(-45deg) translateX(-5px) translateY(-10px); }
+  80% { transform: rotate(-45deg) translateX(-5px) translateY(-10px); }
+  100% { transform: rotate(0deg) translateX(0); }
+}
+
+@keyframes head-tilt {
+  0% { transform: rotate(0deg); }
+  30% { transform: rotate(-10deg); }
+  70% { transform: rotate(-10deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@keyframes liquid-pour {
+  0% { opacity: 0; height: 0; }
+  40% { opacity: 1; height: 100%; }
+  60% { opacity: 1; height: 100%; }
+  100% { opacity: 0; height: 0; }
+}
+
+.water-widget-container {
+  position: relative;
+  overflow: hidden;
+  /* Made transparent to allow parent BentoCard gradient to show */
+  background: transparent; 
+  isolation: isolate;
+}
+
+.dark .water-widget-container {
+  background: transparent;
+}
+
+/* Stylized Glass (Miniature for the Person) */
+.mini-glass {
+  transform-origin: bottom center;
+}
+
+.person-arm {
+  transform-origin: 80% 80%;
+}
+
+.person-head {
+  transform-origin: 50% 80%;
+}
+
+.drinking-active .person-arm {
+  animation: arm-lift 2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.drinking-active .person-head {
+  animation: head-tilt 2s cubic-bezier(0.4, 0, 0.2, 1) 0.1s;
+}
+
+.drinking-active .glass-liquid {
+  animation: liquid-pour 1s ease-in-out 0.5s;
+}
+
+/* Main Display Glass */
+.glass-container {
+  width: 70px;
+  height: 100px;
+  border: 1.5px solid rgba(255, 255, 255, 0.5);
+  border-top: none;
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+  position: relative;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(8px);
+  box-shadow: 
+    0 15px 35px -5px rgba(6, 182, 212, 0.4),
+    inset 0 0 20px rgba(255, 255, 255, 0.1);
+  z-index: 10;
+}
+
+.liquid-fill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  /* Stronger Neon Gradient */
+  background: linear-gradient(to top, #2563eb, #06b6d4, #22d3ee); 
+  transition: height 1s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 30px rgba(34, 211, 238, 0.5);
+}
+
+.liquid-fill::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: 0;
+  width: 200%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 50%;
+  animation: wave-float 3s infinite linear;
+}
+
+.bubble {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  pointer-events: none;
+  bottom: 0;
+  animation: bubble-rise 2.5s infinite ease-in;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.water-widget-glass {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.2);
+}
+
+.dark .water-widget-glass {
+  background: rgba(30, 58, 138, 0.4);
+  border: 1px solid rgba(147, 197, 253, 0.2);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+}
+
+.neon-text-blue {
+  text-shadow: 0 0 15px rgba(6, 182, 212, 0.8);
+}
+
+/* Goal Reached Celebration (Water Theme) */
+@keyframes goal-glow {
+  0% { box-shadow: 0 0 20px rgba(6, 182, 212, 0.2); border-color: rgba(6, 182, 212, 0.3); }
+  50% { box-shadow: 0 0 50px rgba(34, 211, 238, 0.6); border-color: rgba(34, 211, 238, 0.7); }
+  100% { box-shadow: 0 0 20px rgba(6, 182, 212, 0.2); border-color: rgba(6, 182, 212, 0.3); }
+}
+
+.goal-reached-state {
+  animation: goal-glow 3s infinite ease-in-out;
+  /* Enhanced Goal State Background */
+  background: radial-gradient(circle at top right, rgba(34, 211, 238, 0.3), transparent 60%),
+              linear-gradient(135deg, #ecfeff 0%, #cffafe 100%) !important;
+}
+
+.dark .goal-reached-state {
+  background: radial-gradient(circle at top right, rgba(34, 211, 238, 0.4), transparent 50%),
+              linear-gradient(135deg, #083344 0%, #155e75 100%) !important;
+}
+
+.goal-reached-state .liquid-fill {
+  background: linear-gradient(to top, #0891b2, #22d3ee, #67e8f9);
+  box-shadow: 0 0 40px rgba(34, 211, 238, 0.8);
+}
+
+@keyframes sparkle {
+  0%, 100% { transform: scale(0) rotate(0deg); opacity: 0; }
+  50% { transform: scale(1) rotate(180deg); opacity: 1; }
+}
+
+.sparkle-particle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: #22d3ee;
+  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  animation: sparkle 2s infinite ease-in-out;
+  pointer-events: none;
+}

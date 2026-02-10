@@ -31,7 +31,7 @@ export default function RootLayout({
       <body className={`${spaceGrotesk.variable} font-sans`}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
+          defaultTheme="light"
           enableSystem
           disableTransitionOnChange
         >

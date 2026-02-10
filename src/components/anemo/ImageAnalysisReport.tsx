@@ -13,13 +13,14 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
-import { Download, FileText, Hospital, Stethoscope, HeartPulse, MapPin, Sparkles, Loader2 } from 'lucide-react';
+import { Download, FileText, Hospital, Stethoscope, HeartPulse, MapPin, Sparkles } from 'lucide-react';
 import type { PersonalizedRecommendationsOutput } from '@/ai/flows/provide-personalized-recommendations';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { collection, addDoc, serverTimestamp, doc } from 'firebase/firestore';
 import { ScrollArea } from '../ui/scroll-area';
 import { AnalyzeCbcReportOutput } from '@/ai/flows/analyze-cbc-report';
 import { AnemoLoading } from '../ui/anemo-loading';
+import HeartLoader from '@/components/ui/HeartLoader';
 
 export type AnalysisState = {
   file: File | null;
@@ -406,7 +407,7 @@ export function ImageAnalysisReport({ analyses, labReport, onReset }: ImageAnaly
         <div className="flex gap-2 mt-4">
           <Button onClick={onReset}>Start New Analysis</Button>
           <Button onClick={handleDownloadPdf} variant="outline" disabled={isDownloading}>
-            {isDownloading ? <Loader2 className="mr-2 animate-spin" /> : <Download className="mr-2" />}
+            {isDownloading ? <HeartLoader size={16} strokeWidth={3} className="mr-2" /> : <Download className="mr-2" />}
             Download Report
           </Button>
         </div>

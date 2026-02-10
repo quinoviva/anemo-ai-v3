@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { useAuth } from '@/firebase';
 import { cn } from '@/lib/utils';
-import { HeartPulse, History, Stethoscope, Moon, Sun, Monitor, Bot, Video, Search, User, Settings, LogOut, ChevronDown } from 'lucide-react';
+import { HeartPulse, History, Stethoscope, Moon, Sun, Monitor, Bot, Video, Search, User, Settings, LogOut, ChevronDown, Leaf } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useTheme } from 'next-themes';
 import { Logo } from './Logo';
@@ -33,6 +33,7 @@ const otherLinks = [
   { href: '/dashboard/chatbot', label: 'AI Assistant', icon: Bot },
   { href: '/dashboard/live-analysis', label: 'Live Scan', icon: Video },
   { href: '/dashboard/find-doctor', label: 'Find Care', icon: Search },
+  { href: '/dashboard/remedies', label: 'Remedies', icon: Leaf },
 ];
 
 export function Header() {

@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "concurrently \"next dev\" \"npm run genkit:dev\"",
+    "dev": "concurrently \"next dev -p 3001\" \"npm run genkit:dev\"",
     "predev": "rm -f .next/dev/lock",
     "genkit:dev": "echo '' | genkit start -- tsx src/ai/dev.ts",
     "genkit:watch": "genkit start -- tsx --watch src/ai/dev.ts",
@@ -70,7 +70,7 @@
     "tailwind-merge": "^3.0.1",
     "tailwindcss-animate": "^1.0.7",
     "tesseract.js": "^7.0.0",
-    "three": "^0.182.0",
+    "three": "^0.167.1",
     "zod": "^3.25.76"
   },
   "devDependencies": {

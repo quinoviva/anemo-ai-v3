@@ -11,7 +11,8 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { Loader2, XCircle, Sparkles, Upload, Send, FileUp, Info, Hospital, Stethoscope, Cpu } from 'lucide-react';
+import { XCircle, Sparkles, Upload, Send, FileUp, Info, Hospital, Stethoscope, Cpu } from 'lucide-react';
+import HeartLoader from '@/components/ui/HeartLoader';
 import { useToast } from '@/hooks/use-toast';
 import { runAnalyzeCbcReport, saveLabReportForTraining } from '@/app/actions';
 import { runLocalCbcAnalysis } from '@/ai/local-ai';
@@ -300,7 +301,7 @@ export function LabReportCapture({ isOpen, onClose, onAnalysisComplete }: LabRep
         <Sparkles className="h-12 w-12 text-primary mb-4" />
         <h3 className="text-xl font-semibold">AI is Analyzing Your Report...</h3>
         <p className="text-muted-foreground">This may take a moment. Please wait.</p>
-        <Loader2 className="h-8 w-8 animate-spin text-primary mt-6" />
+        <HeartLoader size={32} strokeWidth={3} className="mt-6" />
       </div>
     </>
   );
@@ -315,7 +316,7 @@ export function LabReportCapture({ isOpen, onClose, onAnalysisComplete }: LabRep
         <Sparkles className="h-12 w-12 text-primary mb-4" />
         <h3 className="text-xl font-semibold">AI is Analyzing Your Report...</h3>
         <p className="text-muted-foreground">This may take a moment. Please wait.</p>
-        <Loader2 className="h-8 w-8 animate-spin text-primary mt-6" />
+        <HeartLoader size={32} strokeWidth={3} className="mt-6" />
       </div>
     </>
   );
@@ -363,7 +364,7 @@ export function LabReportCapture({ isOpen, onClose, onAnalysisComplete }: LabRep
       <DialogFooter>
         <Button variant="outline" onClick={() => setStep('upload')}>Re-upload</Button>
         <Button onClick={handleSaveResult} disabled={step === 'saving'}>
-            {step === 'saving' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {step === 'saving' && <HeartLoader size={16} strokeWidth={3} className="mr-2" />}
             Save to History
         </Button>
       </DialogFooter>

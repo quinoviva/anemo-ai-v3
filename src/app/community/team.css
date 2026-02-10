@@ -1,0 +1,119 @@
+@keyframes reveal-up {
+  0% { transform: translateY(100%); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.team-card-premium {
+  position: relative;
+  transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.team-card-premium .glow-ring {
+  position: absolute;
+  inset: -10px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+  opacity: 0;
+  transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: scale(0.9);
+  pointer-events: none;
+}
+
+.team-card-premium:hover .glow-ring {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.team-image-container {
+  overflow: hidden;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: #0a0a0a;
+  box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+  transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+
+.team-card-premium:hover .team-image-container {
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 20px 40px -20px rgba(255, 255, 255, 0.1);
+}
+
+.team-name {
+  background: linear-gradient(to bottom, #fff 0%, rgba(255,255,255,0.5) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  letter-spacing: 0.02em;
+}
+
+.team-card-premium:hover .team-name {
+  letter-spacing: 0.08em;
+  background: linear-gradient(to bottom, #fff 0%, #fff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+.team-role {
+  letter-spacing: 0.3em;
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.2);
+  transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  margin-top: 0.5rem;
+}
+
+.team-card-premium:hover .team-role {
+  color: rgba(255, 255, 255, 0.6);
+  letter-spacing: 0.4em;
+}
+
+.horizon-line {
+  height: 1px;
+  width: 100%;
+  max-width: 600px;
+  margin: 3rem auto;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
+  position: relative;
+}
+
+.horizon-line::before,
+.horizon-line::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+  animation-duration: 4s;
+  animation-iteration-count: infinite;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.horizon-line::before {
+  left: 0;
+  animation-name: horizon-shimmer-left;
+}
+
+.horizon-line::after {
+  right: 0;
+  animation-name: horizon-shimmer-right;
+}
+
+@keyframes horizon-shimmer-left {
+  0% { transform: translateX(100%); opacity: 0; }
+  50% { opacity: 1; }
+  100% { transform: translateX(-100%); opacity: 0; }
+}
+
+@keyframes horizon-shimmer-right {
+  0% { transform: translateX(-100%); opacity: 0; }
+  50% { opacity: 1; }
+  100% { transform: translateX(100%); opacity: 0; }
+}

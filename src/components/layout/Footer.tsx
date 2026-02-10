@@ -6,11 +6,11 @@ export function Footer() {
   const links = [
     { label: 'Terms', href: '/terms-of-service' },
     { label: 'Privacy', href: '/privacy-policy' },
-    { label: 'Security', href: '#' },
-    { label: 'Status', href: '#' },
-    { label: 'Community', href: '#' },
-    { label: 'Docs', href: '#' },
-    { label: 'Contact', href: '#' },
+    { label: 'Security', href: '/security' },
+    { label: 'Status', href: '/status' },
+    { label: 'Community', href: '/community' },
+    { label: 'Docs', href: '/docs' },
+    { label: 'Contact', href: '/contact' },
   ];
 
   return (

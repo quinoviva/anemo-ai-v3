@@ -19,7 +19,8 @@ import {
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/firebase';
-import { Loader2, Mail, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Mail, ArrowLeft, ArrowRight } from 'lucide-react';
+import HeartLoader from '@/components/ui/HeartLoader';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email.' }),
@@ -97,7 +98,7 @@ export function ForgotPasswordForm() {
             className="w-full h-12 rounded-xl text-base font-medium shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all duration-300 hover:scale-[1.02]" 
             disabled={isLoading}
           >
-            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {isLoading && <HeartLoader size={24} strokeWidth={2.5} className="mr-2" />}
             Send Reset Link <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </form>

@@ -4,59 +4,59 @@
 
 @layer base {
   :root {
-    /* Premium Light Mode: "Porcelain & Rouge" */
-    --background: 240 5% 98%; /* Slightly cooler white */
+    /* Premium Light Mode: "Porcelain & Rouge" - Ultra Modern */
+    --background: 210 20% 98%; /* Crisper, cool white */
     --foreground: 240 10% 3.9%;
     --card: 0 0% 100%;
     --card-foreground: 240 10% 3.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
-    --primary: 346 87% 60%; 
-    --primary-foreground: 355.7 100% 97.3%;
+    --primary: 346 100% 50%; /* Stronger Vibrant Crimson */
+    --primary-foreground: 0 0% 100%;
     --secondary: 240 4.8% 95.9%;
     --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 40%;
-    --accent: 240 4.8% 95.9%;
+    --muted: 210 10% 96%;
+    --muted-foreground: 240 3.8% 40%; /* Slightly darker for contrast */
+    --accent: 210 10% 96%;
     --accent-foreground: 240 5.9% 10%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
     --border: 240 5.9% 90%;
     --input: 240 5.9% 90%;
-    --ring: 346 87% 60%;
-    --radius: 1rem;
-    --chart-1: 346 87% 60%;
+    --ring: 346 100% 50%;
+    --radius: 1.5rem;
+    --chart-1: 346 100% 50%;
     --chart-2: 240 4.8% 95.9%;
-    --chart-3: 200 80% 50%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
+    --chart-3: 200 90% 40%;
+    --chart-4: 43 90% 60%;
+    --chart-5: 27 90% 60%;
     
     /* Motion & Physics */
-    --ease-expensive: cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-expensive: cubic-bezier(0.25, 1, 0.5, 1);
   }
 
   .dark {
-    /* Premium Dark Mode: "Deep Space & Neon" */
-    --background: 240 10% 4%;
+    /* Premium Dark Mode: "Deep Space & Neon" - Ultra Modern */
+    --background: 240 10% 4%; /* Deep Void */
     --foreground: 0 0% 98%;
     --card: 240 10% 6%;
     --card-foreground: 0 0% 98%;
     --popover: 240 10% 6%;
     --popover-foreground: 0 0% 98%;
-    --primary: 346 87% 60%;
-    --primary-foreground: 355.7 100% 97.3%;
-    --secondary: 240 4% 16%;
+    --primary: 346 100% 58%; /* Neon Crimson */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 4% 12%;
     --secondary-foreground: 0 0% 98%;
-    --muted: 240 4% 16%;
+    --muted: 240 4% 12%;
     --muted-foreground: 240 5% 65%;
-    --accent: 240 4% 16%;
+    --accent: 240 4% 12%;
     --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 4% 16%;
-    --input: 240 4% 16%;
-    --ring: 346 87% 60%;
-    --chart-1: 346 87% 60%;
+    --border: 240 6% 14%;
+    --input: 240 6% 14%;
+    --ring: 346 100% 58%;
+    --chart-1: 346 100% 58%;
     --chart-2: 240 3.7% 15.9%;
     --chart-3: 200 80% 50%;
     --chart-4: 43 74% 66%;
@@ -75,6 +75,30 @@
   
   ::selection {
     @apply bg-primary/20 text-primary;
+  }
+
+  /* Custom Ultra-Modern Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/10 rounded-full transition-colors duration-300;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-primary/40;
+  }
+
+  /* Firefox Support */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground) / 0.1) transparent;
   }
 }
 

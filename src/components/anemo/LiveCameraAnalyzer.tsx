@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { GlassSurface } from '@/components/ui/glass-surface';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Camera, Video, RefreshCw, XCircle, FlipHorizontal, Sun, Target, CheckCircle, UploadCloud } from 'lucide-react';
+import { Camera, Video, RefreshCw, XCircle, FlipHorizontal, Sun, Target, CheckCircle, UploadCloud } from 'lucide-react';
+import HeartLoader from '@/components/ui/HeartLoader';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { useColorNormalization } from '@/hooks/use-color-normalization'; // Import the hook
@@ -297,7 +298,7 @@ export function LiveCameraAnalyzer({ onCapture, onFileUpload, bodyPart }: LiveCa
     if (hasCameraPermission === null) {
       return (
         <div className="flex flex-col items-center justify-center text-center p-8 h-full">
-          <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
+          <HeartLoader size={40} strokeWidth={3} className="mb-4" />
           <p className="text-muted-foreground">Checking camera...</p>
         </div>
       );
@@ -378,7 +379,7 @@ export function LiveCameraAnalyzer({ onCapture, onFileUpload, bodyPart }: LiveCa
                     )}
                     {calibrationStage === 'capturing_subject' && (
                         <Button onClick={handleCapture} disabled={isCapturing || lowLightCondition} size="lg">
-                            {isCapturing ? <Loader2 className="animate-spin" /> : <Camera />}
+                            {isCapturing ? <HeartLoader size={20} strokeWidth={3} /> : <Camera />}
                             <span className="ml-2">Capture Image</span>
                         </Button>
                     )}

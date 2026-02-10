@@ -9,7 +9,8 @@ import { Input } from '@/components/ui/input';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { useUser } from '@/firebase';
 import { useToast } from '@/hooks/use-toast';
-import { UploadCloud, XCircle, Loader2, CheckCircle, RefreshCw, Hand, Eye, User, Camera } from 'lucide-react';
+import { UploadCloud, XCircle, CheckCircle, RefreshCw, Hand, Eye, User, Camera } from 'lucide-react';
+import HeartLoader from '@/components/ui/HeartLoader';
 import { ImageAnalysisReport } from './ImageAnalysisReport';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
@@ -296,7 +297,7 @@ function AnalysisCard({
       case 'analyzing':
         return (
           <div className="flex flex-col items-center justify-center text-center p-6 border-2 border-dashed rounded-lg h-48 bg-secondary">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <HeartLoader size={32} strokeWidth={3} />
             <p className="mt-2 text-sm text-muted-foreground">Analyzing...</p>
           </div>
         );

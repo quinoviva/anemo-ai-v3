@@ -14,7 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { CardContent } from '@/components/ui/card';
 import { GlassSurface } from '@/components/ui/glass-surface';
-import { Eye, Plus, LogIn, User, Loader2, FileText, Download, Trash2, ShieldCheck } from 'lucide-react';
+import { Eye, Plus, LogIn, User, FileText, Download, Trash2, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { useUser, useFirestore, useCollection, useMemoFirebase, useDoc } from '@/firebase';
 import { collection, query, orderBy, doc } from 'firebase/firestore';
@@ -41,6 +41,7 @@ import { CbcReport as CbcReportType, AnalysisReportViewer } from './AnalysisRepo
 import { AnalyzeCbcReportOutput } from '@/ai/flows/analyze-cbc-report';
 import { runValidateMultimodalResults } from '@/app/actions';
 import { MenstrualCycleCorrelator, CycleLogType } from './MenstrualCycleCorrelator';
+import { AnemoLoading } from '@/components/ui/anemo-loading';
 
 type ImageReport = PersonalizedRecommendationsOutput & {
   id: string;
@@ -205,7 +206,7 @@ export function AnalysisHistory() {
   if (imageIsLoading || cbcIsLoading) {
     return (
       <div className="flex h-full w-full items-center justify-center p-10">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <AnemoLoading />
       </div>
     );
   }

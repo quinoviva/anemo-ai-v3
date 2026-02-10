@@ -1,25 +1,8 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
+import './ColorBends.css';
 
-type ColorBendsProps = {
-  className?: string;
-  style?: React.CSSProperties;
-  rotation?: number;
-  speed?: number;
-  colors?: string[];
-  transparent?: boolean;
-  autoRotate?: number;
-  scale?: number;
-  frequency?: number;
-  warpStrength?: number;
-  mouseInfluence?: number;
-  parallax?: number;
-  noise?: number;
-  color?: string;
-  opacity?: number;
-};
-
-const MAX_COLORS = 8 as const;
+const MAX_COLORS = 8;
 
 const frag = `
 #define MAX_COLORS ${MAX_COLORS}
@@ -126,22 +109,21 @@ export default function ColorBends({
   warpStrength = 1,
   mouseInfluence = 1,
   parallax = 0.5,
-  noise = 0.1,
-  color // added to match requested usage
-}: ColorBendsProps) {
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
-  const rafRef = useRef<number | null>(null);
-  const materialRef = useRef<THREE.ShaderMaterial | null>(null);
-  const resizeObserverRef = useRef<ResizeObserver | null>(null);
-  const rotationRef = useRef<number>(rotation);
-  const autoRotateRef = useRef<number>(autoRotate);
-  const pointerTargetRef = useRef<THREE.Vector2>(new THREE.Vector2(0, 0));
-  const pointerCurrentRef = useRef<THREE.Vector2>(new THREE.Vector2(0, 0));
-  const pointerSmoothRef = useRef<number>(8);
+  noise = 0.1
+}) {
+  const containerRef = useRef(null);
+  const rendererRef = useRef(null);
+  const rafRef = useRef(null);
+  const materialRef = useRef(null);
+  const resizeObserverRef = useRef(null);
+  const rotationRef = useRef(rotation);
+  const autoRotateRef = useRef(autoRotate);
+  const pointerTargetRef = useRef(new THREE.Vector2(0, 0));
+  const pointerCurrentRef = useRef(new THREE.Vector2(0, 0));
+  const pointerSmoothRef = useRef(8);
 
   useEffect(() => {
-    const container = containerRef.current!;
+    const container = containerRef.current;
     const scene = new THREE.Scene();
     const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
 
@@ -180,7 +162,7 @@ export default function ColorBends({
       alpha: true
     });
     rendererRef.current = renderer;
-    (renderer as any).outputColorSpace = (THREE as any).SRGBColorSpace;
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.setClearColor(0x000000, transparent ? 0 : 1);
     renderer.domElement.style.width = '100%';
@@ -194,7 +176,7 @@ export default function ColorBends({
       const w = container.clientWidth || 1;
       const h = container.clientHeight || 1;
       renderer.setSize(w, h, false);
-      (material.uniforms.uCanvas.value as THREE.Vector2).set(w, h);
+      material.uniforms.uCanvas.value.set(w, h);
     };
 
     handleResize();
@@ -204,7 +186,7 @@ export default function ColorBends({
       ro.observe(container);
       resizeObserverRef.current = ro;
     } else {
-      (window as Window).addEventListener('resize', handleResize);
+      window.addEventListener('resize', handleResize);
     }
 
     const loop = () => {
@@ -216,13 +198,13 @@ export default function ColorBends({
       const rad = (deg * Math.PI) / 180;
       const c = Math.cos(rad);
       const s = Math.sin(rad);
-      (material.uniforms.uRot.value as THREE.Vector2).set(c, s);
+      material.uniforms.uRot.value.set(c, s);
 
       const cur = pointerCurrentRef.current;
       const tgt = pointerTargetRef.current;
       const amt = Math.min(1, dt * pointerSmoothRef.current);
       cur.lerp(tgt, amt);
-      (material.uniforms.uPointer.value as THREE.Vector2).copy(cur);
+      material.uniforms.uPointer.value.copy(cur);
       renderer.render(scene, camera);
       rafRef.current = requestAnimationFrame(loop);
     };
@@ -231,7 +213,7 @@ export default function ColorBends({
     return () => {
       if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
       if (resizeObserverRef.current) resizeObserverRef.current.disconnect();
-      else (window as Window).removeEventListener('resize', handleResize);
+      else window.removeEventListener('resize', handleResize);
       geometry.dispose();
       material.dispose();
       renderer.dispose();
@@ -239,7 +221,7 @@ export default function ColorBends({
         container.removeChild(renderer.domElement);
       }
     };
-  }, []);
+  }, [frequency, mouseInfluence, noise, parallax, scale, speed, transparent, warpStrength]);
 
   useEffect(() => {
     const material = materialRef.current;
@@ -256,7 +238,7 @@ export default function ColorBends({
     material.uniforms.uParallax.value = parallax;
     material.uniforms.uNoise.value = noise;
 
-    const toVec3 = (hex: string) => {
+    const toVec3 = hex => {
       const h = hex.replace('#', '').trim();
       const v =
         h.length === 3
@@ -267,7 +249,7 @@ export default function ColorBends({
 
     const arr = (colors || []).filter(Boolean).slice(0, MAX_COLORS).map(toVec3);
     for (let i = 0; i < MAX_COLORS; i++) {
-      const vec = (material.uniforms.uColors.value as THREE.Vector3[])[i];
+      const vec = material.uniforms.uColors.value[i];
       if (i < arr.length) vec.copy(arr[i]);
       else vec.set(0, 0, 0);
     }
@@ -294,7 +276,7 @@ export default function ColorBends({
     const container = containerRef.current;
     if (!material || !container) return;
 
-    const handlePointerMove = (e: PointerEvent) => {
+    const handlePointerMove = e => {
       const rect = container.getBoundingClientRect();
       const x = ((e.clientX - rect.left) / (rect.width || 1)) * 2 - 1;
       const y = -(((e.clientY - rect.top) / (rect.height || 1)) * 2 - 1);
@@ -307,5 +289,5 @@ export default function ColorBends({
     };
   }, []);
 
-  return <div ref={containerRef} className={`w-full h-full relative overflow-hidden ${className}`} style={style} />;
+  return <div ref={containerRef} className={`color-bends-container ${className}`} style={style} />;
 }
