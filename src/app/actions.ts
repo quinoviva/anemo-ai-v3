@@ -32,9 +32,34 @@ import {
   AnswerAnemiaQuestionOutput,
 } from '@/ai/flows/answer-anemia-related-questions';
 
+import { initializeApp, getApps, cert } from 'firebase-admin/app';
+import { getStorage } from 'firebase-admin/storage';
+import { getFirestore } from 'firebase-admin/firestore';
+
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
+
+// --- Firebase Admin Initialization ---
+// Ensure Firebase is initialized, but only once.
+if (!getApps().length) {
+  try {
+    // We use a service account key for admin access.
+    // In a real app, this should be a secret environment variable.
+    // This will only be run in production or when explicitly configured for local Firebase Admin usage.
+    if (process.env.NODE_ENV === 'production' || process.env.FIREBASE_ADMIN_LOCAL_ENABLE === 'true') {
+        const serviceAccount = JSON.parse(
+          process.env.FIREBASE_SERVICE_ACCOUNT_KEY as string
+        );
+        initializeApp({
+          credential: cert(serviceAccount),
+          storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+        });
+    }
+  } catch (error) {
+    console.error('Firebase Admin Initialization failed:', error);
+  }
+}
 
 /**
  * Calculates a SHA-256 hash of a data URI or base64 string.
@@ -116,8 +141,8 @@ export async function runGenerateImageDescription(
 }
 
 /**
- * Saves an image to the local filesystem for future model retraining.
- * Renames file with user's name, hash, and timestamp.
+ * Saves an image to the local filesystem for future model retraining (in development),
+ * or to Firebase Cloud Storage and Firestore (in production).
  */
 export async function saveImageForTraining(
   dataUri: string, 
@@ -125,44 +150,92 @@ export async function saveImageForTraining(
   prediction: string,
   userName: string = 'Anonymous'
 ) {
-  try {
-    const hash = calculateHash(dataUri).substring(0, 12);
-    const cleanUserName = userName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-    const date = new Date();
-    const timestamp = date.toISOString().replace(/[:.]/g, '-').split('T');
-    const dateStr = timestamp[0];
-    const timeStr = timestamp[1].split('Z')[0];
+  const hash = calculateHash(dataUri).substring(0, 12);
+  const cleanUserName = userName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+  const date = new Date();
+  const timestamp = date.toISOString().replace(/[:.]/g, '-');
 
-    const baseDir = path.join(process.cwd(), 'dataset', 'user_contributions', bodyPart);
-    const category = prediction.toLowerCase().includes('anemia') || prediction.toLowerCase().includes('pallor') 
-      ? 'potential_anemia' 
-      : 'potential_normal';
-    
-    const targetDir = path.join(baseDir, category);
-    
-    if (!fs.existsSync(targetDir)) {
-      fs.mkdirSync(targetDir, { recursive: true });
+  const category = prediction.toLowerCase().includes('anemia') || prediction.toLowerCase().includes('pallor') 
+    ? 'potential_anemia' 
+    : 'potential_normal';
+
+  const base64Data = dataUri.split(';base64,').pop();
+  if (!base64Data) {
+    console.error("Invalid Data URI provided to saveImageForTraining.");
+    return { success: false, error: "Invalid Data URI." };
+  }
+
+  if (process.env.NODE_ENV === 'development') {
+    // --- LOCAL DEVELOPMENT SAVE ---
+    try {
+      const dateOnly = date.toISOString().split('T')[0];
+      const timeOnly = date.toTimeString().split(' ')[0].replace(/:/g, '-');
+      const baseDir = path.join(process.cwd(), 'dataset', 'user_contributions', bodyPart);
+      const targetDir = path.join(baseDir, category);
+      
+      if (!fs.existsSync(targetDir)) {
+        fs.mkdirSync(targetDir, { recursive: true });
+      }
+
+      // Specific naming format: FullName_Hash_Date_Time
+      const fileName = `${cleanUserName}_${hash}_${dateOnly}_${timeOnly}.png`;
+      const filePath = path.join(targetDir, fileName);
+      
+      // Deduplication check: if file with same hash exists in this category, don't resave
+      const files = fs.readdirSync(targetDir);
+      if (files.some(f => f.includes(hash))) {
+        console.log(`[DEV] Image with hash ${hash} already exists in ${category}. Not saving.`);
+        return { success: true, duplicated: true };
+      }
+
+      fs.writeFileSync(filePath, base64Data, { encoding: 'base64' });
+      console.log(`[DEV] Successfully saved image locally to ${filePath}`);
+      return { success: true };
+    } catch (error) {
+      console.error("[DEV] Failed to save image locally:", error);
+      return { success: false, error: (error as Error).message };
     }
-
-    const base64Data = dataUri.split(';base64,').pop();
-    if (!base64Data) return;
-
-    // Specific naming format: FullName_Hash_Date_Time
-    const fileName = `${cleanUserName}_${hash}_${dateStr}_${timeStr}.png`;
-    const filePath = path.join(targetDir, fileName);
-    
-    // Deduplication check: if file with same hash exists in this category, don't resave
-    const files = fs.readdirSync(targetDir);
-    if (files.some(f => f.includes(hash))) {
-      console.log(`Image with hash ${hash} already exists in ${category}.`);
-      return { success: true, duplicated: true };
+  } else {
+    // --- PRODUCTION (FIREBASE) SAVE ---
+    if (!getApps().length) {
+        console.error("Firebase not initialized in production. Cannot save image for training.");
+        return { success: false, error: "Firebase not initialized." };
     }
+    
+    try {
+      const filePath = `user_contributions/${bodyPart}/${category}/${cleanUserName}_${hash}_${timestamp}.png`;
+      const imageBuffer = Buffer.from(base64Data, 'base64');
+      
+      // Upload to Firebase Cloud Storage
+      const bucket = getStorage().bucket();
+      const file = bucket.file(filePath);
+      await file.save(imageBuffer, {
+        metadata: {
+          contentType: 'image/png',
+          cacheControl: 'public, max-age=31536000',
+        },
+      });
 
-    fs.writeFileSync(filePath, base64Data, { encoding: 'base64' });
-    return { success: true };
-  } catch (error) {
-    console.error("Failed to save image locally:", error);
-    return { success: false };
+      // Create a job in Firestore
+      const db = getFirestore();
+      const trainingJobRef = db.collection('training_jobs').doc(`${hash}_${bodyPart}`);
+      
+      // Use `set` with `merge: true` to prevent duplicate jobs for the same image
+      await trainingJobRef.set({
+        storagePath: filePath,
+        bodyPart,
+        prediction,
+        userName,
+        createdAt: date,
+        status: 'pending', // Status for the training service to update
+      }, { merge: true });
+
+      console.log(`[PROD] Successfully uploaded ${filePath} to Cloud Storage and created training job.`);
+      return { success: true };
+    } catch (error) {
+      console.error("[PROD] Failed to save image to Cloud Storage:", error);
+      return { success: false, error: (error as Error).message };
+    }
   }
 }
 

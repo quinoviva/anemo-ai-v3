@@ -281,6 +281,7 @@ export default function FindDoctorPage() {
                                </p>
                             </div>
 
+
                             <div className="space-y-3 pt-6 border-t border-white/5">
                                {clinic.hours && (
                                  <div className="flex items-center gap-3 text-sm text-muted-foreground">

@@ -564,8 +564,8 @@ export default function DashboardPage() {
         </div>
 
         {/* --- Nutrition Ticker (Infinite Scroll) --- */}
-        <motion.div variants={itemVariants} className="pt-8">
-           <div className="flex items-center gap-4 mb-8 px-2">
+        <motion.div variants={itemVariants} className="pt-8 -mx-6 md:-mx-12 lg:-mx-20 overflow-hidden">
+           <div className="flex items-center gap-4 mb-8 px-6 md:px-12 lg:px-20">
               <div className="h-px flex-1 bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
               <div className="flex items-center gap-2 text-primary/60">
                  <Sparkles className="h-4 w-4" />

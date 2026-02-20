@@ -22,6 +22,7 @@ import { HeartPulse, History, Stethoscope, Moon, Sun, Monitor, Bot, Video, Searc
 import { useState, useEffect } from 'react';
 import { useTheme } from 'next-themes';
 import { Logo } from './Logo';
+import { SequentialImageAnalyzer } from '../anemo/SequentialImageAnalyzer';
 
 const mainNavLinks = [
   { href: '/dashboard', label: 'HOME' },
@@ -42,6 +43,7 @@ export function Header() {
   const pathname = usePathname();
   const { setTheme } = useTheme();
   const [, setForceRender] = useState(0);
+  const [isScanOpen, setIsScanOpen] = useState(false);
 
   const isGuest = auth.currentUser?.isAnonymous;
 
@@ -75,6 +77,7 @@ export function Header() {
   };
 
   return (
+    <>
     <header className="fixed top-0 z-50 w-full p-4 pointer-events-none flex justify-center">
       {/* Floating Capsule */}
       <div className="pointer-events-auto flex items-center justify-between w-full max-w-5xl h-16 px-4 pr-2 bg-background/60 backdrop-blur-xl border border-primary/10 rounded-full shadow-[0_8px_32px_-4px_rgba(0,0,0,0.1)] transition-all duration-500 hover:shadow-[0_16px_48px_-8px_rgba(0,0,0,0.15)] hover:-translate-y-0.5">
@@ -106,6 +109,23 @@ export function Header() {
             </Link>
           ))}
           
+           {/* SCAN Trigger - Click to Open */}
+           <div className="relative">
+              <button 
+                onClick={() => setIsScanOpen(true)}
+                className={cn(
+                  'px-4 py-2 text-xs font-bold tracking-widest rounded-full transition-all duration-300 flex items-center gap-2 group',
+                  isScanOpen 
+                  ? 'bg-primary text-black shadow-[0_0_20px_-5px_rgba(var(--primary),0.5)]' 
+                  : 'text-primary bg-primary/10 hover:bg-primary/20'
+                )}
+              >
+                <HeartPulse className="w-3 h-3 animate-pulse" />
+                SCAN
+              </button>
+           </div>
+
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <button className={cn(
@@ -175,7 +195,7 @@ export function Header() {
                 <DropdownMenuSubTrigger className="cursor-pointer focus:bg-primary/5 rounded-lg px-3 py-2 text-sm text-muted-foreground focus:text-primary">
                   <Sun className="mr-2 h-4 w-4 opacity-70 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
                   <Moon className="absolute mr-2 h-4 w-4 opacity-70 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-                  <span className="ml-2">Theme</span>
+                  <span className="mr-2">Theme</span>
                 </DropdownMenuSubTrigger>
                 <DropdownMenuPortal>
                   <DropdownMenuSubContent className="bg-background/80 backdrop-blur-xl border border-primary/10 rounded-xl shadow-xl ml-2 p-1">
@@ -204,5 +224,11 @@ export function Header() {
         </div>
       </div>
     </header>
+
+    <SequentialImageAnalyzer 
+      isOpen={isScanOpen} 
+      onClose={() => setIsScanOpen(false)} 
+    />
+    </>
   );
 }

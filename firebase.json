@@ -18,6 +18,10 @@
       "dataDir": "dataconnect/.dataconnect/pgliteData"
     }
   },
+  "functions": {
+    "source": "functions",
+    "runtime": "nodejs20"
+  },
   "dataconnect": {
     "source": "dataconnect"
   }

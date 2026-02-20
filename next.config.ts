@@ -15,6 +15,7 @@ const withPWAConfig = withPWA({
 const nextConfig: NextConfig = {
   devIndicators: false,
   turbopack: {},
+  allowedDevOrigins: ['https://4100-firebase-anemocheck-1768352899979.cluster-y75up3teuvc62qmnwys4deqv6y.cloudworkstations.dev'],
 
   typescript: {
     ignoreBuildErrors: false,

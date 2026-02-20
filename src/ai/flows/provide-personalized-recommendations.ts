@@ -24,6 +24,8 @@ export type PersonalizedRecommendationsInput = z.infer<
 const PersonalizedRecommendationsOutputSchema = z.object({
   recommendations: z.string().describe('Personalized health recommendations for the user, including advice on diet, home remedies, and lifestyle.'),
   riskScore: z.number().describe('Composite anemia risk score (0-100) based on the image analysis and lab report.'),
+  anemiaType: z.string().describe('The likely type of anemia or "Negative" if not detected.'),
+  confidenceScore: z.number().describe('A score from 0-100 representing the certainty of the assessment.'),
 });
 export type PersonalizedRecommendationsOutput = z.infer<
   typeof PersonalizedRecommendationsOutputSchema
@@ -48,18 +50,21 @@ const prompt = ai.definePrompt({
 
 **Your Tasks:**
 
-1.  **Calculate a Risk Score:**
+1.  **Identify Anemia Type and Confidence:**
+    -   Based on visual and clinical data, determine if anemia is present.
+    -   If not detected, set 'anemiaType' to "Negative".
+    -   If detected, specify the type (e.g., "Iron Deficiency Anemia", "Vitamin Deficiency Anemia").
+    -   Provide a 'confidenceScore' (0-100) based on the strength of the evidence (e.g., strong if lab values match visual signs).
+
+2.  **Calculate a Risk Score:**
     -   Analyze the combined results from the image analysis, the lab report, AND the clinical indicators.
     -   **LAB REPORT IS HIGHEST PRIORITY:** If a lab report is provided, prioritize its findings (Hemoglobin, Hematocrit) over visual observations. If lab values are below normal, the risk score should be HIGH (70-100).
     -   Assign a composite anemia risk score from 0 to 100.
-        -   A score of **0-40** suggests **Low Risk**.
-        -   A score of **41-70** suggests **Moderate Risk**.
-        -   A score of **71-100** suggests **High Risk**.
     -   Base the score on the severity and number of anemia signs detected visually (e.g., pallor, pale conjunctiva) and reported clinically.
     -   Increase the score if the user reports 'Moderate' or 'Severe' fatigue, or 'High' cardiovascular strain.
     -   If the user's sex is 'Female' and their menstrual flow is 'Heavy', increase the risk score by 10 points.
 
-2.  **Generate Personalized Recommendations:**
+3.  **Generate Personalized Recommendations:**
     -   Create a bulleted list of clear, actionable recommendations.
     -   **Lab Context:** If lab values are provided, explain what they mean in simple terms.
     -   **Clinical Context:** Address reported symptoms like fatigue or shortness of breath.
