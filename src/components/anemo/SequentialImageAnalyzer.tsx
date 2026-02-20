@@ -283,7 +283,7 @@ export function SequentialImageAnalyzer({ onClose, isOpen }: SequentialImageAnal
                     initial={{ scale: 0.95, opacity: 0, y: 20 }}
                     animate={{ scale: 1, opacity: 1, y: 0 }}
                     exit={{ scale: 0.95, opacity: 0, y: 20 }}
-                    className="relative w-full max-w-7xl h-[90vh] glass-panel rounded-[3rem] overflow-hidden flex flex-col md:flex-row border-primary/20 shadow-[0_0_100px_rgba(0,0,0,0.5)]"
+                    className="relative w-full max-w-7xl h-[95vh] md:h-[90vh] glass-panel rounded-3xl md:rounded-[3rem] overflow-hidden flex flex-col md:flex-row border-primary/20 shadow-[0_0_100px_rgba(0,0,0,0.5)]"
                     onClick={(e) => e.stopPropagation()} 
                 >
                     {/* Noise Texture Overlay */}
@@ -293,21 +293,23 @@ export function SequentialImageAnalyzer({ onClose, isOpen }: SequentialImageAnal
                     <div className="absolute -top-40 -left-40 w-96 h-96 bg-primary/20 rounded-full blur-[140px] pointer-events-none animate-pulse" />
                     <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-blue-600/10 rounded-full blur-[140px] pointer-events-none" />
 
-                    {/* Left Sidebar: Diagnostic Path */}
-                    <div className="w-full md:w-[320px] bg-background/20 backdrop-blur-3xl p-12 border-r border-primary/10 flex flex-col justify-between relative z-10">
+                    {/* Left Sidebar: Diagnostic Path - Stacks on Mobile */}
+                    <div className="w-full md:w-[320px] bg-background/20 backdrop-blur-3xl p-6 md:p-12 border-b md:border-b-0 md:border-r border-primary/10 flex flex-col justify-between relative z-10 shrink-0">
                         <div>
-                            <div className="flex items-center gap-4 mb-16">
-                                <div className="p-3 bg-primary/10 rounded-2xl border border-primary/20">
-                                    <ShieldCheck className="w-6 h-6 text-primary" />
-                                </div>
-                                <div className="flex flex-col">
-                                    <span className="text-[10px] font-black uppercase tracking-[0.5em] text-muted-foreground">Anemo</span>
-                                    <span className="text-xl font-black text-foreground tracking-tighter">DIAGNOSTIC</span>
+                            <div className="flex items-center justify-between md:justify-start gap-4 mb-8 md:mb-16">
+                                <div className="flex items-center gap-4">
+                                    <div className="p-3 bg-primary/10 rounded-2xl border border-primary/20">
+                                        <ShieldCheck className="w-6 h-6 text-primary" />
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="text-[10px] font-black uppercase tracking-[0.5em] text-muted-foreground">Anemo</span>
+                                        <span className="text-xl font-black text-foreground tracking-tighter">DIAGNOSTIC</span>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div className="space-y-10 relative">
-                                <div className="absolute left-[23px] top-6 bottom-6 w-px bg-gradient-to-b from-primary/50 via-primary/5 to-transparent" />
+                            <div className="flex md:flex-col gap-4 md:gap-10 relative overflow-x-auto md:overflow-x-visible pb-4 md:pb-0 no-scrollbar">
+                                <div className="hidden md:block absolute left-[23px] top-6 bottom-6 w-px bg-gradient-to-b from-primary/50 via-primary/5 to-transparent" />
                                 
                                 {[
                                     { id: 'skin', label: 'Dermal Pallor', icon: User },
@@ -319,16 +321,16 @@ export function SequentialImageAnalyzer({ onClose, isOpen }: SequentialImageAnal
                                     const isActive = currentStep === step.id || (step.id === 'cbc-decision' && currentStep === 'cbc-capture');
                                     
                                     return (
-                                        <div key={step.id} className={cn("flex items-center gap-6 transition-all duration-700", isActive ? "opacity-100 translate-x-2" : isCompleted ? "opacity-100" : "opacity-20")}>
+                                        <div key={step.id} className={cn("flex items-center gap-4 md:gap-6 transition-all duration-700 shrink-0", isActive ? "opacity-100 translate-x-0 md:translate-x-2" : isCompleted ? "opacity-100" : "opacity-20")}>
                                             <div className={cn(
-                                                "w-12 h-12 rounded-[1.2rem] flex items-center justify-center border-2 transition-all duration-700 z-10 shrink-0", 
+                                                "w-10 h-10 md:w-12 md:h-12 rounded-[1.2rem] flex items-center justify-center border-2 transition-all duration-700 z-10 shrink-0", 
                                                 isCompleted ? "bg-primary border-primary text-white" : isActive ? "border-primary bg-primary/10 text-primary" : "border-muted/30 text-muted-foreground bg-background/40"
                                             )}>
-                                                {isCompleted ? <CheckCircle className="w-6 h-6" /> : <step.icon className="w-6 h-6" />}
+                                                {isCompleted ? <CheckCircle className="w-5 h-5 md:w-6 md:h-6" /> : <step.icon className="w-5 h-5 md:w-6 md:h-6" />}
                                             </div>
                                             <div className="flex flex-col">
-                                                <span className="text-[9px] font-black uppercase tracking-widest text-primary/60 mb-1">Vector 0{idx + 1}</span>
-                                                <span className={cn("text-xs font-black uppercase tracking-widest leading-none", isActive ? "text-primary" : "text-foreground")}>
+                                                <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-primary/60 mb-0.5 md:mb-1">Vector 0{idx + 1}</span>
+                                                <span className={cn("text-[10px] md:text-xs font-black uppercase tracking-widest leading-none whitespace-nowrap", isActive ? "text-primary" : "text-foreground")}>
                                                     {step.label}
                                                 </span>
                                             </div>
@@ -338,7 +340,7 @@ export function SequentialImageAnalyzer({ onClose, isOpen }: SequentialImageAnal
                             </div>
                         </div>
                         
-                        <div className="mt-auto">
+                        <div className="hidden md:block mt-auto">
                              <div className="p-6 rounded-3xl glass-panel border-primary/10">
                                 <div className="flex items-center gap-3 mb-3">
                                     <Zap className="w-4 h-4 text-amber-500" />
@@ -351,16 +353,16 @@ export function SequentialImageAnalyzer({ onClose, isOpen }: SequentialImageAnal
                         </div>
                     </div>
 
-                    {/* Main Content Area */}
-                    <div className="flex-1 p-12 md:p-24 relative flex items-center justify-center overflow-y-auto custom-scrollbar">
-                        <Button variant="ghost" size="icon" className="absolute top-12 right-12 text-muted-foreground hover:text-foreground hover:bg-background/40 rounded-2xl h-14 w-14 transition-all" onClick={onClose}>
-                            <X className="w-8 h-8" />
+                    {/* Main Content Area - Fluid Padding */}
+                    <div className="flex-1 p-6 sm:p-12 md:p-24 relative flex items-center justify-center overflow-y-auto custom-scrollbar">
+                        <Button variant="ghost" size="icon" className="absolute top-4 right-4 md:top-12 md:right-12 text-muted-foreground hover:text-foreground hover:bg-background/40 rounded-2xl h-12 w-12 md:h-14 md:w-14 transition-all z-20" onClick={onClose}>
+                            <X className="w-6 h-6 md:w-8 md:h-8" />
                         </Button>
 
                         {['under-eye', 'fingernails', 'cbc-decision', 'cbc-capture'].includes(currentStep) && (
                             <Button 
                                 variant="ghost" 
-                                className="absolute top-12 left-12 text-muted-foreground hover:text-foreground flex items-center gap-3 text-xs font-black tracking-[0.4em] uppercase"
+                                className="absolute top-4 left-4 md:top-12 md:left-12 text-muted-foreground hover:text-foreground flex items-center gap-2 md:gap-3 text-[10px] md:text-xs font-black tracking-[0.4em] uppercase z-20 h-12 px-4"
                                 onClick={() => {
                                     if (currentStep === 'under-eye') setCurrentStep('skin');
                                     if (currentStep === 'fingernails') setCurrentStep('under-eye');
@@ -368,7 +370,7 @@ export function SequentialImageAnalyzer({ onClose, isOpen }: SequentialImageAnal
                                     if (currentStep === 'cbc-capture') setCurrentStep('cbc-decision');
                                 }}
                             >
-                                <ChevronLeft className="w-5 h-5" />
+                                <ChevronLeft className="w-4 h-4 md:w-5 md:h-5" />
                                 Back
                             </Button>
                         )}

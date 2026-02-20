@@ -197,7 +197,7 @@ export function Chatbot({ isPopup = false, onClose, onMinimize }: ChatbotProps) 
     <div className={cn(
       "h-full flex flex-col overflow-hidden relative font-sans",
       isPopup 
-        ? "bg-background/90 backdrop-blur-2xl" 
+        ? "bg-background/95 sm:bg-background/90 backdrop-blur-2xl" 
         : "bg-transparent"
     )}>
       
@@ -213,7 +213,7 @@ export function Chatbot({ isPopup = false, onClose, onMinimize }: ChatbotProps) 
       
       <CardContent className="flex-1 flex flex-col min-h-0 overflow-hidden p-0 relative z-10">
         <ScrollArea className="flex-1 w-full h-full">
-          <div className="space-y-6 max-w-4xl mx-auto px-4 py-8 md:px-8">
+          <div className="space-y-6 max-w-4xl mx-auto px-4 py-6 md:px-8 md:py-8">
             <AnimatePresence initial={false}>
             {history.map((msg, i) => (
               <motion.div 
@@ -221,24 +221,24 @@ export function Chatbot({ isPopup = false, onClose, onMinimize }: ChatbotProps) 
                 initial={{ opacity: 0, y: 15, scale: 0.98 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{ duration: 0.35, ease: "easeOut" }}
-                className={cn("flex gap-4 group", msg.role === 'user' ? "flex-row-reverse" : "flex-row")}
+                className={cn("flex gap-3 md:gap-4 group", msg.role === 'user' ? "flex-row-reverse" : "flex-row")}
               >
                 {/* Avatars */}
                 <div className="shrink-0 pt-1">
                     {msg.role === 'assistant' ? (
-                        <div className="h-9 w-9 rounded-full bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border border-cyan-500/20 flex items-center justify-center backdrop-blur-md shadow-lg">
-                            <Bot size={16} className="text-cyan-400"/>
+                        <div className="h-8 w-8 md:h-9 md:w-9 rounded-full bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border border-cyan-500/20 flex items-center justify-center backdrop-blur-md shadow-lg">
+                            <Bot size={14} className="md:size-[16px] text-cyan-400"/>
                         </div>
                     ) : (
-                        <div className="h-9 w-9 rounded-full bg-gradient-to-br from-indigo-500 to-blue-600 border border-indigo-400/30 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-                            <User size={16} className="text-white"/>
+                        <div className="h-8 w-8 md:h-9 md:w-9 rounded-full bg-gradient-to-br from-indigo-500 to-blue-600 border border-indigo-400/30 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                            <User size={14} className="md:size-[16px] text-white"/>
                         </div>
                     )}
                 </div>
                 
                 {/* Message Bubbles */}
                 <div className={cn(
-                    "max-w-[85%] md:max-w-[75%] rounded-[1.25rem] px-5 py-3.5 text-sm leading-relaxed shadow-sm transition-all duration-300",
+                    "max-w-[88%] md:max-w-[75%] rounded-[1.25rem] px-4 py-3 md:px-5 md:py-3.5 text-sm leading-relaxed shadow-sm transition-all duration-300",
                     msg.role === 'assistant' 
                         ? "bg-white/5 hover:bg-white/10 border border-white/5 text-foreground rounded-tl-sm" 
                         : "bg-gradient-to-br from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-600/10 rounded-tr-sm border border-indigo-500/50"
@@ -256,14 +256,14 @@ export function Chatbot({ isPopup = false, onClose, onMinimize }: ChatbotProps) 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
-                className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-6"
+                className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-6"
               >
                   {sampleQuestions.map((q, i) => (
                     <motion.button
                       whileHover={{ scale: 1.02, backgroundColor: "rgba(255, 255, 255, 0.08)" }}
                       whileTap={{ scale: 0.98 }}
                       key={i} 
-                      className="text-left px-5 py-4 bg-white/5 border border-white/5 hover:border-cyan-500/30 transition-all rounded-2xl group flex flex-col gap-2"
+                      className="text-left px-5 py-4 bg-white/5 border border-white/5 hover:border-cyan-500/30 transition-all rounded-2xl group flex flex-col gap-2 min-h-[44px]"
                       onClick={() => handleSampleQuestionClick(q)}
                     >
                       <Zap className="h-4 w-4 text-cyan-400 group-hover:drop-shadow-[0_0_8px_rgba(34,211,238,0.5)] transition-all" />
@@ -279,10 +279,10 @@ export function Chatbot({ isPopup = false, onClose, onMinimize }: ChatbotProps) 
                 animate={{ opacity: 1, scale: 1 }}
                 className="flex items-end gap-4"
               >
-                 <div className="h-9 w-9 rounded-full bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border border-cyan-500/20 flex items-center justify-center backdrop-blur-md">
-                    <Bot size={16} className="text-cyan-400"/>
+                 <div className="h-8 w-8 md:h-9 md:w-9 rounded-full bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border border-cyan-500/20 flex items-center justify-center backdrop-blur-md">
+                    <Bot size={14} className="md:size-[16px] text-cyan-400"/>
                 </div>
-                <div className="rounded-[1.25rem] rounded-tl-sm bg-white/5 border border-white/5 px-6 py-4 shadow-lg backdrop-blur-md">
+                <div className="rounded-[1.25rem] rounded-tl-sm bg-white/5 border border-white/5 px-5 py-3 md:px-6 md:py-4 shadow-lg backdrop-blur-md">
                   <div className="flex items-center gap-1.5">
                      <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 1.2 }} className="w-2 h-2 bg-cyan-400 rounded-full" />
                      <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 1.2, delay: 0.2 }} className="w-2 h-2 bg-blue-500 rounded-full" />
@@ -296,16 +296,16 @@ export function Chatbot({ isPopup = false, onClose, onMinimize }: ChatbotProps) 
         </ScrollArea>
         
         {/* Input Area */}
-        <div className="p-4 md:p-6 bg-gradient-to-t from-background/80 to-transparent backdrop-blur-sm relative z-20">
+        <div className="p-4 md:p-6 bg-gradient-to-t from-background/95 to-transparent backdrop-blur-md relative z-20">
             <form onSubmit={handleSubmit} className="relative max-w-4xl mx-auto flex items-end gap-3">
                 <div className="relative flex-1 group">
                     <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500 rounded-full blur opacity-10 group-focus-within:opacity-40 transition duration-1000 group-hover:opacity-30" />
                     <Input 
-                        placeholder="Ask Anemo Bot about anemia..." 
+                        placeholder="Ask Anemo Bot..." 
                         value={userInput} 
                         onChange={(e) => setUserInput(e.target.value)} 
                         disabled={isLoading}
-                        className="relative bg-background/50 border-white/10 hover:border-white/20 focus-visible:border-white/20 focus-visible:ring-0 rounded-full h-14 pl-6 pr-12 transition-all shadow-inner text-base backdrop-blur-xl"
+                        className="relative bg-background/50 border-white/10 hover:border-white/20 focus-visible:border-white/20 focus-visible:ring-0 rounded-full h-12 md:h-14 pl-5 md:pl-6 pr-12 transition-all shadow-inner text-base backdrop-blur-xl"
                     />
                      <div className="absolute right-2 top-1/2 -translate-y-1/2">
                         {userInput && (
@@ -324,15 +324,14 @@ export function Chatbot({ isPopup = false, onClose, onMinimize }: ChatbotProps) 
                 
                 <Button 
                     type="submit" 
-                    
                     size="icon" 
                     disabled={!userInput.trim() || isLoading} 
                     className={cn(
-                        "shrink-0 rounded-full w-14 h-14 shadow-xl transition-all duration-300 bg-gradient-to-br from-cyan-500 to-blue-600 hover:scale-105 hover:shadow-cyan-500/25 border border-white/10",
+                        "shrink-0 rounded-full w-12 h-12 md:w-14 md:h-14 shadow-xl transition-all duration-300 bg-gradient-to-br from-cyan-500 to-blue-600 hover:scale-105 hover:shadow-cyan-500/25 border border-white/10",
                         !userInput.trim() && "opacity-50 grayscale cursor-not-allowed"
                     )}
                 >
-                    {isLoading ? <HeartLoader size={24} strokeWidth={3} className="text-white" /> : <Send className="h-6 w-6 text-white ml-0.5" />}
+                    {isLoading ? <HeartLoader size={20} strokeWidth={3} className="text-white" /> : <Send className="h-5 w-5 md:h-6 md:w-6 text-white ml-0.5" />}
                 </Button>
             </form>
         </div>
