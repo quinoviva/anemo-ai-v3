@@ -43,6 +43,8 @@ next-env.d.ts
 # firebase
 firebase-debug.log
 firestore-debug.log
+.firebase/logs/
+dataconnect-debug.log
 
 .env
 .env.local
