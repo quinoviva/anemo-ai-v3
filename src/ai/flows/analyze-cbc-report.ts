@@ -93,9 +93,9 @@ CRITICAL RULES:
 
 4. Generate a one-sentence summary including anemia status:
    - If Hemoglobin or Hematocrit is below normal, include:
-     "Patient may have anemia."
+     "ANEMIA POSITIVE: [Brief explanation of which values are low]."
    - If all key values are normal, include:
-     "Patient shows no signs of anemia."
+     "ANEMIA NEGATIVE: All primary hemoglobin markers are within normal range."
    - Always include the general summary of CBC results.
 
 5. DO NOT guess missing values.

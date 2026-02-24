@@ -43,11 +43,26 @@ export async function runLocalCbcAnalysis(extractedText: string) {
 
     // @ts-ignore
     const session = await window.ai.languageModel.create({
-      systemPrompt: `You are an expert medical AI. Analyze the following CBC report text. 
-      Extract Hemoglobin, Hematocrit, and RBC count. 
-      Determine if the patient has signs of anemia.
-      Respond ONLY with a JSON object containing:
-      { "summary": "...", "parameters": [{"parameter": "...", "value": "...", "unit": "...", "range": "...", "isNormal": true/false}] }`
+      systemPrompt: `You are an expert medical AI diagnostic assistant. 
+      Your task is to analyze CBC (Complete Blood Count) laboratory report text.
+
+      STEP 1: VALIDATE
+      Check if the text contains markers of a blood report (e.g., Hemoglobin, RBC, HCT, MCV, WBC, Platelets).
+      If the text is garbage or not a medical report, set summary to "INVALID: This text does not appear to be a CBC lab report." and return empty parameters.
+
+      STEP 2: ANALYZE
+      If valid, extract: Hemoglobin, Hematocrit, and RBC count.
+      Determine the anemia status based on these values.
+      If Hemoglobin is low, state "ANEMIA POSITIVE". If normal, state "ANEMIA NEGATIVE".
+
+      Respond ONLY with a JSON object:
+      { 
+        "summary": "ANEMIA [POSITIVE/NEGATIVE]: [Brief clinical explanation]", 
+        "parameters": [
+          {"parameter": "Hemoglobin", "value": "...", "unit": "...", "range": "...", "isNormal": true/false},
+          ...
+        ] 
+      }`
     });
 
     const result = await session.prompt(`Analyze this CBC text: ${extractedText}`);

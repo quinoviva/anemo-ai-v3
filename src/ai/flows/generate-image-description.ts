@@ -56,26 +56,31 @@ const generateImageDescriptionFlow = ai.defineFlow(
       },
       prompt: [
         {
-          text: `You are a medical image validator. You will receive a photo intended to represent the human: ${input.bodyPart}.
+          text: `You are a specialized medical diagnostic AI. Your mission is to detect clinical signs of anemia through visual inspection of specific body parts.
 
-### VALIDATION RULES:
-1. **Body Part Match**: Is this actually a photo of ${input.bodyPart}? 
-2. **Bare State**: For 'under-eye', there must be NO eye makeup, eyeliner, or mascara. For 'fingernails', there must be NO nail polish or artificial nails. For 'skin', it must be bare skin (palm preferred).
-3. **Quality**: Is the image clear and showing a significant portion of the area (not just a tiny zoomed-in blur)?
+### PHASE 1: RIGOROUS VALIDATION
+Before any analysis, you MUST verify the image quality and state:
+1. **Body Part Identification**: Is this image clearly and primarily showing the user's ${input.bodyPart}?
+2. **"Pure State" Check**: 
+   - For 'under-eye': Is it 100% free of eyeliner, mascara, concealer, or any eye makeup? (Makeup mimics or hides pallor).
+   - For 'fingernails': Is there ZERO nail polish, artificial nails, or dirt under the nails? (Polish blocks the nail bed view).
+   - For 'skin': Is the skin bare, clean, and free of lotions or coverings?
+3. **Diagnostic Quality**: Is the lighting sufficient and the focus sharp enough to see capillary color/pigmentation?
 
-### ANALYSIS RULES:
-If the image passes validation, analyze it for signs of anemia:
-- **Skin (Palm)**: Check for significant pallor (paleness) in the skin creases.
-- **Under-eye**: Check for paleness in the palpebral conjunctiva.
-- **Fingernails**: Check for a pale nail bed or loss of the healthy pink color.
+If ANY of these fail, set 'isValid' to false and explain exactly why in 'description'.
 
-### OUTPUT FORMAT:
-You must return a JSON object with:
-- **isValid**: true/false
-- **description**: A brief explanation of what you see. If invalid, explain exactly why (e.g., "Makeup detected").
-- **analysisResult**: "Anemia Signs Detected", "Normal Range", or "Inconclusive".
-- **confidenceScore**: A number from 0 to 100 representing your certainty.
-- **recommendations**: (Only if valid) Short specific observation.`
+### PHASE 2: ANEMIA DETECTION (Only if Valid)
+Analyze the specific diagnostic markers:
+- **Skin (Palm/Surface)**: Look for significant pallor (paleness) in the skin creases and overall surface compared to a healthy pink/tan tone.
+- **Under-eye (Conjunctiva)**: Inspect the palpebral conjunctiva (the inner lining of the lower eyelid). A pale, white, or yellowish color is a strong indicator of low hemoglobin.
+- **Fingernails**: Assess the nail bed color. Look for the loss of a healthy pink hue or a "washed out" appearance.
+
+### OUTPUT SPECIFICATION:
+- **isValid**: Boolean (Strictly false if makeup, wrong part, or poor quality is detected).
+- **description**: A professional medical observation of the image state and visual findings.
+- **analysisResult**: Use EXACTLY one of these: "ANEMIA POSITIVE (Visual Indicators Found)", "ANEMIA NEGATIVE (Normal Presentation)", or "INCONCLUSIVE (Unclear Markers)".
+- **confidenceScore**: 0-100 based on image clarity and marker prominence.
+- **recommendations**: (If valid) A specific observation or next step for the user.`
         },
         {
           media: {

@@ -15,7 +15,7 @@ import {
   Cpu,
   ChevronRight
 } from 'lucide-react';
-import { motion, AnimatePresence, Variants } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { SequentialImageAnalyzer } from '@/components/anemo/SequentialImageAnalyzer';
@@ -27,7 +27,7 @@ const LocalCbcAnalyzer = dynamic(
 );
 
 // --- Animation Variants (Matching Dashboard) ---
-const containerVariants: Variants = {
+const containerVariants = {
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
@@ -38,7 +38,7 @@ const containerVariants: Variants = {
   },
 };
 
-const itemVariants: Variants = {
+const itemVariants = {
   hidden: { opacity: 0, y: 20 },
   show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 50, damping: 20 } },
 };
@@ -71,7 +71,7 @@ export default function AnalysisPage() {
             </Button>
         </div>
         <div className="w-full max-w-full overflow-hidden">
-            <LocalCbcAnalyzer onBack={() => setAnalysisMode('select')} />
+            <LocalCbcAnalyzer />
         </div>
       </motion.div>
     );
@@ -109,6 +109,7 @@ export default function AnalysisPage() {
               <motion.div variants={itemVariants} className="hidden md:block">
                   <div className="text-right">
                       <p className="text-[10px] font-black tracking-[0.4em] text-muted-foreground">CONCOLUUTIONAL NEURAL NETWORK ALGORITHM</p>
+                      </div>
                   </div>
               </motion.div>
             </div>
@@ -243,7 +244,7 @@ export default function AnalysisPage() {
       </AnimatePresence>
 
       {/* Sequential Image Analyzer for 'full' mode */}
-      <SequentialImageAnalyzer 
+      <SequentialImageAnalyzer
         isOpen={isFullAnalyzerOpen} 
         onClose={() => {
             setIsFullAnalyzerOpen(false);

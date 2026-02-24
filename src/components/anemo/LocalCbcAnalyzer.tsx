@@ -15,7 +15,7 @@ import Tesseract from 'tesseract.js';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
-type LocalCbcAnalyzerProps = {
+export type LocalCbcAnalyzerProps = {
   onBack: () => void;
 };
 
@@ -239,9 +239,9 @@ export function LocalCbcAnalyzer({ onBack }: LocalCbcAnalyzerProps) {
                       <CardContent className="pt-6 space-y-6">
                          
                          {/* Summary Box */}
-                         <div className={`p-4 rounded-lg border ${result.summary?.toLowerCase().includes('anemia') ? 'bg-red-500/10 border-red-500/20' : 'bg-green-500/10 border-green-500/20'}`}>
-                            <h4 className={`font-semibold mb-1 flex items-center gap-2 ${result.summary?.toLowerCase().includes('anemia') ? 'text-red-700' : 'text-green-700'}`}>
-                               {result.summary?.toLowerCase().includes('anemia') ? <AlertTriangle className="h-4 w-4" /> : <CheckCircle className="h-4 w-4" />}
+                         <div className={`p-4 rounded-lg border ${result.summary?.includes('POSITIVE') ? 'bg-red-500/10 border-red-500/20' : result.summary?.includes('NEGATIVE') ? 'bg-green-500/10 border-green-500/20' : 'bg-muted border-muted-foreground/20'}`}>
+                            <h4 className={`font-semibold mb-1 flex items-center gap-2 ${result.summary?.includes('POSITIVE') ? 'text-red-700' : result.summary?.includes('NEGATIVE') ? 'text-green-700' : 'text-muted-foreground'}`}>
+                               {result.summary?.includes('POSITIVE') ? <AlertTriangle className="h-4 w-4" /> : result.summary?.includes('NEGATIVE') ? <CheckCircle className="h-4 w-4" /> : <FileText className="h-4 w-4" />}
                                Assessment Summary
                             </h4>
                             <p className="text-sm text-foreground/80 leading-relaxed">

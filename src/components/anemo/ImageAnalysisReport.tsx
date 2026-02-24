@@ -388,7 +388,13 @@ export function ImageAnalysisReport({ analyses, labReport, onReset }: ImageAnaly
                                     </div>
                                 </div>
                                 <div className="space-y-3 px-2">
-                                    <p className="text-[11px] font-black text-primary uppercase tracking-[0.4em] mb-1">{value.analysisResult}</p>
+                                    <p className={cn(
+                                        "text-[11px] font-black uppercase tracking-[0.4em] mb-1",
+                                        value.analysisResult?.includes('POSITIVE') ? "text-red-500" : 
+                                        value.analysisResult?.includes('NEGATIVE') ? "text-emerald-500" : "text-primary"
+                                    )}>
+                                        {value.analysisResult}
+                                    </p>
                                     <p className="text-sm text-muted-foreground leading-relaxed font-medium uppercase tracking-tight">{value.description}</p>
                                 </div>
                             </motion.div>

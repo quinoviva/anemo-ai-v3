@@ -72,12 +72,12 @@ export const validateMultimodalResultsFlow = ai.defineFlow(
         3.  **Discrepancy Detection:** 
             -   If the **Reliability Index is below 50**, you MUST set "discrepancyAlert" to true. 
             -   This will trigger a high-priority UI alert (ShieldAlert).
-        4.  **Analysis:** Provide a concise, clinical explanation of the consistency between the patient's reported symptoms, visual markers, and lab data.
+        4.  **Analysis:** Provide a concise, clinical explanation. Start with "CORRELATION POSITIVE" if markers align for anemia, or "CORRELATION NEGATIVE" if they align for health.
 
         **Output Format (JSON):**
         {
           "reliabilityScore": <number>,
-          "analysis": "<string>",
+          "analysis": "CORRELATION [POSITIVE/NEGATIVE]: [Explanation]",
           "discrepancyAlert": <boolean>
         }
       `,
