@@ -92,7 +92,7 @@ export default function RemediesPage() {
         <Button variant="ghost" asChild className="rounded-full">
           <Link href="/dashboard">
             <ArrowLeft className="h-5 w-5 mr-2" />
-            Back to Dashboard
+            Backboard
           </Link>
         </Button>
       </div>

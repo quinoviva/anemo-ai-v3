@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { GlassSurface } from '@/components/ui/glass-surface';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -11,22 +11,28 @@ import { Bell, Shield, Smartphone, Globe, Palette, Database, Trash2, Key, Downlo
 import { useTheme } from 'next-themes';
 import { useToast } from '@/hooks/use-toast';
 import HeartLoader from '@/components/ui/HeartLoader';
-import { useEffect } from 'react';
+import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
+import { doc, updateDoc, setDoc } from 'firebase/firestore';
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
+  const { user } = useUser();
+  const firestore = useFirestore();
   const { toast } = useToast();
   const [isSyncing, setIsSyncing] = useState(false);
   const [pushEnabled, setPushEnabled] = useState(false);
-  const [waterReminderEnabled, setWaterReminderEnabled] = useState(false);
 
-  useEffect(() => {
-    // Load persisted settings
-    const savedWater = localStorage.getItem('waterReminderEnabled') === 'true';
-    setWaterReminderEnabled(savedWater);
-  }, []);
+  const userDocRef = useMemoFirebase(() => {
+    if (!user || !firestore) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [user, firestore]);
+
+  const { data: userData } = useDoc(userDocRef);
+  const waterReminderEnabled = userData?.hydration?.enabled || false;
 
   const handleWaterToggle = async (checked: boolean) => {
+    if (!user || !firestore) return;
+
     if (checked) {
       if ('Notification' in window && Notification.permission !== 'granted') {
          const permission = await Notification.requestPermission();
@@ -41,11 +47,20 @@ export default function SettingsPage() {
       }
     }
     
-    setWaterReminderEnabled(checked);
-    localStorage.setItem('waterReminderEnabled', checked.toString());
-    
-    // Dispatch event so other components (Dashboard) can react immediately if needed
-    window.dispatchEvent(new Event('storage')); 
+    try {
+        await setDoc(userDocRef!, {
+            hydration: {
+                enabled: checked
+            }
+        }, { merge: true });
+        
+        toast({
+            title: checked ? "Hydration Enabled" : "Hydration Disabled",
+            description: checked ? "We'll remind you to stay hydrated." : "Hydration reminders turned off.",
+        });
+    } catch (error) {
+        toast({ title: "Error", description: "Failed to update settings.", variant: "destructive" });
+    }
   };
 
   const handlePushToggle = async (checked: boolean) => {

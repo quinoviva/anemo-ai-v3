@@ -47,6 +47,12 @@ export function Chatbot({ isPopup = false, onClose, onMinimize }: ChatbotProps) 
 
   const { data: historyData } = useCollection<any>(messagesQuery);
   
+  const userDocRef = useMemoFirebase(() => {
+    if (!user || !firestore) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [user, firestore]);
+  const { data: userData } = useDoc(userDocRef);
+
   const history: Message[] = historyData ? historyData.map(doc => ({
       role: doc.role,
       content: doc.content,
@@ -56,13 +62,13 @@ export function Chatbot({ isPopup = false, onClose, onMinimize }: ChatbotProps) 
   // Initialization Effect
   useEffect(() => {
     const initChat = async () => {
-        if (!user || !firestore || !historyData) return;
+        if (!user || !firestore || !historyData || (user && !user.isAnonymous && !userData)) return;
 
         if (historyData.length === 0) {
             setIsLoading(true);
             await new Promise(resolve => setTimeout(resolve, 1500));
             
-            const userName = user?.displayName?.split(' ')[0] || 'Friend';
+            const userName = userData?.firstName || user?.displayName?.split(' ')[0] || 'Friend';
             const greeting = `Hello ${userName}! I'm **ANEMO BOT**. I can answer your questions about anemia symptoms, prevention, and diet. How can I help you today?`;
             
             await addDoc(collection(firestore, `users/${user.uid}/chatHistory`), {
@@ -76,7 +82,7 @@ export function Chatbot({ isPopup = false, onClose, onMinimize }: ChatbotProps) 
     };
 
     initChat();
-  }, [user, firestore, historyData?.length]);
+  }, [user, firestore, historyData?.length, userData]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

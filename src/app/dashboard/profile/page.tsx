@@ -5,12 +5,11 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { updateProfile } from 'firebase/auth';
-import { doc, Timestamp } from 'firebase/firestore';
+import { setDoc, doc, Timestamp } from 'firebase/firestore';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 
 import { useUser, useFirestore, useAuth, useDoc, useMemoFirebase } from '@/firebase';
-import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { CardContent, CardDescription, CardHeader, CardTitle, } from '@/components/ui/card';
 import { GlassSurface } from '@/components/ui/glass-surface';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -213,36 +212,36 @@ export default function ProfilePage() {
     try {
       await updateProfile(auth.currentUser, {
         displayName: `${data.firstName} ${data.lastName}`,
-        photoURL: data.photoURL,
+        photoURL: data.photoURL || '',
       });
       const userDocRef = doc(firestore, 'users', user.uid);
-      setDocumentNonBlocking(userDocRef, {
+      await setDoc(userDocRef, {
           id: user.uid,
           firstName: data.firstName,
           lastName: data.lastName,
           email: user.email,
-          photoURL: data.photoURL,
-          address: data.address,
+          photoURL: data.photoURL || '',
+          address: data.address || '',
           medicalInfo: {
-            dateOfBirth: dateOfBirthForFirestore,
-            sex: data.sex,
-            height: data.height,
-            weight: data.weight,
-            bloodType: data.bloodType,
-            allergies: data.allergies,
-            conditions: data.conditions,
-            medications: data.medications,
-            familyHistory: data.familyHistory,
-            lastMenstrualPeriod: lastMenstrualPeriodForFirestore,
-            cycleLength: data.cycleLength,
-            flowDuration: data.flowDuration,
-            flowIntensity: data.flowIntensity,
+            dateOfBirth: dateOfBirthForFirestore || null,
+            sex: data.sex || 'Other',
+            height: data.height || null,
+            weight: data.weight || null,
+            bloodType: data.bloodType || 'Unknown',
+            allergies: data.allergies || [],
+            conditions: data.conditions || [],
+            medications: data.medications || [],
+            familyHistory: data.familyHistory || [],
+            lastMenstrualPeriod: lastMenstrualPeriodForFirestore || null,
+            cycleLength: data.cycleLength || null,
+            flowDuration: data.flowDuration || null,
+            flowIntensity: data.flowIntensity || 'Medium',
           },
         },
         { merge: true }
       );
       window.dispatchEvent(new CustomEvent('profile-updated'));
-      toast({ title: 'Profile Updated', description: 'Your information has been saved.' });
+      toast({ title: 'Profile Updated', description: 'Your information has been saved and synced.' });
     } catch (error: any) {
       toast({ title: 'Update Failed', description: error.message, variant: 'destructive' });
     } finally {

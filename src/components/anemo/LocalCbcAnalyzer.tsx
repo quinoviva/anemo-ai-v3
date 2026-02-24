@@ -14,6 +14,8 @@ import { runLocalCbcAnalysis } from '@/ai/local-ai';
 import Tesseract from 'tesseract.js';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
+import { collection, addDoc, serverTimestamp, doc } from 'firebase/firestore';
 
 export type LocalCbcAnalyzerProps = {
   onBack: () => void;
@@ -22,6 +24,8 @@ export type LocalCbcAnalyzerProps = {
 type AnalysisState = 'idle' | 'ocr' | 'analyzing' | 'complete' | 'error';
 
 export function LocalCbcAnalyzer({ onBack }: LocalCbcAnalyzerProps) {
+  const { user } = useUser();
+  const firestore = useFirestore();
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [status, setStatus] = useState<AnalysisState>('idle');
@@ -33,6 +37,14 @@ export function LocalCbcAnalyzer({ onBack }: LocalCbcAnalyzerProps) {
   const reportRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  const userDocRef = useMemoFirebase(() => {
+    if (!user || !firestore) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [user, firestore]);
+  const { data: userData } = useDoc(userDocRef);
+
+  const fullName = userData ? `${userData.firstName} ${userData.lastName}` : (user?.displayName || 'Anonymous');
 
   useEffect(() => {
     // Check if Gemini Nano is available
@@ -117,6 +129,23 @@ export function LocalCbcAnalyzer({ onBack }: LocalCbcAnalyzerProps) {
 
       setResult(analysisResult);
       setStatus('complete');
+
+      // 3. Save to Firestore (Synchronize across devices)
+      if (user && !user.isAnonymous && firestore) {
+          try {
+              const labReportsRef = collection(firestore, `users/${user.uid}/labReports`);
+              await addDoc(labReportsRef, {
+                  userId: user.uid,
+                  createdAt: serverTimestamp(),
+                  summary: analysisResult.summary || 'No summary',
+                  parameters: analysisResult.parameters || [],
+                  isLocal: true, // Mark it as locally analyzed
+              });
+              toast({ title: "Report Synced", description: "Your local analysis has been saved to your health history." });
+          } catch (dbError) {
+              console.error("Failed to save local report to database:", dbError);
+          }
+      }
 
     } catch (err) {
       console.error('Analysis failed:', err);

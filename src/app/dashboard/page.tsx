@@ -125,21 +125,12 @@ export default function DashboardPage() {
 
   // Effects
   useEffect(() => {
-    const checkWaterSetting = () => {
-        const enabled = localStorage.getItem('waterReminderEnabled') === 'true';
-        setShowWaterReminder(enabled);
-    };
-    
-    checkWaterSetting();
-    window.addEventListener('storage', checkWaterSetting);
-    
-    return () => window.removeEventListener('storage', checkWaterSetting);
-  }, []);
-
-  useEffect(() => {
     if (userData) {
       if (userData.address) setLocation(userData.address);
       if (userData.medicalInfo?.sex) setUserSex(userData.medicalInfo.sex);
+      if (userData.hydration?.enabled !== undefined) {
+        setShowWaterReminder(userData.hydration.enabled);
+      }
     }
   }, [userData]);
 
@@ -155,7 +146,7 @@ export default function DashboardPage() {
     fetchClinics();
   }, [location]);
 
-  const userName = user?.displayName ? user.displayName.split(' ')[0] : null;
+  const userName = userData?.firstName || (user?.displayName ? user.displayName.split(' ')[0] : null);
   const latestImage = imageAnalyses?.[0];
 
   return (

@@ -4,6 +4,8 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Heart, Trophy, Play, RotateCcw, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { useUser, useFirestore } from '@/firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 // --- Types & Constants ---
 type GameState = 'start' | 'playing' | 'gameover';
@@ -32,6 +34,8 @@ const ITEM_SIZE = 40; // px
 
 export const IronCatcherGame = () => {
   // --- React State for UI ---
+  const { user } = useUser();
+  const firestore = useFirestore();
   const [gameState, setGameState] = useState<GameState>('start');
   const [score, setScore] = useState(0);
   const [health, setHealth] = useState(3);
@@ -226,10 +230,22 @@ export const IronCatcherGame = () => {
     requestRef.current = requestAnimationFrame(updateGame);
   };
 
-  const endGame = () => {
+  const endGame = async () => {
     setGameState('gameover');
     if (requestRef.current) cancelAnimationFrame(requestRef.current);
     setHighScore(prev => Math.max(prev, score));
+
+    if (user && !user.isAnonymous && firestore) {
+        try {
+            await addDoc(collection(firestore, `users/${user.uid}/gameScores`), {
+                game: 'Iron Catcher',
+                score: score,
+                createdAt: serverTimestamp()
+            });
+        } catch (e) {
+            console.error("Failed to save score", e);
+        }
+    }
   };
 
   // --- Input Handling ---

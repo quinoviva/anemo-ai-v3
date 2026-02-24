@@ -16,7 +16,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
-import { useAuth } from '@/firebase';
+import { useAuth, useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
+import { doc } from 'firebase/firestore';
 import { cn } from '@/lib/utils';
 import { 
   HeartPulse, 
@@ -58,6 +59,8 @@ const otherLinks = [
 
 export function Header() {
   const auth = useAuth();
+  const { user } = useUser();
+  const firestore = useFirestore();
   const router = useRouter();
   const pathname = usePathname();
   const { setTheme } = useTheme();
@@ -65,6 +68,14 @@ export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const isGuest = auth.currentUser?.isAnonymous;
+
+  const userDocRef = useMemoFirebase(() => {
+    if (!user || !firestore) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [user, firestore]);
+  const { data: userData } = useDoc(userDocRef);
+
+  const displayName = userData ? `${userData.firstName} ${userData.lastName}` : (auth?.currentUser?.displayName || 'User');
 
   const handleLogout = async () => {
     if (auth) {
@@ -75,7 +86,7 @@ export function Header() {
 
   const getInitials = (name: string | null | undefined) => {
     if (isGuest) return 'G';
-    if (!name) return 'U';
+    if (!name || name === 'User') return 'U';
     const names = name.split(' ');
     if (names.length > 1 && names[1]) {
       return `${names[0][0]}${names[names.length - 1][0]}`;
@@ -180,12 +191,10 @@ export function Header() {
                 <Avatar className="h-9 w-9 border border-primary/10">
                   <AvatarImage
                     src={auth?.currentUser?.photoURL ?? undefined}
-                    alt={auth?.currentUser?.displayName || 'User profile'}
+                    alt={displayName || 'User profile'}
                   />
                   <AvatarFallback className="bg-primary/5 text-primary text-xs font-bold">
-                    {getInitials(
-                      auth?.currentUser?.displayName ?? auth?.currentUser?.email
-                    )}
+                    {getInitials(displayName)}
                   </AvatarFallback>
                 </Avatar>
               </Button>
@@ -194,7 +203,7 @@ export function Header() {
               <DropdownMenuLabel className="font-normal px-3 py-2">
                 <div className="flex flex-col space-y-1">
                   <p className="text-sm font-medium leading-none">
-                     {isGuest ? 'Guest User' : (auth?.currentUser?.displayName || 'User')}
+                     {isGuest ? 'Guest User' : (displayName || 'User')}
                   </p>
                   <p className="text-xs leading-none text-muted-foreground truncate font-mono opacity-70">
                     {isGuest ? 'Sign in to save data' : (auth?.currentUser?.email || '')}

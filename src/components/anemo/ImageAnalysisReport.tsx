@@ -84,6 +84,7 @@ export function ImageAnalysisReport({ analyses, labReport, onReset }: ImageAnaly
   const { user } = useUser();
   const firestore = useFirestore();
   const isOnline = typeof window !== 'undefined' ? navigator.onLine : true;
+  const hasSavedRef = useRef(false);
 
   const allImageDescriptions = Object.entries(analyses)
     .map(([key, value]) => `Result for ${key}: ${value.analysisResult}`)
@@ -138,7 +139,8 @@ export function ImageAnalysisReport({ analyses, labReport, onReset }: ImageAnaly
           }
       }
 
-      if (user && !user.isAnonymous && firestore && reportResult) {
+      if (user && !user.isAnonymous && firestore && reportResult && !hasSavedRef.current) {
+        hasSavedRef.current = true;
         const reportCollection = collection(firestore, `users/${user.uid}/imageAnalyses`);
         await addDoc(reportCollection, {
           userId: user.uid,

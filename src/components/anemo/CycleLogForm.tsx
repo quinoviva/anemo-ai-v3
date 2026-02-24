@@ -96,11 +96,11 @@ export function CycleLogForm({ open, onOpenChange, trigger, onFormSubmit }: Cycl
         id: user.uid,
         email: user.email,
         medicalInfo: {
-          sex: data.sex,
-          fatigue: data.fatigue,
-          cardiovascularStrain: data.cardiovascularStrain,
-          physicalIndicators: data.physicalIndicators,
-          flowIntensity: data.flowIntensity,
+          sex: data.sex || 'Other',
+          fatigue: data.fatigue || 'None',
+          cardiovascularStrain: data.cardiovascularStrain || 'None',
+          physicalIndicators: data.physicalIndicators || 'None',
+          flowIntensity: data.flowIntensity || 'Medium',
         }
       }, { merge: true });
 
@@ -109,7 +109,7 @@ export function CycleLogForm({ open, onOpenChange, trigger, onFormSubmit }: Cycl
         await addDoc(collection(firestore, `users/${user.uid}/cycle_logs`), {
             startDate: data.dateRange.from,
             endDate: data.dateRange.to || data.dateRange.from,
-            flowIntensity: data.flowIntensity,
+            flowIntensity: data.flowIntensity || 'Medium',
             createdAt: serverTimestamp(),
         });
       }

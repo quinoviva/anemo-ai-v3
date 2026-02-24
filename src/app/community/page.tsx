@@ -92,7 +92,7 @@ export default function CommunityPage() {
             className="text-xs tracking-[0.2em] text-white/40 hover:text-white uppercase p-0"
           >
             <ArrowLeft className="mr-4 h-3 w-3" />
-            Back to Dashboard
+            Backboard
           </Button>
           <span className="text-xs tracking-[0.2em] text-white/20 uppercase">Community Node</span>
         </motion.div>

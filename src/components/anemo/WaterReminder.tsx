@@ -1,44 +1,54 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { Droplets, Clock, Plus, Timer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
+import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
+import { doc, updateDoc, setDoc } from 'firebase/firestore';
 import './WaterWidget.css';
 
 const NOTIFICATION_INTERVAL_MS = 60 * 60 * 1000; // 1 Hour
 
 export const WaterReminder = () => {
-  const [isEnabled, setIsEnabled] = useState(false);
-  const [lastDrink, setLastDrink] = useState<number>(Date.now());
+  const { user } = useUser();
+  const firestore = useFirestore();
+  const { toast } = useToast();
+  
   const [timeSince, setTimeSince] = useState<string>('Just now');
   const [isRefilling, setIsRefilling] = useState(false);
-  const [level, setLevel] = useState(0); 
-  const { toast } = useToast();
+  
+  const userDocRef = useMemoFirebase(() => {
+    if (!user || !firestore) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [user, firestore]);
+  
+  const { data: userData } = useDoc(userDocRef);
+  
+  const hydration = useMemo(() => userData?.hydration || {
+    enabled: false,
+    lastDrinkTime: Date.now(),
+    dailyLevel: 0,
+    lastResetDate: new Date().toDateString()
+  }, [userData]);
 
-  // Load settings on mount
+  const isEnabled = hydration.enabled;
+  const lastDrink = hydration.lastDrinkTime;
+  const level = hydration.dailyLevel;
+
+  // Daily Reset Logic
   useEffect(() => {
-    const loadedSetting = localStorage.getItem('waterReminderEnabled') === 'true';
-    setIsEnabled(loadedSetting);
+    if (!user || !firestore || !userData) return;
     
-    const savedLastDrink = localStorage.getItem('lastDrinkTime');
-    const savedLevel = localStorage.getItem('dailyWaterLevel');
-    
-    if (savedLastDrink) {
-      const lastDate = new Date(parseInt(savedLastDrink));
-      const today = new Date();
-      
-      // Daily Reset Logic: If last drink was before today, reset level
-      if (lastDate.toDateString() !== today.toDateString()) {
-        setLevel(0);
-        localStorage.setItem('dailyWaterLevel', '0');
-      } else {
-        setLastDrink(parseInt(savedLastDrink));
-        if (savedLevel) setLevel(parseInt(savedLevel));
-      }
+    const today = new Date().toDateString();
+    if (hydration.lastResetDate !== today) {
+        updateDoc(userDocRef!, {
+            'hydration.dailyLevel': 0,
+            'hydration.lastResetDate': today
+        }).catch(console.error);
     }
-  }, []);
+  }, [user, firestore, userData, hydration.lastResetDate, userDocRef]);
 
   // Timer for updating "Time Since" display
   useEffect(() => {
@@ -62,7 +72,7 @@ export const WaterReminder = () => {
   }, [isEnabled, lastDrink]);
 
   const triggerNotification = () => {
-    if (Notification.permission === 'granted') {
+    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
       new Notification("Hydration Check 💧", {
         body: "Time for a glass of water!",
         icon: "/favicon.svg",
@@ -76,22 +86,21 @@ export const WaterReminder = () => {
     }
   };
 
-  const handleDrink = () => {
+  const handleDrink = async () => {
+    if (!user || !firestore) return;
     setIsRefilling(true);
     
-    setTimeout(() => {
-        const now = Date.now();
-        const prevLevel = level;
-        const newLevel = Math.min(100, level + 20);
+    const now = Date.now();
+    const prevLevel = level;
+    const newLevel = Math.min(100, level + 20);
+    
+    try {
+        await updateDoc(userDocRef!, {
+            'hydration.lastDrinkTime': now,
+            'hydration.dailyLevel': newLevel
+        });
         
-        setLastDrink(now);
-        setLevel(newLevel);
         setTimeSince('Just now');
-        
-        localStorage.setItem('lastDrinkTime', now.toString());
-        localStorage.setItem('dailyWaterLevel', newLevel.toString());
-        
-        setIsRefilling(false);
         
         if (newLevel === 100 && prevLevel < 100) {
             toast({
@@ -104,20 +113,33 @@ export const WaterReminder = () => {
               description: `Current Level: ${newLevel}%`,
             });
         }
-    }, 1000);
+    } catch (error) {
+        toast({ title: "Error", description: "Failed to log intake.", variant: "destructive" });
+    } finally {
+        setTimeout(() => setIsRefilling(false), 800);
+    }
   };
 
-  const handleToggleEnable = () => {
+  const handleToggleEnable = async () => {
+    if (!user || !firestore) return;
     const newState = !isEnabled;
-    setIsEnabled(newState);
-    localStorage.setItem('waterReminderEnabled', newState.toString());
-    window.dispatchEvent(new Event('storage'));
     
-    if (newState) {
-        toast({
-            title: "Hydration Tracking Active",
-            description: "Stay hydrated! We'll help you track your daily intake.",
-        });
+    try {
+        await setDoc(userDocRef!, {
+            hydration: {
+                ...hydration,
+                enabled: newState
+            }
+        }, { merge: true });
+        
+        if (newState) {
+            toast({
+                title: "Hydration Tracking Active",
+                description: "Stay hydrated! We'll help you track your daily intake.",
+            });
+        }
+    } catch (error) {
+        toast({ title: "Error", description: "Failed to update settings.", variant: "destructive" });
     }
   };
 

@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { GlassSurface } from '@/components/ui/glass-surface';
 import { Button } from '@/components/ui/button';
 import { Trophy, Apple, Beef, Pizza, X, CheckCircle2, Info } from 'lucide-react';
+import { useUser, useFirestore } from '@/firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 const foods = [
   { id: 1, name: 'Spinach', iron: 'high', icon: <Apple className="text-green-500" /> },
@@ -16,15 +18,34 @@ const foods = [
 ];
 
 export function IronIQGame() {
+  const { user } = useUser();
+  const firestore = useFirestore();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [gameState, setGameState] = useState<'start' | 'playing' | 'end'>('start');
   const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null);
 
+  const saveScore = async (finalScore: number) => {
+    if (user && !user.isAnonymous && firestore) {
+        try {
+            await addDoc(collection(firestore, `users/${user.uid}/gameScores`), {
+                game: 'Iron IQ',
+                score: finalScore,
+                total: foods.length,
+                createdAt: serverTimestamp()
+            });
+        } catch (e) {
+            console.error("Failed to save score", e);
+        }
+    }
+  };
+
   const handleGuess = (guess: 'high' | 'low') => {
     const isCorrect = foods[currentIndex].iron === guess;
+    let newScore = score;
     if (isCorrect) {
-      setScore(s => s + 1);
+      newScore = score + 1;
+      setScore(newScore);
       setFeedback('correct');
     } else {
       setFeedback('wrong');
@@ -36,6 +57,7 @@ export function IronIQGame() {
         setCurrentIndex(c => c + 1);
       } else {
         setGameState('end');
+        saveScore(newScore);
       }
     }, 1000);
   };
