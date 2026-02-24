@@ -198,7 +198,8 @@ export function AnalysisGuide({ bodyPart, onComplete }: AnalysisGuideProps) {
                         key={idx} 
                         className="flex items-start gap-4 p-4 rounded-2xl bg-muted/10 border border-primary/5 hover:bg-muted/20 transition-all"
                         initial={{ opacity: 0, x: 30 }}
-                        animate={{ opacity: 1, x: 0 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
                         transition={{ delay: idx * 0.1 }}
                     >
                         <div className="mt-0.5 w-6 h-6 shrink-0 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">

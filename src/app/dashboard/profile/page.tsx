@@ -272,7 +272,8 @@ export default function ProfilePage() {
       {/* Header Summary */}
       <motion.div 
         initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
         className="grid md:grid-cols-3 gap-6"
       >
         <GlassSurface intensity="high" className="md:col-span-2 p-8 flex flex-col md:flex-row items-center gap-8 border-primary/20">

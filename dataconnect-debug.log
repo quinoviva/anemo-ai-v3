@@ -1,17 +1,17 @@
-I0220 11:28:07.252834     702 load.go:31] Reloading schema and connectors...
-I0220 11:28:07.435155     702 control.go:100] [/emulator/anemo-ai 21a2] UpdateResources(): done
+I0224 01:07:43.764706    6135 load.go:31] Reloading schema and connectors...
+I0224 01:07:44.170326    6135 control.go:100] [/emulator/anemo-ai 4a09] UpdateResources(): done
 Main schema: sources: schema/schema.gql [739B] 
 Connector "example": sources: example/queries.gql [1017B] 
-I0220 11:28:07.687681     702 codegen.go:80] [connector "example" javascriptSdk] Generating sources into "/home/user/anemo-ai/src/dataconnect-generated"
-I0220 11:28:07.788294     702 codegen.go:80] [connector "example" adminSdk] Generating sources into "/home/user/anemo-ai/src/dataconnect-admin-generated"
-I0220 11:28:07.861363     702 collector.go:107] schema extensions wrote into "/home/user/anemo-ai/dataconnect/.dataconnect/schema"
-Generated sources: main/query.gql [6584B] main/mutation.gql [17940B] main/implicit.gql [2315B] main/input.gql [53339B] prelude.gql [73281B] main/relation.gql [26562B] 
-I0220 11:28:08.017470     702 collector.go:107] connector "example" javascriptSdk wrote into "/home/user/anemo-ai/src/dataconnect-generated"
-Generated sources: react/esm/package.json [17B] .guides/config.json [236B] react/package.json [460B] react/esm/index.esm.js [1574B] .guides/usage.md [2283B] .guides/setup.md [1682B] esm/index.esm.js [1712B] index.cjs.js [1979B] react/index.cjs.js [1663B] react/README.md [27802B] index.d.ts [4145B] package.json [863B] README.md [21314B] react/index.d.ts [2002B] esm/package.json [17B] 
-I0220 11:28:08.070576     702 installsdk.go:55] Package @dataconnect/generated is already installed. Skipping installation
-I0220 11:28:08.071289     702 collector.go:107] connector "example" adminSdk wrote into "/home/user/anemo-ai/src/dataconnect-admin-generated"
+I0224 01:07:44.708542    6135 codegen.go:80] [connector "example" javascriptSdk] Generating sources into "/home/user/anemo-ai/src/dataconnect-generated"
+I0224 01:07:44.790257    6135 codegen.go:80] [connector "example" adminSdk] Generating sources into "/home/user/anemo-ai/src/dataconnect-admin-generated"
+I0224 01:07:44.807125    6135 collector.go:107] schema extensions wrote into "/home/user/anemo-ai/dataconnect/.dataconnect/schema"
+Generated sources: prelude.gql [73281B] main/relation.gql [26562B] main/query.gql [6584B] main/mutation.gql [17940B] main/implicit.gql [2315B] main/input.gql [53339B] 
+I0224 01:07:44.820967    6135 collector.go:107] connector "example" javascriptSdk wrote into "/home/user/anemo-ai/src/dataconnect-generated"
+Generated sources: README.md [21314B] react/esm/index.esm.js [1574B] .guides/config.json [236B] index.d.ts [4145B] esm/index.esm.js [1712B] index.cjs.js [1979B] react/index.d.ts [2002B] react/README.md [27802B] package.json [863B] react/esm/package.json [17B] react/index.cjs.js [1663B] esm/package.json [17B] react/package.json [460B] .guides/usage.md [2283B] .guides/setup.md [1682B] 
+I0224 01:07:44.883424    6135 installsdk.go:55] Package @dataconnect/generated is already installed. Skipping installation
+I0224 01:07:44.887408    6135 collector.go:107] connector "example" adminSdk wrote into "/home/user/anemo-ai/src/dataconnect-admin-generated"
 Generated sources: index.d.ts [3980B] esm/index.esm.js [1399B] esm/package.json [17B] index.cjs.js [1570B] package.json [632B] 
-I0220 11:28:08.103450     702 installsdk.go:55] Package @dataconnect/admin-generated is already installed. Skipping installation
-I0220 11:28:08.103543     702 load.go:109] Finished reloading
-I0220 11:28:08.156007     702 dev.go:104] Listening on address (HTTP + gRPC): 127.0.0.1:50001
-I0220 11:28:08.759758     702 engine.go:205] [/emulator/anemo-ai 21a2] ExecuteGraphqlRead IntrospectionQuery: succeeded. 
+I0224 01:07:44.993222    6135 installsdk.go:55] Package @dataconnect/admin-generated is already installed. Skipping installation
+I0224 01:07:44.993292    6135 load.go:109] Finished reloading
+I0224 01:07:45.007263    6135 dev.go:104] Listening on address (HTTP + gRPC): 127.0.0.1:50003
+I0224 01:07:45.597276    6135 engine.go:205] [/emulator/anemo-ai 4a09] ExecuteGraphqlRead IntrospectionQuery: succeeded. 

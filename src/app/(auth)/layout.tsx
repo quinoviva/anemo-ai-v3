@@ -35,7 +35,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <div className="relative z-10 p-16 max-w-xl text-center">
            <motion.div 
              initial={{ opacity: 0, y: 20 }}
-             animate={{ opacity: 1, y: 0 }}
+             whileInView={{ opacity: 1, y: 0 }}
+             viewport={{ once: true }}
              transition={{ duration: 0.8, delay: 0.2 }}
              className="mb-10 flex justify-center"
            >
@@ -46,7 +47,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
            
            <motion.h1 
              initial={{ opacity: 0, y: 20 }}
-             animate={{ opacity: 1, y: 0 }}
+             whileInView={{ opacity: 1, y: 0 }}
+             viewport={{ once: true }}
              transition={{ duration: 0.8, delay: 0.4 }}
              className="text-6xl font-light tracking-tight text-white mb-8 leading-tight drop-shadow-lg"
            >
@@ -55,7 +57,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
            
            <motion.p 
              initial={{ opacity: 0, y: 20 }}
-             animate={{ opacity: 1, y: 0 }}
+             whileInView={{ opacity: 1, y: 0 }}
+             viewport={{ once: true }}
              transition={{ duration: 0.8, delay: 0.6 }}
              className="text-xl text-white/80 font-light leading-relaxed tracking-wide"
            >
@@ -67,7 +70,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         {/* Decorative elements */}
         <motion.div 
           initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
           transition={{ duration: 1, delay: 1 }}
           className="absolute bottom-12 left-12 right-12 flex justify-between text-xs text-white/40 uppercase tracking-[0.2em] font-medium"
         >

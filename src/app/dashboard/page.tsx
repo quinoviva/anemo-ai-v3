@@ -164,7 +164,8 @@ export default function DashboardPage() {
       <motion.div 
         variants={containerVariants}
         initial="hidden"
-        animate="show"
+        whileInView="show"
+        viewport={{ once: true, amount: 0.1 }}
         className="relative z-10 w-full space-y-16"
       >
         
@@ -178,7 +179,8 @@ export default function DashboardPage() {
                   <motion.span
                     key="name"
                     initial={{ opacity: 0, y: 30, filter: 'blur(15px)', scale: 0.9 }}
-                    animate={{ opacity: 1, y: 0, filter: 'blur(0px)', scale: 1 }}
+                    whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)', scale: 1 }}
+                    viewport={{ once: true }}
                     exit={{ opacity: 0, y: -20, filter: 'blur(10px)' }}
                     transition={{ 
                       duration: 1, 

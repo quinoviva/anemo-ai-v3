@@ -150,7 +150,8 @@ export function SignUpForm() {
     <motion.div 
       variants={containerVariants} 
       initial="hidden" 
-      animate="visible"
+      whileInView="visible"
+      viewport={{ once: true }}
       className="space-y-6"
     >
       <motion.div variants={itemVariants} className="flex flex-col space-y-2 mb-6">

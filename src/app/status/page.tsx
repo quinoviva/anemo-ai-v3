@@ -43,7 +43,8 @@ export default function StatusPage() {
       <div className="relative z-10 mx-auto max-w-4xl px-6 py-24 md:py-32">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
           transition={{ duration: 0.8 }}
         >
           <Button 
@@ -77,7 +78,8 @@ export default function StatusPage() {
               <motion.div
                 key={index}
                 initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
                 transition={{ delay: index * 0.1 + 0.5 }}
                 className="p-6 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between hover:bg-white/10 transition-colors"
               >

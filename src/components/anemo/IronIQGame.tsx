@@ -66,7 +66,8 @@ export function IronIQGame() {
             <motion.div 
               key="start"
               initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
               exit={{ opacity: 0, y: -20 }}
               className="text-center space-y-4 py-8"
             >

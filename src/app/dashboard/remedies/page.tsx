@@ -100,7 +100,8 @@ export default function RemediesPage() {
       <motion.div
         variants={containerVariants}
         initial="hidden"
-        animate="show"
+        whileInView="show"
+        viewport={{ once: true, amount: 0.1 }}
         className="space-y-12"
       >
         {/* Hero Section */}
@@ -176,7 +177,8 @@ export default function RemediesPage() {
                <motion.div 
                  key="foods"
                  initial={{ opacity: 0, x: -20 }}
-                 animate={{ opacity: 1, x: 0 }}
+                 whileInView={{ opacity: 1, x: 0 }}
+                 viewport={{ once: true }}
                  exit={{ opacity: 0, x: 20 }}
                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
                >

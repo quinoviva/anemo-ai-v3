@@ -15,7 +15,7 @@ import {
   Cpu,
   ChevronRight
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { SequentialImageAnalyzer } from '@/components/anemo/SequentialImageAnalyzer';
@@ -27,7 +27,7 @@ const LocalCbcAnalyzer = dynamic(
 );
 
 // --- Animation Variants (Matching Dashboard) ---
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
@@ -38,7 +38,7 @@ const containerVariants = {
   },
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
   show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 50, damping: 20 } },
 };
@@ -56,7 +56,8 @@ export default function AnalysisPage() {
     return (
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
         className="min-h-screen pb-20 px-4 md:px-0"
       >
         <div className="mb-8">
@@ -70,7 +71,7 @@ export default function AnalysisPage() {
             </Button>
         </div>
         <div className="w-full max-w-full overflow-hidden">
-            <LocalCbcAnalyzer />
+            <LocalCbcAnalyzer onBack={() => setAnalysisMode('select')} />
         </div>
       </motion.div>
     );
@@ -85,7 +86,8 @@ export default function AnalysisPage() {
             key="selection"
             variants={containerVariants}
             initial="hidden"
-            animate="show"
+            whileInView="show"
+            viewport={{ once: true, amount: 0.1 }}
             exit={{ opacity: 0, y: -20 }}
             className="w-full space-y-12 md:space-y-16"
           >
@@ -106,11 +108,7 @@ export default function AnalysisPage() {
               
               <motion.div variants={itemVariants} className="hidden md:block">
                   <div className="text-right">
-                      <p className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground">Neural Engine</p>
-                      <div className="flex items-center justify-end gap-2 mt-2">
-                          <div className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_15px_theme(colors.emerald.500)] animate-pulse" />
-                          <span className="text-sm font-bold tracking-tight">V.4 Active</span>
-                      </div>
+                      <p className="text-[10px] font-black tracking-[0.4em] text-muted-foreground">CONCOLUUTIONAL NEURAL NETWORK ALGORITHM</p>
                   </div>
               </motion.div>
             </div>

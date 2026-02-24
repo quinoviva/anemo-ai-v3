@@ -54,7 +54,8 @@ export default function DocsPage() {
       <div className="relative z-10 mx-auto max-w-5xl px-6 py-24 md:py-32">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
           transition={{ duration: 0.8 }}
         >
           <Button 
@@ -83,7 +84,8 @@ export default function DocsPage() {
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
                 transition={{ delay: index * 0.1 + 0.5 }}
                 className="space-y-8"
               >

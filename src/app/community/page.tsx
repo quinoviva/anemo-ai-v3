@@ -81,7 +81,8 @@ export default function CommunityPage() {
         {/* Minimal Nav */}
         <motion.div 
           initial={{ opacity: 0 }} 
-          animate={{ opacity: 1 }} 
+          whileInView={{ opacity: 1 }} 
+          viewport={{ once: true }}
           transition={{ duration: 1 }}
           className="mb-24 flex justify-between items-center"
         >

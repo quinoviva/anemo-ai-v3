@@ -259,7 +259,8 @@ export function AnalysisHistory() {
       <motion.tr 
         key={item.id}
         initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
         className="group border-b border-white/5 hover:bg-white/[0.02] transition-colors"
       >
         <TableCell className="py-6">

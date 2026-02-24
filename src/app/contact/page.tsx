@@ -36,7 +36,8 @@ export default function ContactPage() {
       <div className="relative z-10 mx-auto max-w-6xl px-6 py-24 md:py-32">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
           transition={{ duration: 0.8 }}
         >
           <Button 
@@ -50,14 +51,16 @@ export default function ContactPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
             <div>
-              <header className="mb-12">
-                <h1 className="text-5xl md:text-7xl font-bold tracking-tighter mb-6 bg-clip-text text-transparent bg-gradient-to-b from-white to-white/50">
-                  Get in Touch
-                </h1>
-                <p className="text-white/40 text-xl font-light leading-relaxed">
-                  Have questions about our AI analysis? Need technical support? 
-                  Our team is here to help you.
-                </p>
+              <header className="mb-16 flex flex-col md:flex-row md:items-end justify-between gap-8">
+                <div className="max-w-2xl">
+                  <h1 className="text-5xl md:text-7xl font-bold tracking-tighter mb-6 bg-clip-text text-transparent bg-gradient-to-b from-white to-white/50">
+                    Get in Touch
+                  </h1>
+                  <p className="text-white/40 text-xl font-light leading-relaxed">
+                    Have questions about our AI analysis? Need technical support? 
+                    Our team is here to help you.
+                  </p>
+                </div>
               </header>
 
               <div className="space-y-8">
@@ -95,7 +98,8 @@ export default function ContactPage() {
 
             <motion.div 
               initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
               transition={{ delay: 0.3, duration: 0.8 }}
               className="p-10 rounded-[2.5rem] bg-white/5 border border-white/10 backdrop-blur-2xl"
             >

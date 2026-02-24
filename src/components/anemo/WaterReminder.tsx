@@ -125,7 +125,8 @@ export const WaterReminder = () => {
     return (
       <motion.div 
         initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
+        whileInView={{ opacity: 1, scale: 1 }}
+        viewport={{ once: true }}
         className="water-widget-container relative rounded-[2rem] p-10 flex flex-col items-center justify-center h-full min-h-[300px] text-center space-y-6 border border-blue-500/20 shadow-[0_20px_60px_-15px_rgba(59,130,246,0.2)] overflow-hidden"
       >
         <div className="absolute inset-0 bg-gradient-to-br from-blue-900/10 via-blue-900/5 to-transparent backdrop-blur-sm -z-10" />
@@ -156,7 +157,8 @@ export const WaterReminder = () => {
   return (
     <motion.div 
       initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
+      whileInView={{ opacity: 1, scale: 1 }}
+      viewport={{ once: true }}
       className={`water-widget-container relative rounded-[2.5rem] p-10 text-blue-950 dark:text-blue-50 flex flex-col justify-between h-full min-h-[360px] shadow-2xl border border-blue-500/20 overflow-hidden ${level === 100 ? 'goal-reached-state' : ''}`}
     >
       <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 via-transparent to-transparent -z-10" />

@@ -498,6 +498,10 @@ export function ImageAnalysisReport({ analyses, labReport, onReset }: ImageAnaly
                             {clinics.map((clinic, index) => (
                                 <motion.div 
                                     key={index} 
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ delay: index * 0.1 }}
                                     whileHover={{ x: 10, backgroundColor: 'rgba(var(--primary),0.05)' }}
                                     className="flex items-center gap-6 p-8 rounded-[2rem] bg-muted/10 border border-primary/10 hover:border-primary/40 transition-all group cursor-pointer"
                                 >

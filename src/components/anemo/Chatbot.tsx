@@ -254,7 +254,8 @@ export function Chatbot({ isPopup = false, onClose, onMinimize }: ChatbotProps) 
              {history.length === 1 && !isLoading && (
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
                 transition={{ delay: 0.5 }}
                 className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-6"
               >

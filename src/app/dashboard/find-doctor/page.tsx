@@ -158,7 +158,8 @@ export default function FindDoctorPage() {
         {/* --- LEFT SIDEBAR (Search & Info) --- */}
         <motion.div 
           initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true }}
           transition={{ duration: 0.6 }}
           className="lg:col-span-4 space-y-6"
         >
@@ -230,7 +231,8 @@ export default function FindDoctorPage() {
                       <motion.div 
                         key={`skeleton-${i}`}
                         initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
                         exit={{ opacity: 0, scale: 0.9 }}
                         transition={{ duration: 0.3, delay: i * 0.1 }}
                         className="h-64 rounded-[2rem] bg-white/5 border border-white/10 animate-pulse"
@@ -241,7 +243,8 @@ export default function FindDoctorPage() {
                       <motion.div
                         key={index}
                         initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
                         exit={{ opacity: 0, scale: 0.9 }}
                         transition={{ duration: 0.4, delay: index * 0.05 }}
                         className="group relative rounded-[2.5rem] bg-background/40 backdrop-blur-md border border-white/10 overflow-hidden hover:border-blue-500/30 transition-all duration-500 hover:shadow-2xl hover:shadow-blue-500/5 hover:-translate-y-1"

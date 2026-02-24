@@ -1,0 +1,27 @@
+
+> nextn@0.1.0 predev
+> rm -f .next/dev/lock && (lsof -t -i:4100,4001,4034,3100 | xargs kill -9 2>/dev/null || true)
+
+
+> nextn@0.1.0 dev
+> concurrently "next dev -p 4100" "npm run genkit:dev"
+
+[1] 
+[1] > nextn@0.1.0 genkit:dev
+[1] > echo '' | genkit start -- tsx src/ai/dev.ts
+[1] 
+[1] Telemetry API running on http://localhost:4033
+[1] Project root: /home/user/anemo-ai
+[1] Genkit Developer UI: http://localhost:4000
+[0] ▲ Next.js 16.1.6 (Turbopack)
+[0] - Local:         http://localhost:4100
+[0] - Network:       http://10.88.0.3:4100
+[0] - Environments: .env.local, .env
+[0] 
+[0] ✓ Starting...
+[1] [dotenv@17.2.4] injecting env (0) from .env -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+[1] Port 3100 is already in use, using next available port 3101 instead.
+[0] ✓ Ready in 6.6s
+[1] Error: Error processing file /home/user/anemo-ai/.genkit/runtimes/6713-3100-1771851488970.json: ENOENT: no such file or directory, open '/home/user/anemo-ai/.genkit/runtimes/6713-3100-1771851488970.json'
+[1] npm run genkit:dev exited with code SIGHUP
+[0] next dev -p 4100 exited with code SIGHUP

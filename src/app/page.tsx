@@ -55,13 +55,15 @@ export default function RootPage() {
       {/* Content */}
       <motion.div
         initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
         transition={{ duration: 0.8, ease: "easeOut" }}
         className="z-10 flex flex-col items-center space-y-12 p-6 text-center"
       >
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
+          whileInView={{ scale: 1, opacity: 1 }}
+          viewport={{ once: true }}
           transition={{ delay: 0.2, duration: 0.8, type: "spring" }}
         >
           <h1 className="font-light text-8xl md:text-9xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white to-white/70 drop-shadow-2xl">
@@ -74,7 +76,8 @@ export default function RootPage() {
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
           transition={{ delay: 0.6, duration: 0.5 }}
           className="flex flex-col sm:flex-row gap-6 w-full max-w-md"
         >
@@ -99,7 +102,8 @@ export default function RootPage() {
       {/* Footer / Copyright */}
       <motion.div
         initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
         transition={{ delay: 1, duration: 1 }}
         className="absolute bottom-8 text-white/40 text-sm font-light"
       >

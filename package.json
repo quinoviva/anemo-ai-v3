@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "concurrently \"next dev -p 4100\" \"npm run genkit:dev\"",
-    "predev": "rm -f .next/dev/lock && (lsof -t -i:4100,4001,4034,3100 | xargs kill -9 2>/dev/null || true)",
+    "predev": "rm -f .next/dev/lock && (ss -tulpn | grep -E ':(4100|400[0-5]|403[0-5]|310[0-5])' | awk -F'pid=' '{for(i=2;i<=NF;i++) print $i}' | cut -d',' -f1 | sort -u | xargs -r kill -9 2>/dev/null || true)",
     "genkit:dev": "echo '' | genkit start -- tsx src/ai/dev.ts",
     "genkit:watch": "genkit start -- tsx --watch src/ai/dev.ts",
     "build": "NODE_ENV=production next build",

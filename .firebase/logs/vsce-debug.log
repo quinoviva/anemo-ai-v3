@@ -6559,3 +6559,194 @@ I0220 11:28:08.156007     702 dev.go:104] Listening on address (HTTP + gRPC): 12
 [debug] [2026-02-20T11:28:08.650Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects [omitted]
 [debug] [2026-02-20T11:28:08.761Z] I0220 11:28:08.759758     702 engine.go:205] [/emulator/anemo-ai 21a2] ExecuteGraphqlRead IntrospectionQuery: succeeded. 
  {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0220 11:28:08.759758     702 engine.go:205] [/emulator/anemo-ai 21a2] ExecuteGraphqlRead IntrospectionQuery: succeeded. \n"}}
+[debug] [2026-02-23T12:43:43.459Z] [Firebase Plugin] Activating Firebase extension.
+[debug] [2026-02-23T12:43:53.609Z] [Firebase Plugin] requireAuthWrapper
+[debug] [2026-02-23T12:43:53.614Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2026-02-23T12:43:53.616Z] > authorizing via signed-in user (cyrilcquinoviva@gmail.com)
+[debug] [2026-02-23T12:43:53.622Z] Checked if tokens are valid: false, expires at: 1771667960082
+[debug] [2026-02-23T12:43:53.623Z] Checked if tokens are valid: false, expires at: 1771667960082
+[debug] [2026-02-23T12:43:53.624Z] > refreshing access token with scopes: []
+[debug] [2026-02-23T12:43:53.633Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-02-23T12:43:53.635Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-02-23T12:43:53.699Z] [Firebase Plugin] VSCode notification server listening on port 40001
+[debug] [2026-02-23T12:43:54.033Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-02-23T12:43:54.034Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-02-23T12:43:54.187Z] [Firebase Plugin] User found:  cyrilcquinoviva@gmail.com
+[info] [Firebase Plugin] (Core:Project) New user detected, fetching projects
+[debug] [2026-02-23T12:43:54.189Z] Checked if tokens are valid: true, expires at: 1771854233036
+[debug] [2026-02-23T12:43:54.191Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects pageSize=1000
+[debug] [2026-02-23T12:43:54.717Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects 200
+[debug] [2026-02-23T12:43:54.718Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects [omitted]
+[info] [Firebase Plugin] Starting Data Connect toolkit (version 3.1.1) on port 50001
+[debug] [2026-02-23T12:44:02.119Z] I0223 12:44:02.078203     566 control.go:100] [/emulator/anemo-ai 6224] UpdateResources(): done
+Main schema: sources: schema/schema.gql [739B] 
+Connector "example": sources: example/queries.gql [1017B] 
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0223 12:44:02.078203     566 control.go:100] [/emulator/anemo-ai 6224] UpdateResources(): done\nMain schema: sources: schema/schema.gql [739B] \nConnector \"example\": sources: example/queries.gql [1017B] \n"}}
+[debug] [2026-02-23T12:44:02.120Z] Ignoring unsupported arg: auto_download {"metadata":{"emulator":{"name":"dataconnect"},"message":"Ignoring unsupported arg: auto_download"}}
+[debug] [2026-02-23T12:44:02.121Z] Ignoring unsupported arg: port {"metadata":{"emulator":{"name":"dataconnect"},"message":"Ignoring unsupported arg: port"}}
+[debug] [2026-02-23T12:44:02.121Z] Starting Data Connect Emulator with command {"binary":"/home/user/.cache/firebase/emulators/dataconnect-emulator-3.1.1","args":["--logtostderr","-v=2","dev","--listen=localhost:50001","--config_dir=/home/user/anemo-ai/dataconnect","--enable_output_schema_extensions=true","--enable_output_generated_sdk=true"],"optionalArgs":["listen","config_dir","enable_output_schema_extensions","enable_output_generated_sdk"],"joinArgs":true,"shell":false,"port":9399} {"metadata":{"emulator":{"name":"dataconnect"},"message":"Starting Data Connect Emulator with command {\"binary\":\"/home/user/.cache/firebase/emulators/dataconnect-emulator-3.1.1\",\"args\":[\"--logtostderr\",\"-v=2\",\"dev\",\"--listen=localhost:50001\",\"--config_dir=/home/user/anemo-ai/dataconnect\",\"--enable_output_schema_extensions=true\",\"--enable_output_generated_sdk=true\"],\"optionalArgs\":[\"listen\",\"config_dir\",\"enable_output_schema_extensions\",\"enable_output_generated_sdk\"],\"joinArgs\":true,\"shell\":false,\"port\":9399}"}}
+[info] i  dataconnect: Data Connect Emulator logging to dataconnect-debug.log {"metadata":{"emulator":{"name":"dataconnect"},"message":"Data Connect Emulator logging to dataconnect-debug.log"}}
+[debug] [2026-02-23T12:44:02.216Z] I0223 12:44:02.214322     581 load.go:31] Reloading schema and connectors...
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0223 12:44:02.214322     581 load.go:31] Reloading schema and connectors...\n"}}
+[debug] [2026-02-23T12:44:02.549Z] I0223 12:44:02.439697     581 control.go:100] [/emulator/anemo-ai 0c18] UpdateResources(): done
+Main schema: sources: schema/schema.gql [739B] 
+Connector "example": sources: example/queries.gql [1017B] 
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0223 12:44:02.439697     581 control.go:100] [/emulator/anemo-ai 0c18] UpdateResources(): done\nMain schema: sources: schema/schema.gql [739B] \nConnector \"example\": sources: example/queries.gql [1017B] \n"}}
+[debug] [2026-02-23T12:44:02.710Z] I0223 12:44:02.610918     581 codegen.go:80] [connector "example" javascriptSdk] Generating sources into "/home/user/anemo-ai/src/dataconnect-generated"
+I0223 12:44:02.628659     581 codegen.go:80] [connector "example" adminSdk] Generating sources into "/home/user/anemo-ai/src/dataconnect-admin-generated"
+I0223 12:44:02.641859     581 collector.go:107] schema extensions wrote into "/home/user/anemo-ai/dataconnect/.dataconnect/schema"
+Generated sources: main/relation.gql [26562B] main/query.gql [6584B] main/mutation.gql [17940B] main/implicit.gql [2315B] prelude.gql [73281B] main/input.gql [53339B] 
+I0223 12:44:02.647155     581 collector.go:107] connector "example" javascriptSdk wrote into "/home/user/anemo-ai/src/dataconnect-generated"
+Generated sources: index.cjs.js [1979B] package.json [863B] react/README.md [27802B] .guides/usage.md [2283B] README.md [21314B] react/index.d.ts [2002B] .guides/setup.md [1682B] index.d.ts [4145B] esm/index.esm.js [1712B] esm/package.json [17B] react/index.cjs.js [1663B] react/package.json [460B] react/esm/package.json [17B] react/esm/index.esm.js [1574B] .guides/config.json [236B] 
+I0223 12:44:02.660070     581 installsdk.go:55] Package @dataconnect/generated is already installed. Skipping installation
+I0223 12:44:02.663225     581 collector.go:107] connector "example" adminSdk wrote into "/home/user/anemo-ai/src/dataconnect-admin-generated"
+Generated sources: esm/package.json [17B] index.cjs.js [1570B] package.json [632B] index.d.ts [3980B] esm/index.esm.js [1399B] 
+I0223 12:44:02.668705     581 installsdk.go:55] Package @dataconnect/admin-generated is already installed. Skipping installation
+I0223 12:44:02.668787     581 load.go:109] Finished reloading
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0223 12:44:02.610918     581 codegen.go:80] [connector \"example\" javascriptSdk] Generating sources into \"/home/user/anemo-ai/src/dataconnect-generated\"\nI0223 12:44:02.628659     581 codegen.go:80] [connector \"example\" adminSdk] Generating sources into \"/home/user/anemo-ai/src/dataconnect-admin-generated\"\nI0223 12:44:02.641859     581 collector.go:107] schema extensions wrote into \"/home/user/anemo-ai/dataconnect/.dataconnect/schema\"\nGenerated sources: main/relation.gql [26562B] main/query.gql [6584B] main/mutation.gql [17940B] main/implicit.gql [2315B] prelude.gql [73281B] main/input.gql [53339B] \nI0223 12:44:02.647155     581 collector.go:107] connector \"example\" javascriptSdk wrote into \"/home/user/anemo-ai/src/dataconnect-generated\"\nGenerated sources: index.cjs.js [1979B] package.json [863B] react/README.md [27802B] .guides/usage.md [2283B] README.md [21314B] react/index.d.ts [2002B] .guides/setup.md [1682B] index.d.ts [4145B] esm/index.esm.js [1712B] esm/package.json [17B] react/index.cjs.js [1663B] react/package.json [460B] react/esm/package.json [17B] react/esm/index.esm.js [1574B] .guides/config.json [236B] \nI0223 12:44:02.660070     581 installsdk.go:55] Package @dataconnect/generated is already installed. Skipping installation\nI0223 12:44:02.663225     581 collector.go:107] connector \"example\" adminSdk wrote into \"/home/user/anemo-ai/src/dataconnect-admin-generated\"\nGenerated sources: esm/package.json [17B] index.cjs.js [1570B] package.json [632B] index.d.ts [3980B] esm/index.esm.js [1399B] \nI0223 12:44:02.668705     581 installsdk.go:55] Package @dataconnect/admin-generated is already installed. Skipping installation\nI0223 12:44:02.668787     581 load.go:109] Finished reloading\n"}}
+[debug] [2026-02-23T12:44:02.732Z] I0223 12:44:02.731713     581 dev.go:104] Listening on address (HTTP + gRPC): 127.0.0.1:50001
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0223 12:44:02.731713     581 dev.go:104] Listening on address (HTTP + gRPC): 127.0.0.1:50001\n"}}
+[debug] [2026-02-23T12:44:03.103Z] I0223 12:44:03.102927     581 engine.go:205] [/emulator/anemo-ai 0c18] ExecuteGraphqlRead IntrospectionQuery: succeeded. 
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0223 12:44:03.102927     581 engine.go:205] [/emulator/anemo-ai 0c18] ExecuteGraphqlRead IntrospectionQuery: succeeded. \n"}}
+[info] [Firebase Plugin] Stopping Data Connect toolkit
+[warn] ⚠  Data Connect Emulator has exited upon receiving signal: SIGINT 
+[debug] [2026-02-24T00:56:12.791Z] [Firebase Plugin] Activating Firebase extension.
+[debug] [2026-02-24T00:56:24.085Z] [Firebase Plugin] requireAuthWrapper
+[debug] [2026-02-24T00:56:24.088Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2026-02-24T00:56:24.090Z] > authorizing via signed-in user (cyrilcquinoviva@gmail.com)
+[debug] [2026-02-24T00:56:24.098Z] Checked if tokens are valid: false, expires at: 1771854233036
+[debug] [2026-02-24T00:56:24.100Z] Checked if tokens are valid: false, expires at: 1771854233036
+[debug] [2026-02-24T00:56:24.101Z] > refreshing access token with scopes: []
+[debug] [2026-02-24T00:56:24.106Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-02-24T00:56:24.107Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-02-24T00:56:24.192Z] [Firebase Plugin] VSCode notification server listening on port 40001
+[debug] [2026-02-24T00:56:24.528Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-02-24T00:56:24.532Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-02-24T00:56:24.703Z] [Firebase Plugin] User found:  cyrilcquinoviva@gmail.com
+[info] [Firebase Plugin] (Core:Project) New user detected, fetching projects
+[debug] [2026-02-24T00:56:24.710Z] Checked if tokens are valid: true, expires at: 1771898183533
+[debug] [2026-02-24T00:56:24.716Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects pageSize=1000
+[debug] [2026-02-24T00:56:25.384Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects 200
+[debug] [2026-02-24T00:56:25.386Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects [omitted]
+[info] [Firebase Plugin] Starting Data Connect toolkit (version 3.1.1) on port 50001
+[debug] [2026-02-24T00:56:35.066Z] I0224 00:56:34.687361     778 control.go:100] [/emulator/anemo-ai c0ec] UpdateResources(): done
+Main schema: sources: schema/schema.gql [739B] 
+Connector "example": sources: example/queries.gql [1017B] 
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0224 00:56:34.687361     778 control.go:100] [/emulator/anemo-ai c0ec] UpdateResources(): done\nMain schema: sources: schema/schema.gql [739B] \nConnector \"example\": sources: example/queries.gql [1017B] \n"}}
+[debug] [2026-02-24T00:56:35.073Z] Ignoring unsupported arg: auto_download {"metadata":{"emulator":{"name":"dataconnect"},"message":"Ignoring unsupported arg: auto_download"}}
+[debug] [2026-02-24T00:56:35.081Z] Ignoring unsupported arg: port {"metadata":{"emulator":{"name":"dataconnect"},"message":"Ignoring unsupported arg: port"}}
+[debug] [2026-02-24T00:56:35.081Z] Starting Data Connect Emulator with command {"binary":"/home/user/.cache/firebase/emulators/dataconnect-emulator-3.1.1","args":["--logtostderr","-v=2","dev","--listen=localhost:50001","--config_dir=/home/user/anemo-ai/dataconnect","--enable_output_schema_extensions=true","--enable_output_generated_sdk=true"],"optionalArgs":["listen","config_dir","enable_output_schema_extensions","enable_output_generated_sdk"],"joinArgs":true,"shell":false,"port":9399} {"metadata":{"emulator":{"name":"dataconnect"},"message":"Starting Data Connect Emulator with command {\"binary\":\"/home/user/.cache/firebase/emulators/dataconnect-emulator-3.1.1\",\"args\":[\"--logtostderr\",\"-v=2\",\"dev\",\"--listen=localhost:50001\",\"--config_dir=/home/user/anemo-ai/dataconnect\",\"--enable_output_schema_extensions=true\",\"--enable_output_generated_sdk=true\"],\"optionalArgs\":[\"listen\",\"config_dir\",\"enable_output_schema_extensions\",\"enable_output_generated_sdk\"],\"joinArgs\":true,\"shell\":false,\"port\":9399}"}}
+[info] i  dataconnect: Data Connect Emulator logging to dataconnect-debug.log {"metadata":{"emulator":{"name":"dataconnect"},"message":"Data Connect Emulator logging to dataconnect-debug.log"}}
+[debug] [2026-02-24T00:56:36.689Z] I0224 00:56:35.393791     948 load.go:31] Reloading schema and connectors...
+I0224 00:56:36.098753     948 control.go:100] [/emulator/anemo-ai 84ff] UpdateResources(): done
+Main schema: sources: schema/schema.gql [739B] 
+Connector "example": sources: example/queries.gql [1017B] 
+I0224 00:56:36.497274     948 codegen.go:80] [connector "example" javascriptSdk] Generating sources into "/home/user/anemo-ai/src/dataconnect-generated"
+I0224 00:56:36.613215     948 codegen.go:80] [connector "example" adminSdk] Generating sources into "/home/user/anemo-ai/src/dataconnect-admin-generated"
+I0224 00:56:36.634314     948 collector.go:107] schema extensions wrote into "/home/user/anemo-ai/dataconnect/.dataconnect/schema"
+Generated sources: prelude.gql [73281B] main/input.gql [53339B] main/relation.gql [26562B] main/query.gql [6584B] main/mutation.gql [17940B] main/implicit.gql [2315B] 
+I0224 00:56:36.647334     948 collector.go:107] connector "example" javascriptSdk wrote into "/home/user/anemo-ai/src/dataconnect-generated"
+Generated sources: esm/index.esm.js [1712B] README.md [21314B] react/index.d.ts [2002B] react/package.json [460B] react/esm/package.json [17B] react/README.md [27802B] .guides/config.json [236B] index.d.ts [4145B] index.cjs.js [1979B] package.json [863B] .guides/usage.md [2283B] .guides/setup.md [1682B] esm/package.json [17B] react/index.cjs.js [1663B] react/esm/index.esm.js [1574B] 
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0224 00:56:35.393791     948 load.go:31] Reloading schema and connectors...\nI0224 00:56:36.098753     948 control.go:100] [/emulator/anemo-ai 84ff] UpdateResources(): done\nMain schema: sources: schema/schema.gql [739B] \nConnector \"example\": sources: example/queries.gql [1017B] \nI0224 00:56:36.497274     948 codegen.go:80] [connector \"example\" javascriptSdk] Generating sources into \"/home/user/anemo-ai/src/dataconnect-generated\"\nI0224 00:56:36.613215     948 codegen.go:80] [connector \"example\" adminSdk] Generating sources into \"/home/user/anemo-ai/src/dataconnect-admin-generated\"\nI0224 00:56:36.634314     948 collector.go:107] schema extensions wrote into \"/home/user/anemo-ai/dataconnect/.dataconnect/schema\"\nGenerated sources: prelude.gql [73281B] main/input.gql [53339B] main/relation.gql [26562B] main/query.gql [6584B] main/mutation.gql [17940B] main/implicit.gql [2315B] \nI0224 00:56:36.647334     948 collector.go:107] connector \"example\" javascriptSdk wrote into \"/home/user/anemo-ai/src/dataconnect-generated\"\nGenerated sources: esm/index.esm.js [1712B] README.md [21314B] react/index.d.ts [2002B] react/package.json [460B] react/esm/package.json [17B] react/README.md [27802B] .guides/config.json [236B] index.d.ts [4145B] index.cjs.js [1979B] package.json [863B] .guides/usage.md [2283B] .guides/setup.md [1682B] esm/package.json [17B] react/index.cjs.js [1663B] react/esm/index.esm.js [1574B] \n"}}
+[debug] [2026-02-24T00:56:36.777Z] I0224 00:56:36.750702     948 installsdk.go:55] Package @dataconnect/generated is already installed. Skipping installation
+I0224 00:56:36.756551     948 collector.go:107] connector "example" adminSdk wrote into "/home/user/anemo-ai/src/dataconnect-admin-generated"
+Generated sources: index.d.ts [3980B] esm/index.esm.js [1399B] esm/package.json [17B] index.cjs.js [1570B] package.json [632B] 
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0224 00:56:36.750702     948 installsdk.go:55] Package @dataconnect/generated is already installed. Skipping installation\nI0224 00:56:36.756551     948 collector.go:107] connector \"example\" adminSdk wrote into \"/home/user/anemo-ai/src/dataconnect-admin-generated\"\nGenerated sources: index.d.ts [3980B] esm/index.esm.js [1399B] esm/package.json [17B] index.cjs.js [1570B] package.json [632B] \n"}}
+[debug] [2026-02-24T00:56:36.897Z] I0224 00:56:36.785666     948 installsdk.go:55] Package @dataconnect/admin-generated is already installed. Skipping installation
+I0224 00:56:36.785722     948 load.go:109] Finished reloading
+I0224 00:56:36.866122     948 dev.go:104] Listening on address (HTTP + gRPC): 127.0.0.1:50001
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0224 00:56:36.785666     948 installsdk.go:55] Package @dataconnect/admin-generated is already installed. Skipping installation\nI0224 00:56:36.785722     948 load.go:109] Finished reloading\nI0224 00:56:36.866122     948 dev.go:104] Listening on address (HTTP + gRPC): 127.0.0.1:50001\n"}}
+[debug] [2026-02-24T00:56:39.128Z] I0224 00:56:39.022964     948 engine.go:205] [/emulator/anemo-ai 84ff] ExecuteGraphqlRead IntrospectionQuery: succeeded. 
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0224 00:56:39.022964     948 engine.go:205] [/emulator/anemo-ai 84ff] ExecuteGraphqlRead IntrospectionQuery: succeeded. \n"}}
+[debug] [2026-02-24T01:05:50.389Z] [Firebase Plugin] Activating Firebase extension.
+[debug] [2026-02-24T01:06:00.575Z] [Firebase Plugin] requireAuthWrapper
+[debug] [2026-02-24T01:06:00.581Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2026-02-24T01:06:00.585Z] > authorizing via signed-in user (cyrilcquinoviva@gmail.com)
+[debug] [2026-02-24T01:06:00.593Z] Checked if tokens are valid: true, expires at: 1771898183533
+[debug] [2026-02-24T01:06:00.595Z] Checked if tokens are valid: true, expires at: 1771898183533
+[debug] [2026-02-24T01:06:00.596Z] [Firebase Plugin] User found:  cyrilcquinoviva@gmail.com
+[info] [Firebase Plugin] (Core:Project) New user detected, fetching projects
+[debug] [2026-02-24T01:06:00.600Z] Checked if tokens are valid: true, expires at: 1771898183533
+[debug] [2026-02-24T01:06:00.604Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects pageSize=1000
+[debug] [2026-02-24T01:06:00.695Z] [Firebase Plugin] VSCode notification server listening on port 40001
+[debug] [2026-02-24T01:06:01.294Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects 200
+[debug] [2026-02-24T01:06:01.294Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects [omitted]
+[info] [Firebase Plugin] Starting Data Connect toolkit (version 3.1.1) on port 50002
+[debug] [2026-02-24T01:06:03.089Z] I0224 01:06:03.046365    5164 control.go:100] [/emulator/anemo-ai 7ff7] UpdateResources(): done
+Main schema: sources: schema/schema.gql [739B] 
+Connector "example": sources: example/queries.gql [1017B] 
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0224 01:06:03.046365    5164 control.go:100] [/emulator/anemo-ai 7ff7] UpdateResources(): done\nMain schema: sources: schema/schema.gql [739B] \nConnector \"example\": sources: example/queries.gql [1017B] \n"}}
+[debug] [2026-02-24T01:06:03.091Z] Ignoring unsupported arg: auto_download {"metadata":{"emulator":{"name":"dataconnect"},"message":"Ignoring unsupported arg: auto_download"}}
+[debug] [2026-02-24T01:06:03.091Z] Ignoring unsupported arg: port {"metadata":{"emulator":{"name":"dataconnect"},"message":"Ignoring unsupported arg: port"}}
+[debug] [2026-02-24T01:06:03.092Z] Starting Data Connect Emulator with command {"binary":"/home/user/.cache/firebase/emulators/dataconnect-emulator-3.1.1","args":["--logtostderr","-v=2","dev","--listen=localhost:50002","--config_dir=/home/user/anemo-ai/dataconnect","--enable_output_schema_extensions=true","--enable_output_generated_sdk=true"],"optionalArgs":["listen","config_dir","enable_output_schema_extensions","enable_output_generated_sdk"],"joinArgs":true,"shell":false,"port":9399} {"metadata":{"emulator":{"name":"dataconnect"},"message":"Starting Data Connect Emulator with command {\"binary\":\"/home/user/.cache/firebase/emulators/dataconnect-emulator-3.1.1\",\"args\":[\"--logtostderr\",\"-v=2\",\"dev\",\"--listen=localhost:50002\",\"--config_dir=/home/user/anemo-ai/dataconnect\",\"--enable_output_schema_extensions=true\",\"--enable_output_generated_sdk=true\"],\"optionalArgs\":[\"listen\",\"config_dir\",\"enable_output_schema_extensions\",\"enable_output_generated_sdk\"],\"joinArgs\":true,\"shell\":false,\"port\":9399}"}}
+[info] i  dataconnect: Data Connect Emulator logging to dataconnect-debug.log {"metadata":{"emulator":{"name":"dataconnect"},"message":"Data Connect Emulator logging to dataconnect-debug.log"}}
+[debug] [2026-02-24T01:06:03.307Z] I0224 01:06:03.290649    5169 load.go:31] Reloading schema and connectors...
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0224 01:06:03.290649    5169 load.go:31] Reloading schema and connectors...\n"}}
+[debug] [2026-02-24T01:06:03.627Z] I0224 01:06:03.566020    5169 control.go:100] [/emulator/anemo-ai 0178] UpdateResources(): done
+Main schema: sources: schema/schema.gql [739B] 
+Connector "example": sources: example/queries.gql [1017B] 
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0224 01:06:03.566020    5169 control.go:100] [/emulator/anemo-ai 0178] UpdateResources(): done\nMain schema: sources: schema/schema.gql [739B] \nConnector \"example\": sources: example/queries.gql [1017B] \n"}}
+[debug] [2026-02-24T01:06:03.752Z] I0224 01:06:03.752686    5169 codegen.go:80] [connector "example" javascriptSdk] Generating sources into "/home/user/anemo-ai/src/dataconnect-generated"
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0224 01:06:03.752686    5169 codegen.go:80] [connector \"example\" javascriptSdk] Generating sources into \"/home/user/anemo-ai/src/dataconnect-generated\"\n"}}
+[debug] [2026-02-24T01:06:03.898Z] I0224 01:06:03.898060    5169 codegen.go:80] [connector "example" adminSdk] Generating sources into "/home/user/anemo-ai/src/dataconnect-admin-generated"
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0224 01:06:03.898060    5169 codegen.go:80] [connector \"example\" adminSdk] Generating sources into \"/home/user/anemo-ai/src/dataconnect-admin-generated\"\n"}}
+[debug] [2026-02-24T01:06:03.906Z] I0224 01:06:03.905625    5169 collector.go:107] schema extensions wrote into "/home/user/anemo-ai/dataconnect/.dataconnect/schema"
+Generated sources: main/query.gql [6584B] main/mutation.gql [17940B] main/implicit.gql [2315B] prelude.gql [73281B] main/input.gql [53339B] main/relation.gql [26562B] 
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0224 01:06:03.905625    5169 collector.go:107] schema extensions wrote into \"/home/user/anemo-ai/dataconnect/.dataconnect/schema\"\nGenerated sources: main/query.gql [6584B] main/mutation.gql [17940B] main/implicit.gql [2315B] prelude.gql [73281B] main/input.gql [53339B] main/relation.gql [26562B] \n"}}
+[debug] [2026-02-24T01:06:03.991Z] I0224 01:06:03.990358    5169 collector.go:107] connector "example" javascriptSdk wrote into "/home/user/anemo-ai/src/dataconnect-generated"
+Generated sources: index.cjs.js [1979B] react/index.cjs.js [1663B] .guides/setup.md [1682B] index.d.ts [4145B] package.json [863B] react/index.d.ts [2002B] react/esm/package.json [17B] esm/package.json [17B] README.md [21314B] .guides/usage.md [2283B] .guides/config.json [236B] esm/index.esm.js [1712B] react/package.json [460B] react/esm/index.esm.js [1574B] react/README.md [27802B] 
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0224 01:06:03.990358    5169 collector.go:107] connector \"example\" javascriptSdk wrote into \"/home/user/anemo-ai/src/dataconnect-generated\"\nGenerated sources: index.cjs.js [1979B] react/index.cjs.js [1663B] .guides/setup.md [1682B] index.d.ts [4145B] package.json [863B] react/index.d.ts [2002B] react/esm/package.json [17B] esm/package.json [17B] README.md [21314B] .guides/usage.md [2283B] .guides/config.json [236B] esm/index.esm.js [1712B] react/package.json [460B] react/esm/index.esm.js [1574B] react/README.md [27802B] \n"}}
+[debug] [2026-02-24T01:06:04.028Z] I0224 01:06:04.028044    5169 installsdk.go:55] Package @dataconnect/generated is already installed. Skipping installation
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0224 01:06:04.028044    5169 installsdk.go:55] Package @dataconnect/generated is already installed. Skipping installation\n"}}
+[debug] [2026-02-24T01:06:04.036Z] I0224 01:06:04.033584    5169 collector.go:107] connector "example" adminSdk wrote into "/home/user/anemo-ai/src/dataconnect-admin-generated"
+Generated sources: index.cjs.js [1570B] package.json [632B] index.d.ts [3980B] esm/index.esm.js [1399B] esm/package.json [17B] 
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0224 01:06:04.033584    5169 collector.go:107] connector \"example\" adminSdk wrote into \"/home/user/anemo-ai/src/dataconnect-admin-generated\"\nGenerated sources: index.cjs.js [1570B] package.json [632B] index.d.ts [3980B] esm/index.esm.js [1399B] esm/package.json [17B] \n"}}
+[debug] [2026-02-24T01:06:04.060Z] I0224 01:06:04.058312    5169 installsdk.go:55] Package @dataconnect/admin-generated is already installed. Skipping installation
+I0224 01:06:04.059940    5169 load.go:109] Finished reloading
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0224 01:06:04.058312    5169 installsdk.go:55] Package @dataconnect/admin-generated is already installed. Skipping installation\nI0224 01:06:04.059940    5169 load.go:109] Finished reloading\n"}}
+[debug] [2026-02-24T01:06:04.078Z] I0224 01:06:04.077715    5169 dev.go:104] Listening on address (HTTP + gRPC): 127.0.0.1:50002
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0224 01:06:04.077715    5169 dev.go:104] Listening on address (HTTP + gRPC): 127.0.0.1:50002\n"}}
+[debug] [2026-02-24T01:06:04.367Z] I0224 01:06:04.365325    5169 engine.go:205] [/emulator/anemo-ai 0178] ExecuteGraphqlRead IntrospectionQuery: succeeded. 
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0224 01:06:04.365325    5169 engine.go:205] [/emulator/anemo-ai 0178] ExecuteGraphqlRead IntrospectionQuery: succeeded. \n"}}
+[debug] [2026-02-24T01:07:29.844Z] [Firebase Plugin] Activating Firebase extension.
+[debug] [2026-02-24T01:07:41.187Z] [Firebase Plugin] requireAuthWrapper
+[debug] [2026-02-24T01:07:41.190Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2026-02-24T01:07:41.192Z] > authorizing via signed-in user (cyrilcquinoviva@gmail.com)
+[debug] [2026-02-24T01:07:41.199Z] Checked if tokens are valid: true, expires at: 1771898183533
+[debug] [2026-02-24T01:07:41.200Z] Checked if tokens are valid: true, expires at: 1771898183533
+[debug] [2026-02-24T01:07:41.202Z] [Firebase Plugin] User found:  cyrilcquinoviva@gmail.com
+[info] [Firebase Plugin] (Core:Project) New user detected, fetching projects
+[debug] [2026-02-24T01:07:41.205Z] Checked if tokens are valid: true, expires at: 1771898183533
+[debug] [2026-02-24T01:07:41.210Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects pageSize=1000
+[debug] [2026-02-24T01:07:41.308Z] [Firebase Plugin] VSCode notification server listening on port 40001
+[debug] [2026-02-24T01:07:42.040Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects 200
+[debug] [2026-02-24T01:07:42.041Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects [omitted]
+[info] [Firebase Plugin] Starting Data Connect toolkit (version 3.1.1) on port 50003
+[debug] [2026-02-24T01:07:43.631Z] I0224 01:07:43.542919    6130 control.go:100] [/emulator/anemo-ai b513] UpdateResources(): done
+Main schema: sources: schema/schema.gql [739B] 
+Connector "example": sources: example/queries.gql [1017B] 
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0224 01:07:43.542919    6130 control.go:100] [/emulator/anemo-ai b513] UpdateResources(): done\nMain schema: sources: schema/schema.gql [739B] \nConnector \"example\": sources: example/queries.gql [1017B] \n"}}
+[debug] [2026-02-24T01:07:43.643Z] Ignoring unsupported arg: auto_download {"metadata":{"emulator":{"name":"dataconnect"},"message":"Ignoring unsupported arg: auto_download"}}
+[debug] [2026-02-24T01:07:43.644Z] Ignoring unsupported arg: port {"metadata":{"emulator":{"name":"dataconnect"},"message":"Ignoring unsupported arg: port"}}
+[debug] [2026-02-24T01:07:43.649Z] Starting Data Connect Emulator with command {"binary":"/home/user/.cache/firebase/emulators/dataconnect-emulator-3.1.1","args":["--logtostderr","-v=2","dev","--listen=localhost:50003","--config_dir=/home/user/anemo-ai/dataconnect","--enable_output_schema_extensions=true","--enable_output_generated_sdk=true"],"optionalArgs":["listen","config_dir","enable_output_schema_extensions","enable_output_generated_sdk"],"joinArgs":true,"shell":false,"port":9399} {"metadata":{"emulator":{"name":"dataconnect"},"message":"Starting Data Connect Emulator with command {\"binary\":\"/home/user/.cache/firebase/emulators/dataconnect-emulator-3.1.1\",\"args\":[\"--logtostderr\",\"-v=2\",\"dev\",\"--listen=localhost:50003\",\"--config_dir=/home/user/anemo-ai/dataconnect\",\"--enable_output_schema_extensions=true\",\"--enable_output_generated_sdk=true\"],\"optionalArgs\":[\"listen\",\"config_dir\",\"enable_output_schema_extensions\",\"enable_output_generated_sdk\"],\"joinArgs\":true,\"shell\":false,\"port\":9399}"}}
+[info] i  dataconnect: Data Connect Emulator logging to dataconnect-debug.log {"metadata":{"emulator":{"name":"dataconnect"},"message":"Data Connect Emulator logging to dataconnect-debug.log"}}
+[debug] [2026-02-24T01:07:44.282Z] I0224 01:07:43.764706    6135 load.go:31] Reloading schema and connectors...
+I0224 01:07:44.170326    6135 control.go:100] [/emulator/anemo-ai 4a09] UpdateResources(): done
+Main schema: sources: schema/schema.gql [739B] 
+Connector "example": sources: example/queries.gql [1017B] 
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0224 01:07:43.764706    6135 load.go:31] Reloading schema and connectors...\nI0224 01:07:44.170326    6135 control.go:100] [/emulator/anemo-ai 4a09] UpdateResources(): done\nMain schema: sources: schema/schema.gql [739B] \nConnector \"example\": sources: example/queries.gql [1017B] \n"}}
+[debug] [2026-02-24T01:07:45.172Z] I0224 01:07:44.708542    6135 codegen.go:80] [connector "example" javascriptSdk] Generating sources into "/home/user/anemo-ai/src/dataconnect-generated"
+I0224 01:07:44.790257    6135 codegen.go:80] [connector "example" adminSdk] Generating sources into "/home/user/anemo-ai/src/dataconnect-admin-generated"
+I0224 01:07:44.807125    6135 collector.go:107] schema extensions wrote into "/home/user/anemo-ai/dataconnect/.dataconnect/schema"
+Generated sources: prelude.gql [73281B] main/relation.gql [26562B] main/query.gql [6584B] main/mutation.gql [17940B] main/implicit.gql [2315B] main/input.gql [53339B] 
+I0224 01:07:44.820967    6135 collector.go:107] connector "example" javascriptSdk wrote into "/home/user/anemo-ai/src/dataconnect-generated"
+Generated sources: README.md [21314B] react/esm/index.esm.js [1574B] .guides/config.json [236B] index.d.ts [4145B] esm/index.esm.js [1712B] index.cjs.js [1979B] react/index.d.ts [2002B] react/README.md [27802B] package.json [863B] react/esm/package.json [17B] react/index.cjs.js [1663B] esm/package.json [17B] react/package.json [460B] .guides/usage.md [2283B] .guides/setup.md [1682B] 
+I0224 01:07:44.883424    6135 installsdk.go:55] Package @dataconnect/generated is already installed. Skipping installation
+I0224 01:07:44.887408    6135 collector.go:107] connector "example" adminSdk wrote into "/home/user/anemo-ai/src/dataconnect-admin-generated"
+Generated sources: index.d.ts [3980B] esm/index.esm.js [1399B] esm/package.json [17B] index.cjs.js [1570B] package.json [632B] 
+I0224 01:07:44.993222    6135 installsdk.go:55] Package @dataconnect/admin-generated is already installed. Skipping installation
+I0224 01:07:44.993292    6135 load.go:109] Finished reloading
+I0224 01:07:45.007263    6135 dev.go:104] Listening on address (HTTP + gRPC): 127.0.0.1:50003
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0224 01:07:44.708542    6135 codegen.go:80] [connector \"example\" javascriptSdk] Generating sources into \"/home/user/anemo-ai/src/dataconnect-generated\"\nI0224 01:07:44.790257    6135 codegen.go:80] [connector \"example\" adminSdk] Generating sources into \"/home/user/anemo-ai/src/dataconnect-admin-generated\"\nI0224 01:07:44.807125    6135 collector.go:107] schema extensions wrote into \"/home/user/anemo-ai/dataconnect/.dataconnect/schema\"\nGenerated sources: prelude.gql [73281B] main/relation.gql [26562B] main/query.gql [6584B] main/mutation.gql [17940B] main/implicit.gql [2315B] main/input.gql [53339B] \nI0224 01:07:44.820967    6135 collector.go:107] connector \"example\" javascriptSdk wrote into \"/home/user/anemo-ai/src/dataconnect-generated\"\nGenerated sources: README.md [21314B] react/esm/index.esm.js [1574B] .guides/config.json [236B] index.d.ts [4145B] esm/index.esm.js [1712B] index.cjs.js [1979B] react/index.d.ts [2002B] react/README.md [27802B] package.json [863B] react/esm/package.json [17B] react/index.cjs.js [1663B] esm/package.json [17B] react/package.json [460B] .guides/usage.md [2283B] .guides/setup.md [1682B] \nI0224 01:07:44.883424    6135 installsdk.go:55] Package @dataconnect/generated is already installed. Skipping installation\nI0224 01:07:44.887408    6135 collector.go:107] connector \"example\" adminSdk wrote into \"/home/user/anemo-ai/src/dataconnect-admin-generated\"\nGenerated sources: index.d.ts [3980B] esm/index.esm.js [1399B] esm/package.json [17B] index.cjs.js [1570B] package.json [632B] \nI0224 01:07:44.993222    6135 installsdk.go:55] Package @dataconnect/admin-generated is already installed. Skipping installation\nI0224 01:07:44.993292    6135 load.go:109] Finished reloading\nI0224 01:07:45.007263    6135 dev.go:104] Listening on address (HTTP + gRPC): 127.0.0.1:50003\n"}}
+[debug] [2026-02-24T01:07:45.616Z] I0224 01:07:45.597276    6135 engine.go:205] [/emulator/anemo-ai 4a09] ExecuteGraphqlRead IntrospectionQuery: succeeded. 
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0224 01:07:45.597276    6135 engine.go:205] [/emulator/anemo-ai 4a09] ExecuteGraphqlRead IntrospectionQuery: succeeded. \n"}}

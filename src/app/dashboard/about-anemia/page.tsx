@@ -37,7 +37,8 @@ export default function AboutAnemiaPage() {
       <motion.div
         variants={containerVariants}
         initial="hidden"
-        animate="show"
+        whileInView="show"
+        viewport={{ once: true, amount: 0.1 }}
         className="space-y-16"
       >
         {/* Hero Section */}
