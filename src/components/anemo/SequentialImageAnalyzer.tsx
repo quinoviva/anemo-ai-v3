@@ -251,41 +251,167 @@ export function SequentialImageAnalyzer({ onClose, isOpen, isPage }: SequentialI
                                 <motion.div key="image" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0">
                                     <img src={image} className={cn("w-full h-full object-cover grayscale transition-all duration-1000", (analysisStage !== 'idle' && analysisStage !== 'complete') && "blur-xl saturate-150")} />
                                     {(analysisStage !== 'idle' && analysisStage !== 'failed' && analysisStage !== 'complete') && (
-                                        <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 bg-background/40 backdrop-blur-2xl">
-                                            <HeartLoader size={80} strokeWidth={2.5} />
-                                            <span className={cn("text-[11px] font-bold tracking-[0.4em] uppercase text-foreground leading-none")}>Analyzing Samples</span>
+                                        <div className="absolute inset-0 flex flex-col items-center justify-center gap-8 bg-black/40 dark:bg-black/60 backdrop-blur-3xl overflow-hidden">
+                                            {/* Scanning Laser Effect */}
+                                            <motion.div
+                                                animate={{ top: ['0%', '100%', '0%'] }}
+                                                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                                                className={cn("absolute inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-primary to-transparent z-10 shadow-[0_0_15px]", theme.primary === 'amber' ? 'shadow-amber-500/50' : theme.primary === 'red' ? 'shadow-red-500/50' : 'shadow-blue-500/50')}
+                                            />
+                                            <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
+
+                                            <HeartLoader size={90} strokeWidth={1} />
+                                            <div className="flex flex-col items-center gap-3">
+                                                <span className="text-[12px] font-medium tracking-[0.2em] text-foreground opacity-70">spectral analysis active</span>
+                                                <div className="flex gap-1">
+                                                    {[0, 1, 2].map(i => (
+                                                        <motion.div
+                                                            key={i}
+                                                            animate={{ opacity: [0.2, 1, 0.2] }}
+                                                            transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.2 }}
+                                                            className="w-1 h-1 rounded-full bg-primary"
+                                                        />
+                                                    ))}
+                                                </div>
+                                            </div>
                                         </div>
                                     )}
                                     {analysisStage === 'failed' && (
-                                        <div className="absolute inset-0 bg-red-600/95 backdrop-blur-2xl p-8 flex flex-col items-center justify-center text-center gap-8 z-50">
-                                            <div className="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center border border-white/20 animate-pulse">
-                                                <ShieldAlert className="w-12 h-12 text-white" />
+                                        <motion.div
+                                            initial="hidden"
+                                            animate="visible"
+                                            exit="hidden"
+                                            variants={{
+                                                hidden: { opacity: 0, filter: 'blur(10px)' },
+                                                visible: { opacity: 1, filter: 'blur(0px)', transition: { staggerChildren: 0.1, duration: 0.5 } }
+                                            }}
+                                            className="absolute inset-0 z-50 overflow-hidden flex flex-col items-center justify-center p-6 sm:p-10 text-center"
+                                        >
+                                            {/* Breach Context Background */}
+                                            <motion.div 
+                                                initial={{ opacity: 0 }}
+                                                animate={{ opacity: 1 }}
+                                                className="absolute inset-0 bg-red-950/40 backdrop-blur-2xl border border-red-500/10 shadow-[inset_0_0_100px_rgba(220,38,38,0.2)]" 
+                                            />
+                                            
+                                            {/* Dynamic Error Ripple Overlay */}
+                                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full mix-blend-screen opacity-50 pointer-events-none">
+                                                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(220,38,38,0.15)_0%,transparent_50%)] animate-pulse" />
                                             </div>
-                                            <div className="space-y-4 px-6">
-                                                <p className="text-lg font-black text-white uppercase leading-tight">Analysis Failed</p>
-                                                <p className="text-[13px] font-black text-white/80 uppercase tracking-widest leading-relaxed italic">{qualityError}</p>
+
+                                            <div className="relative z-10 flex flex-col items-center max-w-md w-full gap-8">
+                                                
+                                                {/* Animated Glitch Icon Container */}
+                                                <motion.div
+                                                    variants={{
+                                                        hidden: { scale: 0.5, opacity: 0, rotate: -15 },
+                                                        visible: { scale: 1, opacity: 1, rotate: 0 }
+                                                    }}
+                                                    transition={{ type: "spring", stiffness: 200, damping: 20 }}
+                                                    className="relative"
+                                                >
+                                                    <motion.div
+                                                        animate={{ scale: [1, 1.2, 1], opacity: [0.2, 0.6, 0.2] }}
+                                                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                                                        className="absolute inset-[-20%] rounded-full bg-red-600/20 blur-xl"
+                                                    />
+                                                    <div className="w-24 h-24 rounded-full bg-red-950/60 border border-red-500/40 flex items-center justify-center shadow-[0_0_40px_rgba(220,38,38,0.3)] relative overflow-hidden isolate">
+                                                        <motion.div 
+                                                            animate={{ y: ['-100%', '100%'] }}
+                                                            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                                                            className="absolute inset-x-0 h-px bg-red-400 z-10 opacity-30 shadow-[0_0_10px_rgba(248,113,113,1)]" 
+                                                        />
+                                                        <ShieldAlert className="w-10 h-10 text-red-500 relative z-20 drop-shadow-md" strokeWidth={1.5} />
+                                                    </div>
+                                                </motion.div>
+
+                                                <motion.div 
+                                                    variants={{
+                                                        hidden: { y: 20, opacity: 0 },
+                                                        visible: { y: 0, opacity: 1 }
+                                                    }}
+                                                    className="space-y-6 w-full"
+                                                >
+                                                    
+                                                    {/* Central Error Typography */}
+                                                    <div className="bg-red-950/30 p-6 md:p-8 border-y md:border-y-0 md:border border-red-500/20 md:rounded-3xl shadow-2xl relative overflow-hidden group">
+                                                         <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 to-transparent pointer-events-none" />
+                                                         <div className="absolute left-0 top-0 bottom-0 w-1 bg-red-500 rounded-l-3xl shadow-[0_0_20px_rgba(239,68,68,0.8)]" />
+                                                         
+                                                         <div className="space-y-4">
+                                                             <h3 className="flex items-center justify-center gap-3 text-[10px] md:text-xs font-bold text-red-500 tracking-[0.3em] uppercase opacity-90">
+                                                                 <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(239,68,68,1)]" /> 
+                                                                 Specimen Rejected
+                                                             </h3>
+                                                             <p className="text-xl md:text-2xl font-medium text-foreground tracking-tight leading-snug drop-shadow-md pb-2 text-balance">
+                                                                 {qualityError || "Neural synthesis failed due to severe optical anomaly."}
+                                                             </p>
+                                                         </div>
+                                                    </div>
+
+                                                    {/* Integrated Telemetry Feed */}
+                                                    {diagnosticLogs.length > 0 && (
+                                                        <div className="flex flex-col gap-1.5 opacity-60 bg-background/20 p-4 rounded-2xl mx-auto w-fit">
+                                                            {diagnosticLogs.map((log, i) => (
+                                                                <div key={i} className="flex items-center justify-start gap-3 w-full text-left">
+                                                                    <span className="text-[10px] font-mono text-red-500 shadow-sm">»</span>
+                                                                    <span className="text-[10px] font-mono text-foreground tracking-widest leading-none drop-shadow-sm line-clamp-1">{log}</span>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </motion.div>
+
+                                                <motion.div
+                                                    variants={{
+                                                        hidden: { y: 20, opacity: 0 },
+                                                        visible: { y: 0, opacity: 1 }
+                                                    }}
+                                                    className="w-full pt-4"
+                                                >
+                                                    <Button
+                                                        size="lg"
+                                                        className="w-full max-w-[280px] h-16 rounded-full bg-red-600 border border-red-500/20 text-white text-sm font-bold tracking-widest uppercase transition-all hover:bg-red-500 hover:scale-[1.03] active:scale-95 shadow-[0_20px_40px_-10px_rgba(220,38,38,0.4)] relative overflow-hidden ring-1 ring-white/10 group"
+                                                        onClick={() => { setImages(prev => ({ ...prev, [stepId]: null })); setAnalysisStage('idle'); }}
+                                                    >
+                                                        <div className="absolute inset-x-0 h-1 bg-white/30 top-0 group-hover:translate-y-16 transition-transform duration-700" />
+                                                        Re-initialize Sensor
+                                                    </Button>
+                                                </motion.div>
                                             </div>
-                                            <Button size="sm" className="rounded-full h-16 px-12 bg-white text-red-600 font-black tracking-widest hover:scale-105 active:scale-95 transition-all shadow-2xl" onClick={() => { setImages(prev => ({ ...prev, [stepId]: null })); setAnalysisStage('idle'); }}>RETRY FEED</Button>
-                                        </div>
+
+                                            {/* Low Opacity Noise Grain */}
+                                            <div className="absolute inset-0 pointer-events-none opacity-[0.03] mix-blend-overlay bg-[url('/noise.png')]" />
+                                        </motion.div>
                                     )}
                                 </motion.div>
                             ) : (
-                                <div className="flex flex-col items-center space-y-8">
-                                    <div className="p-10 md:p-14 rounded-full bg-white/[0.03] border border-white/10 shadow-2xl relative z-10 transition-transform group-hover:scale-110 duration-700">
-                                        <Icon className={cn("w-20 h-20 md:w-32 md:h-32 opacity-30", theme.text)} />
+                                <div className="flex flex-col items-center gap-10">
+                                    <div className="relative group">
+                                        <motion.div
+                                            animate={{ scale: [1, 1.1, 1], opacity: [0.3, 0.5, 0.3] }}
+                                            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                                            className="absolute inset-0 bg-primary/20 rounded-full blur-3xl"
+                                        />
+                                        <div className="p-12 md:p-16 rounded-full bg-white/[0.02] border border-white/10 shadow-2xl relative z-10 transition-all duration-700 group-hover:bg-white/[0.05] group-hover:scale-110">
+                                            <Icon className={cn("w-24 h-24 md:w-36 md:h-36 opacity-20 transition-opacity duration-700 group-hover:opacity-40", theme.text)} strokeWidth={1} />
+                                        </div>
                                     </div>
-                                    <p className="text-[11px] font-black uppercase tracking-[0.5em] text-muted-foreground/40 italic">Waiting for Signal...</p>
+                                    <div className="flex flex-col items-center gap-4">
+                                        <span className="text-[11px] font-medium tracking-[0.4em] text-foreground/30">awaiting signal</span>
+                                        <div className="h-[1px] w-8 bg-foreground/10" />
+                                    </div>
                                 </div>
                             )}
                         </AnimatePresence>
 
                         {analysisStage !== 'idle' && (
                             <div className="absolute bottom-6 inset-x-6 z-[60]">
-                                <div className="p-4 rounded-2xl bg-black/80 backdrop-blur-3xl border border-white/10 shadow-2xl space-y-2">
+                                <div className="p-3 rounded-2xl bg-card/80 dark:bg-black/80 backdrop-blur-3xl border border-foreground/5 shadow-2xl space-y-1">
                                     {diagnosticLogs.map((log, i) => (
-                                        <p key={i} className="text-[10px] font-mono text-emerald-400 uppercase tracking-widest leading-none flex items-center gap-3">
-                                            <span className="opacity-40 animate-pulse">»</span>
-                                            <span>{log}</span>
+                                        <p key={i} className="text-[10px] font-mono text-foreground tracking-widest leading-none flex items-center gap-2">
+                                            <span className={cn("opacity-40", theme.text)}>»</span>
+                                            <span className="opacity-60">{log}</span>
                                         </p>
                                     ))}
                                 </div>
@@ -299,15 +425,15 @@ export function SequentialImageAnalyzer({ onClose, isOpen, isPage }: SequentialI
                     </div>
                 </div>
 
-                <div className="space-y-8 w-full text-center relative z-20">
+                <div className="space-y-6 w-full text-center relative z-20">
                     <div className="space-y-4">
-                        <h2 className="text-[clamp(2.5rem,10vw,5.5rem)] font-black tracking-tighter text-foreground leading-[0.9] uppercase italic drop-shadow-xl">
-                            {title.split(' ')[0]} <span className={cn("italic-font", theme.text)}>{title.split(' ')[1] || ''}</span>
+                        <h2 className="text-[clamp(1.8rem,8vw,4.5rem)] font-black tracking-tighter text-foreground leading-[1.1]">
+                            {title.split(' ')[0]} <span className={cn("italic-font", theme.text)}>{title.split(' ').slice(1).join(' ')}</span>
                         </h2>
-                        <div className="flex items-center justify-center gap-6">
-                            <div className="h-px w-12 bg-white/10" />
-                            <p className="text-sm md:text-lg text-muted-foreground font-black uppercase tracking-widest leading-relaxed max-w-xl px-4">{description}</p>
-                            <div className="h-px w-12 bg-white/10" />
+                        <div className="flex items-center justify-center gap-4">
+                            <div className="h-px w-8 bg-foreground/10" />
+                            <p className="text-[13px] md:text-base text-muted-foreground font-medium tracking-wide leading-relaxed max-w-lg px-2">{description}</p>
+                            <div className="h-px w-8 bg-foreground/10" />
                         </div>
                     </div>
 
@@ -315,30 +441,30 @@ export function SequentialImageAnalyzer({ onClose, isOpen, isPage }: SequentialI
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 px-6">
                             <Button
                                 size="lg"
-                                className="w-full sm:w-72 h-20 rounded-[1.8rem] bg-white/[0.05] border border-white/10 hover:bg-white/10 text-foreground transition-all flex items-center justify-start px-10 gap-8 group/btn relative overflow-hidden"
+                                className="w-full sm:w-72 h-16 rounded-[1.8rem] bg-white/[0.05] border border-white/10 hover:bg-white/10 text-foreground transition-all flex items-center justify-start px-8 gap-6 group/btn relative overflow-hidden shadow-lg"
                                 onClick={() => fileInputRef.current?.click()}
                             >
-                                <div className="p-3 bg-white/10 rounded-xl group-hover/btn:bg-white group-hover/btn:text-black transition-all"><Upload className="w-6 h-6" /></div>
-                                <span className="text-[12px] font-black uppercase tracking-widest text-left">Upload Specimen</span>
+                                <div className="p-2.5 bg-white/10 rounded-xl group-hover/btn:bg-white group-hover/btn:text-black transition-all"><Upload className="w-5 h-5" /></div>
+                                <span className="text-[11px] font-bold uppercase tracking-widest text-left">Upload Specimen</span>
                             </Button>
                             <Button
                                 size="lg"
-                                className={cn("w-full sm:w-72 h-20 rounded-[1.8rem] text-white flex items-center justify-start px-10 gap-8 group/btn hover:scale-105 transition-all shadow-xl relative overflow-hidden",
+                                className={cn("w-full sm:w-72 h-16 rounded-[1.8rem] text-white flex items-center justify-start px-8 gap-6 group/btn hover:scale-105 active:scale-95 transition-all shadow-xl relative overflow-hidden",
                                     theme.primary === 'amber' ? 'bg-amber-600 shadow-amber-600/30' :
                                         theme.primary === 'red' ? 'bg-red-600 shadow-red-600/30' :
                                             theme.primary === 'blue' ? 'bg-blue-600 shadow-blue-600/30' : 'bg-primary shadow-primary/30'
                                 )}
                                 onClick={() => setIsCameraOpen(true)}
                             >
-                                <div className="p-3 bg-white/20 rounded-xl"><Camera className="w-6 h-6" /></div>
-                                <span className="text-[12px] font-black uppercase tracking-widest text-left">Activate Camera</span>
+                                <div className="p-2.5 bg-foreground/5 rounded-xl transition-colors group-hover:bg-primary/20"><Camera className="w-5 h-5" /></div>
+                                <span className="text-[11px] font-bold tracking-widest text-left uppercase">Activate Camera</span>
                             </Button>
                         </div>
                     )}
 
-                    <button className="flex items-center gap-3 mx-auto text-muted-foreground hover:text-foreground transition-all group px-6 py-3 rounded-full hover:bg-white/5" onClick={() => setShowGuide(true)}>
-                        <Search className="w-5 h-5 opacity-40 group-hover:opacity-100" />
-                        <span className="text-[11px] font-black tracking-widest uppercase italic">Clinical Protocol</span>
+                    <button className="flex items-center gap-3 mx-auto text-muted-foreground hover:text-foreground transition-all group px-6 py-3 rounded-full hover:bg-foreground/5 mt-4" onClick={() => setShowGuide(true)}>
+                        <Search className="w-4 h-4 opacity-40 group-hover:opacity-100" />
+                        <span className="text-[10px] font-bold tracking-widest uppercase">Clinical Protocol</span>
                     </button>
 
                     <Input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && onUpload(e.target.files[0])} />
@@ -491,7 +617,9 @@ export function SequentialImageAnalyzer({ onClose, isOpen, isPage }: SequentialI
                                 </div>
                             </div>
                             <div className="space-y-10">
-                                <h1 className="text-[clamp(3.5rem,14vw,9.5rem)] font-black text-foreground leading-[0.75] uppercase drop-shadow-2xl">ANEMO</h1>
+                                <h1 className="text-[clamp(3.5rem,14vw,9.5rem)] font-bold text-foreground leading-[0.75] drop-shadow-2xl tracking-tighter">
+                                    ANEMO <i className="text-primary italic font-normal animate-pulse">Check</i>
+                                </h1>
                                 <div className="flex flex-col items-center gap-6">
                                     <p className="text-[12px] md:text-sm font-black uppercase tracking-[0.8em] text-muted-foreground/60 leading-none">Anemia Screening</p>
                                     <div className="h-1 w-48 bg-white/5 rounded-full overflow-hidden relative">
@@ -531,7 +659,7 @@ export function SequentialImageAnalyzer({ onClose, isOpen, isPage }: SequentialI
                     )}
 
                     {currentStep === 'cbc-decision' && (
-                        <motion.div key="cbc" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, y: 40 }} className="text-center p-8 max-w-2xl space-y-20 flex flex-col items-center relative z-20">
+                        <motion.div key="cbc" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, y: 40 }} className="text-center p-8 max-w-2xl space-y-16 flex flex-col items-center relative z-20">
                             <div className="relative isolate group">
                                 <div className="absolute inset-[-60px] bg-blue-600/20 rounded-full blur-[100px] animate-pulse group-hover:scale-125 transition-transform duration-1000" />
                                 <div className="w-64 h-64 rounded-[4rem] bg-blue-600/10 flex items-center justify-center border border-white/10 shadow-2xl relative z-10 overflow-hidden ring-1 ring-white/10">
@@ -539,15 +667,15 @@ export function SequentialImageAnalyzer({ onClose, isOpen, isPage }: SequentialI
                                     <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent" />
                                 </div>
                             </div>
-                            <div className="space-y-8">
-                                <h3 className="text-6xl font-black uppercase italic tracking-tighter leading-none drop-shadow-2xl">Clinical <span className="text-blue-500 italic-font">Fibre</span></h3>
-                                <p className="text-lg md:text-xl font-black uppercase tracking-[0.4em] text-muted-foreground/60 max-w-sm mx-auto leading-relaxed italic">Synchronize high-fidelity laboratory data for diagnostic certainty.</p>
+                            <div className="space-y-6">
+                                <h3 className="text-5xl md:text-6xl font-black uppercase tracking-tighter leading-none drop-shadow-2xl">Clinical <span className="text-blue-500 italic-font">Fibre</span></h3>
+                                <p className="text-sm md:text-base font-medium tracking-wide text-muted-foreground/80 max-w-sm mx-auto leading-relaxed">Synchronize high-fidelity laboratory data for diagnostic certainty.</p>
                             </div>
-                            <div className="flex flex-col gap-6 w-full px-12">
-                                <Button className="h-20 rounded-[2.2rem] bg-blue-600 text-white shadow-[0_30px_80px_-15px_rgba(37,99,235,0.6)] hover:scale-[1.03] transition-all text-[12px] font-black tracking-[0.6em] uppercase" onClick={() => setCurrentStep('cbc-capture')}>
+                            <div className="flex flex-col gap-4 w-full px-12">
+                                <Button className="h-16 rounded-full bg-blue-600 text-white shadow-lg hover:scale-[1.03] transition-all text-xs font-bold tracking-widest uppercase" onClick={() => setCurrentStep('cbc-capture')}>
                                     IMPORT LAB RECORDS
                                 </Button>
-                                <Button variant="ghost" className="h-16 text-muted-foreground uppercase text-[11px] font-black tracking-[0.5em] hover:bg-white/5 rounded-full" onClick={() => performFinalAnalysis()}>
+                                <Button variant="ghost" className="h-14 text-muted-foreground uppercase text-[10px] font-bold tracking-widest hover:bg-white/5 rounded-full" onClick={() => performFinalAnalysis()}>
                                     BYPASS SYNC (LOW FIDELITY)
                                 </Button>
                             </div>
@@ -571,19 +699,19 @@ export function SequentialImageAnalyzer({ onClose, isOpen, isPage }: SequentialI
                         <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="w-full h-full overflow-y-auto no-scrollbar py-16 px-4 sm:px-8 lg:px-12">
                             <div className="max-w-[1400px] mx-auto space-y-24">
                                 {validationResult && (
-                                    <div className="p-12 md:p-20 rounded-[4rem] bg-primary/[0.03] border border-white/5 relative overflow-hidden text-left isolate shadow-2xl">
+                                    <div className="p-12 md:p-16 rounded-[3.5rem] bg-primary/[0.03] border border-white/5 relative overflow-hidden text-left isolate shadow-2xl">
                                         <div className="absolute top-0 right-0 p-16 opacity-[0.03] grayscale text-primary"><History className="w-80 h-80" /></div>
                                         <div className="flex flex-col md:flex-row justify-between items-start gap-12 relative z-10 border-b border-white/10 pb-12">
-                                            <div className="space-y-6">
-                                                <Badge className="bg-primary/20 text-primary border-primary/30 uppercase tracking-[0.6em] h-10 px-6 font-black shadow-xl">Diagnostic Clearance</Badge>
-                                                <h4 className="text-[clamp(3.5rem,10vw,8.5rem)] font-black uppercase italic tracking-tighter leading-[0.75]">Neural <br /><span className="text-primary italic-font">Verdict</span></h4>
+                                            <div className="space-y-4">
+                                                <Badge className="bg-primary/10 text-primary border-primary/20 uppercase tracking-widest h-8 px-4 font-bold shadow-md text-[10px]">Diagnostic Clearance</Badge>
+                                                <h4 className="text-[clamp(3.5rem,8vw,7.5rem)] font-black tracking-tighter leading-[0.85]">Neural <span className="text-primary italic-font">Verdict</span></h4>
                                             </div>
                                             <div className="text-left md:text-right">
-                                                <span className="text-[12px] font-black text-muted-foreground uppercase tracking-[0.6em] mb-6 block italic opacity-60">Reliability Index (Σ)</span>
-                                                <span className="text-8xl lg:text-[10rem] leading-none font-black tracking-tighter text-foreground drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)]">{validationResult.reliabilityScore}<span className="text-primary text-[clamp(2.5rem,6vw,5rem)] ml-2">%</span></span>
+                                                <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-4 block opacity-80">Reliability Index (Σ)</span>
+                                                <span className="text-7xl lg:text-[8rem] leading-none font-black tracking-tighter text-foreground drop-shadow-[0_10px_30px_rgba(0,0,0,0.5)]">{validationResult.reliabilityScore}<span className="text-primary text-[clamp(2.2rem,5vw,4rem)] ml-2">%</span></span>
                                             </div>
                                         </div>
-                                        <div className="mt-14 text-[clamp(1.5rem,4vw,3.8rem)] font-light italic text-muted-foreground border-l-[12px] border-primary pl-16 py-8 leading-[1.3] text-balance drop-shadow-md">
+                                        <div className="mt-12 text-[clamp(1.2rem,3vw,2.5rem)] font-medium italic-font text-foreground border-l-[8px] border-primary pl-10 py-6 leading-[1.4] text-balance opacity-90 block">
                                             "{validationResult.analysis}"
                                         </div>
                                     </div>

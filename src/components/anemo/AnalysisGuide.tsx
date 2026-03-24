@@ -99,7 +99,7 @@ export function AnalysisGuide({ bodyPart, onComplete }: AnalysisGuideProps) {
         };
       case 'skin':
         return {
-          title: 'Dermal Lock Protocol',
+          title: 'Dermal Scan',
           subtitle: 'Deep-field analysis of palmar creases and subcutaneous hue distribution.',
           code: 'PX-01',
           steps: [
@@ -204,29 +204,30 @@ export function AnalysisGuide({ bodyPart, onComplete }: AnalysisGuideProps) {
   return (
     <div className="flex flex-col items-center p-8 sm:p-16 lg:p-24 space-y-24 md:space-y-32 animate-in fade-in zoom-in duration-1000 w-full relative isolate overflow-hidden">
       
-      <div className="text-center space-y-10 md:space-y-16 relative z-10 w-full">
+      <div className="text-center space-y-8 md:space-y-12 relative z-10 w-full">
         <motion.div 
             initial={{ y: -40, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             className="w-full flex justify-center"
         >
-            <div className={cn("inline-flex items-center gap-6 px-8 py-3 rounded-full bg-white/5 border backdrop-blur-3xl shadow-2xl transition-all", content.accent.replace('text-', 'border-').replace('500', '500/35'))}>
-                <Cpu className={cn("w-5 h-5 animate-pulse", content.accent)} />
-                <span className={cn("text-[12px] font-black uppercase tracking-[0.6em] italic leading-none", content.accent)}>Neural Protocol {content.code}</span>
+            <div className={cn("inline-flex items-center gap-4 px-6 py-2 rounded-full bg-white/5 border backdrop-blur-3xl shadow-xl transition-all", content.accent.replace('text-', 'border-').replace('500', '500/35'))}>
+                <Cpu className={cn("w-4 h-4 animate-pulse", content.accent)} />
+                <span className={cn("text-[11px] font-bold uppercase tracking-widest leading-none", content.accent)}>Neural Protocol {content.code}</span>
             </div>
         </motion.div>
         
-        <h3 className="text-[clamp(3rem,10vw,7.5rem)] font-black tracking-tighter text-foreground uppercase italic leading-[0.75] drop-shadow-2xl">
-            {content.title.split(' ')[0]} <br/> <span className={cn("text-primary italic-font", content.accent)}>{content.title.split(' ').slice(1).join(' ')}</span>
+        <h3 className="text-[clamp(3.5rem,10vw,6.5rem)] font-black tracking-tighter text-foreground leading-[0.9] drop-shadow-xl">
+            {content.title.split(' ')[0]} <span className={cn("text-primary italic-font", content.accent)}>{content.title.split(' ').slice(1).join(' ')}</span>
         </h3>
+        
         <div className="flex items-center justify-center gap-8">
-            <div className="h-px w-16 bg-white/10" />
-            <p className="text-muted-foreground text-lg md:text-2xl font-black uppercase tracking-[0.3em] max-w-4xl mx-auto leading-relaxed opacity-80 italic italic-font drop-shadow-md">{content.subtitle}</p>
-            <div className="h-px w-16 bg-white/10" />
+            <div className="h-px w-12 bg-white/10" />
+            <p className="text-muted-foreground text-base md:text-xl font-medium tracking-wide max-w-2xl mx-auto leading-relaxed opacity-90">{content.subtitle}</p>
+            <div className="h-px w-12 bg-white/10" />
         </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row items-center justify-center gap-20 md:gap-32 w-full max-w-[1500px] relative z-10">
+      <div className="flex flex-col lg:flex-row items-center justify-center gap-16 md:gap-24 w-full max-w-[1500px] relative z-10">
         <motion.div 
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -243,21 +244,21 @@ export function AnalysisGuide({ bodyPart, onComplete }: AnalysisGuideProps) {
             </div>
         </motion.div>
         
-        <div className="flex-1 space-y-16 w-full max-w-2xl text-left">
-            <div className="grid grid-cols-1 gap-10 md:gap-12">
+        <div className="flex-1 space-y-12 w-full max-w-2xl text-left">
+            <div className="grid grid-cols-1 gap-8 md:gap-10">
                 {content.steps.map((step, idx) => (
                     <motion.div 
                         key={idx} 
-                        className="flex items-center gap-10 md:gap-14 p-8 md:p-10 rounded-[3.5rem] bg-white/[0.04] border border-white/10 hover:bg-white/[0.07] transition-all duration-700 group/item shadow-2xl relative isolate overflow-hidden"
-                        initial={{ opacity: 0, x: 60 }}
+                        className="flex items-center gap-8 md:gap-10 p-6 md:p-8 rounded-[2.5rem] bg-white/[0.03] border border-white/10 hover:bg-white/[0.06] transition-all duration-500 group/item shadow-xl relative isolate overflow-hidden"
+                        initial={{ opacity: 0, x: 40 }}
                         whileInView={{ opacity: 1, x: 0 }}
-                        transition={{ delay: idx * 0.15, duration: 1.2 }}
+                        transition={{ delay: idx * 0.15, duration: 1 }}
                     >
-                        <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.05] z-0" />
-                        <div className={cn("w-16 h-16 md:w-20 md:h-20 shrink-0 rounded-[2.2rem] md:rounded-[2.8rem] bg-white/5 border border-white/10 flex items-center justify-center group-hover/item:scale-110 transition-transform shadow-2xl relative z-10")}>
-                            <span className={cn("font-black text-2xl md:text-3xl drop-shadow-xl leading-none italic", content.accent)}>0{idx + 1}</span>
+                        <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.03] z-0" />
+                        <div className={cn("w-14 h-14 md:w-16 md:h-16 shrink-0 rounded-[1.8rem] md:rounded-[2rem] bg-white/5 border border-white/10 flex items-center justify-center group-hover/item:scale-110 transition-transform shadow-lg relative z-10")}>
+                            <span className={cn("font-black text-xl md:text-2xl drop-shadow-md leading-none italic", content.accent)}>0{idx + 1}</span>
                         </div>
-                        <p className="text-sm md:text-lg font-black uppercase tracking-[0.2em] text-foreground/90 leading-relaxed group-hover/item:text-foreground transition-colors relative z-10 italic">{step}</p>
+                        <p className="text-base md:text-lg font-medium text-foreground/90 leading-relaxed group-hover/item:text-foreground transition-colors relative z-10">{step}</p>
                     </motion.div>
                 ))}
             </div>
@@ -265,13 +266,13 @@ export function AnalysisGuide({ bodyPart, onComplete }: AnalysisGuideProps) {
             <motion.div 
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1 }}
-                className="p-10 md:p-12 rounded-[4rem] bg-red-950/40 border-t-[8px] border-red-600 shadow-[0_40px_100px_-20px_rgba(220,38,38,0.4)] flex items-start gap-10 relative overflow-hidden group/alert"
+                transition={{ delay: 0.8 }}
+                className="p-8 md:p-10 rounded-[3rem] bg-red-950/20 border border-red-900/40 shadow-xl flex items-start gap-8 relative overflow-hidden group/alert"
             >
-                <div className="p-6 bg-red-600/10 rounded-[2.2rem] border border-red-600/30 shadow-2xl"><AlertCircle className="w-8 h-8 text-red-500 shrink-0 drop-shadow-xl" /></div>
-                <div className="space-y-6">
-                    <h5 className="text-[14px] font-black uppercase tracking-[0.6em] text-red-500 italic drop-shadow-md">Careful Heuristics</h5>
-                    <p className="text-[13px] md:text-base font-black uppercase tracking-[0.18em] text-red-100/70 leading-[1.6] italic text-balance shadow-inner">
+                <div className="p-4 bg-red-600/10 rounded-2xl border border-red-600/20 shadow-lg"><AlertCircle className="w-6 h-6 text-red-500 shrink-0" /></div>
+                <div className="space-y-4">
+                    <h5 className="text-[12px] font-bold uppercase tracking-widest text-red-500 drop-shadow-sm">Careful Heuristics</h5>
+                    <p className="text-sm md:text-base font-medium text-red-200/80 leading-relaxed text-balance">
                         Parameter precision is vital for extraction. Any optical obstructions or spectral noise will necessitate a system restart.
                     </p>
                 </div>
@@ -279,14 +280,14 @@ export function AnalysisGuide({ bodyPart, onComplete }: AnalysisGuideProps) {
         </div>
       </div>
 
-      <div className="w-full max-w-lg pt-12">
+      <div className="w-full max-w-lg pt-8">
           <Button 
             onClick={onComplete} 
-            className="w-full rounded-full h-24 md:h-28 text-sm md:text-lg font-black tracking-[1.2em] uppercase bg-primary text-white hover:bg-red-600 hover:scale-[1.03] active:scale-95 transition-all shadow-[0_40px_120px_-30px_rgba(220,38,38,0.8)] group border-t border-white/30 relative overflow-hidden ring-1 ring-white/10"
+            className="w-full rounded-full h-20 md:h-24 text-sm md:text-base font-bold tracking-widest uppercase bg-primary text-white hover:bg-primary/90 hover:scale-[1.03] active:scale-95 transition-all shadow-2xl group border-t border-white/20 relative overflow-hidden"
           >
-            <div className="absolute inset-x-0 h-1.5 bg-white/40 top-0 group-hover:translate-y-28 transition-transform duration-1000" />
-            <div className="flex items-center justify-center gap-8">
-                <Zap className="w-6 h-6 group-hover:fill-white transition-all shadow-2xl" />
+            <div className="absolute inset-x-0 h-1 bg-white/30 top-0 group-hover:translate-y-24 transition-transform duration-700" />
+            <div className="flex items-center justify-center gap-6">
+                <Zap className="w-5 h-5 group-hover:fill-white transition-all shadow-md" />
                 <span>INJECT PROTOCOL</span>
             </div>
           </Button>
@@ -294,3 +295,4 @@ export function AnalysisGuide({ bodyPart, onComplete }: AnalysisGuideProps) {
     </div>
   );
 }
+

@@ -69,7 +69,7 @@ Before any diagnostic work, verify the image state as if you were a pre-processi
     *   **Skin**: Is it clean and free of heavy lotions/covering?
 3.  **Target Lock**: Is the ${input.bodyPart} the primary subject and in sharp focus?
 
-**IF QUALITY FAILS**: You MUST set 'isValid' to false. Specifically, if the user has uploaded an image that is NOT the requested body part (e.g., a photo of a room, an animal, or a different body part), you MUST state exactly what the image contains in the 'description' (e.g., "INVALID OBJECT: This image contains a [cat], not the requested [fingernails]. Protocol aborted.").
+**IF QUALITY FAILS**: You MUST set 'isValid' to false. Specifically, if the user has uploaded an image that is NOT the requested body part (e.g., a photo of a room, an animal, or a different body part), or if it fails quality checks, you MUST state exactly what went wrong in the 'description'. Keep this failure description EXTREMELY concise and direct (max 10-15 words). e.g., "INVALID OBJECT: Image contains a cat, not fingernails." or "QUALITY FAILED: Setup is too dark to analyze."
 
 ### STAGE 2: SPECTRAL FEATURE EXTRACTION (Only if Valid)
 Examine the following specific biomarkers for anemia:
@@ -79,7 +79,7 @@ Examine the following specific biomarkers for anemia:
 
 ### OUTPUT PROTOCOL:
 *   **isValid**: Boolean (Strictly false for quality/obstruction issues OR incorrect body part).
-*   **description**: Technical observation (if valid) OR detailed explanation of what went wrong (if invalid), including what the image actually contains.
+*   **description**: Technical observation (if valid) OR an extremely concise, direct error message (if invalid).
 *   **analysisResult**: Choose ONE: "ANEMIA POSITIVE (Significant Pallor Detected)", "ANEMIA NEGATIVE (Healthy Vascular Presentation)", or "INCONCLUSIVE (Ambiguous Spectral Features)".
 *   **confidenceScore**: 0-100 (Be conservative).
 *   **recommendations**: A precise next step (e.g., "Confirm with CBC lab report for clinical validation.").`
