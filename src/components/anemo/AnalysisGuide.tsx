@@ -20,7 +20,7 @@ export function AnalysisGuide({ bodyPart, onComplete }: AnalysisGuideProps) {
       case 'under-eye':
         return {
           title: 'Ocular Bed Scan',
-          subtitle: 'Spectral analysis of the palpebral vascular bed.',
+          subtitle: 'Spectral analysis of the palpebral vascular bed distribution.',
           code: 'PX-02',
           steps: [
             'Gently expose the lower eyelid (inner tissue).',
@@ -32,7 +32,7 @@ export function AnalysisGuide({ bodyPart, onComplete }: AnalysisGuideProps) {
           accent: 'text-red-500',
           glow: 'bg-red-500/20',
           animation: (
-            <div className="relative w-full aspect-square max-w-[400px] glass-panel bg-background/40 rounded-[2.5rem] md:rounded-[4rem] flex items-center justify-center overflow-hidden border border-white/10 shadow-2xl group isolate">
+            <div className="relative w-full aspect-square max-w-[400px] glass-panel bg-background/60 rounded-[3rem] md:rounded-[4rem] flex items-center justify-center overflow-hidden border border-white/10 shadow-2xl group isolate">
               <div className="absolute inset-0 bg-grid-white/[0.01] bg-[size:30px_30px] z-0" />
               <div className="absolute inset-x-[-100px] blur-[100px] bg-red-500/10 rounded-full opacity-40 animate-pulse" />
               
@@ -45,7 +45,7 @@ export function AnalysisGuide({ bodyPart, onComplete }: AnalysisGuideProps) {
                  
                  {/* Pupil */}
                  <motion.div 
-                    className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-14 bg-foreground rounded-full border-4 border-primary/20"
+                    className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-foreground rounded-full border-4 border-primary/20"
                     animate={{ 
                         y: [-15, -20, -15],
                         x: [-4, 4, -4]
@@ -75,8 +75,8 @@ export function AnalysisGuide({ bodyPart, onComplete }: AnalysisGuideProps) {
                 }}
                 transition={{ repeat: Infinity, duration: 4, times: [0, 0.2, 0.8, 1] }}
               >
-                <div className="p-4 bg-red-600/10 rounded-full border border-red-500/30 backdrop-blur-3xl shadow-xl">
-                    <Hand className="h-10 w-10 fill-red-500/10" />
+                <div className="p-5 bg-red-600/10 rounded-full border border-red-500/30 backdrop-blur-3xl shadow-xl">
+                    <Hand className="h-12 w-12 fill-red-500/10" />
                 </div>
               </motion.div>
 
@@ -86,13 +86,13 @@ export function AnalysisGuide({ bodyPart, onComplete }: AnalysisGuideProps) {
                 animate={{ scale: [1, 1.05, 1], opacity: [0.3, 0.8, 0.3] }}
                 transition={{ repeat: Infinity, duration: 4 }}
               >
-                  <div className="absolute top-0 left-0 w-10 h-10 border-t-2 border-l-2 border-red-500 shadow-[0_0_20px_rgba(239,68,68,0.4)]" />
-                  <div className="absolute bottom-0 right-0 w-10 h-10 border-b-2 border-r-2 border-red-500 shadow-[0_0_20px_rgba(239,68,68,0.4)]" />
+                  <div className="absolute top-0 left-0 w-12 h-12 border-t-2 border-l-2 border-red-500 shadow-[0_0_20px_rgba(239,68,68,0.4)]" />
+                  <div className="absolute bottom-0 right-0 w-12 h-12 border-b-2 border-r-2 border-red-500 shadow-[0_0_20px_rgba(239,68,68,0.4)]" />
               </motion.div>
 
-              <div className="absolute top-10 right-10 flex items-center gap-2">
-                 <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
-                 <span className="text-[10px] font-black text-white/50 tracking-[0.4em] uppercase">LOCK: ACC</span>
+              <div className="absolute top-10 right-10 flex items-center gap-3">
+                 <div className="w-3 h-3 rounded-full bg-red-500 animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.8)]" />
+                 <span className="text-[10px] font-black text-white/50 tracking-[0.4em] uppercase">LOCK_PX02</span>
               </div>
             </div>
           )
@@ -100,7 +100,7 @@ export function AnalysisGuide({ bodyPart, onComplete }: AnalysisGuideProps) {
       case 'skin':
         return {
           title: 'Dermal Lock Protocol',
-          subtitle: 'Deep-field analysis of palmar creases and subcutaneous hue.',
+          subtitle: 'Deep-field analysis of palmar creases and subcutaneous hue distribution.',
           code: 'PX-01',
           steps: [
             'Fully extend palm and flatten surface.',
@@ -112,24 +112,24 @@ export function AnalysisGuide({ bodyPart, onComplete }: AnalysisGuideProps) {
           accent: 'text-amber-500',
           glow: 'bg-amber-500/20',
           animation: (
-            <div className="relative w-full aspect-square max-w-[400px] glass-panel bg-background/40 rounded-[2.5rem] md:rounded-[4rem] flex items-center justify-center overflow-hidden border border-white/10 shadow-2xl group isolate">
+            <div className="relative w-full aspect-square max-w-[400px] glass-panel bg-background/60 rounded-[3rem] md:rounded-[4rem] flex items-center justify-center overflow-hidden border border-white/10 shadow-2xl group isolate">
               <div className="absolute inset-0 bg-grid-white/[0.01] bg-[size:30px_30px] z-0" />
               <div className="absolute inset-x-[-100px] blur-[100px] bg-amber-500/10 rounded-full opacity-40 animate-pulse" />
               
               <motion.div
                 animate={{ 
                     rotateY: [0, 15, -15, 0],
-                    scale: [0.9, 1.05, 1.05, 0.9],
+                    scale: [0.95, 1.1, 1.1, 0.95],
                     filter: ['grayscale(100%)', 'grayscale(0%)', 'grayscale(0%)', 'grayscale(100%)']
                 }}
                 transition={{ repeat: Infinity, duration: 8, ease: "easeInOut" }}
               >
-                <Hand className="h-48 w-48 text-amber-500 opacity-20" strokeWidth={0.5} />
+                <Hand className="h-56 w-56 text-amber-500 opacity-20" strokeWidth={0.5} />
               </motion.div>
               
               {/* Specialized Scanning Box */}
               <motion.div 
-                className="absolute inset-[80px] border-2 border-amber-500/30 rounded-[2.5rem] flex items-center justify-center isolate overflow-hidden"
+                className="absolute inset-[80px] border-2 border-amber-500/30 rounded-[3.5rem] flex items-center justify-center isolate overflow-hidden shadow-2xl"
                 animate={{ scale: [1, 1.08, 1] }}
                 transition={{ repeat: Infinity, duration: 4 }}
               >
@@ -141,8 +141,8 @@ export function AnalysisGuide({ bodyPart, onComplete }: AnalysisGuideProps) {
                   <div className="absolute inset-0 bg-amber-500/5 transition-all duration-1000" />
               </motion.div>
               
-              <div className="absolute bottom-10 left-1/2 -translate-x-1/2 text-[10px] font-black text-amber-500 uppercase tracking-[0.5em] opacity-40 italic">
-                  SYNAPSE LOCK
+              <div className="absolute bottom-10 left-1/2 -translate-x-1/2 text-[11px] font-black text-amber-500 uppercase tracking-[0.5em] opacity-50 italic">
+                  SYNAPSE_LOCK_01
               </div>
             </div>
           )
@@ -150,7 +150,7 @@ export function AnalysisGuide({ bodyPart, onComplete }: AnalysisGuideProps) {
       case 'fingernails':
         return {
           title: 'Ungual Matrix Scan',
-          subtitle: 'Ultra-point detection of capillary distribution in nail beds.',
+          subtitle: 'Ultra-point detection of capillary distribution in nail beds matrix.',
           code: 'PX-03',
           steps: [
             'Bare nails only (strictly zero polish/gel).',
@@ -162,22 +162,22 @@ export function AnalysisGuide({ bodyPart, onComplete }: AnalysisGuideProps) {
           accent: 'text-blue-500',
           glow: 'bg-blue-500/20',
           animation: (
-            <div className="relative w-full aspect-square max-w-[400px] glass-panel bg-background/40 rounded-[2.5rem] md:rounded-[4rem] flex items-center justify-center overflow-hidden border border-white/10 shadow-2xl group isolate">
+            <div className="relative w-full aspect-square max-w-[400px] glass-panel bg-background/60 rounded-[3rem] md:rounded-[4rem] flex items-center justify-center overflow-hidden border border-white/10 shadow-2xl group isolate">
               <div className="absolute inset-0 bg-grid-white/[0.01] bg-[size:30px_30px] z-0" />
               <div className="absolute inset-x-[-100px] blur-[100px] bg-blue-500/10 rounded-full opacity-40 animate-pulse" />
               
-              <div className="flex gap-4 sm:gap-6 items-end h-[180px] relative">
+              <div className="flex gap-6 sm:gap-8 items-end h-[200px] relative">
                 {[1, 2, 3, 4].map((i) => (
                     <motion.div 
                         key={i}
-                        className="w-10 sm:w-14 bg-blue-500/20 border border-blue-500/20 rounded-t-[1.5rem] md:rounded-t-[2rem] relative shadow-2xl"
+                        className="w-12 sm:w-16 bg-blue-500/20 border border-blue-500/20 rounded-t-[2rem] md:rounded-t-[2.5rem] relative shadow-2xl"
                         style={{ height: `${60 + i*10}%` }}
-                        animate={{ y: [0, -10, 0] }}
+                        animate={{ y: [0, -12, 0] }}
                         transition={{ repeat: Infinity, duration: 4, delay: i * 0.25, ease: "easeInOut" }}
                     >
-                        <div className="absolute top-3 left-2 right-2 h-10 bg-white/10 rounded-t-xl border border-white/10 isolate shadow-lg backdrop-blur-3xl">
+                        <div className="absolute top-4 left-3 right-3 h-12 bg-white/10 rounded-t-2xl border border-white/10 isolate shadow-xl backdrop-blur-3xl">
                             <motion.div 
-                                className="absolute bottom-0 inset-x-0 h-3 bg-cyan-400/50 blur-md"
+                                className="absolute bottom-0 inset-x-0 h-4 bg-cyan-400/50 blur-md"
                                 animate={{ opacity: [0.3, 0.9, 0.3] }}
                                 transition={{ repeat: Infinity, duration: 2.5 }}
                             />
@@ -186,12 +186,12 @@ export function AnalysisGuide({ bodyPart, onComplete }: AnalysisGuideProps) {
                 ))}
               </div>
               
-              <div className="absolute top-10 left-10 p-6 border-l-2 border-t-2 border-blue-500/40 rounded-tl-[2.5rem]">
-                  <div className="w-2.5 h-2.5 bg-blue-500 rounded-full animate-pulse shadow-[0_0_15px_rgba(59,130,246,1)]" />
+              <div className="absolute top-10 left-10 p-8 border-l-2 border-t-2 border-blue-500/40 rounded-tl-[3.5rem]">
+                  <div className="w-3.5 h-3.5 bg-blue-500 rounded-full animate-pulse shadow-[0_0_20px_rgba(59,130,246,1)]" />
               </div>
-              <div className="absolute bottom-10 right-10 flex flex-col items-end gap-2 opacity-60">
-                  <span className="text-[10px] font-mono text-blue-400 tracking-[0.2em] leading-none uppercase italic">NODE_C9</span>
-                  <div className="h-1.5 w-16 bg-blue-500/30 rounded-full overflow-hidden" />
+              <div className="absolute bottom-10 right-10 flex flex-col items-end gap-3 opacity-60">
+                  <span className="text-[11px] font-mono text-blue-400 tracking-[0.4em] leading-none uppercase italic">SYNC_NODE_C9</span>
+                  <div className="h-2 w-20 bg-blue-500/30 rounded-full overflow-hidden" />
               </div>
             </div>
           )
@@ -202,88 +202,92 @@ export function AnalysisGuide({ bodyPart, onComplete }: AnalysisGuideProps) {
   const content = getGuideContent();
 
   return (
-    <div className="flex flex-col items-center p-6 sm:p-12 lg:p-20 space-y-20 md:space-y-28 animate-in fade-in zoom-in duration-700 w-full relative isolate overflow-hidden">
+    <div className="flex flex-col items-center p-8 sm:p-16 lg:p-24 space-y-24 md:space-y-32 animate-in fade-in zoom-in duration-1000 w-full relative isolate overflow-hidden">
       
-      <div className="text-center space-y-8 md:space-y-12 relative z-10 w-full">
+      <div className="text-center space-y-10 md:space-y-16 relative z-10 w-full">
         <motion.div 
-            initial={{ y: -30, opacity: 0 }}
+            initial={{ y: -40, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             className="w-full flex justify-center"
         >
-            <div className={cn("inline-flex items-center gap-4 px-6 py-2 rounded-full bg-white/5 border backdrop-blur-3xl shadow-2xl transition-all", content.accent.replace('text-', 'border-').replace('500', '500/30'))}>
-                <Cpu className={cn("w-4 h-4 animate-pulse", content.accent)} />
-                <span className={cn("text-[11px] font-black uppercase tracking-[0.6em] italic", content.accent)}>Neural Protocol {content.code}</span>
+            <div className={cn("inline-flex items-center gap-6 px-8 py-3 rounded-full bg-white/5 border backdrop-blur-3xl shadow-2xl transition-all", content.accent.replace('text-', 'border-').replace('500', '500/35'))}>
+                <Cpu className={cn("w-5 h-5 animate-pulse", content.accent)} />
+                <span className={cn("text-[12px] font-black uppercase tracking-[0.6em] italic leading-none", content.accent)}>Neural Protocol {content.code}</span>
             </div>
         </motion.div>
         
-        <h3 className="text-[clamp(2.5rem,8vw,6rem)] font-black tracking-tighter text-foreground uppercase italic leading-[0.8] drop-shadow-2xl">
-            {content.title.split(' ')[0]} <br/> <span className={cn("italic-font", content.accent)}>{content.title.split(' ').slice(1).join(' ')}</span>
+        <h3 className="text-[clamp(3rem,10vw,7.5rem)] font-black tracking-tighter text-foreground uppercase italic leading-[0.75] drop-shadow-2xl">
+            {content.title.split(' ')[0]} <br/> <span className={cn("text-primary italic-font", content.accent)}>{content.title.split(' ').slice(1).join(' ')}</span>
         </h3>
-        <p className="text-muted-foreground text-base md:text-xl font-light uppercase tracking-[0.4em] max-w-3xl mx-auto leading-relaxed opacity-60 italic">{content.subtitle}</p>
+        <div className="flex items-center justify-center gap-8">
+            <div className="h-px w-16 bg-white/10" />
+            <p className="text-muted-foreground text-lg md:text-2xl font-black uppercase tracking-[0.3em] max-w-4xl mx-auto leading-relaxed opacity-80 italic italic-font drop-shadow-md">{content.subtitle}</p>
+            <div className="h-px w-16 bg-white/10" />
+        </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row items-center justify-center gap-16 md:gap-24 w-full max-w-[1400px] relative z-10">
+      <div className="flex flex-col lg:flex-row items-center justify-center gap-20 md:gap-32 w-full max-w-[1500px] relative z-10">
         <motion.div 
-            initial={{ scale: 0.9, opacity: 0 }}
+            initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="relative group transition-all duration-1000 w-full max-w-[400px] aspect-square lg:max-w-none lg:flex-1 flex items-center justify-center"
+            className="relative group transition-all duration-1000 w-full max-w-[480px] aspect-square lg:max-w-none lg:flex-1 flex items-center justify-center"
         >
-            <div className={cn("absolute inset-[-60px] blur-[120px] opacity-10 transition-all duration-1000", content.glow)} />
+            <div className={cn("absolute inset-[-80px] blur-[160px] opacity-20 transition-all duration-1000", content.glow)} />
             {content.animation}
             
-            <div className={cn("absolute -top-10 -left-10 opacity-20", content.accent)}>
-                <Crosshair className="w-16 h-16" />
+            <div className={cn("absolute -top-12 -left-12 opacity-30 shadow-2xl", content.accent)}>
+                <Crosshair className="w-20 h-20" />
             </div>
-            <div className={cn("absolute -bottom-10 -right-10 scale-x-[-1] scale-y-[-1] opacity-20", content.accent)}>
-                <Crosshair className="w-16 h-16" />
+            <div className={cn("absolute -bottom-12 -right-12 scale-x-[-1] scale-y-[-1] opacity-30 shadow-2xl", content.accent)}>
+                <Crosshair className="w-20 h-20" />
             </div>
         </motion.div>
         
-        <div className="flex-1 space-y-12 w-full max-w-xl text-left">
-            <div className="grid grid-cols-1 gap-6 md:gap-8">
+        <div className="flex-1 space-y-16 w-full max-w-2xl text-left">
+            <div className="grid grid-cols-1 gap-10 md:gap-12">
                 {content.steps.map((step, idx) => (
                     <motion.div 
                         key={idx} 
-                        className="flex items-center gap-8 md:gap-10 p-6 md:p-8 rounded-[2.5rem] bg-white/[0.03] border border-white/5 hover:bg-white/[0.05] transition-all duration-700 group/item shadow-xl relative isolate overflow-hidden"
-                        initial={{ opacity: 0, x: 50 }}
+                        className="flex items-center gap-10 md:gap-14 p-8 md:p-10 rounded-[3.5rem] bg-white/[0.04] border border-white/10 hover:bg-white/[0.07] transition-all duration-700 group/item shadow-2xl relative isolate overflow-hidden"
+                        initial={{ opacity: 0, x: 60 }}
                         whileInView={{ opacity: 1, x: 0 }}
-                        transition={{ delay: idx * 0.1, duration: 1 }}
+                        transition={{ delay: idx * 0.15, duration: 1.2 }}
                     >
                         <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.05] z-0" />
-                        <div className={cn("w-14 h-14 md:w-16 md:h-16 shrink-0 rounded-[1.8rem] md:rounded-[2rem] bg-white/5 border border-white/10 flex items-center justify-center group-hover/item:scale-110 transition-transform shadow-xl relative z-10")}>
-                            <span className={cn("font-black text-xl md:text-2xl drop-shadow-xl", content.accent)}>0{idx + 1}</span>
+                        <div className={cn("w-16 h-16 md:w-20 md:h-20 shrink-0 rounded-[2.2rem] md:rounded-[2.8rem] bg-white/5 border border-white/10 flex items-center justify-center group-hover/item:scale-110 transition-transform shadow-2xl relative z-10")}>
+                            <span className={cn("font-black text-2xl md:text-3xl drop-shadow-xl leading-none italic", content.accent)}>0{idx + 1}</span>
                         </div>
-                        <p className="text-xs md:text-base font-black uppercase tracking-[0.2em] text-foreground/80 leading-relaxed group-hover/item:text-foreground transition-colors relative z-10 italic">{step}</p>
+                        <p className="text-sm md:text-lg font-black uppercase tracking-[0.2em] text-foreground/90 leading-relaxed group-hover/item:text-foreground transition-colors relative z-10 italic">{step}</p>
                     </motion.div>
                 ))}
             </div>
             
             <motion.div 
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.8 }}
-                className="p-8 md:p-10 rounded-[3rem] bg-red-950/30 border-t-[4px] border-red-600 shadow-xl flex items-start gap-6 relative overflow-hidden group/alert"
+                transition={{ delay: 1 }}
+                className="p-10 md:p-12 rounded-[4rem] bg-red-950/40 border-t-[8px] border-red-600 shadow-[0_40px_100px_-20px_rgba(220,38,38,0.4)] flex items-start gap-10 relative overflow-hidden group/alert"
             >
-                <div className="p-4 bg-red-600/10 rounded-[1.5rem] border border-red-600/20"><AlertCircle className="w-6 h-6 text-red-500 shrink-0 drop-shadow-xl" /></div>
-                <div className="space-y-4">
-                    <h5 className="text-[12px] font-black uppercase tracking-[0.4em] text-red-500 italic">Caution</h5>
-                    <p className="text-[11px] md:text-sm font-black uppercase tracking-[0.15em] text-red-100/60 leading-relaxed italic text-balance shadow-inner">
-                        Precision is vital for Convolutional processing. Optical obstructions or low-light artifacts will necessitate a sequence reboot.
+                <div className="p-6 bg-red-600/10 rounded-[2.2rem] border border-red-600/30 shadow-2xl"><AlertCircle className="w-8 h-8 text-red-500 shrink-0 drop-shadow-xl" /></div>
+                <div className="space-y-6">
+                    <h5 className="text-[14px] font-black uppercase tracking-[0.6em] text-red-500 italic drop-shadow-md">Careful Heuristics</h5>
+                    <p className="text-[13px] md:text-base font-black uppercase tracking-[0.18em] text-red-100/70 leading-[1.6] italic text-balance shadow-inner">
+                        Parameter precision is vital for extraction. Any optical obstructions or spectral noise will necessitate a system restart.
                     </p>
                 </div>
             </motion.div>
         </div>
       </div>
 
-      <div className="w-full max-w-md pt-8">
+      <div className="w-full max-w-lg pt-12">
           <Button 
             onClick={onComplete} 
-            className="w-full rounded-full h-20 md:h-24 text-sm md:text-base font-black tracking-[1em] uppercase bg-primary text-white hover:bg-red-600 hover:scale-[1.02] transition-all shadow-[0_30px_100px_-20px_rgba(var(--primary),0.6)] group border-t border-white/30 relative overflow-hidden"
+            className="w-full rounded-full h-24 md:h-28 text-sm md:text-lg font-black tracking-[1.2em] uppercase bg-primary text-white hover:bg-red-600 hover:scale-[1.03] active:scale-95 transition-all shadow-[0_40px_120px_-30px_rgba(220,38,38,0.8)] group border-t border-white/30 relative overflow-hidden ring-1 ring-white/10"
           >
-            <div className="absolute inset-x-0 h-1 bg-white/30 top-0 group-hover:translate-y-24 transition-transform duration-1000" />
-            <div className="flex items-center justify-center gap-6">
-                <Zap className="w-5 h-5 group-hover:fill-white transition-all shadow-xl" />
-                <span>INITIATE PROTOCOL</span>
+            <div className="absolute inset-x-0 h-1.5 bg-white/40 top-0 group-hover:translate-y-28 transition-transform duration-1000" />
+            <div className="flex items-center justify-center gap-8">
+                <Zap className="w-6 h-6 group-hover:fill-white transition-all shadow-2xl" />
+                <span>INJECT PROTOCOL</span>
             </div>
           </Button>
       </div>
