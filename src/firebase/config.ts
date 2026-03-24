@@ -1,18 +1,9 @@
 export const firebaseConfig = {
-  apiKey: "AIzaSyDRt82D8vWouBq1TVmAn9xZDPyVAo-N0TY",
-  authDomain: "studio-5574929814-ea244.firebaseapp.com",
-  projectId: "studio-5574929814-ea244",
-  storageBucket: "studio-5574929814-ea244.appspot.com",
-  messagingSenderId: "33629963873",
-  appId: "1:33629963873:web:855a8de70da9082036cc20"
+  apiKey: "AIzaSyCjr0jB3P8k-L2HUK9L8Eqw8Fuj59kFoSY",
+  authDomain: "anemo-d551a.firebaseapp.com",
+  projectId: "anemo-d551a",
+  storageBucket: "anemo-d551a.firebasestorage.app",
+  messagingSenderId: "1068613356788",
+  appId: "1:1068613356788:web:cbbe5506fb51ce21a722a1",
+  measurementId: "G-P2VSV11XKS"
 };
-
-
-// export const firebaseConfig = {
-//   apiKey: "AIzaSyCTtiHht1mBm8AdjG7BNXlCk0MBYoYvS2A",
-//   authDomain: "anemoai.firebaseapp.com",
-//   projectId: "anemoai",
-//   storageBucket: "anemoai.firebasestorage.app",
-//   messagingSenderId: "532158160698",
-//   appId: "1:532158160698:web:9a0da3c2484369cd807a03"
-// };

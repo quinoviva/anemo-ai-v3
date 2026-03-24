@@ -32,34 +32,14 @@ import {
   AnswerAnemiaQuestionOutput,
 } from '@/ai/flows/answer-anemia-related-questions';
 
-import { initializeApp, getApps, cert } from 'firebase-admin/app';
-import { getStorage } from 'firebase-admin/storage';
-import { getFirestore } from 'firebase-admin/firestore';
+import { getAdminApp, getAdminFirestore, getAdminStorage } from '@/lib/firebase-admin';
 
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 
-// --- Firebase Admin Initialization ---
-// Ensure Firebase is initialized, but only once.
-if (!getApps().length) {
-  try {
-    // We use a service account key for admin access.
-    // In a real app, this should be a secret environment variable.
-    // This will only be run in production or when explicitly configured for local Firebase Admin usage.
-    if (process.env.NODE_ENV === 'production' || process.env.FIREBASE_ADMIN_LOCAL_ENABLE === 'true') {
-        const serviceAccount = JSON.parse(
-          process.env.FIREBASE_SERVICE_ACCOUNT_KEY as string
-        );
-        initializeApp({
-          credential: cert(serviceAccount),
-          storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-        });
-    }
-  } catch (error) {
-    console.error('Firebase Admin Initialization failed:', error);
-  }
-}
+// Use Admin App for checking credentials presence
+const adminApp = getAdminApp();
 
 /**
  * Calculates a SHA-256 hash of a data URI or base64 string.
@@ -197,7 +177,7 @@ export async function saveImageForTraining(
     }
   } else {
     // --- PRODUCTION (FIREBASE) SAVE ---
-    if (!getApps().length) {
+    if (!getAdminApp()) {
         console.error("Firebase not initialized in production. Cannot save image for training.");
         return { success: false, error: "Firebase not initialized." };
     }
@@ -207,7 +187,9 @@ export async function saveImageForTraining(
       const imageBuffer = Buffer.from(base64Data, 'base64');
       
       // Upload to Firebase Cloud Storage
-      const bucket = getStorage().bucket();
+      const storage = getAdminStorage();
+      if (!storage) throw new Error("Storage not initialized.");
+      const bucket = storage.bucket();
       const file = bucket.file(filePath);
       await file.save(imageBuffer, {
         metadata: {
@@ -217,7 +199,8 @@ export async function saveImageForTraining(
       });
 
       // Create a job in Firestore
-      const db = getFirestore();
+      const db = getAdminFirestore();
+      if (!db) throw new Error("Firestore not initialized.");
       const trainingJobRef = db.collection('training_jobs').doc(`${hash}_${bodyPart}`);
       
       // Use `set` with `merge: true` to prevent duplicate jobs for the same image

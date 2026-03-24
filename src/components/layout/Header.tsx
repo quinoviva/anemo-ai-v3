@@ -329,7 +329,7 @@ export function Header() {
 
             <div className="mt-auto pt-8 border-t border-primary/5">
               <div className="p-6 rounded-3xl bg-primary/5 border border-primary/10">
-                <p className="text-xs font-bold text-foreground mb-1 uppercase tracking-tight">Anemo Intelligence</p>
+                <p className="text-xs font-bold text-foreground mb-1 uppercase tracking-tight">Anemo</p>
                 <p className="text-[10px] text-muted-foreground leading-relaxed">Neural diagnostics for blood health assessment.</p>
               </div>
             </div>

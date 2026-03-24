@@ -40,7 +40,15 @@ const containerVariants = {
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 50, damping: 20 } },
+  show: { 
+    opacity: 1, 
+    y: 0, 
+    transition: { 
+      type: 'spring' as const, 
+      stiffness: 50, 
+      damping: 20 
+    } 
+  },
 };
 
 export default function AnalysisPage() {
@@ -71,7 +79,7 @@ export default function AnalysisPage() {
             </Button>
         </div>
         <div className="w-full max-w-full overflow-hidden">
-            <LocalCbcAnalyzer />
+            <LocalCbcAnalyzer onBack={() => setAnalysisMode('select')} />
         </div>
       </motion.div>
     );
@@ -109,7 +117,6 @@ export default function AnalysisPage() {
               <motion.div variants={itemVariants} className="hidden md:block">
                   <div className="text-right">
                       <p className="text-[10px] font-black tracking-[0.4em] text-muted-foreground">CONCOLUUTIONAL NEURAL NETWORK ALGORITHM</p>
-                      </div>
                   </div>
               </motion.div>
             </div>

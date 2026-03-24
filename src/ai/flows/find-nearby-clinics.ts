@@ -9,7 +9,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import * as admin from 'firebase-admin';
+import { getAdminFirestore } from '@/lib/firebase-admin';
 
 const ClinicSchema = z.object({
   name: z.string().describe('The name of the hospital, clinic, or doctor.'),
@@ -31,86 +31,63 @@ const FindNearbyClinicsOutputSchema = z.object({
 });
 export type FindNearbyClinicsOutput = z.infer<typeof FindNearbyClinicsOutputSchema>;
 
-// Initialize Firebase Admin for server-side access
-if (!admin.apps.length) {
-  admin.initializeApp({
-    projectId: 'studio-5574929814-ea244'
-  });
-}
-
-const db = admin.firestore();
-
 /**
- * Tool to retrieve healthcare providers from Firestore.
+ * Hardcoded list of healthcare providers in Iloilo and Panay Island.
  */
-const getHealthcareProvidersFromDb = ai.defineTool(
+const ILOILO_PANAY_CLINICS: z.infer<typeof ClinicSchema>[] = [
+  // Iloilo City - Private
+  { name: 'The Medical City Iloilo', address: 'Locsin St, Molo, Iloilo City', type: 'Hospital', contact: '(033) 338 1505', hours: '24/7', website: 'https://www.themedicalcityiloilo.com' },
+  { name: 'St. Paul’s Hospital Iloilo', address: 'General Luna St, Iloilo City Proper', type: 'Hospital', contact: '(033) 337 2741', hours: '24/7', website: 'https://sphiloilo.com' },
+  { name: 'Iloilo Mission Hospital', address: 'Mission Rd, Jaro, Iloilo City', type: 'Hospital', contact: '(033) 320 0315', hours: '24/7', website: 'https://iloilomissionhospital.ph' },
+  { name: 'Medicus Medical Center', address: 'Padi-an St, Mandurriao, Iloilo City', type: 'Hospital', contact: '(033) 330 2222', hours: '24/7' },
+  { name: 'QualiMed Hospital Iloilo', address: 'Atria Park District, Mandurriao, Iloilo City', type: 'Hospital', contact: '(033) 501 4843', hours: '24/7' },
+  { name: 'Metro Iloilo Hospital and Medical Center', address: 'Metropolis Ave, Jaro, Iloilo City', type: 'Hospital', contact: '(033) 327 1527', hours: '24/7' },
+  { name: 'Iloilo Doctors’ Hospital', address: 'Infante St, Molo, Iloilo City', type: 'Hospital', contact: '(033) 337 7702', hours: '24/7' },
+  { name: 'Amosup Seamen’s Hospital Iloilo', address: 'Oñate St, Mandurriao, Iloilo City', type: 'Hospital', contact: '(033) 321 3521', hours: '24/7' },
+
+  // Iloilo City - Public
+  { name: 'Western Visayas Medical Center', address: 'Q. Abeto St, Mandurriao, Iloilo City', type: 'Hospital', contact: '(033) 321 2841', hours: '24/7', notes: 'Government Tertiary Hospital' },
+  { name: 'WVSU Medical Center', address: 'E. Lopez St, Jaro, Iloilo City', type: 'Hospital', contact: '(033) 320 2431', hours: '24/7', notes: 'Public University Hospital' },
+
+  // Iloilo Province
+  { name: 'Don Jose S. Monfort Medical Center', address: 'Dumangas, Iloilo', type: 'Hospital', contact: '(033) 361 2492', hours: '24/7' },
+  { name: 'Aleosan District Hospital', address: 'Alimodian, Iloilo', type: 'Hospital', contact: '(033) 331 0184', hours: '24/7' },
+  { name: 'Iloilo Provincial Hospital', address: 'Pototan, Iloilo', type: 'Hospital', contact: '(033) 529 8161', hours: '24/7' },
+  { name: 'Sara District Hospital', address: 'Sara, Iloilo', type: 'Hospital', contact: '(033) 392 0106', hours: '24/7' },
+  { name: 'Guimbal District Hospital', address: 'Guimbal, Iloilo', type: 'Hospital', contact: '(033) 315 5288', hours: '24/7' },
+
+  // Panay Island (Capiz, Aklan, Antique)
+  { name: 'Roxas Memorial Provincial Hospital', address: 'Arnaldo Blvd, Roxas City, Capiz', type: 'Hospital', contact: '(036) 621 0233', hours: '24/7' },
+  { name: 'Capiz Emmanuel Hospital', address: 'Roxas City, Capiz', type: 'Hospital', contact: '(036) 621 0441', hours: '24/7' },
+  { name: 'Dr. Rafael S. Tumbokon Memorial Hospital', address: 'Kalibo, Aklan', type: 'Hospital', contact: '(036) 268 4066', hours: '24/7' },
+  { name: 'St. Gabriel Medical Center', address: 'Kalibo, Aklan', type: 'Hospital', contact: '(036) 268 2211', hours: '24/7' },
+  { name: 'Angel Salazar Memorial General Hospital', address: 'San Jose, Antique', type: 'Hospital', contact: '(036) 540 9140', hours: '24/7' },
+
+  // Clinics
+  { name: 'Medicus Health Partners - SM City Iloilo', address: 'SM City Iloilo, Mandurriao', type: 'Clinic', contact: '(033) 320 9431', hours: '10:00 AM - 9:00 PM' },
+  { name: 'HealthWay Medical - Festive Walk Mall', address: 'Festive Walk, Mandurriao, Iloilo City', type: 'Clinic', contact: '(033) 330 1445', hours: '9:00 AM - 8:00 PM' },
+];
+
+export const findNearbyClinics = ai.defineFlow(
   {
-    name: 'getHealthcareProvidersFromDb',
-    description: 'Retrieves the list of hospitals and clinics from the Firestore database.',
-    inputSchema: z.object({}),
-    outputSchema: z.array(ClinicSchema),
-  },
-  async () => {
-    const snapshot = await db.collection('healthcareProviders').get();
-    return snapshot.docs.map(doc => doc.data() as z.infer<typeof ClinicSchema>);
-  }
-);
-
-
-export async function findNearbyClinics(
-  input: FindNearbyClinicsInput
-): Promise<FindNearbyClinicsOutput> {
-  return findNearbyClinicsFlow(input);
-}
-
-
-const findNearbyClinicsFlow = ai.defineFlow(
-  {
-    name: 'findNearbyClinicsFlow',
+    name: 'findNearbyClinics',
     inputSchema: FindNearbyClinicsInputSchema,
     outputSchema: FindNearbyClinicsOutputSchema,
   },
   async (input) => {
-    try {
-        const llmResponse = await ai.generate({
-        prompt: `You are an intelligent healthcare assistant for Iloilo, Philippines.
-        
-        Your task:
-        1. Access the verified list of healthcare providers using the 'getHealthcareProvidersFromDb' tool.
-        2. Filter this list based on the user's query: "${input.query}".
-        3. Return the most relevant results from the database.
-        
-        Guidelines:
-        - If the user searches for a specific municipality (e.g., "Pototan", "Passi", "Molo"), return all facilities matching that location.
-        - If the user searches for a type (e.g., "Hospital", "Diagnostic Center"), filter accordingly.
-        - If the query implies a need (e.g., "blood test", "CBC"), look for facilities with "laboratory" or "diagnostic" in their notes.
-        - Prioritize clarity and accuracy.
-        `,
-        model: 'googleai/gemini-flash-latest',
-        tools: [getHealthcareProvidersFromDb],
-        output: {
-            schema: FindNearbyClinicsOutputSchema,
-        },
-        });
-        
-        const output = llmResponse.output;
-        if(output) {
-          return {
-            results: output.results,
-          };
-        }
-    } catch (error) {
-        console.error('Flow failed:', error);
-        // Fallback to basic filtering if AI fails
-        const snapshot = await db.collection('healthcareProviders').get();
-        const all = snapshot.docs.map(doc => doc.data() as z.infer<typeof ClinicSchema>);
-        const filtered = all.filter(p => 
-            p.name.toLowerCase().includes(input.query.toLowerCase()) || 
-            p.address.toLowerCase().includes(input.query.toLowerCase())
-        );
-        return { results: filtered };
-    }
+      // Filter the hardcoded list based on the search query (case-insensitive)
+      const query = input.query.toLowerCase();
+      const filteredResults = ILOILO_PANAY_CLINICS.filter(p =>
+          p.name.toLowerCase().includes(query) ||
+          p.address.toLowerCase().includes(query) ||
+          p.type.toLowerCase().includes(query)
+      );
 
-    return { results: [] };
+      // If query is empty or "all", return everything (capped at 10)
+      if (query === '' || query === 'all' || query === 'iloilo') {
+          return { results: ILOILO_PANAY_CLINICS.slice(0, 15) };
+      }
+
+      return { results: filteredResults };
   }
 );
