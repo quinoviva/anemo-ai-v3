@@ -352,11 +352,11 @@ export function ImageAnalysisReport({ analyses, labReport, onReset }: ImageAnaly
                         <div className="p-4 bg-primary/10 rounded-2xl">
                             <Activity className="w-8 h-8 text-primary" />
                         </div>
-                        <h3 className="text-2xl font-black text-foreground uppercase tracking-[0.3em]">Clinical Synthesis</h3>
+                        <h3 className="text-2xl font-black text-foreground uppercase tracking-[0.3em]">Neural Insight</h3>
                     </div>
                     <div className="space-y-8 relative z-10">
-                        <p className="text-2xl text-foreground/80 leading-tight font-medium tracking-tight">
-                            {report.recommendations.split('\n')[0].replace(/^[*-]\s*/, '')}
+                        <p className="text-2xl text-foreground font-light tracking-tight leading-relaxed italic border-l-4 border-primary pl-10 py-2">
+                            "{report.recommendations.split('\n')[0].replace(/^[*-]\s*/, '')}"
                         </p>
                     </div>
                 </div>
@@ -366,9 +366,12 @@ export function ImageAnalysisReport({ analyses, labReport, onReset }: ImageAnaly
                     <div className="flex items-center justify-between border-b border-primary/10 pb-8">
                          <h3 className="text-xl font-black text-foreground uppercase tracking-[0.4em] flex items-center gap-4">
                             <Layers className="w-6 h-6 text-primary" />
-                            Visual Parametrics
+                            Diagnostic Samples
                         </h3>
-                        <span className="px-4 py-1.5 rounded-full bg-muted border border-primary/10 text-[11px] font-black text-muted-foreground uppercase tracking-[0.3em]">3 Sequential Sensors Active</span>
+                        <div className="flex items-center gap-4">
+                            <div className="px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-black text-emerald-500 uppercase tracking-[0.3em]">Sensors Aligned</div>
+                            <span className="px-4 py-1.5 rounded-full bg-muted border border-primary/10 text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em]">Quantum Encrypted</span>
+                        </div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
                         {Object.entries(analyses).map(([key, value], idx) => (
@@ -377,27 +380,31 @@ export function ImageAnalysisReport({ analyses, labReport, onReset }: ImageAnaly
                                 initial={{ opacity: 0, y: 30 }}
                                 whileInView={{ opacity: 1, y: 0 }}
                                 transition={{ delay: idx * 0.15 }}
-                                className="p-8 rounded-[3rem] border border-primary/10 bg-muted/10 space-y-8 group transition-all duration-700 hover:bg-muted/20 hover:border-primary/30"
+                                className="p-10 rounded-[3.5rem] border border-primary/10 bg-muted/10 space-y-10 group transition-all duration-700 hover:bg-muted/20 hover:border-primary/30 relative overflow-hidden"
                             >
-                                <div className="aspect-square rounded-[2.5rem] overflow-hidden border-2 border-primary/5 relative shadow-2xl">
-                                    <img src={value.imageUrl!} alt={key} className="w-full h-full object-cover group-hover:scale-125 transition-transform duration-1000 grayscale group-hover:grayscale-0" />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60" />
+                                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                <div className="aspect-[4/5] rounded-[3rem] overflow-hidden border-2 border-primary/5 relative shadow-2xl">
+                                    <img src={value.imageUrl!} alt={key} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 grayscale group-hover:grayscale-0" />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
                                     <div className="absolute top-6 left-6 px-4 py-1.5 rounded-xl bg-background/80 backdrop-blur-xl border border-primary/10">
                                         <span className="text-[10px] font-black text-foreground uppercase tracking-[0.3em]">{key.replace('-', ' ')}</span>
                                     </div>
-                                    <div className="absolute bottom-6 right-6 w-12 h-12 rounded-full bg-primary flex items-center justify-center text-primary-foreground shadow-[0_0_20px_rgba(var(--primary),0.5)]">
-                                         <CheckCircle2 className="w-6 h-6" />
+                                    <div className={cn(
+                                        "absolute bottom-6 right-6 w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-2xl",
+                                        value.analysisResult?.toUpperCase().includes('POSITIVE') ? "bg-red-500" : "bg-emerald-500"
+                                    )}>
+                                         <CheckCircle2 className="w-8 h-8" />
                                     </div>
                                 </div>
-                                <div className="space-y-3 px-2">
+                                <div className="space-y-4 px-2 relative z-10">
                                     <p className={cn(
-                                        "text-[11px] font-black uppercase tracking-[0.4em] mb-1",
-                                        value.analysisResult?.includes('POSITIVE') ? "text-red-500" : 
-                                        value.analysisResult?.includes('NEGATIVE') ? "text-emerald-500" : "text-primary"
+                                        "text-[12px] font-black uppercase tracking-[0.4em] mb-1",
+                                        value.analysisResult?.toUpperCase().includes('POSITIVE') ? "text-red-500" : 
+                                        value.analysisResult?.toUpperCase().includes('NEGATIVE') ? "text-emerald-500" : "text-primary"
                                     )}>
                                         {value.analysisResult}
                                     </p>
-                                    <p className="text-sm text-muted-foreground leading-relaxed font-medium uppercase tracking-tight">{value.description}</p>
+                                    <p className="text-sm text-muted-foreground leading-relaxed font-bold uppercase tracking-widest opacity-60 line-clamp-3">{value.description}</p>
                                 </div>
                             </motion.div>
                         ))}
@@ -409,42 +416,38 @@ export function ImageAnalysisReport({ analyses, labReport, onReset }: ImageAnaly
                     <motion.div 
                         initial={{ opacity: 0, scale: 0.98 }}
                         whileInView={{ opacity: 1, scale: 1 }}
-                        className="p-16 rounded-[4rem] border border-blue-500/20 bg-blue-500/[0.03] backdrop-blur-[80px] relative overflow-hidden shadow-2xl"
+                        className="p-16 rounded-[4.5rem] border border-blue-500/20 bg-blue-500/[0.03] backdrop-blur-[80px] relative overflow-hidden shadow-2xl"
                     >
-                        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[150px] -mr-32 -mt-32" />
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-blue-500/10 rounded-full blur-[200px] pointer-events-none" />
                         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-10 mb-16 relative z-10">
-                            <div className="flex items-center gap-8">
-                                <div className="w-20 h-20 bg-blue-500/20 rounded-[2rem] border border-blue-500/30 flex items-center justify-center shadow-2xl">
-                                    <FlaskConical className="w-10 h-10 text-blue-500" />
+                            <div className="flex items-center gap-10">
+                                <div className="w-24 h-24 bg-blue-500/20 rounded-[2.5rem] border border-blue-500/30 flex items-center justify-center shadow-2xl animate-float">
+                                    <FlaskConical className="w-12 h-12 text-blue-500" />
                                 </div>
                                 <div>
-                                    <h3 className="text-4xl font-black text-foreground tracking-tighter uppercase leading-none">Clinical Sync</h3>
-                                    <p className="text-[12px] font-black text-blue-500 uppercase tracking-[0.4em] mt-3">CBC Laboratory Correlation Active</p>
+                                    <h3 className="text-5xl font-black text-foreground tracking-tighter uppercase leading-none">Vascular <span className="text-blue-500">Sync</span></h3>
+                                    <p className="text-[12px] font-black text-blue-500 uppercase tracking-[0.5em] mt-4">CBC Laboratory Integrity Core Active</p>
                                 </div>
-                            </div>
-                            <div className="px-8 py-4 rounded-3xl bg-background/60 border border-primary/10 backdrop-blur-xl flex items-center gap-4">
-                                <Clock className="w-6 h-6 text-muted-foreground" />
-                                <span className="text-sm font-black text-foreground/70 uppercase tracking-widest leading-none">Data extracted: {labReport.summary}</span>
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 relative z-10">
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-10 relative z-10">
                             {labReport.parameters.map((p, idx) => (
-                                <div key={idx} className="bg-background/60 backdrop-blur-2xl p-8 rounded-[2.5rem] border border-primary/5 group hover:border-blue-500/50 transition-all duration-500">
-                                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em] mb-4 group-hover:text-blue-500 transition-colors">{p.parameter}</p>
-                                    <div className="flex items-baseline gap-2 mb-6">
-                                        <span className="text-4xl font-black text-foreground tracking-tighter">{p.value}</span>
+                                <div key={idx} className="bg-background/80 backdrop-blur-3xl p-10 rounded-[3rem] border border-primary/5 group hover:border-blue-500/50 transition-all duration-700 hover:-translate-y-2">
+                                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em] mb-6 group-hover:text-blue-500 transition-colors">{p.parameter}</p>
+                                    <div className="flex items-baseline gap-2 mb-8">
+                                        <span className="text-5xl font-black text-foreground tracking-tighter">{p.value}</span>
                                         <span className="text-[11px] font-black text-muted-foreground uppercase">{p.unit}</span>
                                     </div>
-                                    <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                                    <div className="h-2 w-full bg-muted/30 rounded-full overflow-hidden">
                                         <motion.div 
                                             initial={{ width: 0 }}
                                             whileInView={{ width: p.isNormal ? '100%' : '40%' }}
-                                            className={cn("h-full rounded-full transition-all duration-1000", p.isNormal ? "bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.4)]" : "bg-red-500 shadow-[0_0_15px_rgba(239,68,68,0.4)]")} 
+                                            className={cn("h-full rounded-full transition-all duration-1000", p.isNormal ? "bg-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.5)]" : "bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.5)]")} 
                                         />
                                     </div>
-                                    <p className={cn("text-[10px] font-black uppercase tracking-[0.2em] mt-4", p.isNormal ? "text-emerald-500/50" : "text-red-500/50")}>
-                                        {p.isNormal ? 'NOMINAL RANGE' : 'CRITICAL OFFSET'}
+                                    <p className={cn("text-[10px] font-black uppercase tracking-[0.3em] mt-5", p.isNormal ? "text-emerald-500" : "text-red-500")}>
+                                        {p.isNormal ? 'NOMINAL LEVEL' : 'CRITICAL OFFSET'}
                                     </p>
                                 </div>
                             ))}
@@ -455,37 +458,34 @@ export function ImageAnalysisReport({ analyses, labReport, onReset }: ImageAnaly
                 {/* Recommendations Grid */}
                 <div className="grid lg:grid-cols-2 gap-16">
                     {/* Home Remedies */}
-                    <div className="space-y-10">
-                        <h3 className="text-xl font-black text-foreground uppercase tracking-[0.4em] flex items-center gap-4 border-b border-primary/10 pb-6">
-                            <Leaf className="w-6 h-6 text-emerald-500" />
-                            Holistic Strategy
-                        </h3>
-                        <div className="grid gap-8">
-                            <div className="p-10 rounded-[3rem] bg-emerald-500/[0.02] border border-emerald-500/10 group hover:border-emerald-500/30 transition-all duration-700">
-                                <h4 className="text-[12px] font-black text-emerald-500 uppercase tracking-[0.4em] mb-8 flex items-center justify-between">
-                                    Nutritional Matrix
-                                    <Zap className="w-5 h-5 animate-pulse" />
+                    <div className="space-y-12">
+                        <div className="flex items-center gap-6 border-b border-primary/10 pb-8">
+                             <div className="p-4 bg-emerald-500/10 rounded-2xl">
+                                <Leaf className="w-8 h-8 text-emerald-500" />
+                             </div>
+                             <h3 className="text-2xl font-black text-foreground uppercase tracking-[0.4em]">Home Remedies</h3>
+                        </div>
+                        <div className="grid gap-10">
+                            <div className="p-12 rounded-[4rem] bg-emerald-500/[0.03] border border-emerald-500/10 group hover:border-emerald-500/30 transition-all duration-700 relative overflow-hidden">
+                                <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-[100px] -mr-32 -mt-32 pointer-events-none" />
+                                <h4 className="text-[12px] font-black text-emerald-100 bg-emerald-500 px-6 py-2 rounded-full uppercase tracking-[0.5em] mb-10 inline-block">
+                                    Holistic Recovery Matrix
                                 </h4>
-                                <ul className="space-y-6">
-                                    {report.recommendations.split('\n')
-                                        .filter(line => line.toLowerCase().includes('iron') || line.toLowerCase().includes('food') || line.toLowerCase().includes('intake'))
-                                        .slice(0, 4)
-                                        .map((item, i) => (
-                                        <li key={i} className="flex items-start gap-6 group/item">
-                                            <div className="mt-1.5 w-2 h-2 rounded-full bg-emerald-500/40 group-hover/item:scale-150 transition-transform" />
-                                            <span className="text-lg text-foreground/60 font-medium tracking-tight leading-tight">{item.replace(/^[*-]\s*/, '')}</span>
-                                        </li>
-                                    ))}
-                                    {/* Fallback if list extraction is too specific */}
-                                    {report.recommendations.split('\n').length < 3 && [
-                                        'Increase Malunggay & Spinach intake',
-                                        'Prioritize lean red meats & organ meats',
-                                        'Pair Iron with Vitamin C (Calamansi)',
-                                        'Iron-fortified cereals & legumes'
+                                <ul className="space-y-8">
+                                    {[
+                                        { title: 'Iron Infusion (Dietary)', desc: 'Prioritize Malunggay, Spinach, and Lean Meats daily.' },
+                                        { title: 'Vitamin C Synergy', desc: 'Squeeze calamansi or lemon into iron meals to triple absorption.' },
+                                        { title: 'Dark Molasses Boost', desc: '1 tsp of blackstrap molasses in warm water nightly.' },
+                                        { title: 'Hydration Cycle', desc: 'Avoid tea/coffee during meals as tannins block iron uptake.' }
                                     ].map((item, i) => (
-                                        <li key={i} className="flex items-start gap-6 group/item">
-                                            <div className="mt-1.5 w-2 h-2 rounded-full bg-emerald-500/40 group-hover/item:scale-150 transition-transform" />
-                                            <span className="text-lg text-foreground/60 font-medium tracking-tight leading-tight">{item}</span>
+                                        <li key={i} className="flex items-start gap-8 group/item">
+                                            <div className="mt-1 w-5 h-5 rounded-full border-2 border-emerald-500/40 flex items-center justify-center p-1 group-hover/item:border-emerald-500 transition-colors">
+                                                <div className="w-full h-full rounded-full bg-emerald-500 opacity-0 group-hover/item:opacity-100 transition-opacity" />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <span className="text-xl text-foreground font-black tracking-tighter uppercase block">{item.title}</span>
+                                                <span className="text-sm text-muted-foreground font-medium uppercase tracking-widest leading-relaxed">{item.desc}</span>
+                                            </div>
                                         </li>
                                     ))}
                                 </ul>
@@ -494,68 +494,59 @@ export function ImageAnalysisReport({ analyses, labReport, onReset }: ImageAnaly
                     </div>
 
                     {/* Nearby Support */}
-                    <div className="space-y-10">
-                        <div className="flex items-center justify-between border-b border-primary/10 pb-6">
-                            <h3 className="text-xl font-black text-foreground uppercase tracking-[0.4em] flex items-center gap-4">
-                                <MapPin className="w-6 h-6 text-primary" />
-                                Support Network
-                            </h3>
-                            <span className="px-4 py-1.5 rounded-xl bg-muted border border-primary/10 text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em]">{userLocation} Hub</span>
+                    <div className="space-y-12">
+                        <div className="flex items-center gap-6 border-b border-primary/10 pb-8">
+                             <div className="p-4 bg-primary/10 rounded-2xl">
+                                <MapPin className="w-8 h-8 text-primary" />
+                             </div>
+                             <h3 className="text-2xl font-black text-foreground uppercase tracking-[0.4em]">Care Network</h3>
                         </div>
-                        <div className="space-y-4">
+                        <div className="space-y-6">
                             {clinics.map((clinic, index) => (
                                 <motion.div 
                                     key={index} 
-                                    initial={{ opacity: 0, y: 20 }}
-                                    whileInView={{ opacity: 1, y: 0 }}
+                                    initial={{ opacity: 0, x: 20 }}
+                                    whileInView={{ opacity: 1, x: 0 }}
                                     viewport={{ once: true }}
                                     transition={{ delay: index * 0.1 }}
-                                    whileHover={{ x: 10, backgroundColor: 'rgba(var(--primary),0.05)' }}
-                                    className="flex items-center gap-6 p-8 rounded-[2rem] bg-muted/10 border border-primary/10 hover:border-primary/40 transition-all group cursor-pointer"
+                                    whileHover={{ x: 10, scale: 1.02 }}
+                                    className="flex items-center gap-8 p-10 rounded-[3rem] bg-muted/10 border border-primary/10 hover:border-primary/40 transition-all group cursor-pointer shadow-xl backdrop-blur-md"
                                 >
-                                    <div className="w-14 h-14 rounded-2xl bg-background border border-primary/10 flex items-center justify-center group-hover:border-primary/60 transition-all shadow-xl">
-                                        {clinic.type === 'Hospital' ? <Hospital className="w-7 h-7 text-primary" /> : <Stethoscope className="w-7 h-7 text-primary" />}
+                                    <div className="w-16 h-16 rounded-[1.5rem] bg-background border border-primary/10 flex items-center justify-center group-hover:border-primary/60 transition-all shadow-2xl scale-110">
+                                        {clinic.type === 'Hospital' ? <Hospital className="w-8 h-8 text-primary" /> : <Stethoscope className="w-8 h-8 text-primary" />}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <p className="text-xl font-black text-foreground tracking-tight truncate">{clinic.name}</p>
-                                        <p className="text-[11px] text-muted-foreground uppercase tracking-[0.2em] font-bold mt-1 truncate">
+                                        <p className="text-2xl font-black text-foreground tracking-tighter truncate leading-none mb-2">{clinic.name}</p>
+                                        <p className="text-[11px] text-muted-foreground uppercase tracking-[0.3em] font-black truncate opacity-60">
                                             {clinic.address}
                                         </p>
                                     </div>
-                                    <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <ExternalLink className="w-5 h-5 text-foreground" />
+                                    <div className="w-14 h-14 rounded-full bg-primary/5 flex items-center justify-center border border-primary/10 opacity-0 group-hover:opacity-100 transition-all group-hover:rotate-12">
+                                        <ExternalLink className="w-6 h-6 text-primary" />
                                     </div>
                                 </motion.div>
                             ))}
-                            {clinics.length === 0 && (
-                                <div className="p-16 text-center rounded-[3rem] border-2 border-dashed border-primary/10">
-                                    <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-6">
-                                        <Activity className="w-8 h-8 text-muted-foreground animate-pulse" />
-                                    </div>
-                                    <p className="text-sm text-muted-foreground font-black uppercase tracking-[0.5em]">Synchronizing Local Support Nodes...</p>
-                                </div>
-                            )}
                         </div>
                     </div>
                 </div>
 
                 {/* Legal Protocol */}
-                <div className="p-12 rounded-[3rem] bg-red-500/[0.02] border border-red-500/20 relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-full h-1 bg-red-500/30" />
-                    <div className="flex items-center gap-4 mb-6 text-red-500">
-                        <AlertCircle className="w-6 h-6" />
-                        <span className="text-[12px] font-black uppercase tracking-[0.4em]">Clinical Use Protocol</span>
+                <div className="p-16 rounded-[4.5rem] bg-red-500/[0.03] border border-red-500/20 relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-2 bg-red-500/20" />
+                    <div className="flex items-center gap-6 mb-10 text-red-500">
+                        <AlertCircle className="w-8 h-8" />
+                        <span className="text-[14px] font-black uppercase tracking-[0.5em]">Clinical Use Protocol</span>
                     </div>
-                    <p className="text-[11px] text-muted-foreground leading-relaxed uppercase font-black tracking-widest text-justify">
-                        THIS AI-GENERATED ASSESSMENT IS PROVIDED FOR INFORMATIONAL AND ANALYTICAL PURPOSES ONLY. IT DOES NOT CONSTITUTE CLINICAL MEDICAL ADVICE, DEFINITIVE DIAGNOSIS, OR PRESCRIBED TREATMENT. THE RESULTS ARE BASED ON COMPUTER VISION INTERPRETATION OF VISUAL MARKERS AND MAY NOT ACCOUNT FOR ALL CLINICAL VARIABLES. ALWAYS CONSULT A LICENSED HEALTHCARE PROFESSIONAL FOR MEDICAL EVALUATION. NEVER DISREGARD PROFESSIONAL MEDICAL ADVICE OR DELAY SEEKING IT BECAUSE OF INFORMATION PROVIDED BY THIS CORE ENGINE.
+                    <p className="text-[12px] text-muted-foreground leading-relaxed uppercase font-black tracking-[0.1em] text-justify opacity-60">
+                        The Anemo diagnostic pipeline utilizes neural networks for hemological interpretation of ocular and dermal markers. This insight is probabilistic and should not serve as late-stage clinical diagnosis. Cross-reference with standard venous blood analysis for definitive verification.
                     </p>
                 </div>
             </div>
 
             {/* Deep Footer */}
-            <div className="p-16 bg-muted/30 border-t border-primary/10 text-center relative">
-                <div className="absolute inset-0 bg-gradient-to-t from-primary/5 to-transparent pointer-events-none" />
-                <p className="text-[11px] font-black text-muted-foreground uppercase tracking-[1em] relative z-10">AnemoCloud Diagnostic Core • Quantum Encryption Active • © 2026</p>
+            <div className="p-20 bg-muted/20 border-t border-primary/10 text-center relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-t from-primary/10 to-transparent pointer-events-none" />
+                <p className="text-[11px] font-black text-muted-foreground uppercase tracking-[1.5em] relative z-10 animate-pulse">Bio-Health Signal Transmission Active • Distributed Neural Network • © 2026</p>
             </div>
         </div>
       </div>

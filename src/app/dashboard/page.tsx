@@ -229,16 +229,16 @@ export default function DashboardPage() {
           {/* Dynamic Background Mesh */}
           <div className="absolute inset-0 bg-gradient-to-br from-red-950/80 via-background to-background z-0" />
           <div className="absolute inset-0 bg-[url('/noise.png')] opacity-20 mix-blend-overlay z-0" />
+          
+          {/* Animated Glow Orbs - Now using automatic CSS animations */}
+          <div className="absolute -top-24 -right-24 w-96 h-96 bg-red-600/30 rounded-full blur-[120px] mix-blend-screen animate-slow-pulse group-hover:bg-red-500/40 transition-colors" />
+          <div className="absolute -bottom-32 -left-32 w-[500px] h-[500px] bg-rose-600/20 rounded-full blur-[140px] mix-blend-screen animate-slow-float" />
 
-          {/* Animated Glow Orbs */}
-          <div className="absolute -top-24 -right-24 w-96 h-96 bg-red-600/30 rounded-full blur-[120px] mix-blend-screen animate-pulse duration-[8000ms] group-hover:bg-red-500/40 transition-colors" />
-          <div className="absolute -bottom-32 -left-32 w-[500px] h-[500px] bg-rose-600/20 rounded-full blur-[140px] mix-blend-screen" />
-
-          {/* Shimmer Effect */}
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-[200%] animate-[shimmer_8s_infinite] pointer-events-none z-10" />
+          {/* Shimmer Effect - Improved for automatic loop */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent pointer-events-none z-10 animate-[shimmer_8s_infinite]" />
 
           {/* Abstract 3D Icon Composition */}
-          <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity duration-700 pointer-events-none z-0 transform group-hover:scale-110 group-hover:rotate-6">
+          <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity duration-700 pointer-events-none z-0 transform scale-110 group-hover:rotate-6 animate-float">
             <Activity className="h-[400px] w-[400px] text-red-500" />
           </div>
 

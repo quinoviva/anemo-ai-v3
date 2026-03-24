@@ -64,7 +64,6 @@ export function Header() {
   const router = useRouter();
   const pathname = usePathname();
   const { setTheme } = useTheme();
-  const [isScanOpen, setIsScanOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const isGuest = auth.currentUser?.isAnonymous;
@@ -132,20 +131,20 @@ export function Header() {
             </Link>
           ))}
           
-           {/* SCAN Trigger */}
+           {/* SCAN Trigger - Updated to navigate to dedicated page */}
            <div className="relative">
-              <button 
-                onClick={() => setIsScanOpen(true)}
+              <Link
+                href="/dashboard/analysis/multimodal"
                 className={cn(
                   'px-4 py-2 text-xs font-bold tracking-widest rounded-full transition-all duration-300 flex items-center gap-2 group h-10',
-                  isScanOpen 
+                  pathname === '/dashboard/analysis/multimodal' 
                   ? 'bg-primary text-primary-foreground shadow-[0_0_20px_-5px_rgba(var(--primary),0.5)]' 
                   : 'text-primary bg-primary/10 hover:bg-primary/20'
                 )}
               >
                 <HeartPulse className="w-3 h-3 animate-pulse" />
                 SCAN
-              </button>
+              </Link>
            </div>
 
           <DropdownMenu>
@@ -292,16 +291,19 @@ export function Header() {
                       {label}
                     </Link>
                   ))}
-                  <button 
-                    onClick={() => {
-                      setIsMobileMenuOpen(false);
-                      setIsScanOpen(true);
-                    }}
-                    className="flex items-center gap-4 px-6 py-4 rounded-2xl text-sm font-black tracking-widest text-primary bg-primary/10 transition-all text-left"
+                  <Link 
+                    href="/dashboard/analysis/multimodal"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={cn(
+                        "flex items-center gap-4 px-6 py-4 rounded-2xl text-sm font-black tracking-widest transition-all",
+                        pathname === '/dashboard/analysis/multimodal' 
+                        ? 'bg-primary text-primary-foreground shadow-[0_0_20px_-5px_rgba(var(--primary),0.5)]' 
+                        : 'text-primary bg-primary/10 hover:bg-primary/20'
+                    )}
                   >
-                    <HeartPulse className="w-5 h-5" />
+                    <HeartPulse className="w-5 h-5 animate-pulse" />
                     SCAN
-                  </button>
+                  </Link>
                 </div>
               </div>
 
@@ -337,11 +339,6 @@ export function Header() {
         </>
       )}
     </AnimatePresence>
-
-    <SequentialImageAnalyzer 
-      isOpen={isScanOpen} 
-      onClose={() => setIsScanOpen(false)} 
-    />
     </>
   );
 }

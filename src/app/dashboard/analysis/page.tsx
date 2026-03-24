@@ -13,12 +13,13 @@ import {
   Activity,
   Layers,
   Cpu,
-  ChevronRight
+  ChevronRight,
+  Link as LucideLink 
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { SequentialImageAnalyzer } from '@/components/anemo/SequentialImageAnalyzer';
+import Link from 'next/link';
 import dynamic from 'next/dynamic';
 
 const LocalCbcAnalyzer = dynamic(
@@ -52,13 +53,7 @@ const itemVariants = {
 };
 
 export default function AnalysisPage() {
-  const [analysisMode, setAnalysisMode] = useState<'select' | 'full' | 'local-cbc'>('select');
-  const [isFullAnalyzerOpen, setIsFullAnalyzerOpen] = useState(false);
-
-  const startFullScan = () => {
-    setAnalysisMode('full');
-    setIsFullAnalyzerOpen(true);
-  };
+  const [analysisMode, setAnalysisMode] = useState<'select' | 'local-cbc'>('select');
 
   if (analysisMode === 'local-cbc') {
     return (
@@ -125,11 +120,9 @@ export default function AnalysisPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-10">
               
               {/* Option 1: Full Assessment */}
-              <motion.div 
-                variants={itemVariants}
-                whileTap={{ scale: 0.98 }}
-                onClick={startFullScan}
-                className="group relative overflow-hidden rounded-[2.5rem] glass-panel glass-panel-hover flex flex-col p-8 md:p-12 cursor-pointer min-h-[450px] md:min-h-[550px] justify-between border-primary/20 shadow-[0_20px_60px_-15px_rgba(220,38,38,0.1)]"
+              <Link 
+                href="/dashboard/analysis/multimodal"
+                className="group relative overflow-hidden rounded-[2.5rem] glass-panel glass-panel-hover flex flex-col p-8 md:p-12 cursor-pointer min-h-[450px] md:min-h-[550px] justify-between border-primary/20 shadow-[0_20px_60px_-15px_rgba(220,38,38,0.1)] transition-all"
               >
                   {/* Radial Blur Glow */}
                   <div className="absolute -top-40 -right-40 w-[300px] md:w-[600px] h-[300px] md:h-[600px] bg-primary/20 rounded-full blur-[80px] md:blur-[160px] group-hover:bg-primary/30 transition-colors duration-1000 mix-blend-screen" />
@@ -170,14 +163,14 @@ export default function AnalysisPage() {
                       </div>
                   </div>
 
-                  <Button className="relative z-10 w-full justify-between group/btn bg-primary hover:bg-primary/90 text-white rounded-3xl h-16 md:h-20 transition-all px-8 md:px-10 shadow-2xl shadow-primary/20 overflow-hidden mt-8">
+                  <div className="relative z-10 w-full flex items-center justify-between group/btn bg-primary hover:bg-primary/90 text-white rounded-3xl h-16 md:h-20 transition-all px-8 md:px-10 shadow-2xl shadow-primary/20 overflow-hidden mt-8">
                       <span className="text-xs md:text-sm font-black uppercase tracking-[0.3em] relative z-10">Start Full Scan</span>
                       <div className="p-2 md:p-2.5 rounded-full bg-white/20 border border-white/20 group-hover/btn:bg-white group-hover/btn:text-primary transition-all relative z-10">
                         <ChevronRight className="h-4 w-4 md:h-5 md:w-5" />
                       </div>
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-[200%] group-hover/btn:animate-[shimmer_2s_infinite] pointer-events-none" />
-                  </Button>
-              </motion.div>
+                  </div>
+              </Link>
 
               {/* Option 2: Quick CBC Analysis */}
               <motion.div 
@@ -249,15 +242,6 @@ export default function AnalysisPage() {
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Sequential Image Analyzer for 'full' mode */}
-      <SequentialImageAnalyzer
-        isOpen={isFullAnalyzerOpen} 
-        onClose={() => {
-            setIsFullAnalyzerOpen(false);
-            setAnalysisMode('select');
-        }} 
-      />
     </div>
   );
 }
