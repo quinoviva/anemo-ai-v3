@@ -6,23 +6,32 @@ import {
   Camera, 
   Upload, 
   CheckCircle, 
-  AlertCircle, 
   X, 
-  Scan, 
-  Activity, 
-  FileText,
-  FlaskConical,
+  Cpu,
   Eye,
   Hand,
   User,
-  Sparkles,
   ArrowRight,
   ChevronLeft,
-  Layers,
-  ShieldCheck,
   Zap,
-  MousePointer2,
-  TrendingUp
+  Loader2,
+  ShieldAlert,
+  Fingerprint,
+  Search,
+  LayoutGrid,
+  FlaskConical,
+  FileText,
+  TrendingUp,
+  Activity,
+  Sparkles,
+  ArrowUpRight,
+  Info,
+  Layers,
+  Scan,
+  Database,
+  History,
+  Workflow,
+  Terminal
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -34,10 +43,13 @@ import { useUser } from '@/firebase';
 import HeartLoader from '@/components/ui/HeartLoader';
 import { cn } from '@/lib/utils';
 import { AnalysisGuide } from './AnalysisGuide';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Badge } from '@/components/ui/badge';
 
 // Types
 type BodyPart = 'skin' | 'under-eye' | 'fingernails';
 type Step = 'intro' | 'skin' | 'under-eye' | 'fingernails' | 'cbc-decision' | 'cbc-capture' | 'analyzing' | 'results';
+type AnalysisStage = 'idle' | 'uploading' | 'quality-check' | 'anemia-detection' | 'complete' | 'failed';
 
 interface SequentialImageAnalyzerProps {
   onClose: () => void;
@@ -45,16 +57,9 @@ interface SequentialImageAnalyzerProps {
   isPage?: boolean;
 }
 
-// Animation Variants (Matching Dashboard)
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 50, damping: 20 } },
-};
-
 export function SequentialImageAnalyzer({ onClose, isOpen, isPage }: SequentialImageAnalyzerProps) {
   const { user } = useUser();
   const { toast } = useToast();
-  const containerRef = useRef<HTMLDivElement>(null);
   
   // State
   const [currentStep, setCurrentStep] = useState<Step>('intro');
@@ -70,15 +75,21 @@ export function SequentialImageAnalyzer({ onClose, isOpen, isPage }: SequentialI
     fingernails: null
   });
   
+  const [analysisStage, setAnalysisStage] = useState<AnalysisStage>('idle');
+  const [diagnosticLogs, setDiagnosticLogs] = useState<string[]>([]);
+  const [qualityError, setQualityError] = useState<string | null>(null);
   const [cbcImage, setCbcImage] = useState<string | null>(null);
   const [cbcResult, setCbcResult] = useState<any>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [validationResult, setValidationResult] = useState<any>(null);
 
-  // Reset state when closed (only for modal mode)
+  const addLog = (message: string) => {
+    setDiagnosticLogs(prev => [...prev.slice(-2), message]);
+  };
+
   useEffect(() => {
     if (!isPage && !isOpen) {
-      const timer = setTimeout(() => {
+      setTimeout(() => {
         setCurrentStep('intro');
         setShowGuide(false);
         setImages({ skin: null, 'under-eye': null, fingernails: null });
@@ -86,10 +97,21 @@ export function SequentialImageAnalyzer({ onClose, isOpen, isPage }: SequentialI
         setCbcImage(null);
         setCbcResult(null);
         setValidationResult(null);
+        setAnalysisStage('idle');
+        setDiagnosticLogs([]);
+        setQualityError(null);
       }, 500);
-      return () => clearTimeout(timer);
     }
   }, [isOpen, isPage]);
+
+  const getThemeColor = (step: Step) => {
+    if (step === 'skin') return { primary: 'amber', glow: 'bg-amber-500/20', text: 'text-amber-500', border: 'border-amber-500/20' };
+    if (step === 'under-eye') return { primary: 'red', glow: 'bg-red-500/20', text: 'text-red-500', border: 'border-red-500/20' };
+    if (step === 'fingernails') return { primary: 'blue', glow: 'bg-blue-500/20', text: 'text-blue-500', border: 'border-blue-500/20' };
+    return { primary: 'primary', glow: 'bg-primary/20', text: 'text-primary', border: 'border-primary/20' };
+  };
+
+  const theme = getThemeColor(currentStep);
 
   const handleImageSelect = async (file: File, part: BodyPart) => {
     if (!file) return;
@@ -97,28 +119,39 @@ export function SequentialImageAnalyzer({ onClose, isOpen, isPage }: SequentialI
     reader.onload = async (e) => {
       const dataUri = e.target?.result as string;
       setImages(prev => ({ ...prev, [part]: dataUri }));
-      setIsAnalyzing(true);
+      setAnalysisStage('quality-check');
+      setDiagnosticLogs([]);
+      
+      addLog(`[INIT] Sequence: ${part.toUpperCase()}`);
       
       try {
+        await new Promise(r => setTimeout(r, 1000));
         const result = await runGenerateImageDescription({ photoDataUri: dataUri, bodyPart: part });
-        if (result.isValid) {
-          setAnalysisResults(prev => ({ ...prev, [part]: result }));
-          saveImageForTraining(dataUri, part, result.analysisResult, user?.displayName || 'Anonymous');
-          setTimeout(() => {
-            setIsAnalyzing(false);
-            if (part === 'skin') setCurrentStep('under-eye');
-            else if (part === 'under-eye') setCurrentStep('fingernails');
-            else if (part === 'fingernails') setCurrentStep('cbc-decision');
-            setShowGuide(false);
-          }, 1500); // Longer delay to enjoy the heart animation
-        } else {
-          setIsAnalyzing(false);
-          toast({ title: "Quality Check Failed", description: result.description, variant: "destructive" });
-          setImages(prev => ({ ...prev, [part]: null })); 
+        
+        if (!result.isValid) {
+            setAnalysisStage('failed');
+            setQualityError(result.description);
+            return;
         }
+
+        setAnalysisStage('anemia-detection');
+        addLog(`[SYNC] Spectral Mapping...`);
+        await new Promise(r => setTimeout(r, 1500));
+        
+        setAnalysisResults(prev => ({ ...prev, [part]: result }));
+        saveImageForTraining(dataUri, part, result.analysisResult, user?.displayName || 'Anonymous');
+        setAnalysisStage('complete');
+        
+        setTimeout(() => {
+          setAnalysisStage('idle');
+          if (part === 'skin') setCurrentStep('under-eye');
+          else if (part === 'under-eye') setCurrentStep('fingernails');
+          else if (part === 'fingernails') setCurrentStep('cbc-decision');
+          setShowGuide(false);
+        }, 1500);
       } catch (error) {
-        setIsAnalyzing(false);
-        setImages(prev => ({ ...prev, [part]: null }));
+        setAnalysisStage('failed');
+        setQualityError("Neural Sync Timeout.");
       }
     };
     reader.readAsDataURL(file);
@@ -151,21 +184,21 @@ export function SequentialImageAnalyzer({ onClose, isOpen, isPage }: SequentialI
     setCurrentStep('analyzing');
     setIsAnalyzing(true);
     try {
-        if (cbcData) {
-            const validation = await validateMultimodalResults({
-                medicalInfo: {}, 
-                imageAnalysisReport: {
-                    conjunctiva: analysisResults['under-eye']?.analysisResult || '',
-                    skin: analysisResults['skin']?.analysisResult || '',
-                    fingernails: analysisResults['fingernails']?.analysisResult || '',
-                },
-                cbcAnalysis: {
-                    hemoglobin: cbcData.parameters.find((p: any) => p.parameter.toLowerCase().includes('hemoglobin'))?.value || 'N/A',
-                    rbc: cbcData.parameters.find((p: any) => p.parameter.toLowerCase().includes('rbc'))?.value || 'N/A',
-                }
-            });
-            setValidationResult(validation);
-        }
+        const imageAnalysisReport = {
+            conjunctiva: analysisResults['under-eye']?.analysisResult || '',
+            skin: analysisResults['skin']?.analysisResult || '',
+            fingernails: analysisResults['fingernails']?.analysisResult || '',
+        };
+
+        const validation = await validateMultimodalResults({
+            medicalInfo: {}, 
+            imageAnalysisReport,
+            cbcAnalysis: cbcData ? {
+                hemoglobin: cbcData.parameters.find((p: any) => p.parameter.toLowerCase().includes('hemoglobin'))?.value || 'N/A',
+                rbc: cbcData.parameters.find((p: any) => p.parameter.toLowerCase().includes('rbc'))?.value || 'N/A',
+            } : undefined
+        });
+        setValidationResult(validation);
         setTimeout(() => {
             setIsAnalyzing(false);
             setCurrentStep('results');
@@ -182,82 +215,112 @@ export function SequentialImageAnalyzer({ onClose, isOpen, isPage }: SequentialI
 
     if (showGuide && stepId) {
         return (
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-4xl">
-                <AnalysisGuide bodyPart={stepId} onComplete={() => setShowGuide(false)} />
-            </motion.div>
+            <div className="absolute inset-0 z-[100] bg-background">
+                <ScrollArea className="h-full w-full">
+                    <div className="p-4 sm:p-8 lg:p-12">
+                        <AnalysisGuide bodyPart={stepId} onComplete={() => setShowGuide(false)} />
+                    </div>
+                </ScrollArea>
+                <div className="absolute bottom-6 left-1/2 -translate-x-1/2">
+                     <Button variant="secondary" className="rounded-full h-12 px-8 text-[10px] font-black uppercase tracking-widest bg-background/80 backdrop-blur-xl border border-white/10" onClick={() => setShowGuide(false)}>
+                        <X className="w-4 h-4 mr-3" /> Close Protocol
+                     </Button>
+                </div>
+            </div>
         )
     }
 
     return (
-      <div className="flex flex-col items-center text-center space-y-12 max-w-2xl mx-auto">
-          <div className="relative group cursor-pointer" onClick={() => setShowGuide(true)}>
-              {/* Premium Glow matching Dashboard */}
-              <div className="absolute inset-0 bg-primary/20 blur-[60px] rounded-full group-hover:bg-primary/40 transition-colors duration-700" />
+      <div className="flex flex-col items-center justify-center min-h-full w-full max-w-4xl mx-auto px-4 py-8 space-y-12 md:space-y-20 relative z-10">
+          <div className="relative group w-full max-w-[min(100%,500px)] aspect-square self-center">
+              <div className={cn("absolute inset-[-40px] md:inset-[-80px] blur-[80px] md:blur-[140px] opacity-20 rounded-full transition-all duration-1000", theme.glow)} />
               
-              <div className="relative w-48 h-48 rounded-[3rem] bg-background/40 backdrop-blur-2xl border border-primary/20 flex items-center justify-center shadow-2xl transition-all duration-700 group-hover:scale-105 group-hover:rotate-3">
-                  <Icon className="w-20 h-20 text-primary" />
+              <div className="relative w-full h-full rounded-[2.5rem] md:rounded-[4rem] bg-background/40 glass-panel border border-white/5 overflow-hidden isolate flex items-center justify-center shadow-2xl">
+                  <div className="absolute inset-0 bg-grid-white/[0.01] bg-[size:30px_30px]" />
+                  
+                  <AnimatePresence mode="wait">
+                      {image ? (
+                           <motion.div key="image" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0">
+                               <img src={image} className={cn("w-full h-full object-cover grayscale transition-all duration-1000", (analysisStage !== 'idle' && analysisStage !== 'complete') && "blur-xl saturate-150")} />
+                               {(analysisStage !== 'idle' && analysisStage !== 'failed' && analysisStage !== 'complete') && (
+                                   <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 bg-background/20 backdrop-blur-2xl">
+                                       <HeartLoader size={80} strokeWidth={2} />
+                                       <span className={cn("text-[10px] font-black tracking-[0.4em] uppercase", theme.text)}>Processing</span>
+                                   </div>
+                               )}
+                               {analysisStage === 'failed' && (
+                                   <div className="absolute inset-0 bg-red-600/95 backdrop-blur-2xl p-6 flex flex-col items-center justify-center text-center gap-8 z-50">
+                                       <ShieldAlert className="w-16 h-16 text-white" />
+                                       <p className="text-xs font-bold text-white uppercase tracking-widest">{qualityError}</p>
+                                       <Button size="sm" className="rounded-full h-14 px-10 bg-white text-red-600 font-bold tracking-widest" onClick={() => { setImages(prev => ({ ...prev, [stepId]: null })); setAnalysisStage('idle'); }}>RETRY</Button>
+                                   </div>
+                               )}
+                           </motion.div>
+                      ) : (
+                          <div className="flex flex-col items-center space-y-8">
+                              <div className="p-10 md:p-14 rounded-full bg-white/[0.02] border border-white/10 shadow-2xl relative z-10">
+                                <Icon className={cn("w-20 h-20 md:w-32 md:h-32 opacity-20", theme.text)} />
+                              </div>
+                              <p className="text-[10px] font-black uppercase tracking-[0.6em] text-muted-foreground/30 italic">Scanner Initialized</p>
+                          </div>
+                      )}
+                  </AnimatePresence>
+
+                  {analysisStage !== 'idle' && (
+                      <div className="absolute bottom-6 inset-x-6 z-[60]">
+                          <div className="p-4 rounded-2xl bg-black/80 backdrop-blur-3xl border border-white/10 shadow-2xl">
+                             {diagnosticLogs.map((log, i) => (
+                                 <p key={i} className="text-[9px] font-mono text-emerald-400 uppercase tracking-widest leading-none flex items-center gap-3 mb-1 last:mb-0">
+                                    <span className="opacity-40">»</span> {log}
+                                 </p>
+                             ))}
+                          </div>
+                      </div>
+                  )}
+                  
+                  <div className="absolute inset-0 pointer-events-none">
+                      <div className="absolute top-6 left-6 w-8 h-8 border-l border-t border-white/20 rounded-tl-2xl" />
+                      <div className="absolute bottom-6 right-6 w-8 h-8 border-r border-b border-white/20 rounded-br-2xl" />
+                  </div>
               </div>
-              
-              <AnimatePresence>
-                {image && (
-                    <motion.div 
-                        initial={{ opacity: 0, scale: 0.8, rotate: -5 }}
-                        animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                        exit={{ opacity: 0, scale: 0.8 }}
-                        className="absolute inset-0 rounded-[3rem] overflow-hidden border-4 border-primary bg-background z-10 shadow-[0_0_50px_rgba(var(--primary),0.5)]"
-                    >
-                        <img src={image} alt="Preview" className="w-full h-full object-cover opacity-70" />
-                        {isAnalyzing && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-background/60 backdrop-blur-md">
-                                <HeartLoader size={64} strokeWidth={3} />
-                            </div>
+          </div>
+
+          <div className="space-y-8 w-full text-center relative z-20">
+              <div className="space-y-4">
+                <h2 className="text-[clamp(1.8rem,8vw,4.5rem)] font-black tracking-tighter text-foreground leading-none uppercase italic drop-shadow-2xl">
+                    {title.split(' ')[0]} <span className={cn("italic-font", theme.text)}>{title.split(' ')[1] || ''}</span>
+                </h2>
+                <p className="text-sm md:text-lg text-muted-foreground font-medium uppercase tracking-widest opacity-60 leading-relaxed max-w-xl mx-auto px-4">{description}</p>
+              </div>
+
+              {analysisStage === 'idle' && (
+                  <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 px-4">
+                      <Button 
+                        size="lg"
+                        className="w-full sm:w-64 h-20 rounded-3xl bg-white/5 border border-white/10 hover:bg-white/10 text-foreground transition-all flex items-center justify-start px-8 gap-6 group/btn"
+                        onClick={() => fileInputRef.current?.click()}
+                      >
+                          <Upload className="w-5 h-5 opacity-60" />
+                          <span className="text-[11px] font-black uppercase tracking-widest">Upload File</span>
+                      </Button>
+                      <Button 
+                        size="lg"
+                        className={cn("w-full sm:w-64 h-20 rounded-3xl text-white flex items-center justify-start px-8 gap-6 group/btn hover:scale-105 transition-all shadow-xl", 
+                            theme.primary === 'amber' ? 'bg-amber-600 shadow-amber-500/20' : 
+                            theme.primary === 'red' ? 'bg-red-600 shadow-red-500/20' :
+                            theme.primary === 'blue' ? 'bg-blue-600 shadow-blue-500/20' : 'bg-primary shadow-primary/20'
                         )}
-                    </motion.div>
-                )}
-              </AnimatePresence>
-
-              <div className="absolute -top-4 -right-4 w-14 h-14 rounded-2xl glass-panel flex items-center justify-center border-primary/20 animate-pulse">
-                <Scan className="w-6 h-6 text-primary" />
-              </div>
-          </div>
-          
-          <div className="space-y-6">
-              <h2 className="text-6xl md:text-7xl font-light tracking-tighter text-foreground leading-[0.9]">
-                {title.split(' ')[0]} <span className="font-black text-transparent bg-clip-text bg-gradient-to-r from-primary via-red-500 to-rose-400">{title.split(' ')[1] || ''}</span>
-              </h2>
-              <p className="text-xl text-muted-foreground font-light max-w-md mx-auto uppercase tracking-widest">{description}</p>
-              
-              <Button 
-                variant="ghost" 
-                className="text-primary font-bold tracking-[0.3em] uppercase text-xs hover:bg-primary/10 rounded-full px-8 py-6 h-auto" 
-                onClick={() => setShowGuide(true)}
-              >
-                  <MousePointer2 className="w-4 h-4 mr-3" />
-                  View Guide
-              </Button>
-          </div>
-
-          <div className="grid grid-cols-2 gap-8 w-full">
-              <button 
-                className="glass-panel glass-panel-hover h-44 rounded-[2.5rem] flex flex-col items-center justify-center space-y-4 group transition-all duration-500"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isAnalyzing}
-              >
-                  <div className="p-5 rounded-3xl bg-primary/10 group-hover:bg-primary/20 group-hover:scale-110 transition-all duration-500">
-                    <Upload className="w-8 h-8 text-primary" />
+                        onClick={() => cameraInputRef.current?.click()}
+                      >
+                          <Camera className="w-5 h-5" />
+                          <span className="text-[11px] font-black uppercase tracking-widest">Direct Camera</span>
+                      </Button>
                   </div>
-                  <span className="text-xs font-black uppercase tracking-[0.4em] text-muted-foreground group-hover:text-primary">Library</span>
-              </button>
+              )}
 
-              <button 
-                className="glass-panel glass-panel-hover h-44 rounded-[2.5rem] flex flex-col items-center justify-center space-y-4 group transition-all duration-500"
-                onClick={() => cameraInputRef.current?.click()}
-                disabled={isAnalyzing}
-              >
-                  <div className="p-5 rounded-3xl bg-primary/10 group-hover:bg-primary/20 group-hover:scale-110 transition-all duration-500">
-                    <Camera className="w-8 h-8 text-primary" />
-                  </div>
-                  <span className="text-xs font-black uppercase tracking-[0.4em] text-muted-foreground group-hover:text-primary">Camera</span>
+              <button className="flex items-center gap-3 mx-auto text-muted-foreground hover:text-foreground transition-all group px-4 py-2" onClick={() => setShowGuide(true)}>
+                  <Info className="w-4 h-4 opacity-40 group-hover:opacity-100" />
+                  <span className="text-[10px] font-black tracking-widest uppercase">View Guide</span>
               </button>
 
               <Input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && onUpload(e.target.files[0])} />
@@ -267,68 +330,64 @@ export function SequentialImageAnalyzer({ onClose, isOpen, isPage }: SequentialI
     );
   };
 
-  const AnalyzerContent = (
-    <motion.div 
-        ref={containerRef}
-        initial={isPage ? { opacity: 0, y: 30 } : { scale: 0.95, opacity: 0, y: 20 }}
-        animate={isPage ? { opacity: 1, y: 0 } : { scale: 1, opacity: 1, y: 0 }}
-        onMouseLeave={!isPage ? onClose : undefined}
-        className={cn(
-            "relative w-full overflow-hidden flex flex-col md:flex-row border-primary/20",
-            isPage 
-                ? "min-h-[85vh] rounded-[3rem] glass-panel" 
-                : "max-w-7xl h-[95vh] md:h-[90vh] glass-panel rounded-3xl md:rounded-[3rem] shadow-[0_0_100px_rgba(0,0,0,0.5)]"
-        )}
-        onClick={(e) => e.stopPropagation()} 
-    >
-        {/* Noise Texture Overlay */}
-        <div className="absolute inset-0 bg-[url('/noise.png')] opacity-10 mix-blend-overlay pointer-events-none" />
+  const MainLayout = (
+    <div className={cn(
+        "relative w-full overflow-hidden flex flex-col md:flex-row bg-background isolate",
+        isPage ? "min-h-screen" : "max-w-6xl w-full h-[90vh] md:h-[85vh] rounded-[2rem] md:rounded-[3.5rem] shadow-2xl border border-white/5"
+    )}>
+        <div className="absolute inset-0 bg-grid-white/[0.01] bg-[size:40px_40px] z-0" />
+        <div className="absolute inset-0 bg-[url('/noise.png')] opacity-10 mix-blend-overlay z-0" />
         
-        {/* Floating Orbs matching Dashboard */}
-        <div className="absolute -top-40 -left-40 w-96 h-96 bg-primary/20 rounded-full blur-[140px] pointer-events-none animate-slow-pulse" />
-        <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-blue-600/10 rounded-full blur-[140px] pointer-events-none animate-float" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-red-500/[0.03] rounded-full blur-[160px] pointer-events-none" />
+        <AnimatePresence mode="wait">
+            <motion.div 
+                key={currentStep}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 1.2 }}
+                transition={{ duration: 1 }}
+                className={cn("absolute inset-[-20%] blur-[100px] md:blur-[180px] rounded-full pointer-events-none opacity-10", theme.glow)} 
+            />
+        </AnimatePresence>
 
-        {/* Left Sidebar: Diagnostic Path - Stacks on Mobile */}
-        <div className="w-full md:w-[320px] bg-background/20 backdrop-blur-3xl p-6 md:p-12 border-b md:border-b-0 md:border-r border-primary/10 flex flex-col justify-between relative z-10 shrink-0">
-            <div>
-                <div className="flex items-center justify-between md:justify-start gap-4 mb-8 md:mb-16">
-                    <div className="flex items-center gap-4">
-                        <div className="p-3 bg-primary/10 rounded-2xl border border-primary/20 shadow-[0_0_20px_rgba(var(--primary),0.2)]">
-                            <ShieldCheck className="w-6 h-6 text-primary" />
-                        </div>
-                        <div className="flex flex-col">
-                            <span className="text-[10px] font-black uppercase tracking-[0.5em] text-muted-foreground">Anemo</span>
-                            <span className="text-xl font-black text-foreground tracking-tighter uppercase italic">Matrix</span>
-                        </div>
+        {/* Navigation Sidebar: Now adapts correctly between Mobile & Desktop */}
+        <aside className="w-full md:w-20 lg:w-[320px] bg-background/50 backdrop-blur-3xl border-b md:border-b-0 md:border-r border-white/5 p-4 md:p-6 lg:p-10 z-30 flex md:flex-col items-center md:items-start justify-between relative isolate">
+            <div className="w-full">
+                <div className="hidden md:flex flex-col gap-4 mb-12 lg:mb-20">
+                    <div className="inline-flex items-center gap-3 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 w-fit">
+                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                        <span className="text-[8px] font-black tracking-widest text-white uppercase">System Online</span>
                     </div>
+                    <h1 className="text-2xl lg:text-4xl font-black italic tracking-tighter uppercase leading-tight">Anemo.<span className="text-primary">V3</span></h1>
                 </div>
 
-                <div className="flex md:flex-col gap-4 md:gap-10 relative overflow-x-auto md:overflow-x-visible pb-4 md:pb-0 no-scrollbar">
-                    <div className="hidden md:block absolute left-[23px] top-6 bottom-6 w-px bg-gradient-to-b from-primary/50 via-primary/5 to-transparent" />
-                    
+                <div className="flex md:flex-col gap-4 md:gap-8 overflow-x-auto no-scrollbar md:overflow-visible w-full py-2">
                     {[
-                        { id: 'skin', label: 'Dermal Pallor', icon: User },
-                        { id: 'under-eye', label: 'Conjunctival', icon: Eye },
-                        { id: 'fingernails', label: 'Nail Matrix', icon: Hand },
-                        { id: 'cbc-decision', label: 'Clinical Sync', icon: FlaskConical }
-                    ].map((step, idx) => {
-                        const isCompleted = images[step.id as BodyPart] !== null || (step.id === 'cbc-decision' && (cbcResult !== null || currentStep === 'results'));
-                        const isActive = currentStep === step.id || (step.id === 'cbc-decision' && currentStep === 'cbc-capture');
+                        { id: 'skin', label: 'Dermal', icon: User },
+                        { id: 'under-eye', label: 'Ocular', icon: Eye },
+                        { id: 'fingernails', label: 'Ungual', icon: Hand },
+                        { id: 'cbc-decision', label: 'Clinical', icon: Database }
+                    ].map((step) => {
+                        const isDone = images[step.id as BodyPart] !== null || (step.id === 'cbc-decision' && (cbcResult !== null || currentStep === 'results'));
+                        const isAt = currentStep === step.id || (step.id === 'cbc-decision' && currentStep === 'cbc-capture');
+                        const sTheme = getThemeColor(step.id as Step);
                         
                         return (
-                            <div key={step.id} className={cn("flex items-center gap-4 md:gap-6 transition-all duration-700 shrink-0", isActive ? "opacity-100 translate-x-0 md:translate-x-2" : isCompleted ? "opacity-100" : "opacity-20")}>
+                            <div key={step.id} className={cn("flex items-center gap-4 shrink-0 transition-opacity", !isAt && !isDone && "opacity-30")}>
                                 <div className={cn(
-                                    "w-10 h-10 md:w-12 md:h-12 rounded-[1.2rem] flex items-center justify-center border-2 transition-all duration-700 z-10 shrink-0 shadow-lg", 
-                                    isCompleted ? "bg-primary border-primary text-white shadow-[0_0_15px_rgba(var(--primary),0.5)]" : isActive ? "border-primary bg-primary/10 text-primary" : "border-muted/30 text-muted-foreground bg-background/40"
+                                    "w-12 h-12 lg:w-16 lg:h-16 rounded-2xl md:rounded-[1.8rem] flex items-center justify-center border transition-all duration-500 relative isolate",
+                                    isDone ? `bg-${step.id === 'skin' ? 'amber' : step.id === 'under-eye' ? 'red' : 'blue'}-600 border-transparent text-white shadow-lg` : 
+                                    isAt ? `border-${step.id === 'skin' ? 'amber' : step.id === 'under-eye' ? 'red' : 'blue'}-500 bg-${step.id === 'skin' ? 'amber' : step.id === 'under-eye' ? 'red' : 'blue'}-500/10 ${sTheme.text} shadow-lg` : 
+                                    "border-white/10 text-muted-foreground bg-white/[0.03]"
                                 )}>
-                                    {isCompleted ? <CheckCircle className="w-5 h-5 md:w-6 md:h-6" /> : <step.icon className="w-5 h-5 md:w-6 md:h-6" />}
+                                    {isDone ? <CheckCircle className="w-6 h-6" /> : <step.icon className="w-6 h-6 lg:w-8 lg:h-8" />}
+                                    {isAt && (
+                                        <div className={cn("absolute inset-[-4px] rounded-[1.2rem] md:rounded-[2.2rem] animate-pulse -z-10", sTheme.glow)} />
+                                    )}
                                 </div>
-                                <div className="flex flex-col">
-                                    <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-primary/60 mb-0.5 md:mb-1">Protocol 0{idx + 1}</span>
-                                    <span className={cn("text-[10px] md:text-xs font-black uppercase tracking-[0.3em] leading-none whitespace-nowrap", isActive ? "text-primary" : "text-foreground")}>
+                                <div className="hidden lg:flex flex-col text-left">
+                                    <h3 className={cn("text-sm font-black uppercase tracking-tight leading-none italic", isAt ? "text-foreground" : "text-muted-foreground")}>
                                         {step.label}
-                                    </span>
+                                    </h3>
                                 </div>
                             </div>
                         )
@@ -336,193 +395,153 @@ export function SequentialImageAnalyzer({ onClose, isOpen, isPage }: SequentialI
                 </div>
             </div>
             
-            <div className="hidden md:block mt-auto">
-                 <div className="p-8 rounded-[2.5rem] bg-gradient-to-br from-primary/10 to-transparent border border-primary/10 backdrop-blur-md relative overflow-hidden group">
-                    <div className="absolute inset-0 bg-primary/5 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                    <div className="flex items-center gap-3 mb-4">
-                        <Zap className="w-4 h-4 text-amber-500 animate-pulse" />
-                        <span className="text-[10px] font-black uppercase tracking-[0.4em] text-foreground">Diagnostic Protocol</span>
+            <div className="hidden lg:block w-full">
+                 <div className="p-6 rounded-[2rem] bg-white/[0.02] border border-white/5 space-y-4">
+                    <div className="flex items-center gap-3 text-primary">
+                        <Workflow className="w-4 h-4 fill-primary" />
+                        <span className="text-[10px] font-black uppercase tracking-widest">Data Link</span>
                     </div>
-                    <p className="text-[11px] text-muted-foreground leading-relaxed font-bold uppercase tracking-tight relative z-10">
-                        Avoid directional interference. Ensure diffuse luminance of 500-1000 lux for spectral accuracy.
+                    <p className="text-[11px] font-medium text-muted-foreground/60 uppercase tracking-widest leading-relaxed italic">
+                        Node active. Signal locked. EfficientNetB0 diagnostic core synchronized.
                     </p>
                  </div>
             </div>
-        </div>
+        </aside>
 
-        {/* Main Content Area - Fluid Padding */}
-        <div className="flex-1 p-6 sm:p-12 md:p-24 relative flex items-center justify-center overflow-y-auto custom-scrollbar min-h-[600px]">
-            <Button variant="ghost" size="icon" className="absolute top-4 right-4 md:top-12 md:right-12 text-muted-foreground hover:text-foreground hover:bg-background/40 rounded-2xl h-12 w-12 md:h-14 md:w-14 transition-all z-20 group" onClick={onClose}>
-                <X className="w-6 h-6 md:w-8 md:h-8 group-hover:rotate-90 transition-transform" />
-            </Button>
-
-            {['under-eye', 'fingernails', 'cbc-decision', 'cbc-capture'].includes(currentStep) && (
-                <Button 
-                    variant="ghost" 
-                    className="absolute top-4 left-4 md:top-12 md:left-12 text-muted-foreground hover:text-foreground flex items-center gap-2 md:gap-3 text-[10px] md:text-xs font-black tracking-[0.4em] uppercase z-20 h-12 px-4"
-                    onClick={() => {
-                        if (currentStep === 'under-eye') setCurrentStep('skin');
-                        if (currentStep === 'fingernails') setCurrentStep('under-eye');
-                        if (currentStep === 'cbc-decision') setCurrentStep('fingernails');
-                        if (currentStep === 'cbc-capture') setCurrentStep('cbc-decision');
-                    }}
-                >
-                    <ChevronLeft className="w-4 h-4 md:w-5 md:h-5" />
-                    Back
+        {/* Interaction Portal */}
+        <main className="flex-1 relative flex flex-col items-center justify-center overflow-y-auto no-scrollbar py-12 px-4 min-h-[500px]">
+            {/* Top Control Bar */}
+            <div className="absolute top-6 right-6 z-[100] flex items-center gap-4">
+                {(['under-eye', 'fingernails', 'cbc-decision', 'cbc-capture'].includes(currentStep)) && (
+                    <Button variant="ghost" size="icon" className="h-12 w-12 rounded-2xl bg-background/50 border border-white/5 text-muted-foreground hover:bg-white/5 backdrop-blur-xl" onClick={() => {
+                         if (currentStep === 'under-eye') setCurrentStep('skin');
+                         if (currentStep === 'fingernails') setCurrentStep('under-eye');
+                         if (currentStep === 'cbc-decision') setCurrentStep('fingernails');
+                         if (currentStep === 'cbc-capture') setCurrentStep('cbc-decision');
+                    }}>
+                        <ChevronLeft className="w-6 h-6" />
+                    </Button>
+                )}
+                <Button variant="ghost" size="icon" className="h-12 w-12 rounded-2xl bg-background/50 border border-white/5 text-muted-foreground hover:bg-red-500/10 hover:text-red-500 backdrop-blur-xl" onClick={onClose}>
+                    <X className="w-6 h-6" />
                 </Button>
-            )}
+            </div>
 
             <AnimatePresence mode="wait">
                 {currentStep === 'intro' && (
-                    <motion.div key="intro" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 1.05 }} className="text-center space-y-16 max-w-2xl">
-                        <div className="relative inline-flex items-center justify-center">
-                            <div className="absolute inset-[-40px] rounded-full border border-primary/20 animate-[ping_4s_linear_infinite]" />
-                            <div className="w-48 h-48 rounded-[3.5rem] glass-panel flex items-center justify-center border-primary/20 shadow-[0_0_80px_rgba(var(--primary),0.2)]">
-                                <Activity className="w-24 h-24 text-primary" />
+                    <motion.div key="intro" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 1.1 }} className="text-center px-4 flex flex-col items-center space-y-12 max-w-2xl">
+                         <div className="relative isolate group">
+                            <div className="absolute inset-[-40px] md:inset-[-60px] bg-primary/20 rounded-full blur-[60px] md:blur-[100px] opacity-100 group-hover:scale-110 transition-transform duration-1000 animate-pulse" />
+                            <div className="w-48 h-48 md:w-64 md:h-64 rounded-[2.5rem] md:rounded-[4rem] bg-gradient-to-br from-primary/20 via-background/40 to-background flex items-center justify-center border border-white/10 shadow-2xl relative z-10 overflow-hidden">
+                                <Fingerprint className="w-24 h-24 md:w-32 md:h-32 text-primary group-hover:scale-110 transition-transform duration-1000" />
+                                <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:20px_20px]" />
                             </div>
-                        </div>
-                        
-                        <div className="space-y-8">
-                            <h1 className="text-7xl md:text-9xl font-light tracking-tighter text-foreground leading-[0.85]">
-                                Full <br/> <span className="font-black text-transparent bg-clip-text bg-gradient-to-r from-primary via-red-500 to-rose-400">Scan</span>
-                            </h1>
-                            <p className="text-muted-foreground leading-relaxed text-2xl font-light uppercase tracking-tight max-w-md mx-auto">
-                                Initiating high-fidelity neural diagnostic sequence.
-                            </p>
-                        </div>
-                        
-                        <Button 
-                            className="h-20 px-16 rounded-full text-sm font-black tracking-[0.5em] bg-primary text-white hover:bg-red-600 transition-all hover:scale-110 shadow-[0_25px_60px_-10px_rgba(var(--primary),0.5)] group" 
-                            onClick={() => setCurrentStep('skin')}
-                        >
-                            BEGIN SEQUENCE
-                            <ArrowRight className="ml-6 w-6 h-6 group-hover:translate-x-2 transition-transform" />
-                        </Button>
+                         </div>
+                         <div className="space-y-6">
+                            <h1 className="text-[clamp(2.5rem,10vw,6rem)] font-black text-foreground italic leading-[0.85] tracking-tighter uppercase drop-shadow-xl">NEURAL.<span className="text-primary italic-font">SCAN</span></h1>
+                            <p className="text-[10px] md:text-xs font-black uppercase tracking-[0.6em] text-muted-foreground/60 leading-none">V3.0 // Clinical Multimodal Terminal</p>
+                         </div>
+                         <Button className="h-16 px-16 rounded-full bg-primary text-white text-xs font-black tracking-[0.8em] hover:scale-105 transition-all shadow-xl group relative overflow-hidden" onClick={() => setCurrentStep('skin')}>
+                            START ANALYSIS
+                         </Button>
                     </motion.div>
                 )}
-
-                {currentStep === 'skin' && (
-                    <StepCard key="skin" stepId="skin" title="Dermal Pallor" description="Align palmar surface for pigmentation analysis." icon={User} onUpload={(f: File) => handleImageSelect(f, 'skin')} image={images.skin} />
-                )}
-
-                {currentStep === 'under-eye' && (
-                    <StepCard key="under-eye" stepId="under-eye" title="Conjunctival Tissue" description="Expose lower eyelid bed for hemoglobin markers." icon={Eye} onUpload={(f: File) => handleImageSelect(f, 'under-eye')} image={images['under-eye']} />
-                )}
-
-                {currentStep === 'fingernails' && (
-                    <StepCard key="fingernails" stepId="fingernails" title="Nail Matrix" description="Focus on bare nail beds for capillary refill." icon={Hand} onUpload={(f: File) => handleImageSelect(f, 'fingernails')} image={images.fingernails} />
+                
+                {['skin', 'under-eye', 'fingernails', 'cbc-capture'].includes(currentStep) && (
+                    <StepCard 
+                        key={currentStep}
+                        stepId={currentStep === 'cbc-capture' ? 'cbc-capture' : currentStep}
+                        title={
+                            currentStep === 'skin' ? "Dermal Scan" : 
+                            currentStep === 'under-eye' ? "Ocular Hub" : 
+                            currentStep === 'fingernails' ? "Ungual Check" : "Clinical Sync"
+                        } 
+                        description={
+                            currentStep === 'skin' ? "Spectral analysis of palmar creases and dermal indices." : 
+                            currentStep === 'under-eye' ? "Vascular mapping of the conjunctival capillary bed." : 
+                            currentStep === 'fingernails' ? "Assessment of ungual pallor and matrix distribution." : "Optical read of clinical hematology records."
+                        }
+                        icon={
+                            currentStep === 'skin' ? User : 
+                            currentStep === 'under-eye' ? Eye : 
+                            currentStep === 'fingernails' ? Hand : Database
+                        }
+                        onUpload={currentStep === 'cbc-capture' ? handleCbcSelect : (f: File) => handleImageSelect(f, currentStep as BodyPart)}
+                        image={currentStep === 'cbc-capture' ? cbcImage : images[currentStep as BodyPart]}
+                    />
                 )}
 
                 {currentStep === 'cbc-decision' && (
-                    <motion.div key="cbc-decision" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-center space-y-16 max-xl">
-                        <div className="w-40 h-40 mx-auto rounded-[3rem] glass-panel flex items-center justify-center border-primary/20 shadow-2xl">
-                            <FlaskConical className="w-20 h-20 text-primary" />
+                    <motion.div key="cbc" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, y: 30 }} className="text-center p-6 max-w-xl space-y-12 flex flex-col items-center relative z-20">
+                        <div className="relative isolate group">
+                            <div className="absolute inset-[-40px] bg-blue-600/20 rounded-full blur-[80px] animate-pulse" />
+                            <div className="w-48 h-48 rounded-[3rem] bg-blue-600/10 flex items-center justify-center border border-white/10 shadow-2xl relative z-10 overflow-hidden">
+                                <Database className="w-20 h-20 text-blue-500 drop-shadow-xl" />
+                                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent" />
+                            </div>
                         </div>
-                        <div className="space-y-8">
-                            <h3 className="text-6xl font-light tracking-tighter text-foreground leading-none">Clinical <span className="font-black text-primary italic">Sync</span></h3>
-                            <p className="text-xl text-muted-foreground font-light uppercase tracking-tight">Integrate CBC laboratory data for clinical-grade assessment.</p>
+                        <div className="space-y-6">
+                            <h3 className="text-4xl md:text-5xl font-black uppercase italic tracking-tighter leading-none">Clinical <span className="text-blue-500">Sync</span></h3>
+                            <p className="text-sm md:text-base font-medium uppercase tracking-widest text-muted-foreground/60 max-w-xs mx-auto leading-relaxed italic">Synchronize laboratory records for absolute diagnostic confidence.</p>
                         </div>
-                        <div className="flex flex-col gap-6">
-                            <Button className="h-20 bg-primary text-white rounded-3xl text-xs font-black tracking-[0.4em] uppercase hover:bg-red-600 transition-all shadow-2xl" onClick={() => setCurrentStep('cbc-capture')}>
-                                <Upload className="w-6 h-6 mr-4" />
-                                Sync Lab Report
+                        <div className="flex flex-col gap-4 w-full px-6">
+                            <Button className="h-16 rounded-3xl bg-blue-600 text-white shadow-xl hover:scale-105 transition-all text-[10px] font-black tracking-[0.4em] uppercase" onClick={() => setCurrentStep('cbc-capture')}>
+                                IMPORT LAB RECORDS
                             </Button>
-                            <Button variant="ghost" className="h-16 text-muted-foreground hover:text-foreground text-xs font-black tracking-[0.4em] uppercase" onClick={() => performFinalAnalysis()}>
-                                Continue Without Report
+                            <Button variant="ghost" className="h-12 text-muted-foreground uppercase text-[9px] tracking-[0.4em] font-black hover:bg-white/5" onClick={() => performFinalAnalysis()}>
+                                BYPASS SYNC
                             </Button>
                         </div>
                     </motion.div>
-                )}
-
-                {currentStep === 'cbc-capture' && (
-                    <StepCard key="cbc-capture" title="Clinical Sync" description="Scan your CBC report. Focus on Hemoglobin & RBC values." icon={FileText} onUpload={handleCbcSelect} image={cbcImage} />
                 )}
 
                 {currentStep === 'analyzing' && (
-                    <motion.div key="analyzing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center space-y-16">
-                        <div className="relative w-72 h-72 mx-auto flex items-center justify-center">
-                            <div className="absolute inset-0 border-[6px] border-primary/10 rounded-full" />
-                            <motion.div className="absolute inset-0 border-t-[6px] border-primary rounded-full" animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 2, ease: "linear" }} />
-                            <HeartLoader size={120} strokeWidth={2} />
-                        </div>
-                        <div className="space-y-6">
-                            <h3 className="text-5xl font-black text-foreground uppercase tracking-[0.3em]">Processing</h3>
-                            <p className="text-muted-foreground text-sm font-black uppercase tracking-[0.5em] animate-pulse">Synchronizing Neural Biomarkers...</p>
-                        </div>
-                    </motion.div>
+                    <div className="text-center space-y-12">
+                         <div className="relative isolate">
+                             <div className="absolute inset-[-40px] bg-primary blur-[40px] opacity-20 animate-pulse" />
+                             <HeartLoader size={100} strokeWidth={2} />
+                         </div>
+                         <div className="space-y-4">
+                            <h2 className="text-4xl font-black uppercase tracking-[0.8em] animate-pulse">Neural Fusion</h2>
+                            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary/60 italic">Processing Multimodal Diagnostic Weights...</p>
+                         </div>
+                    </div>
                 )}
 
                 {currentStep === 'results' && (
-                    <motion.div key="results" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full h-full flex flex-col">
-                       <div className="flex-1 overflow-y-auto pr-4 custom-scrollbar space-y-12">
-                            {validationResult && (
-                                <div className="p-12 rounded-[3.5rem] glass-panel border-primary/20 relative overflow-hidden group">
-                                    <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-primary/10 rounded-full blur-[120px] -mr-48 -mt-48" />
-                                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-10 relative z-10">
-                                        <div className="flex items-center gap-8">
-                                            <div className="p-5 bg-primary/10 rounded-3xl border border-primary/20">
-                                                <Activity className="w-12 h-12 text-primary" />
-                                            </div>
-                                            <div className="flex flex-col">
-                                                <span className="text-[11px] font-black text-primary uppercase tracking-[0.5em]">System Sync</span>
-                                                <h4 className="font-black text-foreground text-5xl tracking-tighter uppercase">Correlation</h4>
-                                            </div>
-                                        </div>
-                                        <div className="text-right">
-                                            <span className="text-[11px] font-black text-muted-foreground uppercase tracking-[0.3em] block mb-2">Reliability Index</span>
-                                            <span className={cn("text-8xl font-black tracking-tighter", validationResult.reliabilityScore > 80 ? "text-emerald-500" : "text-amber-500")}>
-                                                {validationResult.reliabilityScore}%
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div className="mt-10 p-10 rounded-[2.5rem] bg-background/40 border border-primary/10 italic text-xl text-muted-foreground">
-                                        "{validationResult.analysis}"
-                                    </div>
-                                </div>
-                            )}
-
-                            <ImageAnalysisReport 
-                                    analyses={{
-                                        skin: { ...analysisResults.skin, imageUrl: images.skin, status: 'success' } as any,
-                                        'under-eye': { ...analysisResults['under-eye'], imageUrl: images['under-eye'], status: 'success' } as any,
-                                        fingernails: { ...analysisResults.fingernails, imageUrl: images.fingernails, status: 'success' } as any,
-                                    }}
-                                    labReport={cbcResult}
-                                    onReset={() => { 
-                                        setCurrentStep('intro'); 
-                                        setImages({ skin: null, 'under-eye': null, fingernails: null }); 
-                                        setAnalysisResults({ skin: null, 'under-eye': null, fingernails: null });
-                                        setCbcResult(null);
-                                        setCbcImage(null);
-                                        setValidationResult(null);
-                                    }}
-                            />
-                       </div>
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full h-full overflow-y-auto no-scrollbar py-12 px-2 sm:px-4 lg:px-8">
+                        <div className="max-w-7xl mx-auto space-y-20">
+                             {validationResult && (
+                                 <div className="p-8 md:p-12 rounded-[2.5rem] md:rounded-[4rem] bg-primary/[0.03] border border-white/5 relative overflow-hidden text-left isolate shadow-2xl">
+                                     <div className="absolute top-0 right-0 p-12 opacity-[0.03] grayscale text-primary"><History className="w-64 h-64" /></div>
+                                     <div className="flex flex-col sm:flex-row justify-between items-start gap-8 relative z-10 border-b border-white/10 pb-10">
+                                         <div>
+                                            <Badge className="bg-primary/20 text-primary border-primary/30 uppercase tracking-widest mb-6 h-8 px-4 font-black">Final Verdict</Badge>
+                                            <h4 className="text-[clamp(2.5rem,8vw,6rem)] font-black uppercase italic tracking-tighter leading-[0.8]">Neural <br/><span className="italic-font">Lock</span></h4>
+                                         </div>
+                                         <div className="text-left sm:text-right">
+                                            <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-4 block italic opacity-60">Confidence Score</span>
+                                            <span className="text-7xl lg:text-9xl leading-none font-black tracking-tighter text-foreground">{validationResult.reliabilityScore}<span className="text-primary text-3xl md:text-5xl ml-1">%</span></span>
+                                         </div>
+                                     </div>
+                                     <div className="mt-10 text-[clamp(1.2rem,3vw,2.4rem)] font-light italic text-muted-foreground border-l-4 md:border-l-[8px] border-primary pl-8 md:pl-12 py-4 leading-relaxed text-balance">
+                                         "{validationResult.analysis}"
+                                     </div>
+                                 </div>
+                             )}
+                             <ImageAnalysisReport analyses={Object.fromEntries(Object.entries(analysisResults).map(([k, v]) => [k, { ...v, imageUrl: images[k as BodyPart], status: 'success' }])) as any} labReport={cbcResult} onReset={() => setCurrentStep('intro')} />
+                        </div>
                     </motion.div>
                 )}
             </AnimatePresence>
-        </div>
-    </motion.div>
+        </main>
+    </div>
   );
 
-  if (isPage) {
-    return AnalyzerContent;
-  }
-
   return (
-    <AnimatePresence>
-        {isOpen && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8">
-                {/* Backdrop Blur matching Dashboard */}
-                <motion.div 
-                    initial={{ backdropFilter: "blur(0px)" }} 
-                    animate={{ backdropFilter: "blur(20px)" }} 
-                    className="absolute inset-0 bg-background/80" 
-                    onClick={onClose} 
-                />
-                {AnalyzerContent}
-            </motion.div>
-        )}
-    </AnimatePresence>
+    <div className={cn("w-full transition-all duration-1000", isPage ? "" : "fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6")}>
+        {!isPage && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0 bg-background/95 backdrop-blur-2xl" onClick={onClose} />}
+        {MainLayout}
+    </div>
   );
 }
