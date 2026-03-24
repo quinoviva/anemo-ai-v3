@@ -196,7 +196,7 @@ export function ImageAnalysisReport({ analyses, labReport, onReset }: ImageAnaly
     <div className="space-y-16 md:space-y-20 animate-in fade-in zoom-in duration-1000 w-full overflow-hidden">
       
       {/* Functional Header Banner */}
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-8 glass-panel p-8 md:p-10 rounded-[2.5rem] border border-white/10 shadow-xl relative overflow-hidden isolate">
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-8 glass-panel p-6 md:p-10 rounded-[2.5rem] border border-white/10 shadow-xl relative overflow-hidden isolate">
         <div className="absolute inset-0 bg-grid-white/[0.01] bg-[size:30px_30px] z-0" />
         
         <div className="flex items-center gap-6 relative z-10 w-full sm:w-auto">
@@ -316,12 +316,12 @@ export function ImageAnalysisReport({ analyses, labReport, onReset }: ImageAnaly
 
           {/* Clinical Neural Logic Block */}
           <div className="space-y-12 text-left relative z-10 max-w-5xl">
-              <div className="flex items-center gap-6 opacity-80">
+              <div className="flex items-center gap-6 opacity-80 px-2 lg:px-0">
                   <Search className="w-6 h-6 text-foreground" />
                   <span className="text-xs font-bold uppercase tracking-widest leading-none">Logic Synthesis</span>
               </div>
-              <div className="p-10 md:p-16 lg:p-20 rounded-[3rem] bg-white/[0.02] border border-border border-l-[8px] border-l-primary leading-[1.4] relative overflow-hidden">
-                  <div className="absolute top-0 right-0 p-12 opacity-5 scale-150 rotate-12 text-primary"><Sparkles className="w-64 h-64 text-primary" /></div>
+              <div className="p-6 md:p-10 lg:p-20 rounded-[2.5rem] md:rounded-[3rem] bg-white/[0.02] border border-border border-l-[8px] border-l-primary leading-[1.4] relative overflow-hidden">
+                  <div className="absolute top-0 right-0 p-8 md:p-12 opacity-5 scale-150 rotate-12 text-primary"><Sparkles className="w-64 h-64 text-primary" /></div>
                   <div className="relative z-10 text-xl md:text-3xl font-medium text-foreground italic-font tracking-tight">
                       "{report.recommendations.split('\n')[0].replace(/^[*-]\s*/, '')}"
                   </div>
@@ -330,7 +330,7 @@ export function ImageAnalysisReport({ analyses, labReport, onReset }: ImageAnaly
 
           {/* High-Fidelity Lab Data Sync */}
           {labReport && (
-                <div className="p-12 md:p-16 lg:p-24 rounded-[3.5rem] bg-blue-500/5 border border-blue-500/10 space-y-16 relative overflow-hidden isolate shadow-xl">
+                <div className="p-6 md:p-12 lg:p-24 rounded-[2.5rem] md:rounded-[3.5rem] bg-blue-500/5 border border-blue-500/10 space-y-12 md:space-y-16 relative overflow-hidden isolate shadow-xl">
                     <div className="absolute inset-x-[-100px] blur-[150px] bg-blue-500/10 rounded-full opacity-40 mix-blend-screen" />
                     
                     <div className="flex flex-col md:flex-row items-center gap-10 text-left relative z-10 w-full border-b border-blue-500/10 pb-12">
@@ -365,8 +365,8 @@ export function ImageAnalysisReport({ analyses, labReport, onReset }: ImageAnaly
             )}
 
           {/* Disclaimer Footer Block */}
-          <div className="p-12 md:p-16 lg:p-20 rounded-[3rem] bg-red-950/20 border-t-[6px] border-red-600 relative isolate flex flex-col items-center gap-10 shadow-lg">
-              <div className="absolute top-0 right-0 p-12 opacity-5 rotate-12 text-red-600"><ShieldAlert className="w-64 h-64" /></div>
+          <div className="p-8 md:p-12 lg:p-20 rounded-[2.5rem] md:rounded-[3rem] bg-red-950/20 border-t-[6px] border-red-600 relative isolate flex flex-col items-center gap-8 md:gap-10 shadow-lg">
+              <div className="absolute top-0 right-0 p-8 md:p-12 opacity-5 rotate-12 text-red-600"><ShieldAlert className="w-48 h-48 md:w-64 md:h-64" /></div>
               
               <div className="flex flex-col items-center gap-6 text-red-500 relative z-10">
                   <div className="p-6 bg-red-600/10 rounded-3xl border border-red-600/20"><AlertCircle className="w-10 h-10 md:w-12 md:h-12" /></div>

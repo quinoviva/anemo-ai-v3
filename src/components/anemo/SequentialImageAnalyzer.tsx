@@ -617,7 +617,7 @@ export function SequentialImageAnalyzer({ onClose, isOpen, isPage }: SequentialI
                                 </div>
                             </div>
                             <div className="space-y-10">
-                                <h1 className="text-[clamp(3.5rem,14vw,9.5rem)] font-bold text-foreground leading-[0.75] drop-shadow-2xl tracking-tighter">
+                                <h1 className="text-[clamp(3.5rem,calc(1rem+12vw),9.5rem)] font-bold text-foreground leading-[0.75] drop-shadow-2xl tracking-tighter">
                                     ANEMO <i className="text-primary italic font-normal animate-pulse">Check</i>
                                 </h1>
                                 <div className="flex flex-col items-center gap-6">

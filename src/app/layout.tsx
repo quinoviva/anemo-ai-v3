@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Space_Grotesk } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/components/layout/ThemeProvider';
@@ -18,6 +18,13 @@ export const metadata: Metadata = {
   }
 };
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false, // Prevents iOS force zoom and pinch-to-zoom
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -28,16 +35,16 @@ export default function RootLayout({
        <head>
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
       </head>
-      <body className={`${spaceGrotesk.variable} font-sans`}>
+      <body className={`${spaceGrotesk.variable} font-sans overflow-x-hidden`}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="light"
+          defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >
           <FirebaseClientProvider>
-            <div className="flex min-h-screen flex-col bg-background text-foreground">
-            <main className="flex-1">
+            <div className="flex min-h-[100dvh] w-full flex-col bg-background text-foreground">
+            <main className="flex-1 w-full">
                 {children}
             </main>
             <Toaster />
