@@ -28,7 +28,9 @@ import {
   Search,
   ChevronRight,
   Sparkles,
-  ArrowUpRight
+  ArrowUpRight,
+  TrendingUp,
+  History
 } from 'lucide-react';
 import Link from 'next/link';
 import { useUser, useFirestore, useCollection, useMemoFirebase, useDoc } from '@/firebase';

@@ -15,7 +15,7 @@ const MedicalInfoSchema = z.object({
 const ValidationInputSchema = z.object({
   medicalInfo: MedicalInfoSchema,
   imageAnalysisReport: ImageAnalysisReport,
-  cbcAnalysis: CbcAnalysis,
+  cbcAnalysis: CbcAnalysis.optional(),
 });
 
 export type ValidateMultimodalResultsInput = z.infer<typeof ValidationInputSchema>;
@@ -60,8 +60,8 @@ export const validateMultimodalResultsFlow = ai.defineFlow(
         - **Skin:** ${input.imageAnalysisReport.skin}
 
         **Clinical Data (CBC Report):**
-        - **Hemoglobin:** ${input.cbcAnalysis.hemoglobin}
-        - **RBC:** ${input.cbcAnalysis.rbc}
+        - **Hemoglobin:** ${input.cbcAnalysis?.hemoglobin || 'N/A'}
+        - **RBC:** ${input.cbcAnalysis?.rbc || 'N/A'}
 
         **Task:**
         1.  **Multimodal Correlation:** Rigorously compare the visual physical markers against the clinical CBC values.
