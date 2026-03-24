@@ -8,7 +8,7 @@
  * - GenerateImageDescriptionOutput - The return type for the generateImageDescription function.
  */
 
-import {ai} from '@/ai/genkit';
+import {ai, geminiActiveModel as gemini15Flash} from '@/ai/genkit';
 import {z} from 'zod';
 
 const GenerateImageDescriptionInputSchema = z.object({
@@ -50,7 +50,7 @@ const generateImageDescriptionFlow = ai.defineFlow(
     }
 
     const {output} = await ai.generate({
-      model: 'googleai/gemini-2.0-flash',
+      model: gemini15Flash,
       config: {
         temperature: 0.0,
       },
@@ -69,7 +69,7 @@ Before any diagnostic work, verify the image state as if you were a pre-processi
     *   **Skin**: Is it clean and free of heavy lotions/covering?
 3.  **Target Lock**: Is the ${input.bodyPart} the primary subject and in sharp focus?
 
-**IF QUALITY FAILS**: You MUST set 'isValid' to false. Provide a technical explanation in 'description' (e.g., "Spectral interference detected: Nail polish obstructing hemoglobin markers.").
+**IF QUALITY FAILS**: You MUST set 'isValid' to false. Specifically, if the user has uploaded an image that is NOT the requested body part (e.g., a photo of a room, an animal, or a different body part), you MUST state exactly what the image contains in the 'description' (e.g., "INVALID OBJECT: This image contains a [cat], not the requested [fingernails]. Protocol aborted.").
 
 ### STAGE 2: SPECTRAL FEATURE EXTRACTION (Only if Valid)
 Examine the following specific biomarkers for anemia:
@@ -78,8 +78,8 @@ Examine the following specific biomarkers for anemia:
 3.  **Fingernails (Ungual Bed)**: Evaluate the capillary refill zone. Loss of translucent pinkness or a 'blanched' appearance in the nail bed indicates potential hematological insufficiency.
 
 ### OUTPUT PROTOCOL:
-*   **isValid**: Boolean (Strictly false for quality/obstruction issues).
-*   **description**: Technical observation of the physiological state (e.g., "Reduced vascular density observed in conjunctiva region. Luminosity optimal.").
+*   **isValid**: Boolean (Strictly false for quality/obstruction issues OR incorrect body part).
+*   **description**: Technical observation (if valid) OR detailed explanation of what went wrong (if invalid), including what the image actually contains.
 *   **analysisResult**: Choose ONE: "ANEMIA POSITIVE (Significant Pallor Detected)", "ANEMIA NEGATIVE (Healthy Vascular Presentation)", or "INCONCLUSIVE (Ambiguous Spectral Features)".
 *   **confidenceScore**: 0-100 (Be conservative).
 *   **recommendations**: A precise next step (e.g., "Confirm with CBC lab report for clinical validation.").`

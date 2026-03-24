@@ -1,6 +1,6 @@
 'use server';
 
-import { ai } from '@/ai/genkit';
+import { ai, geminiActiveModel as gemini15Flash } from '@/ai/genkit';
 import { z } from 'zod';
 
 const AnalyzeCbcReportInputSchema = z.object({
@@ -57,7 +57,7 @@ export const analyzeCbcReport = ai.defineFlow(
 
         const {output} = await ai.generate({
 
-          model: 'googleai/gemini-2.0-flash',
+          model: gemini15Flash,
 
           config: {
 

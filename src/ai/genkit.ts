@@ -1,7 +1,14 @@
-import {genkit} from 'genkit';
-import {googleAI} from '@genkit-ai/google-genai';
+import { gemini25FlashLite, googleAI } from '@genkit-ai/googleai';
+import { genkit } from 'genkit';
 
+// Configure a Genkit instance
 export const ai = genkit({
-  plugins: [googleAI()],
-  model: 'googleai/gemini-flash-latest',
+  plugins: [
+    googleAI({
+      apiKey: process.env.GOOGLE_GENAI_API_KEY,
+    }),
+  ],
+  model: gemini25FlashLite,
 });
+
+export { gemini25FlashLite as geminiActiveModel };

@@ -21,6 +21,11 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: false,
   },
 
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '60mb',
+    },
+  },
   images: {
     remotePatterns: [
       {

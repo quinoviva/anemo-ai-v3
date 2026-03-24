@@ -115,7 +115,11 @@ export async function runGenerateImageDescription(
 
     return result;
   } catch (error) {
-    console.error("Error in runGenerateImageDescription:", error);
+    console.error("CRITICAL ERROR in runGenerateImageDescription:", error);
+    if (error instanceof Error) {
+      console.error("Error Message:", error.message);
+      console.error("Stack Trace:", error.stack);
+    }
     throw error;
   }
 }

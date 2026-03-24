@@ -27,6 +27,7 @@ import {
     Info,
     Activity
 } from 'lucide-react';
+import { RealTimeCamera } from './RealTimeCamera';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
@@ -76,6 +77,7 @@ export function SequentialImageAnalyzer({ onClose, isOpen, isPage }: SequentialI
     const [cbcResult, setCbcResult] = useState<any>(null);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [validationResult, setValidationResult] = useState<any>(null);
+    const [isCameraOpen, setIsCameraOpen] = useState(false);
 
     const addLog = (message: string) => {
         setDiagnosticLogs(prev => [...prev.slice(-2), message]);
@@ -109,69 +111,69 @@ export function SequentialImageAnalyzer({ onClose, isOpen, isPage }: SequentialI
 
     const handleImageSelect = async (file: File, part: BodyPart) => {
         if (!file) return;
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-            const dataUri = e.target?.result as string;
-            setImages(prev => ({ ...prev, [part]: dataUri }));
-            setAnalysisStage('quality-check');
-            setDiagnosticLogs([]);
 
-            addLog(`[SYNC] Initializing ${part.toUpperCase()} Protocol`);
+        const dataUri = await resizeImage(file);
+        setImages(prev => ({ ...prev, [part]: dataUri }));
+        setAnalysisStage('quality-check');
+        setDiagnosticLogs([]);
 
-            try {
-                await new Promise(r => setTimeout(r, 1000));
-                const result = await runGenerateImageDescription({ photoDataUri: dataUri, bodyPart: part });
+        addLog(`[SYNC] Initializing ${part.toUpperCase()} Protocol`);
 
-                if (!result.isValid) {
-                    setAnalysisStage('failed');
-                    setQualityError(result.description);
-                    return;
-                }
+        try {
+            await new Promise(r => setTimeout(r, 1000));
+            const result = await runGenerateImageDescription({ photoDataUri: dataUri, bodyPart: part });
 
-                setAnalysisStage('anemia-detection');
-                addLog(`[SYNC] Mapping Spectral Indices...`);
-                await new Promise(r => setTimeout(r, 1500));
-
-                setAnalysisResults(prev => ({ ...prev, [part]: result }));
-                saveImageForTraining(dataUri, part, result.analysisResult, user?.displayName || 'Anonymous');
-                setAnalysisStage('complete');
-
-                setTimeout(() => {
-                    setAnalysisStage('idle');
-                    if (part === 'skin') setCurrentStep('under-eye');
-                    else if (part === 'under-eye') setCurrentStep('fingernails');
-                    else if (part === 'fingernails') setCurrentStep('cbc-decision');
-                    setShowGuide(false);
-                }, 1500);
-            } catch (error) {
+            if (!result.isValid) {
                 setAnalysisStage('failed');
-                setQualityError("Neural Sync Timeout. Check connection.");
+                setQualityError(result.description);
+                return;
             }
-        };
-        reader.readAsDataURL(file);
+
+            setAnalysisStage('anemia-detection');
+            addLog(`[SYNC] Mapping Spectral Indices...`);
+            await new Promise(r => setTimeout(r, 1500));
+
+            setAnalysisResults(prev => ({ ...prev, [part]: result }));
+            saveImageForTraining(dataUri, part, result.analysisResult, user?.displayName || 'Anonymous');
+            setAnalysisStage('complete');
+
+            setTimeout(() => {
+                setAnalysisStage('idle');
+                if (part === 'skin') setCurrentStep('under-eye');
+                else if (part === 'under-eye') setCurrentStep('fingernails');
+                else if (part === 'fingernails') setCurrentStep('cbc-decision');
+                setShowGuide(false);
+            }, 1500);
+        } catch (error: any) {
+            console.error("CAPTURE_FAILURE:", error);
+            setAnalysisStage('failed');
+
+            // Check for Gemini/Genkit Quota Errors (429)
+            if (error?.message?.includes('429') || error?.message?.includes('Quota exceeded')) {
+                setQualityError("AI Protocol at Capacity. Please wait 60 seconds for neural node reset and try again.");
+            } else {
+                setQualityError("Check connection.");
+            }
+        }
     };
 
     const handleCbcSelect = async (file: File) => {
         if (!file) return;
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-            const dataUri = e.target?.result as string;
-            setCbcImage(dataUri);
-            setIsAnalyzing(true);
-            try {
-                const result = await runAnalyzeCbcReport({ photoDataUri: dataUri });
-                setCbcResult(result);
-                saveLabReportForTraining(dataUri, result.summary, user?.displayName || 'Anonymous');
-                setTimeout(() => {
-                    setIsAnalyzing(false);
-                    performFinalAnalysis(result);
-                }, 1500);
-            } catch (error) {
+        const dataUri = await resizeImage(file);
+        setCbcImage(dataUri);
+        setIsAnalyzing(true);
+        try {
+            const result = await runAnalyzeCbcReport({ photoDataUri: dataUri });
+            setCbcResult(result);
+            saveLabReportForTraining(dataUri, result.summary, user?.displayName || 'Anonymous');
+            setTimeout(() => {
                 setIsAnalyzing(false);
-                setCbcImage(null);
-            }
-        };
-        reader.readAsDataURL(file);
+                performFinalAnalysis(result);
+            }, 1500);
+        } catch (error) {
+            setIsAnalyzing(false);
+            setCbcImage(null);
+        }
     };
 
     const performFinalAnalysis = async (cbcData: any = null) => {
@@ -205,7 +207,19 @@ export function SequentialImageAnalyzer({ onClose, isOpen, isPage }: SequentialI
 
     const StepCard = ({ title, description, icon: Icon, onUpload, image, stepId }: any) => {
         const fileInputRef = useRef<HTMLInputElement>(null);
-        const cameraInputRef = useRef<HTMLInputElement>(null);
+
+        if (isCameraOpen && stepId) {
+            return (
+                <RealTimeCamera
+                    bodyPart={stepId as BodyPart}
+                    onCapture={(uri) => {
+                        setIsCameraOpen(false);
+                        handleImageSelect(dataUriToBlob(uri), stepId as BodyPart);
+                    }}
+                    onClose={() => setIsCameraOpen(false)}
+                />
+            );
+        }
 
         if (showGuide && stepId) {
             return (
@@ -243,10 +257,15 @@ export function SequentialImageAnalyzer({ onClose, isOpen, isPage }: SequentialI
                                         </div>
                                     )}
                                     {analysisStage === 'failed' && (
-                                        <div className="absolute inset-0 bg-red-600/95 backdrop-blur-2xl p-6 flex flex-col items-center justify-center text-center gap-8 z-50">
-                                            <ShieldAlert className="w-16 h-16 text-white" />
-                                            <p className="text-sm font-bold text-white uppercase tracking-widest px-4">{qualityError}</p>
-                                            <Button size="sm" className="rounded-full h-14 px-10 bg-white text-red-600 font-black tracking-widest" onClick={() => { setImages(prev => ({ ...prev, [stepId]: null })); setAnalysisStage('idle'); }}>RETRY FEED</Button>
+                                        <div className="absolute inset-0 bg-red-600/95 backdrop-blur-2xl p-8 flex flex-col items-center justify-center text-center gap-8 z-50">
+                                            <div className="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center border border-white/20 animate-pulse">
+                                                <ShieldAlert className="w-12 h-12 text-white" />
+                                            </div>
+                                            <div className="space-y-4 px-6">
+                                                <p className="text-lg font-black text-white uppercase leading-tight">Analysis Failed</p>
+                                                <p className="text-[13px] font-black text-white/80 uppercase tracking-widest leading-relaxed italic">{qualityError}</p>
+                                            </div>
+                                            <Button size="sm" className="rounded-full h-16 px-12 bg-white text-red-600 font-black tracking-widest hover:scale-105 active:scale-95 transition-all shadow-2xl" onClick={() => { setImages(prev => ({ ...prev, [stepId]: null })); setAnalysisStage('idle'); }}>RETRY FEED</Button>
                                         </div>
                                     )}
                                 </motion.div>
@@ -309,7 +328,7 @@ export function SequentialImageAnalyzer({ onClose, isOpen, isPage }: SequentialI
                                         theme.primary === 'red' ? 'bg-red-600 shadow-red-600/30' :
                                             theme.primary === 'blue' ? 'bg-blue-600 shadow-blue-600/30' : 'bg-primary shadow-primary/30'
                                 )}
-                                onClick={() => cameraInputRef.current?.click()}
+                                onClick={() => setIsCameraOpen(true)}
                             >
                                 <div className="p-3 bg-white/20 rounded-xl"><Camera className="w-6 h-6" /></div>
                                 <span className="text-[12px] font-black uppercase tracking-widest text-left">Activate Camera</span>
@@ -323,10 +342,42 @@ export function SequentialImageAnalyzer({ onClose, isOpen, isPage }: SequentialI
                     </button>
 
                     <Input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && onUpload(e.target.files[0])} />
-                    <Input ref={cameraInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => e.target.files?.[0] && onUpload(e.target.files[0])} />
                 </div>
             </div>
         );
+    };
+
+    // --- HIGH-FIDELITY SPECIMEN UTILITIES ---
+    const resizeImage = (f: File, maxDim = 1600): Promise<string> => {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let w = img.width;
+                let h = img.height;
+                if (w > h && w > maxDim) { h *= maxDim / w; w = maxDim; }
+                else if (h > maxDim) { w *= maxDim / h; h = maxDim; }
+                canvas.width = w;
+                canvas.height = h;
+                const ctx = canvas.getContext('2d');
+                ctx?.drawImage(img, 0, 0, w, h);
+                resolve(canvas.toDataURL('image/jpeg', 0.85));
+                URL.revokeObjectURL(img.src);
+            };
+            img.src = URL.createObjectURL(f);
+        });
+    };
+
+    const dataUriToBlob = (dataUri: string): File => {
+        const byteString = atob(dataUri.split(',')[1]);
+        const mimeString = dataUri.split(',')[0].split(':')[1].split(';')[0];
+        const ab = new ArrayBuffer(byteString.length);
+        const ia = new Uint8Array(ab);
+        for (let i = 0; i < byteString.length; i++) {
+            ia[i] = byteString.charCodeAt(i);
+        }
+        const blob = new Blob([ab], { type: mimeString });
+        return new File([blob], "capture.png", { type: mimeString });
     };
 
     const MainLayout = (
