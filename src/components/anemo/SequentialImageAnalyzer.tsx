@@ -537,10 +537,10 @@ export function SequentialImageAnalyzer({ onClose, isOpen, isPage }: SequentialI
 
                     <div className="flex md:flex-col gap-6 md:gap-12 overflow-x-auto no-scrollbar md:overflow-visible w-full py-4 md:py-0">
                         {[
-                            { id: 'skin', label: 'Skin Scan', icon: User },
-                            { id: 'under-eye', label: 'Eye Scan', icon: Eye },
-                            { id: 'fingernails', label: 'Nail Scan', icon: Hand },
-                            { id: 'cbc-decision', label: 'Clinical Sync', icon: Database }
+                            { id: 'skin', label: 'Skin Scan', code: '001', icon: User },
+                            { id: 'under-eye', label: 'Eye Scan', code: '002', icon: Eye },
+                            { id: 'fingernails', label: 'Nail Scan', code: '003', icon: Hand },
+                            { id: 'cbc-decision', label: 'Clinical Sync', code: '004', icon: Database }
                         ].map((step) => {
                             const isDone = images[step.id as BodyPart] !== null || (step.id === 'cbc-decision' && (cbcResult !== null || currentStep === 'results'));
                             const isAt = currentStep === step.id || (step.id === 'cbc-decision' && currentStep === 'cbc-capture');
