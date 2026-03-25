@@ -1,6 +1,22 @@
-# Anemo Check AI
+# Anemo
 
-This is a Next.js application built with Firebase Studio that uses AI to perform preliminary anemia analysis. It features image analysis, a diagnostic chatbot, and tools to find nearby healthcare providers.
+
+ █████╗ ███╗   ██╗███████╗███╗   ███╗ ██████╗ 
+██╔══██╗████╗  ██║██╔════╝████╗ ████║██╔═══██╗
+███████║██╔██╗ ██║█████╗  ██╔████╔██║██║   ██║
+██╔══██║██║╚██╗██║██╔══╝  ██║╚██╔╝██║██║   ██║
+██║  ██║██║ ╚████║███████╗██║ ╚═╝ ██║╚██████╔╝
+╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝╚═╝     ╚═╝ ╚═════╝ 
+
+ ██╗    ██╗██╗   ██╗███████╗██╗   ██╗     ██████╗  ██████╗
+ ██║    ██║██║   ██║██╔════╝██║   ██║     ██╔══██╗██╔════╝
+ ██║ █╗ ██║██║   ██║███████╗██║   ██║     ██████╔╝██║     
+ ██║███╗██║╚██╗ ██╔╝╚════██║██║   ██║     ██╔═══╝ ██║     
+ ╚███╔███╔╝ ╚████╔╝ ███████║╚██████╔╝     ██║     ╚██████╗
+  ╚══╝╚══╝   ╚═══╝  ╚══════╝ ╚═════╝      ╚═╝      ╚═════╝
+   School of Information and Communications Technology
+
+Anemo is an intelligent system designed for the preliminary screening of anemia. It utilizes a multi-layered diagnostic pipeline that combines custom-trained CNN Models with the reasoning capabilities of Gemini AI.
 
 ## Getting Started
 
@@ -61,7 +77,7 @@ This project consists of two main parts that need to run simultaneously in separ
     npm run dev
     ```
 
-    This will start the frontend on [http://localhost:9002](http://localhost:9002).
+    This will start the frontend on [http://localhost:4100](http://localhost:4100).
 
 2.  **Run the Genkit AI Development Server**
 
@@ -79,7 +95,7 @@ This project consists of two main parts that need to run simultaneously in separ
 
     The Genkit UI will be available at [http://localhost:4000](http://localhost:4000) for inspecting flows and tools.
 
-You should now have the application fully running locally! Open [http://localhost:9002](http://localhost:9002) in your browser to see the app.
+You should now have the application fully running locally! Open [http://localhost:4100](http://localhost:4100) in your browser to see the app.
 
 
     Cyril Quinoviva

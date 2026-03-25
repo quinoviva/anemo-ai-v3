@@ -537,10 +537,10 @@ export function SequentialImageAnalyzer({ onClose, isOpen, isPage }: SequentialI
 
                     <div className="flex md:flex-col gap-6 md:gap-12 overflow-x-auto no-scrollbar md:overflow-visible w-full py-4 md:py-0">
                         {[
-                            { id: 'skin', label: 'Dermal Lock', code: 'PX01', icon: User },
-                            { id: 'under-eye', label: 'Ocular Hub', code: 'PX02', icon: Eye },
-                            { id: 'fingernails', label: 'Ungual Matrix', code: 'PX03', icon: Hand },
-                            { id: 'cbc-decision', label: 'Clinical Sync', code: 'PX04', icon: Database }
+                            { id: 'skin', label: 'Skin Scan', icon: User },
+                            { id: 'under-eye', label: 'Eye Scan', icon: Eye },
+                            { id: 'fingernails', label: 'Nail Scan', icon: Hand },
+                            { id: 'cbc-decision', label: 'Clinical Sync', icon: Database }
                         ].map((step) => {
                             const isDone = images[step.id as BodyPart] !== null || (step.id === 'cbc-decision' && (cbcResult !== null || currentStep === 'results'));
                             const isAt = currentStep === step.id || (step.id === 'cbc-decision' && currentStep === 'cbc-capture');
@@ -639,9 +639,9 @@ export function SequentialImageAnalyzer({ onClose, isOpen, isPage }: SequentialI
                             key={currentStep}
                             stepId={currentStep === 'cbc-capture' ? 'cbc-capture' : currentStep}
                             title={
-                                currentStep === 'skin' ? "Dermal Scan" :
-                                    currentStep === 'under-eye' ? "Ocular Bed" :
-                                        currentStep === 'fingernails' ? "Ungual Matrix" : "Clinical Sync"
+                                currentStep === 'skin' ? "Skin Scan" :
+                                    currentStep === 'under-eye' ? "Eye Scan" :
+                                        currentStep === 'fingernails' ? "Nail Scan" : "Clinical Sync"
                             }
                             description={
                                 currentStep === 'skin' ? "Spectral analysis of palmar creases and dermal indices for pallor." :
