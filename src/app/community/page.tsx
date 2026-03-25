@@ -14,7 +14,7 @@ const ColorBends = dynamic(() => import('@/components/ColorBends'), { ssr: false
 const teamMembers = [
   { name: 'Zaxius Berina', role: 'Visionary Lead', image: 'https://placehold.co/400x400/1a1a1a/FFF?text=Z' },
   { name: 'Ashley Jane De Juan', role: 'Core Operations', image: 'https://placehold.co/400x400/1a1a1a/FFF?text=A' },
-  { name: 'Erika', role: 'Design Lead', image: 'https://placehold.co/400x400/1a1a1a/FFF?text=E' },
+  { name: 'Erika Porcel', role: 'Design Lead', image: 'https://placehold.co/400x400/1a1a1a/FFF?text=E' },
   { name: 'Emerald Capillo', role: 'Tech Innovation', image: 'https://placehold.co/400x400/1a1a1a/FFF?text=E' },
 ];
 
@@ -106,8 +106,8 @@ export default function CommunityPage() {
           className="mb-40"
         >
           <motion.div variants={itemVariants} className="text-center mb-20">
-            <h1 className="text-5xl md:text-8xl font-thin tracking-tighter text-white">
-              THE MINDS
+            <h1 className="text-5xl md:text-8xl font-thin text-white">
+              ANEMO TEAM
             </h1>
             <div className="horizon-line" />
             <p className="text-sm md:text-base text-white/40 tracking-[0.3em] uppercase max-w-lg mx-auto leading-loose">

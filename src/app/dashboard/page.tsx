@@ -561,8 +561,7 @@ export default function DashboardPage() {
           <div className="flex items-center gap-4 mb-8 px-6 md:px-12 lg:px-20">
             <div className="h-px flex-1 bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
             <div className="flex items-center gap-2 text-primary/60">
-              <Sparkles className="h-4 w-4" />
-              <span className="text-[10px] font-bold uppercase tracking-[0.3em]">Nutritional Protocol</span>
+              <span className="text-[20px] font-bold uppercase tracking-[0.3em]">Nutrition Guide</span>
             </div>
             <div className="h-px flex-1 bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
           </div>
