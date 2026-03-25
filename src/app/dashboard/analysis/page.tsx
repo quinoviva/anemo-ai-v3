@@ -105,7 +105,7 @@ export default function AnalysisPage() {
                   <span className="text-primary animate-pulse">.</span>
                 </h1>
                 <p className="text-sm sm:text-xl md:text-2xl text-muted-foreground font-bold md:font-light tracking-[0.2em] md:tracking-widest uppercase">
-                  DIAGNOSTIC INTELLIGENCE HUB
+                  SCREENING INTELLIGENCE HUB
                 </p>
               </motion.div>
               
@@ -234,7 +234,7 @@ export default function AnalysisPage() {
                   <div className="h-px flex-1 bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
                   <div className="flex items-center gap-2 text-primary/60">
                      <ShieldCheck className="h-4 w-4 shrink-0" />
-                     <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] md:tracking-[0.3em]">Diagnostic Intelligence Powered by AnemoCloud</span>
+                     <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] md:tracking-[0.3em]">Anemia Screening Powered by Anemo</span>
                   </div>
                   <div className="h-px flex-1 bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
                </div>

@@ -288,19 +288,19 @@ export function SequentialImageAnalyzer({ onClose, isOpen, isPage }: SequentialI
                                             className="absolute inset-0 z-50 overflow-hidden flex flex-col items-center justify-center p-6 sm:p-10 text-center"
                                         >
                                             {/* Breach Context Background */}
-                                            <motion.div 
+                                            <motion.div
                                                 initial={{ opacity: 0 }}
                                                 animate={{ opacity: 1 }}
-                                                className="absolute inset-0 bg-red-950/40 backdrop-blur-2xl border border-red-500/10 shadow-[inset_0_0_100px_rgba(220,38,38,0.2)]" 
+                                                className="absolute inset-0 bg-red-950/40 backdrop-blur-2xl border border-red-500/10 shadow-[inset_0_0_100px_rgba(220,38,38,0.2)]"
                                             />
-                                            
+
                                             {/* Dynamic Error Ripple Overlay */}
                                             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full mix-blend-screen opacity-50 pointer-events-none">
                                                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(220,38,38,0.15)_0%,transparent_50%)] animate-pulse" />
                                             </div>
 
                                             <div className="relative z-10 flex flex-col items-center max-w-md w-full gap-8">
-                                                
+
                                                 {/* Animated Glitch Icon Container */}
                                                 <motion.div
                                                     variants={{
@@ -316,37 +316,37 @@ export function SequentialImageAnalyzer({ onClose, isOpen, isPage }: SequentialI
                                                         className="absolute inset-[-20%] rounded-full bg-red-600/20 blur-xl"
                                                     />
                                                     <div className="w-24 h-24 rounded-full bg-red-950/60 border border-red-500/40 flex items-center justify-center shadow-[0_0_40px_rgba(220,38,38,0.3)] relative overflow-hidden isolate">
-                                                        <motion.div 
+                                                        <motion.div
                                                             animate={{ y: ['-100%', '100%'] }}
                                                             transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                                                            className="absolute inset-x-0 h-px bg-red-400 z-10 opacity-30 shadow-[0_0_10px_rgba(248,113,113,1)]" 
+                                                            className="absolute inset-x-0 h-px bg-red-400 z-10 opacity-30 shadow-[0_0_10px_rgba(248,113,113,1)]"
                                                         />
                                                         <ShieldAlert className="w-10 h-10 text-red-500 relative z-20 drop-shadow-md" strokeWidth={1.5} />
                                                     </div>
                                                 </motion.div>
 
-                                                <motion.div 
+                                                <motion.div
                                                     variants={{
                                                         hidden: { y: 20, opacity: 0 },
                                                         visible: { y: 0, opacity: 1 }
                                                     }}
                                                     className="space-y-6 w-full"
                                                 >
-                                                    
+
                                                     {/* Central Error Typography */}
                                                     <div className="bg-red-950/30 p-6 md:p-8 border-y md:border-y-0 md:border border-red-500/20 md:rounded-3xl shadow-2xl relative overflow-hidden group">
-                                                         <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 to-transparent pointer-events-none" />
-                                                         <div className="absolute left-0 top-0 bottom-0 w-1 bg-red-500 rounded-l-3xl shadow-[0_0_20px_rgba(239,68,68,0.8)]" />
-                                                         
-                                                         <div className="space-y-4">
-                                                             <h3 className="flex items-center justify-center gap-3 text-[10px] md:text-xs font-bold text-red-500 tracking-[0.3em] uppercase opacity-90">
-                                                                 <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(239,68,68,1)]" /> 
-                                                                 Specimen Rejected
-                                                             </h3>
-                                                             <p className="text-xl md:text-2xl font-medium text-foreground tracking-tight leading-snug drop-shadow-md pb-2 text-balance">
-                                                                 {qualityError || "Neural synthesis failed due to severe optical anomaly."}
-                                                             </p>
-                                                         </div>
+                                                        <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 to-transparent pointer-events-none" />
+                                                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-red-500 rounded-l-3xl shadow-[0_0_20px_rgba(239,68,68,0.8)]" />
+
+                                                        <div className="space-y-4">
+                                                            <h3 className="flex items-center justify-center gap-3 text-[10px] md:text-xs font-bold text-red-500 tracking-[0.3em] uppercase opacity-90">
+                                                                <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(239,68,68,1)]" />
+                                                                Image Rejected
+                                                            </h3>
+                                                            <p className="text-xl md:text-2xl font-medium text-foreground tracking-tight leading-snug drop-shadow-md pb-2 text-balance">
+                                                                {qualityError || "Neural synthesis failed due to severe optical anomaly."}
+                                                            </p>
+                                                        </div>
                                                     </div>
 
                                                     {/* Integrated Telemetry Feed */}
@@ -375,7 +375,7 @@ export function SequentialImageAnalyzer({ onClose, isOpen, isPage }: SequentialI
                                                         onClick={() => { setImages(prev => ({ ...prev, [stepId]: null })); setAnalysisStage('idle'); }}
                                                     >
                                                         <div className="absolute inset-x-0 h-1 bg-white/30 top-0 group-hover:translate-y-16 transition-transform duration-700" />
-                                                        Re-initialize Sensor
+                                                        Recalibrate
                                                     </Button>
                                                 </motion.div>
                                             </div>
@@ -398,7 +398,7 @@ export function SequentialImageAnalyzer({ onClose, isOpen, isPage }: SequentialI
                                         </div>
                                     </div>
                                     <div className="flex flex-col items-center gap-4">
-                                        <span className="text-[11px] font-medium tracking-[0.4em] text-foreground/30">awaiting signal</span>
+                                        <span className="text-[11px] font-medium tracking-[0.4em] text-foreground/30">Searching for connection...</span>
                                         <div className="h-[1px] w-8 bg-foreground/10" />
                                     </div>
                                 </div>
@@ -574,10 +574,10 @@ export function SequentialImageAnalyzer({ onClose, isOpen, isPage }: SequentialI
                     <div className="p-8 rounded-[2.8rem] bg-white/[0.03] border border-white/5 space-y-6">
                         <div className="flex items-center gap-4 text-primary">
                             <Scan className="w-5 h-5 text-primary" />
-                            <span className="text-[11px] font-black uppercase tracking-widest leading-none">Matrix Intel</span>
+                            <span className="text-[11px] font-black uppercase tracking-widest leading-none">Main Insight</span>
                         </div>
                         <p className="text-[13px] font-black text-muted-foreground/60 uppercase tracking-[0.2em] leading-relaxed italic">
-                            Signal 100%. Node active. Neural weights synchronized at panay clinical cluster.
+                            Strong connection.
                         </p>
                     </div>
                 </div>
@@ -669,14 +669,14 @@ export function SequentialImageAnalyzer({ onClose, isOpen, isPage }: SequentialI
                             </div>
                             <div className="space-y-6">
                                 <h3 className="text-5xl md:text-6xl font-black uppercase tracking-tighter leading-none drop-shadow-2xl">Clinical <span className="text-blue-500 italic-font">Fibre</span></h3>
-                                <p className="text-sm md:text-base font-medium tracking-wide text-muted-foreground/80 max-w-sm mx-auto leading-relaxed">Synchronize high-fidelity laboratory data for diagnostic certainty.</p>
+                                <p className="text-sm md:text-base font-medium tracking-wide text-muted-foreground/80 max-w-sm mx-auto leading-relaxed">Match laboratory data for accurate results.</p>
                             </div>
                             <div className="flex flex-col gap-4 w-full px-12">
                                 <Button className="h-16 rounded-full bg-blue-600 text-white shadow-lg hover:scale-[1.03] transition-all text-xs font-bold tracking-widest uppercase" onClick={() => setCurrentStep('cbc-capture')}>
                                     IMPORT LAB RECORDS
                                 </Button>
                                 <Button variant="ghost" className="h-14 text-muted-foreground uppercase text-[10px] font-bold tracking-widest hover:bg-white/5 rounded-full" onClick={() => performFinalAnalysis()}>
-                                    BYPASS SYNC (LOW FIDELITY)
+                                    Basic Update
                                 </Button>
                             </div>
                         </motion.div>
@@ -689,8 +689,8 @@ export function SequentialImageAnalyzer({ onClose, isOpen, isPage }: SequentialI
                                 <HeartLoader size={120} strokeWidth={2.5} />
                             </div>
                             <div className="space-y-6">
-                                <h2 className="text-5xl md:text-6xl font-black uppercase tracking-[1.2em] animate-pulse text-foreground drop-shadow-2xl">Neural Sync</h2>
-                                <p className="text-[13px] font-black uppercase tracking-[0.6em] text-primary/60 italic">Mapping Complex Diagnostic Weights...</p>
+                                <h2 className="text-5xl md:text-6xl font-black uppercase tracking-[1.2em] animate-pulse text-foreground drop-shadow-2xl">System Match</h2>
+                                <p className="text-[13px] font-black uppercase tracking-[0.6em] text-primary/60 italic">Analyzing test results...</p>
                             </div>
                         </div>
                     )}
@@ -703,7 +703,7 @@ export function SequentialImageAnalyzer({ onClose, isOpen, isPage }: SequentialI
                                         <div className="absolute top-0 right-0 p-16 opacity-[0.03] grayscale text-primary"><History className="w-80 h-80" /></div>
                                         <div className="flex flex-col md:flex-row justify-between items-start gap-12 relative z-10 border-b border-white/10 pb-12">
                                             <div className="space-y-4">
-                                                <Badge className="bg-primary/10 text-primary border-primary/20 uppercase tracking-widest h-8 px-4 font-bold shadow-md text-[10px]">Diagnostic Clearance</Badge>
+                                                <Badge className="bg-primary/10 text-primary border-primary/20 uppercase tracking-widest h-8 px-4 font-bold shadow-md text-[10px]">Result Ready</Badge>
                                                 <h4 className="text-[clamp(3.5rem,8vw,7.5rem)] font-black tracking-tighter leading-[0.85]">Neural <span className="text-primary italic-font">Verdict</span></h4>
                                             </div>
                                             <div className="text-left md:text-right">
