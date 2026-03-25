@@ -229,7 +229,7 @@ export default function DashboardPage() {
           {/* Dynamic Background Mesh */}
           <div className="absolute inset-0 bg-gradient-to-br from-red-950/80 via-background to-background z-0" />
           <div className="absolute inset-0 bg-[url('/noise.png')] opacity-20 mix-blend-overlay z-0" />
-          
+
           {/* Animated Glow Orbs - Now using automatic CSS animations */}
           <div className="absolute -top-24 -right-24 w-96 h-96 bg-red-600/30 rounded-full blur-[120px] mix-blend-screen animate-slow-pulse group-hover:bg-red-500/40 transition-colors" />
           <div className="absolute -bottom-32 -left-32 w-[500px] h-[500px] bg-rose-600/20 rounded-full blur-[140px] mix-blend-screen animate-slow-float" />

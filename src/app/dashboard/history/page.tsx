@@ -45,10 +45,10 @@ export default function HistoryPage() {
               <span className="opacity-80">Health</span>
               <span className="font-black text-transparent bg-clip-text bg-gradient-to-r from-primary via-red-500 to-rose-400 drop-shadow-sm cursor-default relative group">
                 Track
-                <motion.span
+                {/* <motion.span
                   className="absolute -bottom-2 left-0 w-full h-1.5 bg-gradient-to-r from-primary to-rose-400 rounded-full shadow-[0_0_20px_rgba(220,38,38,0.5)]"
                   layoutId="underline-track"
-                />
+                /> */}
               </span>
               <span className="text-primary animate-pulse">.</span>
             </h1>
@@ -59,10 +59,10 @@ export default function HistoryPage() {
 
           <motion.div variants={itemVariants} className="hidden md:block">
             <div className="text-right">
-              <p className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Archive Status</p>
+              <p className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Database</p>
               <div className="flex items-center justify-end gap-2 mt-2">
                 <div className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_15px_theme(colors.emerald.500)] animate-pulse" />
-                <span className="text-sm font-medium tracking-tight">Sync Active</span>
+                <span className="text-sm font-medium tracking-tight">Active</span>
               </div>
             </div>
           </motion.div>
@@ -75,7 +75,7 @@ export default function HistoryPage() {
               <Activity className="h-16 w-16 text-primary" />
             </div>
             <div className="relative z-10">
-              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-4">Diagnostic Volume</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-4">Diagnostic</p>
               <h3 className="text-5xl font-light tracking-tighter">History</h3>
               <p className="text-sm text-muted-foreground mt-2 font-medium">Complete record of your health scans</p>
             </div>
@@ -97,7 +97,7 @@ export default function HistoryPage() {
               <Sparkles className="h-16 w-16 text-amber-500" />
             </div>
             <div className="relative z-10">
-              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-amber-500 mb-4">Premium Access</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-amber-500 mb-4">Secure</p>
               <h3 className="text-5xl font-light tracking-tighter">Vault</h3>
               <p className="text-sm text-muted-foreground mt-2 font-medium">Securely encrypted health data</p>
             </div>
