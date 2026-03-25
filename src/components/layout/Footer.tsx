@@ -9,7 +9,6 @@ export function Footer() {
     { label: 'Security', href: '/security' },
     { label: 'Status', href: '/status' },
     { label: 'Community', href: '/community' },
-    { label: 'Docs', href: '/docs' },
     { label: 'Contact', href: '/contact' },
   ];
 

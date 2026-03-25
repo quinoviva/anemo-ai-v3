@@ -111,7 +111,7 @@ export default function AnalysisPage() {
               
               <motion.div variants={itemVariants} className="hidden md:block">
                   <div className="text-right">
-                      <p className="text-[10px] font-black tracking-[0.4em] text-muted-foreground">CONCOLUUTIONAL NEURAL NETWORK ALGORITHM</p>
+                      <p className="text-[10px] font-black tracking-[0.4em] text-muted-foreground">CONVOLUTIONAL NEURAL NETWORK ALGORITHM</p>
                   </div>
               </motion.div>
             </div>
