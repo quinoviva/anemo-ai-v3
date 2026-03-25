@@ -60,7 +60,10 @@
     border-radius: inherit;
     padding: 1px;
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    -webkit-mask-composite: destination-out;
     -webkit-mask-composite: xor;
     mask-composite: exclude;
     z-index: 2;

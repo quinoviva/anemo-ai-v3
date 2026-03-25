@@ -12,7 +12,7 @@ const spaceGrotesk = Space_Grotesk({
 
 export const metadata: Metadata = {
   title: 'Anemo',
-  description: 'Intelligent anemia detection using CNN and AI',
+  description: 'Intelligent anemia screening using CNN and AI',
   icons: {
     icon: '/favicon.svg',
   }
