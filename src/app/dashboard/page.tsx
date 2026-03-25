@@ -215,7 +215,7 @@ export default function DashboardPage() {
               <p className="text-sm font-bold uppercase tracking-widest text-muted-foreground">System Status</p>
               <div className="flex items-center justify-end gap-2 mt-2">
                 <div className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_15px_theme(colors.emerald.500)] animate-pulse" />
-                <span className="text-sm font-medium tracking-tight">Active Engine</span>
+                <span className="text-sm font-medium tracking-tight">Active</span>
               </div>
             </div>
           </motion.div>
@@ -249,7 +249,7 @@ export default function DashboardPage() {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
                 </span>
-                <span className="font-bold text-[10px] uppercase tracking-[0.25em] text-red-400">New Protocol Available</span>
+                <span className="font-bold text-[10px] uppercase tracking-[0.25em] text-red-400">Ready to Start</span>
               </div>
 
               <div className="space-y-4">
@@ -258,7 +258,7 @@ export default function DashboardPage() {
                   <span className="font-serif italic text-red-500/90">& Your Health.</span>
                 </h2>
                 <p className="text-muted-foreground leading-relaxed text-lg md:text-xl font-light max-w-2xl text-balance">
-                  Unveil the silent markers of anemia with precision. Anemo leverages <span className="text-foreground font-medium">neural diagnostics</span> to decode your hematological data into personalized health protocols.
+                  Unveil the silent signs of anemia with precision. Anemo uses <span className="text-foreground font-medium">neural diagnostics</span> to decode your hematological data into personalized health protocols.
                 </p>
               </div>
             </div>
