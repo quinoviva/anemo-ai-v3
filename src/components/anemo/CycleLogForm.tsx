@@ -34,6 +34,7 @@ import {
 import { useUser, useFirestore } from '@/firebase';
 import { addDoc, collection, serverTimestamp, doc, setDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
+import { getErrorMessage } from '@/lib/utils';
 import {
     Dialog,
     DialogContent,
@@ -125,7 +126,7 @@ export function CycleLogForm({ open, onOpenChange, trigger, onFormSubmit }: Cycl
     } catch (error: any) {
        toast({
            title: "Error",
-           description: error.message || "Failed to save information.",
+           description: getErrorMessage(error, "Failed to save your information. Please try again."),
            variant: "destructive"
        });
     } finally {

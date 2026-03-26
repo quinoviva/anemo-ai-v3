@@ -27,7 +27,7 @@ export function MedicalInsights() {
   return (
     <div className="py-12 space-y-8">
       <div className="text-center space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight">The Science Behind Anemo Check</h2>
+        <h2 className="text-3xl font-bold tracking-tight">The Science Behind Anemo</h2>
         <p className="text-muted-foreground max-w-2xl mx-auto">
           Understanding why visual indicators are a powerful first line of defense against anemia.
         </p>
@@ -63,7 +63,7 @@ export function MedicalInsights() {
           <div className="space-y-2">
             <h4 className="text-lg font-bold">Important Medical Disclaimer</h4>
             <p className="text-sm text-muted-foreground">
-              Anemo Check is a screening tool, not a diagnostic one. While visual indicators like pallor are clinically recognized, they cannot replace a formal Complete Blood Count (CBC) test. Always consult with a licensed medical professional for a final diagnosis.
+              Anemo is a screening tool, not a diagnostic one. While visual indicators like pallor are clinically recognized, they cannot replace a formal Complete Blood Count (CBC) test. Always consult with a licensed medical professional for a final diagnosis.
             </p>
           </div>
         </div>

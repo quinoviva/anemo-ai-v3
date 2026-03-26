@@ -30,7 +30,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth, useFirestore } from '@/firebase';
 import HeartLoader from '@/components/ui/HeartLoader';
 import { Eye, EyeOff, Mail, Lock, ArrowRight, User } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, getErrorMessage } from '@/lib/utils';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email.' }),
@@ -65,7 +65,7 @@ export function LoginForm() {
     } catch (error: any) {
       toast({
         title: 'Login Failed',
-        description: error.message,
+        description: getErrorMessage(error, 'Invalid email or password.'),
         variant: 'destructive',
       });
     } finally {
@@ -103,7 +103,7 @@ export function LoginForm() {
     } catch (error: any) {
       toast({
         title: 'Google Sign-In Failed',
-        description: error.message,
+        description: getErrorMessage(error, 'Could not complete Google sign-in.'),
         variant: 'destructive',
       });
     } finally {
@@ -119,7 +119,7 @@ export function LoginForm() {
     } catch (error: any) {
       toast({
         title: 'Guest Sign-In Failed',
-        description: error.message,
+        description: getErrorMessage(error, 'Guest sign-in is currently unavailable.'),
         variant: 'destructive',
       });
     } finally {

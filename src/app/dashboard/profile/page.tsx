@@ -22,7 +22,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { useToast } from '@/hooks/use-toast';
 import { Upload, User, LogIn, Info, Activity, ShieldCheck, Heart, UserCircle, MapPin } from 'lucide-react';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { cn } from '@/lib/utils';
+import { cn, getErrorMessage } from '@/lib/utils';
 import HeartLoader from '@/components/ui/HeartLoader';
 import { AnemoLoading } from '@/components/ui/anemo-loading';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -192,7 +192,7 @@ export default function ProfilePage() {
       form.setValue('photoURL', downloadURL);
       toast({ title: 'Success', description: 'Profile picture uploaded. Click "Save Changes" to apply.' });
     } catch (error) {
-      toast({ title: 'Upload Failed', description: 'Could not upload profile picture.', variant: 'destructive' });
+      toast({ title: 'Upload Failed', description: getErrorMessage(error, 'Could not upload profile picture. Please try a different image.'), variant: 'destructive' });
     } finally {
       setIsUploading(false);
     }
@@ -243,7 +243,7 @@ export default function ProfilePage() {
       window.dispatchEvent(new CustomEvent('profile-updated'));
       toast({ title: 'Profile Updated', description: 'Your information has been saved and synced.' });
     } catch (error: any) {
-      toast({ title: 'Update Failed', description: error.message, variant: 'destructive' });
+      toast({ title: 'Update Failed', description: getErrorMessage(error, 'Could not save your profile changes.'), variant: 'destructive' });
     } finally {
       setIsLoading(false);
     }

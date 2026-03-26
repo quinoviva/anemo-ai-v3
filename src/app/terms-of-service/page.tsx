@@ -59,17 +59,17 @@ export default function TermsOfServicePage() {
           <div className="space-y-12 text-lg font-light leading-relaxed text-white/70">
             <section className="space-y-4">
               <p>
-                Welcome to Anemo Check, an AI-powered web application designed to help users detect
+                Welcome to Anemo, an AI-powered web application designed to help users detect
                 possible signs of anemia through image analysis and health-related insights. By using
                 our website, features, or services, you agree to comply with and be bound by the
-                following Terms of Service. Please read them carefully before using Anemo Check.
+                following Terms of Service. Please read them carefully before using Anemo.
               </p>
             </section>
 
             <section className="space-y-4">
               <h2 className="text-2xl font-semibold text-white tracking-tight">1. Acceptance of Terms</h2>
               <p>
-                By accessing or using Anemo Check, you confirm that you have read, understood, and
+                By accessing or using Anemo, you confirm that you have read, understood, and
                 agree to these Terms of Service and our Privacy Policy. If you do not agree, you may
                 not access or use our services.
               </p>
@@ -78,7 +78,7 @@ export default function TermsOfServicePage() {
             <section className="space-y-4">
               <h2 className="text-2xl font-semibold text-white tracking-tight">2. Purpose of the Service</h2>
               <p>
-                Anemo Check is intended for informational and educational purposes only. The
+                Anemo is intended for informational and educational purposes only. The
                 AI-generated results, insights, and reports are not a substitute for professional
                 medical diagnosis, advice, or treatment. Always consult a qualified healthcare
                 provider regarding any medical condition or concern.
@@ -88,7 +88,7 @@ export default function TermsOfServicePage() {
             <section className="space-y-4">
               <h2 className="text-2xl font-semibold text-white tracking-tight">3. User Accounts</h2>
               <p>
-                You may use Anemo Check as a guest or sign in through Google via Firebase
+                You may use Anemo as a guest or sign in through Google via Firebase
                 Authentication. You are responsible for maintaining the confidentiality of your account and ensuring
                 that your login credentials are secure.
               </p>
@@ -96,7 +96,7 @@ export default function TermsOfServicePage() {
 
             <section className="space-y-4">
               <h2 className="text-2xl font-semibold text-white tracking-tight">4. Use of the Service</h2>
-              <p>By using Anemo Check, you agree:</p>
+              <p>By using Anemo, you agree:</p>
               <ul className="list-none space-y-3 pl-0 border-l border-white/10 ml-2 pl-6">
                 <li>Not to misuse the platform or attempt unauthorized access.</li>
                 <li>Not to upload inappropriate or harmful content.</li>
@@ -116,7 +116,7 @@ export default function TermsOfServicePage() {
             <section className="space-y-4">
               <h2 className="text-2xl font-semibold text-white tracking-tight">6. AI Limitations</h2>
               <p>
-                Anemo Check uses advanced AI models but may produce inaccurate or incomplete results.
+                Anemo uses advanced AI models but may produce inaccurate or incomplete results.
                 The AI’s conclusions are probabilistic and should be used as guidance only.
               </p>
             </section>

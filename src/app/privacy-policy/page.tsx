@@ -59,7 +59,7 @@ export default function PrivacyPolicyPage() {
           <div className="space-y-12 text-lg font-light leading-relaxed text-white/70">
             <section className="space-y-4">
               <p>
-                Welcome to Anemo Check. Your privacy and data protection
+                Welcome to Anemo. Your privacy and data protection
                 are important to us. This Privacy Policy explains how we collect, use, store, and
                 protect your personal information when you use our app and services.
               </p>
@@ -101,7 +101,7 @@ export default function PrivacyPolicyPage() {
             <section className="space-y-4">
               <h2 className="text-2xl font-semibold text-white tracking-tight">4. AI and Data Processing</h2>
               <p>
-                Anemo Check uses Gemini AI and a custom CNN model to process your images. AI-generated 
+                Anemo uses Gemini AI and a custom CNN model to process your images. AI-generated 
                 outputs are probabilistic and may not always be medically accurate. No personal data 
                 is shared externally or used for training unrelated models.
               </p>

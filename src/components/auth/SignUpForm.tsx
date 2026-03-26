@@ -37,6 +37,7 @@ import { Eye, EyeOff, User, Mail, Lock, MapPin, Users, ArrowRight } from 'lucide
 import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { iloiloMunicipalities } from '@/lib/iloilo-municipalities';
 import { ScrollArea } from '../ui/scroll-area';
+import { getErrorMessage } from '@/lib/utils';
 
 const formSchema = z
   .object({
@@ -118,7 +119,7 @@ export function SignUpForm() {
     } catch (error: any) {
       toast({
         title: 'Sign Up Failed',
-        description: error.message,
+        description: getErrorMessage(error, 'Could not create your account. Please try again.'),
         variant: 'destructive',
       });
     } finally {

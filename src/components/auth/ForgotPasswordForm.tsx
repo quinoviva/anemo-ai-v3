@@ -21,6 +21,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/firebase';
 import { Mail, ArrowLeft, ArrowRight } from 'lucide-react';
 import HeartLoader from '@/components/ui/HeartLoader';
+import { getErrorMessage } from '@/lib/utils';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email.' }),
@@ -51,7 +52,7 @@ export function ForgotPasswordForm() {
     } catch (error: any) {
       toast({
         title: 'Error Sending Reset Email',
-        description: error.message,
+        description: getErrorMessage(error, 'Could not send reset email. Please try again later.'),
         variant: 'destructive',
       });
     } finally {

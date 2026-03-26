@@ -1,9 +1,9 @@
 export default function HowToUsePage() {
   return (
     <div className="container mx-auto py-8 px-4">
-      <h1 className="text-3xl font-bold mb-4">How to Use Anemo Check</h1>
+      <h1 className="text-3xl font-bold mb-4">How to Use Anemo</h1>
       <p className="text-lg text-muted-foreground mb-6">
-        Welcome to Anemo Check! This guide will help you understand how to best utilize our platform for your health monitoring needs.
+        Welcome to Anemo! This guide will help you understand how to best utilize our platform for your health monitoring needs.
       </p>
 
       <section className="mb-8">
@@ -18,9 +18,9 @@ export default function HowToUsePage() {
       </section>
 
       <section className="mb-8">
-        <h2 className="text-2xl font-semibold mb-3">2. Performing an Anemo Check Analysis</h2>
+        <h2 className="text-2xl font-semibold mb-3">2. Performing an Anemo Analysis</h2>
         <p className="mb-2">
-          Anemo Check utilizes image analysis for early anemia detection.
+          Anemo utilizes image analysis for early anemia detection.
         </p>
         <ol className="list-decimal list-inside pl-4 space-y-2">
           <li>Navigate to the <a href="/dashboard/analysis" className="text-primary hover:underline">New Scan</a> section from your dashboard.</li>
@@ -52,12 +52,12 @@ export default function HowToUsePage() {
       <section className="mb-8">
         <h2 className="text-2xl font-semibold mb-3">5. Important Disclaimer</h2>
         <p className="text-red-500 font-medium">
-          Anemo Check is a health-assistive tool, not a medical diagnostic service. Always consult a qualified healthcare provider for professional diagnosis and treatment.
+          Anemo is a health-assistive tool, not a medical diagnostic service. Always consult a qualified healthcare provider for professional diagnosis and treatment.
         </p>
       </section>
 
       <p className="text-muted-foreground text-sm mt-8">
-        We hope Anemo Check helps you on your health journey!
+        We hope Anemo helps you on your health journey!
       </p>
     </div>
   );
