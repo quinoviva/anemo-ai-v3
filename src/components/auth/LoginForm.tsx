@@ -11,7 +11,9 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   signInAnonymously,
+  browserPopupRedirectResolver,
 } from 'firebase/auth';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { motion, Variants } from 'framer-motion';
 
 import { Button } from '@/components/ui/button';
@@ -25,7 +27,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/firebase';
+import { useAuth, useFirestore } from '@/firebase';
 import HeartLoader from '@/components/ui/HeartLoader';
 import { Eye, EyeOff, Mail, Lock, ArrowRight, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -41,6 +43,7 @@ export function LoginForm() {
   const [isGuestLoading, setIsGuestLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const auth = useAuth();
+  const firestore = useFirestore();
   const router = useRouter();
   const { toast } = useToast();
 
@@ -74,7 +77,28 @@ export function LoginForm() {
     setIsGoogleLoading(true);
     try {
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
+      provider.setCustomParameters({ prompt: 'select_account' });
+      const result = await signInWithPopup(auth, provider, browserPopupRedirectResolver);
+      const user = result.user;
+
+      // Check if user document exists, if not, create it
+      const userDocRef = doc(firestore, 'users', user.uid);
+      const userDoc = await getDoc(userDocRef);
+      
+      if (!userDoc.exists()) {
+        const [firstName, ...lastNameParts] = (user.displayName || '').split(' ');
+        await setDoc(userDocRef, {
+          id: user.uid,
+          firstName: firstName || 'User',
+          lastName: lastNameParts.join(' ') || '',
+          email: user.email,
+          createdAt: new Date(),
+          medicalInfo: {
+            sex: 'Male' // Default, user can change later in settings
+          }
+        }, { merge: true });
+      }
+
       router.push('/');
     } catch (error: any) {
       toast({
