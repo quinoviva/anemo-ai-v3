@@ -159,8 +159,8 @@ export function LoginForm() {
         <h3 className="text-4xl font-light tracking-tighter text-foreground">
             Welcome <span className="font-semibold text-primary">Back</span>
         </h3>
-        <p className="text-muted-foreground text-lg font-light tracking-wide">
-          Enter your credentials to access your dashboard.
+        <p className="text-lg font-semibold tracking-wide">
+          Log into Anemo
         </p>
       </motion.div>
 

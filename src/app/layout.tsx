@@ -5,7 +5,7 @@ import { ThemeProvider } from '@/components/layout/ThemeProvider';
 import { Toaster } from '@/components/ui/toaster';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 
-const spaceGrotesk = Space_Grotesk({ 
+const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
   variable: '--font-space-grotesk',
 });
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   title: 'Anemo',
   description: 'Intelligent anemia screening using CNN and AI',
   icons: {
-    icon: '/favicon.svg',
+    icon: '/anemo.png',
   }
 };
 
@@ -32,8 +32,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-       <head>
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+      <head>
+        <link rel="icon" href="/anemo.png" type="image/svg+xml" />
       </head>
       <body className={`${spaceGrotesk.variable} font-sans overflow-x-hidden`}>
         <ThemeProvider
@@ -44,10 +44,10 @@ export default function RootLayout({
         >
           <FirebaseClientProvider>
             <div className="flex min-h-[100dvh] w-full flex-col bg-background text-foreground">
-            <main className="flex-1 w-full">
+              <main className="flex-1 w-full">
                 {children}
-            </main>
-            <Toaster />
+              </main>
+              <Toaster />
             </div>
           </FirebaseClientProvider>
         </ThemeProvider>
