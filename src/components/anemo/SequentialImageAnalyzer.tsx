@@ -572,12 +572,8 @@ export function SequentialImageAnalyzer({ onClose, isOpen, isPage }: SequentialI
 
                 <div className="hidden lg:block w-full">
                     <div className="p-8 rounded-[2.8rem] bg-white/[0.03] border border-white/5 space-y-6">
-                        <div className="flex items-center gap-4 text-primary">
-                            <Scan className="w-5 h-5 text-primary" />
-                            <span className="text-[11px] font-black uppercase tracking-widest leading-none">Main Insight</span>
-                        </div>
-                        <p className="text-[13px] font-black text-muted-foreground/60 uppercase tracking-[0.2em] leading-relaxed italic">
-                            Strong connection.
+                        <p className="text-[13px] text-muted-foreground/80 leading-relaxed text-center">
+                            Powered by <span className="text-primary font-black">ANEMO</span>
                         </p>
                     </div>
                 </div>
@@ -610,10 +606,6 @@ export function SequentialImageAnalyzer({ onClose, isOpen, isPage }: SequentialI
                                 <div className="w-64 h-64 md:w-80 md:h-80 rounded-[4rem] md:rounded-[5rem] bg-gradient-to-br from-primary/20 via-background/40 to-background flex items-center justify-center border border-white/10 shadow-[-20px_-20px_60px_rgba(255,255,255,0.02),20px_20px_60px_rgba(0,0,0,0.4)] relative z-10 overflow-hidden ring-1 ring-white/10">
                                     <Fingerprint className="w-32 h-32 md:w-40 md:h-40 text-primary group-hover:scale-110 transition-transform duration-1000" />
                                     <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:25px_25px]" />
-                                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3">
-                                        <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                                        <span className="text-[10px] font-black uppercase tracking-widest text-foreground/40">Lens: Offline</span>
-                                    </div>
                                 </div>
                             </div>
                             <div className="space-y-10">
