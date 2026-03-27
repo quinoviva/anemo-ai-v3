@@ -14,10 +14,14 @@ export const metadata: Metadata = {
   title: 'Anemo',
   description: 'Intelligent anemia screening using CNN and AI',
   icons: {
-    icon: '/anemo.png',
-  }
+    icon: [
+      { url: '/anemo.png?v=3', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/anemo.png?v=3', sizes: '180x180', type: 'image/png' },
+    ],
+  },
 };
-
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
