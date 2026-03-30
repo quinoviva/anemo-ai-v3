@@ -147,7 +147,17 @@ export function consensusClassify(
     };
   }
 
-  const w = weights ?? scores.map(() => 1 / scores.length);
+  // Validate weights: must have the same length as scores, every element must
+  // be finite, and the total must be > 0.  Fall back to equal weights when
+  // the provided weights are invalid to avoid NaN/Infinity propagation.
+  const equalWeights = scores.map(() => 1 / scores.length);
+  const useEqualWeights =
+    !weights ||
+    weights.length !== scores.length ||
+    !weights.every(Number.isFinite) ||
+    weights.reduce((s, v) => s + v, 0) <= 0;
+
+  const w = useEqualWeights ? equalWeights : weights!;
   const totalWeight = w.reduce((s, v) => s + v, 0);
   const weightedMean =
     scores.reduce((sum, score, i) => sum + score * w[i], 0) / totalWeight;
