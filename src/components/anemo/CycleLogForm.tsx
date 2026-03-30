@@ -311,22 +311,22 @@ export function CycleLogForm({ open, onOpenChange, trigger, onFormSubmit }: Cycl
                                     <Button
                                     variant={"outline"}
                                     className={cn(
-                                        "w-full pl-3 text-left font-normal",
+                                        "w-full h-11 pl-4 pr-3 text-left font-normal rounded-2xl glass-button border-border/40 hover:border-primary/30",
                                         !field.value && "text-muted-foreground"
                                     )}
                                     >
+                                    <CalendarIcon className="mr-2 h-4 w-4 text-primary/60 shrink-0" />
                                     {field.value?.from ? (
                                         field.value.to ? (
                                         <>
-                                            {format(field.value.from, "LLL dd, y")} -{" "}
-                                            {format(field.value.to, "LLL dd, y")}
+                                            {format(field.value.from, "MMM d, yyyy")} —{" "}
+                                            {format(field.value.to, "MMM d, yyyy")}
                                         </>                                ) : (
-                                        format(field.value.from, "LLL dd, y")
+                                        format(field.value.from, "MMM d, yyyy")
                                         )
                                     ) : (
-                                        <span>Pick a date range</span>
+                                        <span>Select cycle dates</span>
                                     )}
-                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                     </Button>
                                 </FormControl>
                                 </PopoverTrigger>

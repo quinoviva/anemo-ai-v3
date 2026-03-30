@@ -30,7 +30,7 @@ export function LocalCbcAnalyzer({ onBack }: LocalCbcAnalyzerProps) {
    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
    const [status, setStatus] = useState<AnalysisState>('idle');
    const [progress, setProgress] = useState(0); // For OCR progress
-   const [result, setResult] = useState<any | null>(null); // Using any for the loose JSON structure from local AI
+   const [result, setResult] = useState<{ summary?: string; parameters?: { parameter: string; value: string; unit: string; isNormal: boolean }[]; error?: string } | null>(null);
    const [error, setError] = useState<string | null>(null);
    const [isNanoAvailable, setIsNanoAvailable] = useState<boolean | null>(null);
 
@@ -100,8 +100,9 @@ export function LocalCbcAnalyzer({ onBack }: LocalCbcAnalyzerProps) {
             }
          });
 
-         const { data: { text } } = await worker.recognize(previewUrl);
+         const recognizeResult = await worker.recognize(previewUrl);
          await worker.terminate();
+         const text = recognizeResult?.data?.text ?? '';
 
          if (!text || text.trim().length < 10) {
             throw new Error('Could not extract sufficient text from the image. Please try a clearer image.');
@@ -283,13 +284,13 @@ export function LocalCbcAnalyzer({ onBack }: LocalCbcAnalyzerProps) {
                                     </TableRow>
                                  </TableHeader>
                                  <TableBody>
-                                    {result.parameters.map((p: any, i: number) => (
+                                    {(result.parameters ?? []).map((p, i: number) => (
                                        <TableRow key={i}>
-                                          <TableCell className="font-medium">{p.parameter}</TableCell>
-                                          <TableCell>{p.value} <span className="text-xs text-muted-foreground">{p.unit}</span></TableCell>
+                                          <TableCell className="font-medium">{p?.parameter ?? '—'}</TableCell>
+                                          <TableCell>{p?.value} <span className="text-xs text-muted-foreground">{p?.unit}</span></TableCell>
                                           <TableCell>
-                                             <Badge variant={p.isNormal === false ? 'destructive' : 'outline'}>
-                                                {p.isNormal === false ? 'Abnormal' : 'Normal'}
+                                             <Badge variant={p?.isNormal === false ? 'destructive' : 'outline'}>
+                                                {p?.isNormal === false ? 'Abnormal' : 'Normal'}
                                              </Badge>
                                           </TableCell>
                                        </TableRow>

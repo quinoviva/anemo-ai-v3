@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import {
     Table,
     TableBody,
@@ -61,6 +61,7 @@ import { MenstrualCycleCorrelator, CycleLogType } from './MenstrualCycleCorrelat
 import { AnemoLoading } from '@/components/ui/anemo-loading';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import jsPDF from 'jspdf';
 
 type ImageReport = PersonalizedRecommendationsOutput & {
     id: string;
@@ -142,7 +143,11 @@ export function AnalysisHistory() {
             ...imageHistory.map((item: any) => ({ ...item, type: 'image' } as ImageReport)),
             ...cbcHistory.map((item: any) => ({ ...item, type: 'cbc' } as CbcReport))
         ];
-        return combined.sort((a, b) => b.createdAt.toDate().getTime() - a.createdAt.toDate().getTime());
+        return combined.sort((a, b) => {
+            const aTime = a.createdAt?.toDate?.()?.getTime?.() ?? 0;
+            const bTime = b.createdAt?.toDate?.()?.getTime?.() ?? 0;
+            return bTime - aTime;
+        });
     }, [imageHistory, cbcHistory]);
 
     const getBadgeVariant = (riskScore: number) => {
@@ -161,6 +166,147 @@ export function AnalysisHistory() {
             description: `The ${type === 'image' ? 'analysis' : 'clinical'} record has been removed.`,
         });
     };
+
+    const handleDownloadPDF = useCallback((item: HistoryItem) => {
+        const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+        const pageW = pdf.internal.pageSize.getWidth();
+        const margin = 20;
+        let y = margin;
+
+        // ── Header ──────────────────────────────────────────────────────────
+        pdf.setFillColor(220, 38, 38);
+        pdf.rect(0, 0, pageW, 18, 'F');
+        pdf.setTextColor(255, 255, 255);
+        pdf.setFontSize(11);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('ANEMO AI — DIAGNOSTIC REPORT', margin, 12);
+        pdf.setFontSize(8);
+        pdf.setFont('helvetica', 'normal');
+        pdf.text('Non-invasive Hematological Screening', pageW - margin, 12, { align: 'right' });
+
+        y = 30;
+        // ── Report meta ────────────────────────────────────────────────────
+        pdf.setTextColor(30, 30, 30);
+        pdf.setFontSize(18);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text(item.type === 'image' ? 'Visual Neural Analysis' : 'CBC Lab Report Analysis', margin, y);
+        y += 8;
+        pdf.setFontSize(9);
+        pdf.setFont('helvetica', 'normal');
+        pdf.setTextColor(120, 120, 120);
+        pdf.text(`Generated: ${format(item.createdAt.toDate(), 'MMMM d, yyyy · h:mm a')}`, margin, y);
+        pdf.text(`Record ID: ${item.id.substring(0, 16)}`, pageW - margin, y, { align: 'right' });
+        y += 5;
+        pdf.setDrawColor(220, 38, 38);
+        pdf.setLineWidth(0.5);
+        pdf.line(margin, y, pageW - margin, y);
+        y += 10;
+
+        if (item.type === 'image') {
+            const img = item as ImageReport;
+
+            // Risk score box
+            pdf.setFillColor(255, 245, 245);
+            pdf.roundedRect(margin, y, pageW - margin * 2, 28, 4, 4, 'F');
+            pdf.setTextColor(220, 38, 38);
+            pdf.setFontSize(9);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text('ANEMIA RISK INDEX', margin + 6, y + 8);
+            pdf.setFontSize(28);
+            pdf.text(String(img.riskScore), margin + 6, y + 22);
+            pdf.setFontSize(9);
+            pdf.setFont('helvetica', 'normal');
+            pdf.setTextColor(80, 80, 80);
+            const verdict = img.riskScore > 75 ? 'Critical' : img.riskScore > 50 ? 'Moderate Risk' : 'Normal Range';
+            pdf.text(verdict, margin + 40, y + 22);
+            pdf.text(`Confidence: ${img.confidenceScore || 0}%`, pageW - margin - 40, y + 22, { align: 'right' });
+            y += 38;
+
+            // Analysis summary
+            pdf.setFontSize(10);
+            pdf.setFont('helvetica', 'bold');
+            pdf.setTextColor(30, 30, 30);
+            pdf.text('AI Observation', margin, y);
+            y += 6;
+            pdf.setFontSize(9);
+            pdf.setFont('helvetica', 'normal');
+            pdf.setTextColor(70, 70, 70);
+            const summaryLines = pdf.splitTextToSize(img.imageAnalysisSummary || '', pageW - margin * 2);
+            pdf.text(summaryLines, margin, y);
+            y += summaryLines.length * 5 + 8;
+
+            // Recommendations
+            if (img.recommendations) {
+                pdf.setFontSize(10);
+                pdf.setFont('helvetica', 'bold');
+                pdf.setTextColor(30, 30, 30);
+                pdf.text('Clinical Recommendations', margin, y);
+                y += 6;
+                pdf.setFontSize(9);
+                pdf.setFont('helvetica', 'normal');
+                pdf.setTextColor(70, 70, 70);
+                const recLines = pdf.splitTextToSize(img.recommendations, pageW - margin * 2);
+                pdf.text(recLines, margin, y);
+                y += recLines.length * 5 + 8;
+            }
+        } else {
+            const cbc = item as CbcReport;
+            pdf.setFontSize(10);
+            pdf.setFont('helvetica', 'bold');
+            pdf.setTextColor(30, 30, 30);
+            pdf.text('CBC Analysis Summary', margin, y);
+            y += 6;
+            pdf.setFontSize(9);
+            pdf.setFont('helvetica', 'normal');
+            pdf.setTextColor(70, 70, 70);
+            const summaryLines = pdf.splitTextToSize(cbc.summary || '', pageW - margin * 2);
+            pdf.text(summaryLines, margin, y);
+            y += summaryLines.length * 5 + 8;
+
+            // Parameters table
+            if (cbc.parameters && cbc.parameters.length > 0) {
+                pdf.setFontSize(10);
+                pdf.setFont('helvetica', 'bold');
+                pdf.setTextColor(30, 30, 30);
+                pdf.text('Parameters', margin, y);
+                y += 6;
+                const colW = [(pageW - margin * 2) * 0.45, (pageW - margin * 2) * 0.25, (pageW - margin * 2) * 0.15, (pageW - margin * 2) * 0.15];
+                pdf.setFontSize(8);
+                pdf.setFont('helvetica', 'bold');
+                pdf.setFillColor(245, 245, 245);
+                pdf.rect(margin, y - 2, pageW - margin * 2, 7, 'F');
+                pdf.text('Parameter', margin + 2, y + 3);
+                pdf.text('Value', margin + colW[0] + 2, y + 3);
+                pdf.text('Unit', margin + colW[0] + colW[1] + 2, y + 3);
+                pdf.text('Status', margin + colW[0] + colW[1] + colW[2] + 2, y + 3);
+                y += 8;
+                pdf.setFont('helvetica', 'normal');
+                for (const p of cbc.parameters.slice(0, 20)) {
+                    pdf.setTextColor(p.isNormal ? 40 : 200, p.isNormal ? 40 : 38, p.isNormal ? 40 : 38);
+                    pdf.text(String(p.parameter).substring(0, 30), margin + 2, y);
+                    pdf.text(String(p.value), margin + colW[0] + 2, y);
+                    pdf.text(String(p.unit), margin + colW[0] + colW[1] + 2, y);
+                    pdf.text(p.isNormal ? 'Normal' : 'Abnormal', margin + colW[0] + colW[1] + colW[2] + 2, y);
+                    y += 6;
+                    if (y > 260) { pdf.addPage(); y = margin; }
+                }
+            }
+        }
+
+        // ── Footer ──────────────────────────────────────────────────────────
+        const pageH = pdf.internal.pageSize.getHeight();
+        pdf.setDrawColor(230, 230, 230);
+        pdf.setLineWidth(0.3);
+        pdf.line(margin, pageH - 18, pageW - margin, pageH - 18);
+        pdf.setFontSize(7);
+        pdf.setFont('helvetica', 'normal');
+        pdf.setTextColor(160, 160, 160);
+        pdf.text('ANEMO AI — For screening purposes only. Not a medical diagnosis. Consult a licensed healthcare professional.', pageW / 2, pageH - 11, { align: 'center' });
+        pdf.text(`anemo.ai · ${format(new Date(), 'yyyy')}`, pageW / 2, pageH - 6, { align: 'center' });
+
+        pdf.save(`anemo-report-${item.id.substring(0, 8)}-${format(item.createdAt.toDate(), 'yyyyMMdd')}.pdf`);
+        toast({ title: 'Report Downloaded', description: 'Your Anemo AI report has been saved as PDF.' });
+    }, [toast]);
 
     const handleValidation = async () => {
         if (!user || !firestore || !validationCbcReport || !validationImageReport) {
@@ -183,8 +329,8 @@ export function AnalysisHistory() {
                     skin: 'Verified in summary',
                 },
                 cbcAnalysis: {
-                    hemoglobin: validationCbcReport.parameters.find(p => p.parameter.toLowerCase().includes('hemoglobin'))?.value || 'N/A',
-                    rbc: validationCbcReport.parameters.find(p => p.parameter.toLowerCase().includes('rbc'))?.value || 'N/A',
+                    hemoglobin: validationCbcReport?.parameters?.find(p => p?.parameter?.toLowerCase().includes('hemoglobin'))?.value ?? 'N/A',
+                    rbc: validationCbcReport?.parameters?.find(p => p?.parameter?.toLowerCase().includes('rbc'))?.value ?? 'N/A',
                 },
             });
 
@@ -331,28 +477,38 @@ export function AnalysisHistory() {
                     )}
                 </TableCell>
                 <TableCell className="text-right px-8">
-                    <div className="flex items-center justify-end gap-3">
+                    <div className="flex items-center justify-center gap-2 md:gap-3">
                         {!isImage && (
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-12 w-12 rounded-2xl bg-blue-500/5 border border-blue-500/10 hover:bg-blue-500/20 hover:text-blue-400 transition-all group/btn"
+                                className="h-10 w-10 md:h-12 md:w-12 rounded-2xl bg-blue-500/5 border border-blue-500/10 hover:bg-blue-500/20 hover:text-blue-400 transition-all group/btn"
                                 onClick={() => {
                                     setValidationCbcReport(item as CbcReport);
                                     setIsValidationDialogOpen(true);
                                 }}
                             >
-                                <ShieldCheck className="h-5 h-5 group-hover/btn:scale-110 transition-transform" />
+                                <ShieldCheck className="h-4 w-4 md:h-5 md:w-5 group-hover/btn:scale-110 transition-transform" />
                                 <span className="sr-only">Cross-Reference</span>
                             </Button>
                         )}
                         <Button
                             variant="ghost"
-                            className="h-12 px-6 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:text-white transition-all group/btn flex items-center gap-2"
+                            className="h-10 md:h-12 px-3 md:px-6 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:text-white transition-all group/btn flex items-center gap-1.5 md:gap-2"
                             onClick={() => setReportToView(item)}
                         >
-                            <span className="text-[10px] font-black uppercase tracking-widest mr-2">Open Report</span>
-                            <ArrowUpRight className="h-4 w-4 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />
+                            <Eye className="h-4 w-4 flex-shrink-0" />
+                            <span className="hidden md:inline text-[10px] font-black uppercase tracking-widest">View</span>
+                            <ArrowUpRight className="hidden md:inline h-4 w-4 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />
+                        </Button>
+
+                        <Button
+                            variant="ghost"
+                            className="h-10 md:h-12 px-3 md:px-6 rounded-2xl bg-emerald-500/5 border border-emerald-500/10 hover:bg-emerald-500/20 hover:text-emerald-400 transition-all group/btn flex items-center gap-1.5 md:gap-2"
+                            onClick={() => handleDownloadPDF(item)}
+                        >
+                            <Download className="h-4 w-4 flex-shrink-0 group-hover/btn:scale-110 transition-transform" />
+                            <span className="hidden md:inline text-[10px] font-black uppercase tracking-widest">PDF</span>
                         </Button>
 
                         <AlertDialog>
@@ -360,9 +516,9 @@ export function AnalysisHistory() {
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="h-12 w-12 rounded-2xl bg-red-500/5 border border-red-500/10 hover:bg-red-500/20 hover:text-red-400 transition-all opacity-0 group-hover:opacity-100 group/btn"
+                                    className="h-10 w-10 md:h-12 md:w-12 rounded-2xl bg-red-500/5 border border-red-500/10 hover:bg-red-500/20 hover:text-red-400 transition-all group/btn"
                                 >
-                                    <Trash2 className="h-5 w-5 group-hover/btn:scale-110 transition-transform" />
+                                    <Trash2 className="h-4 w-4 md:h-5 md:w-5 group-hover/btn:scale-110 transition-transform" />
                                     <span className="sr-only">Purge</span>
                                 </Button>
                             </AlertDialogTrigger>
@@ -483,8 +639,14 @@ export function AnalysisHistory() {
                             </div>
                         </div>
 
-                        <div className="p-10 bg-zinc-950/80 border-t border-white/5 flex justify-end gap-6 backdrop-blur-2xl">
+                        <div className="p-10 bg-zinc-950/80 border-t border-white/5 flex justify-end gap-4 backdrop-blur-2xl flex-wrap">
                             <Button variant="ghost" onClick={() => setReportToView(null)} className="h-14 px-10 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-white/5 text-white/60 hover:text-white transition-all">CLOSE</Button>
+                            <Button
+                                onClick={() => handleDownloadPDF(report)}
+                                className="h-14 px-8 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-widest shadow-xl shadow-emerald-600/20 hover:scale-105 transition-all flex items-center gap-2"
+                            >
+                                <Download className="w-4 h-4" /> DOWNLOAD PDF
+                            </Button>
                             <Button asChild className="h-14 px-12 rounded-2xl bg-primary text-black font-black text-xs uppercase tracking-widest shadow-xl shadow-primary/20 hover:scale-105 transition-all">
                                 <Link href="/dashboard/analysis" className="flex items-center gap-2">
                                     RE-SCAN <ChevronRight className="w-4 h-4" />

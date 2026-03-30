@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Activity,
   Camera,
@@ -88,10 +88,9 @@ const BentoCard = ({
 export default function DashboardPage() {
   const { user } = useUser();
   const firestore = useFirestore();
-  const { scrollY } = useScroll();
 
   // Data State
-  const [clinics, setClinics] = useState<any[]>([]);
+  const [clinics, setClinics] = useState<{ name: string; address?: string; distance?: string; phone?: string }[]>([]);
   const [isLoadingClinics, setIsLoadingClinics] = useState(true);
   const [location, setLocation] = useState('Iloilo City');
   const [userSex, setUserSex] = useState<string>('');
@@ -486,7 +485,7 @@ export default function DashboardPage() {
                 <div className="flex-1 w-full h-[250px] glass-panel rounded-[2rem] flex items-center justify-center overflow-hidden shadow-inner border border-rose-500/10">
                   {(cbcHistory && cbcHistory.length > 0) || (cycleLogs && cycleLogs.length > 0) ? (
                     <MenstrualCycleCorrelator
-                      labReports={cbcHistory ? cbcHistory.map((h: any) => ({ ...h, type: 'cbc' })) as any : []}
+                      labReports={cbcHistory ? cbcHistory.map((h: any) => ({ ...h, type: 'cbc' as const })) : []}
                       cycleLogs={cycleLogs || []}
                       variant="compact"
                     />

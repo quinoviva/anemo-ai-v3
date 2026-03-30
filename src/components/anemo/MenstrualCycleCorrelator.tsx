@@ -37,14 +37,24 @@ interface MenstrualCycleCorrelatorProps {
 export function MenstrualCycleCorrelator({ labReports, cycleLogs, variant = 'default' }: MenstrualCycleCorrelatorProps) {
 
   const data = useMemo(() => {
+    const toMs = (ts: any): number | null => {
+      try {
+        if (!ts) return null;
+        if (ts instanceof Date) return ts.getTime();
+        if (typeof ts.toDate === 'function') return ts.toDate().getTime();
+        if (typeof ts.seconds === 'number') return ts.seconds * 1000;
+        return null;
+      } catch { return null; }
+    };
+
     // 1. Process Lab Reports to get Hemoglobin points
     const points = labReports
       .filter(report => report.type === 'cbc')
       .map(report => {
-        const cbcReport = report as any; // Cast for simplicity, or use type guard
-        const hbParam = cbcReport.parameters.find((p: { parameter: string; }) => 
-            p.parameter.toLowerCase().includes('hemoglobin') || 
-            p.parameter.toLowerCase().includes('hgb')
+        const cbcReport = report as any;
+        const hbParam = (cbcReport.parameters ?? []).find((p: { parameter: string }) => 
+            p?.parameter?.toLowerCase().includes('hemoglobin') || 
+            p?.parameter?.toLowerCase().includes('hgb')
         );
         
         if (!hbParam) return null;
@@ -52,13 +62,16 @@ export function MenstrualCycleCorrelator({ labReports, cycleLogs, variant = 'def
         const value = parseFloat(hbParam.value);
         if (isNaN(value)) return null;
 
+        const dateMs = toMs(report.createdAt);
+        if (dateMs === null) return null;
+
         return {
-            date: report.createdAt.toDate().getTime(), // Convert date to timestamp for recharts
+            date: dateMs,
             hemoglobin: value,
             id: report.id,
-            isLow: !hbParam.isNormal && value < 12 // Simplified check, usually < 12 for women
+            isLow: !hbParam.isNormal && value < 12
         };
-    }).filter(Boolean) as { date: number, hemoglobin: number, id: string, isLow: boolean }[];
+    }).filter((p): p is { date: number; hemoglobin: number; id: string; isLow: boolean } => p !== null);
 
     // Sort by date
     points.sort((a, b) => a.date - b.date);
@@ -67,8 +80,8 @@ export function MenstrualCycleCorrelator({ labReports, cycleLogs, variant = 'def
 
   const cycleAreas = useMemo(() => {
       return cycleLogs.map(log => {
-          const start = log.startDate instanceof Date ? log.startDate : log.startDate.toDate();
-          const end = log.endDate instanceof Date ? log.endDate : log.endDate.toDate();
+          const start = log.startDate instanceof Date ? log.startDate : (log.startDate as any)?.toDate?.() ?? new Date(0);
+          const end = log.endDate instanceof Date ? log.endDate : (log.endDate as any)?.toDate?.() ?? new Date(0);
           return {
               x1: start.getTime(),
               x2: end.getTime(),
@@ -78,22 +91,18 @@ export function MenstrualCycleCorrelator({ labReports, cycleLogs, variant = 'def
   }, [cycleLogs]);
 
   const correlationInsight = useMemo(() => {
-      // Find if any LOW hemoglobin report is within 7 days AFTER a cycle ends
       for (const point of data) {
           if (!point.isLow) continue;
 
           for (const cycle of cycleLogs) {
-              const end = cycle.endDate instanceof Date ? cycle.endDate : cycle.endDate.toDate();
-              // Check if report date is between cycle end and cycle end + 7 days
-              const windowEnd = addDays(end, 7);
-              
-              if (isWithinInterval(new Date(point.date), { start: end, end: windowEnd })) {
-                  return {
-                      found: true,
-                      date: new Date(point.date),
-                      cycleEnd: end
-                  };
-              }
+              try {
+                  const end = cycle.endDate instanceof Date ? cycle.endDate : (cycle.endDate as any)?.toDate?.();
+                  if (!end) continue;
+                  const windowEnd = addDays(end, 7);
+                  if (isWithinInterval(new Date(point.date), { start: end, end: windowEnd })) {
+                      return { found: true, date: new Date(point.date), cycleEnd: end };
+                  }
+              } catch { continue; }
           }
       }
       return null;

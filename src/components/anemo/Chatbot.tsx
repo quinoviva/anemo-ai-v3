@@ -33,8 +33,22 @@ export function Chatbot({ isPopup = false, onClose, onMinimize }: ChatbotProps) 
   const [userInput, setUserInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
   const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Keyboard-aware: detect when virtual keyboard is shown on mobile
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.visualViewport) return;
+    const vv = window.visualViewport;
+    const handleResize = () => {
+      // Keyboard is visible when viewport height is significantly less than window height
+      const isKB = vv.height < window.innerHeight * 0.75;
+      setIsKeyboardVisible(isKB);
+    };
+    vv.addEventListener('resize', handleResize);
+    return () => vv.removeEventListener('resize', handleResize);
+  }, []);
 
   // Firestore Query
   const messagesQuery = useMemoFirebase(() => {
@@ -54,8 +68,8 @@ export function Chatbot({ isPopup = false, onClose, onMinimize }: ChatbotProps) 
   const { data: userData } = useDoc(userDocRef);
 
   const history: Message[] = historyData ? historyData.map(doc => ({
-      role: doc.role,
-      content: doc.content,
+      role: (doc.role ?? 'assistant') as 'user' | 'assistant',
+      content: doc.content ?? '',
       id: doc.id
   })) : [];
 
@@ -90,6 +104,7 @@ export function Chatbot({ isPopup = false, onClose, onMinimize }: ChatbotProps) 
 
   useEffect(() => {
     scrollToBottom();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [history.length, isLoading]);
 
   const sendMessage = async (message: string) => {
@@ -201,7 +216,11 @@ export function Chatbot({ isPopup = false, onClose, onMinimize }: ChatbotProps) 
 
   return (
     <div className={cn(
-      "h-full flex flex-col overflow-hidden relative font-sans",
+      "flex flex-col overflow-hidden relative font-sans",
+      // When keyboard is visible on mobile (non-popup), go full-screen
+      isKeyboardVisible && !isPopup
+        ? "fixed inset-0 z-50 bg-background h-[100dvh]"
+        : "h-full",
       isPopup 
         ? "bg-background/95 sm:bg-background/90 backdrop-blur-2xl" 
         : "bg-transparent"

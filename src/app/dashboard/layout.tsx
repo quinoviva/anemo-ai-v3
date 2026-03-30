@@ -6,6 +6,8 @@ import { useUser } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { AnemoLoading } from '@/components/ui/anemo-loading';
+import { useOfflineQueueFlush } from '@/hooks/use-offline-queue';
+import { useScanReminder } from '@/hooks/use-scan-reminder';
 
 import dynamic from 'next/dynamic';
 
@@ -19,6 +21,11 @@ export default function DashboardLayout({
   const { user, isUserLoading } = useUser();
   const router = useRouter();
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  // Flush offline-queued saves when connectivity is restored
+  useOfflineQueueFlush();
+  // Fire weekly scan reminder notification if permission is granted
+  useScanReminder();
 
   useEffect(() => {
     if (isUserLoading) {

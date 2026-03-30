@@ -26,7 +26,9 @@ import {
   LayoutGrid,
   Loader2,
   Activity,
-  ShieldAlert
+  ShieldAlert,
+  Copy,
+  Check
 } from 'lucide-react';
 import type { PersonalizedRecommendationsOutput } from '@/ai/flows/provide-personalized-recommendations';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
@@ -69,6 +71,7 @@ export function ImageAnalysisReport({ analyses, labReport, onReset }: ImageAnaly
   const [isLoading, setIsLoading] = useState(true);
   const [isDownloading, setIsDownloading] = useState(false);
   const [userLocation, setUserLocation] = useState<string>('Iloilo City');
+  const [copiedRec, setCopiedRec] = useState(false);
   const { theme } = useTheme();
   const { toast } = useToast();
   const reportRef = useRef<HTMLDivElement>(null);
@@ -76,6 +79,15 @@ export function ImageAnalysisReport({ analyses, labReport, onReset }: ImageAnaly
   const firestore = useFirestore();
   const isOnline = typeof window !== 'undefined' ? navigator.onLine : true;
   const hasSavedRef = useRef(false);
+
+  const handleCopyRecommendations = useCallback(() => {
+    if (!report?.recommendations) return;
+    navigator.clipboard.writeText(report.recommendations).then(() => {
+      setCopiedRec(true);
+      toast({ title: 'Copied!', description: 'Recommendations copied to clipboard.' });
+      setTimeout(() => setCopiedRec(false), 2500);
+    });
+  }, [report, toast]);
 
   const allImageDescriptions = Object.entries(analyses)
     .map(([key, value]) => `Result for ${key}: ${value.analysisResult}`)
@@ -322,6 +334,16 @@ export function ImageAnalysisReport({ analyses, labReport, onReset }: ImageAnaly
               </div>
               <div className="p-6 md:p-10 lg:p-20 rounded-[2.5rem] md:rounded-[3rem] bg-white/[0.02] border border-border border-l-[8px] border-l-primary leading-[1.4] relative overflow-hidden">
                   <div className="absolute top-0 right-0 p-8 md:p-12 opacity-5 scale-150 rotate-12 text-primary"><Sparkles className="w-64 h-64 text-primary" /></div>
+                  <button
+                    onClick={handleCopyRecommendations}
+                    title="Copy recommendations"
+                    className="absolute top-4 right-4 z-20 p-2.5 rounded-2xl bg-primary/10 border border-primary/20 hover:bg-primary/20 transition-all"
+                  >
+                    {copiedRec
+                      ? <Check className="w-4 h-4 text-primary" />
+                      : <Copy className="w-4 h-4 text-primary/60" />
+                    }
+                  </button>
                   <div className="relative z-10 text-xl md:text-3xl font-medium text-foreground italic-font tracking-tight">
                       "{report.recommendations.split('\n')[0].replace(/^[*-]\s*/, '')}"
                   </div>

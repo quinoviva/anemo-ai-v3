@@ -48,7 +48,8 @@ export default function SettingsPage() {
     }
 
     try {
-      await setDoc(userDocRef!, {
+      if (!userDocRef) return;
+      await setDoc(userDocRef, {
         hydration: {
           enabled: checked
         }
@@ -77,14 +78,17 @@ export default function SettingsPage() {
       const permission = await Notification.requestPermission();
       if (permission === 'granted') {
         setPushEnabled(true);
+        // Schedule weekly scan reminder: first reminder in 7 days
+        const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+        localStorage.setItem('anemo_next_reminder_at', String(Date.now() + WEEK_MS));
         toast({
           title: "Notifications Enabled",
-          description: "You will now receive health alerts on this device.",
+          description: "You'll receive a weekly scan reminder and health alerts on this device.",
         });
-        // In a real app, you would also register the service worker token here
-        new Notification("Anemo Check", {
-          body: "Notifications are now active on this system!",
-          icon: "/anemo.png"
+        new Notification("Anemo AI — Notifications Active", {
+          body: "You'll receive a weekly check-in reminder. Stay on top of your health!",
+          icon: "/anemo.png",
+          tag: "anemo-setup",
         });
       } else {
         setPushEnabled(false);
@@ -96,6 +100,7 @@ export default function SettingsPage() {
       }
     } else {
       setPushEnabled(false);
+      localStorage.removeItem('anemo_next_reminder_at');
     }
   };
 
@@ -145,7 +150,7 @@ export default function SettingsPage() {
                 <Label className="text-lg font-medium">Interface Theme</Label>
                 <p className="text-sm text-muted-foreground">Select how Anemo looks on your screen.</p>
               </div>
-              <Select value={theme} onValueChange={setTheme}>
+              <Select value={theme ?? 'system'} onValueChange={setTheme}>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Select theme" />
                 </SelectTrigger>

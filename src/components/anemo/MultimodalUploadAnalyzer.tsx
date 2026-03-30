@@ -38,12 +38,19 @@ import {
   SkipForward,
   Sparkles,
   AlertCircle,
+  Calendar,
+  Heart,
+  Info,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useToast } from '@/hooks/use-toast';
-import { useUser } from '@/firebase';
+import { useUser, useFirestore, useMemoFirebase, useDoc } from '@/firebase';
+import { doc } from 'firebase/firestore';
 import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
 import HeartLoader from '@/components/ui/HeartLoader';
 import {
   runGenerateImageDescription,
@@ -281,10 +288,10 @@ function CaptureStep({
       {/* ── Step header ── */}
       <div className="flex items-start gap-4">
         <div
-          className="p-3 rounded-2xl border flex-shrink-0"
+          className="w-12 h-12 rounded-2xl border flex-shrink-0 flex items-center justify-center"
           style={{ backgroundColor: `${part.color}15`, borderColor: `${part.color}40` }}
         >
-          <span className="w-6 h-6 block" style={{ color: part.color }}>{part.icon}</span>
+          <span className="w-6 h-6 flex items-center justify-center" style={{ color: part.color }}>{part.icon}</span>
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-0.5">
@@ -532,7 +539,7 @@ function CaptureStep({
           </motion.div>
         )}
 
-        {/* ── ERROR: Rejection card ── */}
+        {/* ── ERROR: Contextual rejection card ── */}
         {status === 'error' && (
           <motion.div
             key="error"
@@ -553,11 +560,20 @@ function CaptureStep({
                 <div className="p-4 rounded-2xl bg-red-500/20 border border-red-500/30">
                   <ShieldAlert className="w-8 h-8 text-red-400" />
                 </div>
-                <div className="text-center space-y-2">
-                  <p className="text-sm font-bold text-red-300">Image Rejected</p>
-                  <p className="text-xs text-red-400/80 leading-relaxed max-w-xs">{error}</p>
+                <div className="text-center space-y-3">
+                  <p className="text-sm font-bold text-red-300 uppercase tracking-widest">Image Not Accepted</p>
+                  <p className="text-xs text-red-400/90 leading-relaxed max-w-xs">{error}</p>
                 </div>
               </div>
+            </div>
+
+            {/* Contextual guidance */}
+            <div className="glass-panel rounded-2xl p-4 space-y-2 border border-amber-500/20">
+              <div className="flex items-center gap-2">
+                <Info className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                <span className="text-[9px] font-black uppercase tracking-[0.3em] text-amber-400">What We Need Instead</span>
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">{part.instruction}</p>
             </div>
 
             {/* Retry actions */}
@@ -767,6 +783,205 @@ function ValidatingView() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// CyclePreAnalysisModal — shown for female users before first scan
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface CyclePreAnalysisModalProps {
+  onComplete: (context: string) => void;
+  onSkip: () => void;
+}
+
+function CyclePreAnalysisModal({ onComplete, onSkip }: CyclePreAnalysisModalProps) {
+  const [lmpDate, setLmpDate] = useState<Date | undefined>(undefined);
+  const [lmpOpen, setLmpOpen] = useState(false);
+  const [isRegular, setIsRegular] = useState<boolean | null>(null);
+  const [symptoms, setSymptoms] = useState<string[]>([]);
+  const [step, setStep] = useState<1 | 2>(1);
+
+  const symptomOptions = [
+    'Heavy menstrual flow',
+    'Fatigue / low energy',
+    'Dizziness',
+    'Pale skin',
+    'Shortness of breath',
+    'Hair loss',
+  ];
+
+  const toggleSymptom = (s: string) =>
+    setSymptoms((prev) => (prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]));
+
+  const handleComplete = () => {
+    const ctx = [
+      lmpDate ? `Last menstrual period: ${format(lmpDate, 'MMMM d, yyyy')}` : null,
+      isRegular !== null ? `Cycle regularity: ${isRegular ? 'Regular' : 'Irregular'}` : null,
+      symptoms.length > 0 ? `Reported symptoms: ${symptoms.join(', ')}` : null,
+    ]
+      .filter(Boolean)
+      .join('. ');
+    onComplete(ctx);
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="min-h-screen flex flex-col items-center justify-center px-4 py-12 bg-background"
+    >
+      {/* Background glow */}
+      <div className="fixed inset-0 pointer-events-none -z-10">
+        <div className="absolute top-[-20%] right-[-10%] w-[60vw] h-[60vw] bg-rose-500/10 rounded-full blur-[160px]" />
+        <div className="absolute bottom-[-20%] left-[-10%] w-[50vw] h-[50vw] bg-primary/10 rounded-full blur-[140px]" />
+      </div>
+
+      <div className="w-full max-w-lg glass-panel rounded-[2.5rem] overflow-hidden border-rose-500/20">
+        {/* Header */}
+        <div className="p-8 border-b border-rose-500/10">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="w-10 h-10 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center">
+              <Heart className="w-5 h-5 text-rose-400" />
+            </div>
+            <div>
+              <p className="text-[9px] font-black uppercase tracking-[0.4em] text-rose-400">Clinical Protocol</p>
+              <h2 className="text-xl font-light tracking-tight">Cycle-Aware Screening</h2>
+            </div>
+          </div>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            Your menstrual cycle can affect hemoglobin levels. Providing this context helps Anemo AI deliver a more accurate, personalized analysis.
+          </p>
+        </div>
+
+        <AnimatePresence mode="wait">
+          {step === 1 && (
+            <motion.div
+              key="step1"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="p-8 space-y-6"
+            >
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">
+                  Last Menstrual Period (LMP)
+                </label>
+                <Popover open={lmpOpen} onOpenChange={setLmpOpen}>
+                  <PopoverTrigger asChild>
+                    <button
+                      className={cn(
+                        'w-full h-12 px-4 rounded-2xl glass-panel border border-border/60 focus:border-rose-400/60 focus:outline-none text-sm transition-colors text-left flex items-center gap-3',
+                        !lmpDate && 'text-muted-foreground'
+                      )}
+                    >
+                      <Calendar className="w-4 h-4 text-rose-400 shrink-0" />
+                      {lmpDate ? format(lmpDate, 'MMMM d, yyyy') : 'Select date'}
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <CalendarComponent
+                      mode="single"
+                      selected={lmpDate}
+                      onSelect={(d) => { setLmpDate(d); setLmpOpen(false); }}
+                      disabled={(date) => date > new Date() || date < new Date('2000-01-01')}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              <div className="space-y-3">
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">
+                  Is your cycle regular?
+                </p>
+                <div className="flex gap-3">
+                  {[true, false].map((v) => (
+                    <button
+                      key={String(v)}
+                      onClick={() => setIsRegular(v)}
+                      className={cn(
+                        'flex-1 h-11 rounded-2xl text-[10px] font-black uppercase tracking-[0.25em] border transition-all',
+                        isRegular === v
+                          ? 'bg-rose-500/20 border-rose-500/50 text-rose-400'
+                          : 'bg-muted/30 border-border/40 text-muted-foreground hover:border-rose-500/30',
+                      )}
+                    >
+                      {v ? 'Yes, Regular' : 'No, Irregular'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <Button
+                onClick={() => setStep(2)}
+                className="w-full h-12 rounded-2xl bg-rose-500 hover:bg-rose-400 text-white font-black text-[10px] uppercase tracking-[0.3em]"
+              >
+                Continue <ChevronRight className="w-4 h-4 ml-1" />
+              </Button>
+            </motion.div>
+          )}
+
+          {step === 2 && (
+            <motion.div
+              key="step2"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="p-8 space-y-6"
+            >
+              <div className="space-y-3">
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">
+                  Any current symptoms? (select all that apply)
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  {symptomOptions.map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => toggleSymptom(s)}
+                      className={cn(
+                        'text-left px-4 py-3 rounded-2xl text-[10px] font-bold border transition-all',
+                        symptoms.includes(s)
+                          ? 'bg-primary/10 border-primary/40 text-primary'
+                          : 'bg-muted/20 border-border/30 text-muted-foreground hover:border-primary/20',
+                      )}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <Button
+                  variant="ghost"
+                  onClick={() => setStep(1)}
+                  className="h-12 px-6 rounded-2xl glass-button text-[10px] font-black uppercase tracking-[0.2em]"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5 mr-1" /> Back
+                </Button>
+                <Button
+                  onClick={handleComplete}
+                  className="flex-1 h-12 rounded-2xl bg-primary hover:bg-primary/90 text-white font-black text-[10px] uppercase tracking-[0.3em]"
+                >
+                  <Zap className="w-4 h-4 mr-1 fill-white" /> Start Scan
+                </Button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Skip option */}
+        <div className="px-8 pb-8 text-center">
+          <button
+            onClick={onSkip}
+            className="text-[9px] font-black uppercase tracking-[0.3em] text-muted-foreground/50 hover:text-muted-foreground transition-colors"
+          >
+            Skip — continue without cycle data
+          </button>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Main Component
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -776,7 +991,30 @@ export interface MultimodalUploadAnalyzerProps {
 
 export function MultimodalUploadAnalyzer({ onClose }: MultimodalUploadAnalyzerProps) {
   const { user } = useUser();
+  const firestore = useFirestore();
   const { toast } = useToast();
+
+  // ── Female pre-analysis check ─────────────────────────────────────────────
+  const userDocRef = useMemoFirebase(() => {
+    if (!user || !firestore) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [user, firestore]);
+  const { data: userData } = useDoc(userDocRef);
+
+  const isFemale = userData?.medicalInfo?.sex === 'Female';
+  const [showCycleModal, setShowCycleModal] = useState(false);
+  const [cycleContext, setCycleContext] = useState<string>('');
+  const [hasCheckedGender, setHasCheckedGender] = useState(false);
+
+  // When user data loads and user is female, show cycle modal before first capture
+  useEffect(() => {
+    if (!hasCheckedGender && userData && isFemale) {
+      setHasCheckedGender(true);
+      setShowCycleModal(true);
+    } else if (!hasCheckedGender && userData && !isFemale) {
+      setHasCheckedGender(true);
+    }
+  }, [userData, isFemale, hasCheckedGender]);
 
   const [pagePhase, setPagePhase] = useState<PagePhase>('capture');
   const [currentStep, setCurrentStep] = useState(1); // 1-based index into PARTS
@@ -924,7 +1162,11 @@ export function MultimodalUploadAnalyzer({ onClose }: MultimodalUploadAnalyzerPr
         fingernails: captures['fingernails']?.analysisResult ?? '',
       };
       const validation = await validateMultimodalResults({
-        medicalInfo: {},
+        medicalInfo: {
+          sex: userData?.medicalInfo?.sex ?? '',
+          age: userData?.medicalInfo?.age ?? '',
+          ...(cycleContext ? { menstrualContext: cycleContext } : {}),
+        },
         imageAnalysisReport: imageReport,
         cbcAnalysis: cbcData ? {
           hemoglobin: cbcData.parameters?.find((p: any) => p.parameter?.toLowerCase().includes('hemoglobin'))?.value ?? 'N/A',
@@ -937,7 +1179,7 @@ export function MultimodalUploadAnalyzer({ onClose }: MultimodalUploadAnalyzerPr
     } finally {
       setTimeout(() => setPagePhase('results'), 1800);
     }
-  }, [captures]);
+  }, [captures, userData, cycleContext]);
 
   // ── Reset ─────────────────────────────────────────────────────────────────
   const handleReset = useCallback(() => {
@@ -952,6 +1194,19 @@ export function MultimodalUploadAnalyzer({ onClose }: MultimodalUploadAnalyzerPr
   }, [captures, cbcImageUrl]);
 
   // ──────────────────────────────────────────────────────────────────────────
+  // Render: Female pre-scan cycle modal
+  if (showCycleModal) {
+    return (
+      <CyclePreAnalysisModal
+        onComplete={(ctx) => {
+          setCycleContext(ctx);
+          setShowCycleModal(false);
+        }}
+        onSkip={() => setShowCycleModal(false)}
+      />
+    );
+  }
+
   // Render: fullscreen camera overlay
   if (showCamera) {
     return (

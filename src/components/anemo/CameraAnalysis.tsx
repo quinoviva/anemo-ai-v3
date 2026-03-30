@@ -55,6 +55,9 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useEnsembleModel } from '@/hooks/use-ensemble-model';
+import { useUser, useFirestore } from '@/firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { enqueueFirestoreSave } from '@/lib/offline-queue';
 import { cn } from '@/lib/utils';
 import type { BodyPart } from '@/lib/ensemble/consensus-engine';
 
@@ -62,9 +65,11 @@ import type { BodyPart } from '@/lib/ensemble/consensus-engine';
 // Camera constraints — 720p @ 30 fps, no 4K
 // ─────────────────────────────────────────────────────────────────────────────
 
+// Portrait-first constraints — 720×1280 (9:16) for mobile portrait mode.
+// On desktop the browser may clamp to the actual sensor; the UI adapts via CSS.
 const CAMERA_CONSTRAINTS: MediaTrackConstraints = {
-  width: { ideal: 1280, max: 1280 },
-  height: { ideal: 720, max: 720 },
+  width: { ideal: 720, max: 1080 },
+  height: { ideal: 1280, max: 1920 },
   frameRate: { ideal: 30, max: 30 },
 };
 
@@ -184,8 +189,9 @@ const SEVERITY_COLORS: Record<string, string> = {
   Severe: 'bg-red-500/20 text-red-400 border-red-500/30',
 };
 
-// Lux threshold below which we trigger quality warnings.
+// Lux thresholds for quality warnings.
 const LUX_MIN = 300;
+const LUX_MAX = 8000;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TargetFrame — morphing SVG body-part guide
@@ -310,6 +316,9 @@ interface CameraAnalysisProps {
 
 export function CameraAnalysis({ onBack }: CameraAnalysisProps) {
   const { toast } = useToast();
+  const { user } = useUser();
+  const firestore = useFirestore();
+  const savedRef = useRef(false);
 
   const {
     runAnalysis,
@@ -359,7 +368,8 @@ export function CameraAnalysis({ onBack }: CameraAnalysisProps) {
   const currentStepCfg = STEPS[stepIndex];
   const hudConfig = HUD_CONFIGS[currentStepCfg?.id ?? 'skin'];
   const lowLight = lux !== null && lux < LUX_MIN;
-  const canCapture = cameraReady && !isCapturing && !lowLight;
+  const highLight = lux !== null && lux > LUX_MAX;
+  const canCapture = cameraReady && !isCapturing && !lowLight && !highLight;
 
   // ── Camera initialisation ───────────────────────────────────────────────
   const startCamera = useCallback(async () => {
@@ -432,7 +442,7 @@ export function CameraAnalysis({ onBack }: CameraAnalysisProps) {
             offCtx = offscreen.getContext('2d') as OffscreenCanvasRenderingContext2D | null;
           }
           offCtx?.drawImage(video, sx, sy, sw, sh, 0, 0, sw, sh);
-          const px = offCtx?.getImageData(0, 0, sw, sh).data;
+          const px = offCtx?.getImageData(0, 0, sw, sh)?.data;
           if (px) {
             let sum = 0;
             for (let i = 0; i < px.length; i += 4)
@@ -480,6 +490,7 @@ export function CameraAnalysis({ onBack }: CameraAnalysisProps) {
 
   // Low-light toast — fires once per transition into low-light territory.
   const prevLowLightRef = useRef(false);
+  const prevHighLightRef = useRef(false);
   useEffect(() => {
     if (lowLight && !prevLowLightRef.current) {
       toast({
@@ -489,6 +500,16 @@ export function CameraAnalysis({ onBack }: CameraAnalysisProps) {
     }
     prevLowLightRef.current = lowLight;
   }, [lowLight, toast]);
+
+  useEffect(() => {
+    if (highLight && !prevHighLightRef.current) {
+      toast({
+        title: '☀️ Too Much Light',
+        description: 'Reduce direct lighting or move to a shadier area for an accurate scan.',
+      });
+    }
+    prevHighLightRef.current = highLight;
+  }, [highLight, toast]);
 
   // ── Frame capture ────────────────────────────────────────────────────────
   const captureFrame = useCallback(async () => {
@@ -630,12 +651,48 @@ export function CameraAnalysis({ onBack }: CameraAnalysisProps) {
   // ── Reset / retake ───────────────────────────────────────────────────────
   const handleRetake = () => {
     reset();
+    savedRef.current = false;
     setStep('skin');
     setStepIndex(0);
     setCaptures({});
     setCameraReady(false);
     setLux(null);
   };
+
+  // ── Persist results to Firebase (authenticated users only) ───────────────
+  useEffect(() => {
+    if (step !== 'results') return;
+    if (!ensembleReport || severity === null || consensusHgb === null) return;
+    if (!user || !firestore || user.isAnonymous) return;
+    if (savedRef.current) return;
+    savedRef.current = true;
+
+    const riskScore = Math.round(
+      Math.max(0, Math.min(100, ((16 - consensusHgb) / 11) * 100)),
+    );
+
+    const saveData = {
+      type: 'image',
+      mode: 'live-camera',
+      riskScore,
+      anemiaType: severity,
+      confidenceScore: Math.round(ensembleReport.overallConfidence * 100),
+      imageAnalysisSummary:
+        report ||
+        `${severity} anemia indicators detected. Est. Hgb: ${consensusHgb.toFixed(1)} g/dL`,
+      recommendations: dietaryRecommendations.join('\n') || '',
+      hemoglobin: consensusHgb,
+    };
+
+    addDoc(collection(firestore, `users/${user.uid}/imageAnalyses`), {
+      ...saveData,
+      createdAt: serverTimestamp(),
+    }).catch(() => {
+      // Network failure — persist locally for retry when back online
+      enqueueFirestoreSave(`users/${user.uid}/imageAnalyses`, saveData);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step]);
 
   // ============================================================================
   // RENDER
@@ -671,6 +728,7 @@ export function CameraAnalysis({ onBack }: CameraAnalysisProps) {
               isCapturing={isCapturing}
               countdown={countdown}
               canCapture={canCapture}
+              isMirrored={facingMode === 'user'}
               onCameraReady={() => setCameraReady(true)}
               onCaptureClick={handleCaptureClick}
               onFlip={() => {
@@ -742,6 +800,7 @@ interface CameraViewProps {
   isCapturing: boolean;
   countdown: number | null;
   canCapture: boolean;
+  isMirrored: boolean;
   onCameraReady: () => void;
   onCaptureClick: () => void;
   onFlip: () => void;
@@ -761,6 +820,7 @@ function CameraView({
   isCapturing,
   countdown,
   canCapture,
+  isMirrored,
   onCameraReady,
   onCaptureClick,
   onFlip,
@@ -816,11 +876,11 @@ function CameraView({
             <div
               className={cn(
                 'flex items-center gap-1 text-[10px] font-mono uppercase tracking-widest shrink-0 transition-colors',
-                lowLight ? 'text-red-400' : 'text-emerald-400',
+                lowLight ? 'text-red-400' : highLight ? 'text-amber-400' : 'text-emerald-400',
               )}
             >
               <Sun className="w-3 h-3" />
-              <span>{lux < 9999 ? lux : '9999+'} lx</span>
+              <span>{lowLight ? '↓ Low' : highLight ? '↑ High' : `${lux < 9999 ? lux : '9999+'} lx`}</span>
             </div>
           )}
         </div>
@@ -828,7 +888,7 @@ function CameraView({
 
       {/* ── Viewport ────────────────────────────────────────────────────── */}
       <div className="flex-1 flex items-center justify-center px-4 py-2 min-h-0 overflow-hidden">
-        <div className="relative w-full max-w-2xl">
+        <div className="relative w-full max-w-sm">
 
           {/* Ambient glow halo — colour-shifts with body part */}
           <div
@@ -839,14 +899,14 @@ function CameraView({
             }}
           />
 
-          {/* Viewport wrapper — clip-path morphs per body part */}
+          {/* Portrait viewport — 9:16, capped at 75vh */}
           <motion.div
-            className="relative w-full aspect-[4/3] sm:aspect-video bg-black overflow-hidden"
-            style={{ borderRadius: '3rem' }}
+            className="relative w-full bg-black overflow-hidden"
+            style={{ borderRadius: '3rem', aspectRatio: '9/16', maxHeight: '75vh' }}
             animate={{ clipPath: hudConfig.clipPath }}
             transition={{ duration: 0.7, ease: [0.25, 1, 0.5, 1] }}
           >
-            {/* Live video feed */}
+            {/* Live video feed — mirrored when using front camera */}
             {!cameraError && (
               <video
                 ref={videoRef}
@@ -855,6 +915,7 @@ function CameraView({
                 muted
                 onCanPlay={onCameraReady}
                 className="absolute inset-0 w-full h-full object-cover"
+                style={isMirrored ? { transform: 'scaleX(-1)' } : undefined}
               />
             )}
 
@@ -949,10 +1010,10 @@ function CameraView({
                       <span
                         className={cn(
                           'text-[9px] font-mono uppercase tracking-widest',
-                          lowLight ? 'text-red-400' : 'text-emerald-400',
+                          lowLight ? 'text-red-400' : highLight ? 'text-amber-400' : 'text-emerald-400',
                         )}
                       >
-                        {lowLight ? '⚠ LOW LIGHT' : `LUX ${lux}`}
+                        {lowLight ? '⚠ LOW LIGHT' : highLight ? '⚠ TOO BRIGHT' : `LUX ${lux}`}
                       </span>
                     )}
                   </div>
@@ -969,6 +1030,26 @@ function CameraView({
                     </div>
                   </div>
                 )}
+
+                {/* High-light overlay banner */}
+                {highLight && (
+                  <div className="absolute inset-x-0 bottom-14 flex justify-center z-20">
+                    <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/20 backdrop-blur-sm border border-amber-500/30">
+                      <Sun className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                      <span className="text-[11px] font-semibold text-amber-300">
+                        Too much light — find shade
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* ANEMO AI Branded Watermark */}
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/25 backdrop-blur-sm z-20 pointer-events-none">
+                  <Droplets className="w-2.5 h-2.5 text-white/40" />
+                  <span className="text-[7px] font-black uppercase tracking-[0.45em] text-white/35">
+                    ANEMO · AI
+                  </span>
+                </div>
               </div>
             )}
 

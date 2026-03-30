@@ -52,23 +52,26 @@ function calculateHash(data: string): string {
  * Checks if an image has been processed before and returns its cached result.
  */
 export async function checkImageConsistency(dataUri: string, bodyPart: string) {
+  // Sanitize bodyPart to prevent directory traversal
+  const safePart = path.basename(bodyPart).replace(/[^a-zA-Z0-9_-]/g, '_');
   try {
     const hash = calculateHash(dataUri);
-    // For now, we use a simple local filesystem cache to demonstrate consistency.
-    // In a production app, this would be a Firestore lookup.
     const cacheDir = path.join(process.cwd(), '.cache', 'analysis_results');
     if (!fs.existsSync(cacheDir)) {
       fs.mkdirSync(cacheDir, { recursive: true });
     }
 
-    const cachePath = path.join(cacheDir, `${hash}_${bodyPart}.json`);
+    const cachePath = path.join(cacheDir, `${hash}_${safePart}.json`);
     if (fs.existsSync(cachePath)) {
       console.log(`Cache hit for image consistency: ${hash}`);
-      const cachedResult = JSON.parse(fs.readFileSync(cachePath, 'utf8'));
-      return { 
-        isConsistent: true, 
-        result: cachedResult as GenerateImageDescriptionOutput 
-      };
+      try {
+        const cachedResult = JSON.parse(fs.readFileSync(cachePath, 'utf8'));
+        return { isConsistent: true, result: cachedResult as GenerateImageDescriptionOutput };
+      } catch {
+        // Cache corrupted — treat as miss
+        fs.unlinkSync(cachePath);
+        return { isConsistent: false, hash };
+      }
     }
 
     return { isConsistent: false, hash };
@@ -81,14 +84,16 @@ export async function checkImageConsistency(dataUri: string, bodyPart: string) {
 /**
  * Caches an analysis result to ensure consistency.
  */
-export async function cacheAnalysisResult(dataUri: string, bodyPart: string, result: any) {
+export async function cacheAnalysisResult(dataUri: string, bodyPart: string, result: GenerateImageDescriptionOutput) {
+  // Sanitize bodyPart to prevent directory traversal
+  const safePart = path.basename(bodyPart).replace(/[^a-zA-Z0-9_-]/g, '_');
   try {
     const hash = calculateHash(dataUri);
     const cacheDir = path.join(process.cwd(), '.cache', 'analysis_results');
     if (!fs.existsSync(cacheDir)) {
       fs.mkdirSync(cacheDir, { recursive: true });
     }
-    const cachePath = path.join(cacheDir, `${hash}_${bodyPart}.json`);
+    const cachePath = path.join(cacheDir, `${hash}_${safePart}.json`);
     fs.writeFileSync(cachePath, JSON.stringify(result));
   } catch (error) {
     console.error("Failed to cache result:", error);
@@ -152,9 +157,10 @@ export async function saveImageForTraining(
   if (process.env.NODE_ENV === 'development') {
     // --- LOCAL DEVELOPMENT SAVE ---
     try {
+      const safeBodyPart = path.basename(bodyPart).replace(/[^a-zA-Z0-9_-]/g, '_');
       const dateOnly = date.toISOString().split('T')[0];
       const timeOnly = date.toTimeString().split(' ')[0].replace(/:/g, '-');
-      const baseDir = path.join(process.cwd(), 'dataset', 'user_contributions', bodyPart);
+      const baseDir = path.join(process.cwd(), 'dataset', 'user_contributions', safeBodyPart);
       const targetDir = path.join(baseDir, category);
       
       if (!fs.existsSync(targetDir)) {

@@ -52,7 +52,18 @@ export function AnalysisReportViewer({ report, isOpen, onClose, reliabilityScore
         <DialogHeader>
           <DialogTitle>Lab Report Analysis</DialogTitle>
           <DialogDescription>
-            Report from {report.createdAt ? format(new Date(report.createdAt.seconds * 1000), 'PPP p') : 'unknown date'}
+          Report from {report.createdAt
+            ? (() => {
+                try {
+                  const d = typeof report.createdAt.toDate === 'function'
+                    ? report.createdAt.toDate()
+                    : report.createdAt.seconds
+                      ? new Date(report.createdAt.seconds * 1000)
+                      : new Date(report.createdAt);
+                  return format(d, 'PPP p');
+                } catch { return 'unknown date'; }
+              })()
+            : 'unknown date'}
           </DialogDescription>
         </DialogHeader>
         
@@ -107,13 +118,13 @@ export function AnalysisReportViewer({ report, isOpen, onClose, reliabilityScore
                     </TableRow>
                     </TableHeader>
                     <TableBody>
-                    {report.parameters.map((p, i) => (
+                    {(report.parameters ?? []).map((p, i) => (
                         <TableRow key={i}>
-                        <TableCell className="font-medium">{p.parameter}</TableCell>
-                        <TableCell>{p.value} {p.unit}</TableCell>
+                        <TableCell className="font-medium">{p?.parameter ?? '—'}</TableCell>
+                        <TableCell>{p?.value} {p?.unit}</TableCell>
                         <TableCell>
-                            <Badge variant={p.isNormal ? 'default' : 'destructive'}>
-                            {p.isNormal ? 'Normal' : 'Out of Range'}
+                            <Badge variant={p?.isNormal ? 'default' : 'destructive'}>
+                            {p?.isNormal ? 'Normal' : 'Out of Range'}
                             </Badge>
                         </TableCell>
                         </TableRow>

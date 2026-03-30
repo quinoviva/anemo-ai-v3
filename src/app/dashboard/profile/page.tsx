@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -20,9 +20,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from '@/components/ui/select';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, User, LogIn, Info, Activity, ShieldCheck, Heart, UserCircle, MapPin } from 'lucide-react';
+import { Upload, User, LogIn, Info, Activity, ShieldCheck, Heart, UserCircle, MapPin, CalendarIcon } from 'lucide-react';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { cn, getErrorMessage } from '@/lib/utils';
+import { format, parse, isValid } from 'date-fns';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import HeartLoader from '@/components/ui/HeartLoader';
 import { AnemoLoading } from '@/components/ui/anemo-loading';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -60,6 +63,12 @@ export default function ProfilePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [initialDataLoaded, setInitialDataLoaded] = useState(false);
+  const [dobOpen, setDobOpen] = useState(false);
+  const [lmpOpen, setLmpOpen] = useState(false);
+  // Tracks when the Firestore subscription has actually started fetching,
+  // preventing a race condition where userDocRef becomes non-null but
+  // useDoc's isLoading is still false on the same render.
+  const docHasStartedLoadingRef = useRef(false);
 
   const isGuest = user?.isAnonymous;
 
@@ -115,26 +124,28 @@ export default function ProfilePage() {
     return `${month}/${day}/${year}`;
   }
 
-  const handleDateInputChange = (e: React.ChangeEvent<HTMLInputElement>, fieldName: keyof ProfileFormValues) => {
-    let value = e.target.value.replace(/\D/g, '');
-    if (value.length > 8) value = value.slice(0, 8);
-    if (value.length > 4) {
-      value = `${value.slice(0, 2)}/${value.slice(2, 4)}/${value.slice(4)}`;
-    } else if (value.length > 2) {
-      value = `${value.slice(0, 2)}/${value.slice(2)}`;
-    }
-    form.setValue(fieldName, value);
-  };
-
   const toArray = (value: any): string[] => {
     if (Array.isArray(value)) return value;
     if (typeof value === 'string') return value.split(',').map(s => s.trim()).filter(s => s);
     return [];
   };
 
+  // Track when loading has actually started (prevents race condition)
   useEffect(() => {
-    if (!initialDataLoaded && !userDataLoading) {
-        if (userData) {
+    if (userDataLoading) docHasStartedLoadingRef.current = true;
+  }, [userDataLoading]);
+
+  useEffect(() => {
+    if (initialDataLoaded) return;
+    if (!user) return; // Auth not ready yet
+
+    // If we have a docRef, wait for the subscription to START loading before
+    // trusting a null userData — otherwise we fire the fallback on the brief
+    // render where userDocRef just became non-null but isLoading is still false.
+    if (userDocRef && !docHasStartedLoadingRef.current) return;
+    if (userDocRef && userDataLoading) return; // Still fetching
+
+    if (userData) {
           const medicalInfo = userData.medicalInfo || {};
           let dobValue = medicalInfo.dateOfBirth;
           if (dobValue instanceof Timestamp) dobValue = formatDate(dobValue.toDate());
@@ -161,18 +172,32 @@ export default function ProfilePage() {
             flowIntensity: medicalInfo.flowIntensity || '',
           });
           setInitialDataLoaded(true);
-        } else if (user) {
+    } else {
+          // No Firestore doc yet (new user) — seed from auth profile
           const [firstName, ...lastName] = (user.displayName || '').split(' ');
           form.reset({
             firstName: firstName || '',
             lastName: lastName.join(' ') || '',
             photoURL: user.photoURL || '',
+            address: '',
+            dateOfBirth: '',
+            sex: '',
+            height: '',
+            weight: '',
+            bloodType: '',
+            allergies: [],
+            conditions: [],
+            medications: [],
+            familyHistory: [],
+            lastMenstrualPeriod: '',
+            cycleLength: '',
+            flowDuration: '',
+            flowIntensity: '',
           });
           if (!isGuest) setInitialDataLoaded(true);
-        }
-        if (isGuest) setInitialDataLoaded(true);
     }
-  }, [user, userData, userDataLoading, form, initialDataLoaded, isGuest]);
+    if (isGuest) setInitialDataLoaded(true);
+  }, [user, userData, userDataLoading, userDocRef, form, initialDataLoaded, isGuest]);
 
   const getInitials = (name: string | null | undefined) => {
     if (!name) return 'U';
@@ -387,13 +412,41 @@ export default function ProfilePage() {
                             <FormField
                                 control={form.control}
                                 name="dateOfBirth"
-                                render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Birth Date</FormLabel>
-                                    <FormControl><Input placeholder="MM/DD/YYYY" {...field} onChange={(e) => handleDateInputChange(e, 'dateOfBirth')} value={field.value || ''} /></FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                                )}
+                                render={({ field }) => {
+                                  const parsed = field.value ? parse(field.value, 'MM/dd/yyyy', new Date()) : undefined;
+                                  const dateVal = parsed && isValid(parsed) ? parsed : undefined;
+                                  return (
+                                  <FormItem>
+                                      <FormLabel>Birth Date</FormLabel>
+                                      <Popover open={dobOpen} onOpenChange={setDobOpen}>
+                                        <PopoverTrigger asChild>
+                                          <FormControl>
+                                            <button type="button" className={cn(
+                                              'w-full h-10 px-3 rounded-md border border-input bg-background/50 text-sm text-left flex items-center gap-2 hover:bg-accent transition-colors',
+                                              !dateVal && 'text-muted-foreground'
+                                            )}>
+                                              <CalendarIcon className="h-4 w-4 text-primary/50 shrink-0" />
+                                              {dateVal ? format(dateVal, 'MMMM d, yyyy') : 'Select date'}
+                                            </button>
+                                          </FormControl>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0" align="start">
+                                          <CalendarComponent
+                                            mode="single"
+                                            selected={dateVal}
+                                            onSelect={(d) => {
+                                              field.onChange(d ? format(d, 'MM/dd/yyyy') : '');
+                                              setDobOpen(false);
+                                            }}
+                                            disabled={(date) => date > new Date() || date < new Date('1900-01-01')}
+                                            initialFocus
+                                          />
+                                        </PopoverContent>
+                                      </Popover>
+                                      <FormMessage />
+                                  </FormItem>
+                                  );
+                                }}
                             />
                             <FormField
                                 control={form.control}
@@ -401,7 +454,7 @@ export default function ProfilePage() {
                                 render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Biological Sex</FormLabel>
-                                    <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
+                                    <Select onValueChange={field.onChange} value={field.value || undefined} defaultValue={field.value || undefined}>
                                     <FormControl><SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger></FormControl>
                                     <SelectContent>
                                         <SelectItem value="Male">Male</SelectItem>
@@ -419,7 +472,7 @@ export default function ProfilePage() {
                                 render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Blood Group</FormLabel>
-                                    <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
+                                    <Select onValueChange={field.onChange} value={field.value || undefined} defaultValue={field.value || undefined}>
                                     <FormControl><SelectTrigger><SelectValue placeholder="Group" /></SelectTrigger></FormControl>
                                     <SelectContent>
                                         {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(type => (
@@ -484,12 +537,40 @@ export default function ProfilePage() {
                             <FormField
                                 control={form.control}
                                 name="lastMenstrualPeriod"
-                                render={({ field }) => (
+                                render={({ field }) => {
+                                  const parsed = field.value ? parse(field.value, 'MM/dd/yyyy', new Date()) : undefined;
+                                  const dateVal = parsed && isValid(parsed) ? parsed : undefined;
+                                  return (
                                     <FormItem>
                                         <FormLabel>Last Period</FormLabel>
-                                        <FormControl><Input placeholder="MM/DD/YYYY" {...field} onChange={(e) => handleDateInputChange(e, 'lastMenstrualPeriod')} /></FormControl>
+                                        <Popover open={lmpOpen} onOpenChange={setLmpOpen}>
+                                          <PopoverTrigger asChild>
+                                            <FormControl>
+                                              <button type="button" className={cn(
+                                                'w-full h-10 px-3 rounded-md border border-input bg-background/50 text-sm text-left flex items-center gap-2 hover:bg-accent transition-colors',
+                                                !dateVal && 'text-muted-foreground'
+                                              )}>
+                                                <CalendarIcon className="h-4 w-4 text-rose-400 shrink-0" />
+                                                {dateVal ? format(dateVal, 'MMMM d, yyyy') : 'Select date'}
+                                              </button>
+                                            </FormControl>
+                                          </PopoverTrigger>
+                                          <PopoverContent className="w-auto p-0" align="start">
+                                            <CalendarComponent
+                                              mode="single"
+                                              selected={dateVal}
+                                              onSelect={(d) => {
+                                                field.onChange(d ? format(d, 'MM/dd/yyyy') : '');
+                                                setLmpOpen(false);
+                                              }}
+                                              disabled={(date) => date > new Date() || date < new Date('2000-01-01')}
+                                              initialFocus
+                                            />
+                                          </PopoverContent>
+                                        </Popover>
                                     </FormItem>
-                                )}
+                                  );
+                                }}
                             />
                             <FormField
                                 control={form.control}
@@ -497,7 +578,7 @@ export default function ProfilePage() {
                                 render={({ field }) => (
                                     <FormItem>
                                     <FormLabel>Flow Intensity</FormLabel>
-                                    <Select onValueChange={field.onChange} value={field.value}>
+                                    <Select onValueChange={field.onChange} value={field.value || undefined}>
                                         <FormControl><SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger></FormControl>
                                         <SelectContent>
                                             <SelectItem value="Light">Light</SelectItem>
