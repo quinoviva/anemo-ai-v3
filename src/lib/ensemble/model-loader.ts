@@ -272,7 +272,27 @@ export async function runInference(
   tensor: tf.Tensor4D,
 ): Promise<Float32Array> {
   const output = model.predict(tensor);
-  const resolved = Array.isArray(output) ? output[0] : output;
-  const data = await (resolved as tf.Tensor).data();
-  return data as Float32Array;
+
+  // Normalise output into a primary tensor (to read data from) and any extras.
+  let resolved: tf.Tensor;
+  const extraOutputs: tf.Tensor[] = [];
+
+  if (Array.isArray(output)) {
+    const [first, ...rest] = output as tf.Tensor[];
+    resolved = first;
+    extraOutputs.push(...rest);
+  } else {
+    resolved = output as tf.Tensor;
+  }
+
+  try {
+    const data = (await resolved.data()) as Float32Array;
+    return data;
+  } finally {
+    // Dispose all tensors created by predict to avoid GPU/CPU memory leaks.
+    resolved.dispose();
+    for (const t of extraOutputs) {
+      t.dispose();
+    }
+  }
 }
