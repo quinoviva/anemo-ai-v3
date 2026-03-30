@@ -400,7 +400,7 @@ export default function DashboardPage() {
                 <MessageSquare className="h-10 w-10" />
               </div>
               <div className="space-y-2">
-                <h3 className="text-4xl md:text-9xl font-light tracking-tighter text-foreground leading-none drop-shadow-sm">
+                <h3 className="text-4xl md:text-3xl font-light tracking-tighter text-foreground leading-none drop-shadow-sm">
                   Anemo <span className="font-medium text-red-600 italic">Bot</span>
                 </h3>
                 <p className="text-sm text-muted-foreground font-light tracking-widest uppercase">AI Health Intelligence</p>
@@ -434,7 +434,7 @@ export default function DashboardPage() {
                   <MapPin className="h-10 w-10" />
                 </div>
                 <div className="space-y-2">
-                  <h3 className="text-4xl md:text-9xl font-light tracking-tighter text-foreground leading-none drop-shadow-sm">
+                  <h3 className="text-4xl md:text-3xl font-light tracking-tighter text-foreground leading-none drop-shadow-sm">
                     Nearby <span className="font-medium text-red-600 italic">Clinics</span>
                   </h3>
                   <p className="text-sm text-muted-foreground font-light tracking-wide flex items-center gap-3">
@@ -547,7 +547,7 @@ export default function DashboardPage() {
 
               <div className="space-y-8 text-center">
                 <div className="space-y-2">
-                  <h3 className="text-4xl md:text-9xl font-bold tracking-tighter text-foreground leading-none drop-shadow-sm">
+                  <h3 className="text-4xl md:text-3xl font-bold tracking-tighter text-foreground leading-none drop-shadow-sm">
                     Iron <span className="font-light italic">Catcher</span>
                   </h3>
                   <p className="text-red-100 text-xs font-bold uppercase tracking-[0.4em] drop-shadow-lg">Hemoglobin Rush</p>

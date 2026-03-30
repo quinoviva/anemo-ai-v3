@@ -350,7 +350,7 @@ export function SignUpForm() {
           <motion.div variants={itemVariants} className="p-4 bg-primary/5 border border-primary/10 rounded-2xl text-sm text-muted-foreground">
              <p className="leading-relaxed text-center">
                 <span className="font-semibold text-primary block mb-1">Health Note</span> 
-                Female users unlock <span className="text-foreground font-medium">Gemini Women’s Health Mode</span> for cycle-aware analysis.
+                Female users unlock <span className="text-foreground font-medium">Women’s Health Mode</span> for cycle-aware analysis.
              </p>
           </motion.div>
 
