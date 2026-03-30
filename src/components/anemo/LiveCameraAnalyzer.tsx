@@ -32,10 +32,30 @@ declare global {
   }
 }
 
+// Target resolution: 720p @ 30 fps — prevents thermal throttling on mobile.
+// 4K is intentionally excluded to stay within the 30-fps budget.
+const CAMERA_CONSTRAINTS: MediaTrackConstraints = {
+  width: { ideal: 1280, max: 1280 },
+  height: { ideal: 720, max: 720 },
+  frameRate: { ideal: 30, max: 30 },
+};
+
+// Extend HTMLVideoElement to expose the requestVideoFrameCallback API where
+// the TypeScript DOM lib has not yet included it.  We use a separate type
+// alias so we never mutate the existing HTMLVideoElement interface.
+type VideoElementWithRVFC = HTMLVideoElement & {
+  requestVideoFrameCallback: (
+    callback: (now: DOMHighResTimeStamp, metadata: Record<string, unknown>) => void,
+  ) => number;
+  cancelVideoFrameCallback: (handle: number) => void;
+};
+
 export function LiveCameraAnalyzer({ onCapture, onFileUpload, bodyPart }: LiveCameraAnalyzerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const rvfcHandleRef = useRef<number | null>(null);
+  const rafHandleRef = useRef<number | null>(null);
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [isCapturing, setIsCapturing] = useState(false);
@@ -63,8 +83,8 @@ export function LiveCameraAnalyzer({ onCapture, onFileUpload, bodyPart }: LiveCa
       stopStream(); // Stop any existing stream before starting a new one
 
       try {
-        const newStream = await navigator.mediaDevices.getUserMedia({ 
-            video: { facingMode }
+        const newStream = await navigator.mediaDevices.getUserMedia({
+            video: { ...CAMERA_CONSTRAINTS, facingMode },
         });
         setStream(newStream);
         setHasCameraPermission(true);
@@ -96,28 +116,92 @@ export function LiveCameraAnalyzer({ onCapture, onFileUpload, bodyPart }: LiveCa
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [facingMode]);
 
-  // AmbientLightSensor integration
+  // requestVideoFrameCallback-based luma monitor.
+  // Runs off the main render loop — much more efficient than setInterval.
+  // Falls back to requestAnimationFrame when RVFC is not supported.
   useEffect(() => {
-    if ('AmbientLightSensor' in window) {
-      const sensor = new window.AmbientLightSensor();
+    const video = videoRef.current;
+    if (!video || hasCameraPermission !== true) return;
 
-      sensor.onreading = () => {
-        setLux(sensor.illuminance);
+    let frameCanvas: OffscreenCanvas | null = null;
+    let frameCtx: OffscreenCanvasRenderingContext2D | null = null;
+
+    const measureLuma = () => {
+      if (!video || video.readyState < 2) return;
+      const vw = video.videoWidth;
+      const vh = video.videoHeight;
+      if (!vw || !vh) return;
+
+      // Sample a small central patch (10% of each dimension) for speed.
+      const sw = Math.max(1, Math.floor(vw * 0.1));
+      const sh = Math.max(1, Math.floor(vh * 0.1));
+      const sx = Math.floor((vw - sw) / 2);
+      const sy = Math.floor((vh - sh) / 2);
+
+      try {
+        if (typeof OffscreenCanvas !== 'undefined') {
+          if (!frameCanvas || frameCanvas.width !== sw || frameCanvas.height !== sh) {
+            frameCanvas = new OffscreenCanvas(sw, sh);
+            frameCtx = frameCanvas.getContext('2d') as OffscreenCanvasRenderingContext2D | null;
+          }
+          frameCtx?.drawImage(video, sx, sy, sw, sh, 0, 0, sw, sh);
+          const data = frameCtx?.getImageData(0, 0, sw, sh).data;
+          if (data) {
+            let totalLuma = 0;
+            for (let i = 0; i < data.length; i += 4) {
+              totalLuma += 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+            }
+            const avgLuma = totalLuma / (data.length / 4);
+            // Map 0–255 luma to approximate lux (very rough heuristic: 1 luma ≈ 4 lux)
+            setLux(Math.round(avgLuma * 4));
+          }
+        }
+      } catch {
+        // OffscreenCanvas may be blocked by cross-origin; silently ignore.
+      }
+    };
+
+    let stopped = false;
+
+    const videoRVFC = video as VideoElementWithRVFC;
+
+    if ('requestVideoFrameCallback' in video) {
+      const tick = (_now: DOMHighResTimeStamp, _meta: Record<string, unknown>) => {
+        if (stopped) return;
+        measureLuma();
+        rvfcHandleRef.current = videoRVFC.requestVideoFrameCallback(tick);
       };
-
-      sensor.onerror = (event: any) => {
-        console.error('AmbientLightSensor error:', event.error.name, event.error.message);
-      };
-
-      sensor.start();
-
-      return () => {
-        sensor.stop();
-      };
+      rvfcHandleRef.current = videoRVFC.requestVideoFrameCallback(tick);
     } else {
-      console.warn('AmbientLightSensor not supported in this browser.');
+      // Fallback: rAF-based sampling at ~10 fps to avoid overloading the main thread.
+      let lastTime = 0;
+      const tick = (time: number) => {
+        if (stopped) return;
+        if (time - lastTime > 100) {
+          lastTime = time;
+          measureLuma();
+        }
+        rafHandleRef.current = requestAnimationFrame(tick);
+      };
+      rafHandleRef.current = requestAnimationFrame(tick);
     }
-  }, []);
+
+    return () => {
+      stopped = true;
+      if (rvfcHandleRef.current !== null && 'cancelVideoFrameCallback' in video) {
+        videoRVFC.cancelVideoFrameCallback(rvfcHandleRef.current);
+        rvfcHandleRef.current = null;
+      }
+      if (rafHandleRef.current !== null) {
+        cancelAnimationFrame(rafHandleRef.current);
+        rafHandleRef.current = null;
+      }
+    };
+  // Re-run whenever camera permission state or video source changes.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasCameraPermission, stream]);
+
+
 
   // Luminance Guardrail effect
   useEffect(() => {
@@ -165,56 +249,78 @@ export function LiveCameraAnalyzer({ onCapture, onFileUpload, bodyPart }: LiveCa
     }
   }, [performCalibration, toast]);
 
-  const handleCapture = () => {
-    if (!videoRef.current || !canvasRef.current || lowLightCondition || calibrationStage !== 'capturing_subject') return;
+  const handleCapture = useCallback(async () => {
+    if (!videoRef.current || lowLightCondition || calibrationStage !== 'capturing_subject') return;
     setIsCapturing(true);
 
     const video = videoRef.current;
-    const canvas = canvasRef.current;
-    const context = canvas.getContext('2d', { willReadFrequently: true });
-
-    if (!context) {
-        toast({
-            title: 'Capture Error',
-            description: 'Could not get canvas context.',
-            variant: 'destructive',
-        });
-        setIsCapturing(false);
-        return;
-    };
-
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
-
-    // Apply color correction matrix if available
-    if (colorCorrectionMatrix) {
-        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-        const correctedImageData = applyColorCorrection(imageData, colorCorrectionMatrix);
-        context.putImageData(correctedImageData, 0, 0);
-    }
+    const vw = video.videoWidth || 1280;
+    const vh = video.videoHeight || 720;
 
     const calibrationMetadata: CalibrationMetadata = {
-        ambientLux: lux,
-        colorTemperatureKelvin: colorTemperatureKelvin,
-        colorCorrectionMatrix: colorCorrectionMatrix,
+      ambientLux: lux,
+      colorTemperatureKelvin: colorTemperatureKelvin,
+      colorCorrectionMatrix: colorCorrectionMatrix,
     };
 
-    canvas.toBlob((blob) => {
-      if (blob) {
-        const file = new File([blob], 'capture.png', { type: 'image/png' });
-        const dataUri = canvas.toDataURL('image/png');
-        onCapture(file, dataUri, calibrationMetadata);
-      } else {
-         toast({
-            title: 'Capture Error',
-            description: 'Could not create image blob.',
-            variant: 'destructive',
-        });
+    try {
+      // Prefer OffscreenCanvas so the DOM/render thread stays unblocked.
+      if (typeof OffscreenCanvas !== 'undefined') {
+        const offscreen = new OffscreenCanvas(vw, vh);
+        const ctx = offscreen.getContext('2d') as OffscreenCanvasRenderingContext2D | null;
+        if (ctx) {
+          ctx.drawImage(video, 0, 0, vw, vh);
+          if (colorCorrectionMatrix) {
+            const imageData = ctx.getImageData(0, 0, vw, vh);
+            const corrected = applyColorCorrection(imageData, colorCorrectionMatrix);
+            ctx.putImageData(corrected, 0, 0);
+          }
+          const blob = await offscreen.convertToBlob({ type: 'image/png' });
+          const file = new File([blob], 'capture.png', { type: 'image/png' });
+          const dataUri = await new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.readAsDataURL(blob);
+          });
+          onCapture(file, dataUri, calibrationMetadata);
+          return;
+        }
       }
-      setIsCapturing(false);
-    }, 'image/png');
-  };
+
+      // Fallback: use the hidden <canvas> on the main thread.
+      const canvas = canvasRef.current;
+      if (!canvas) throw new Error('No canvas available');
+      const context = canvas.getContext('2d', { willReadFrequently: true });
+      if (!context) throw new Error('Could not get canvas context');
+      canvas.width = vw;
+      canvas.height = vh;
+      context.drawImage(video, 0, 0, vw, vh);
+      if (colorCorrectionMatrix) {
+        const imageData = context.getImageData(0, 0, vw, vh);
+        const corrected = applyColorCorrection(imageData, colorCorrectionMatrix);
+        context.putImageData(corrected, 0, 0);
+      }
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const file = new File([blob], 'capture.png', { type: 'image/png' });
+          const dataUri = canvas.toDataURL('image/png');
+          onCapture(file, dataUri, calibrationMetadata);
+        } else {
+          toast({ title: 'Capture Error', description: 'Could not create image blob.', variant: 'destructive' });
+        }
+        setIsCapturing(false);
+      }, 'image/png');
+      return; // blob callback handles setIsCapturing
+    } catch (err) {
+      toast({
+        title: 'Capture Error',
+        description: err instanceof Error ? err.message : 'Unexpected error during capture.',
+        variant: 'destructive',
+      });
+    }
+
+    setIsCapturing(false);
+  }, [lowLightCondition, calibrationStage, lux, colorTemperatureKelvin, colorCorrectionMatrix, applyColorCorrection, onCapture, toast]);
 
   const handleFlipCamera = () => {
     setFacingMode(prev => prev === 'user' ? 'environment' : 'user');
