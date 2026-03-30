@@ -231,12 +231,27 @@ export function EnsembleAnalysisPanel({ onBack }: EnsembleAnalysisPanelProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step]);
 
-  // Scout quality gate — toast when a Tier-1 scout rejects an ROI.
+  // Scout quality gate — toast when a Tier-1 scout processed an image but
+  // rejected it for low quality (not simply skipped due to missing input).
+  // We detect "skipped due to no image" by checking contributedToConsensus
+  // against whether the matching body part was actually captured.
   useEffect(() => {
     if (!ensembleReport) return;
+    const capturedBodyParts = new Set<string>(
+      Object.entries(captures)
+        .filter(([, v]) => v !== null)
+        .map(([k]) => k), // 'skin' | 'fingernails' | 'undereye'
+    );
     const scoutResults = ensembleReport.modelResults.filter((r) => r.tier === 1);
     for (const scout of scoutResults) {
-      if (!scout.qualityApproved && !scout.error?.includes('No image')) {
+      // Skip models that were omitted because no image was provided.
+      const wasProvided =
+        (scout.modelId.includes('skin') && capturedBodyParts.has('skin')) ||
+        (scout.modelId.includes('nail') && capturedBodyParts.has('fingernails')) ||
+        (scout.modelId.includes('eye') && capturedBodyParts.has('undereye'));
+      if (!wasProvided) continue;
+
+      if (!scout.qualityApproved) {
         const bodyPartName =
           scout.modelName.includes('Skin')
             ? 'skin image'
@@ -253,13 +268,24 @@ export function EnsembleAnalysisPanel({ onBack }: EnsembleAnalysisPanelProps) {
         });
       }
     }
-  }, [ensembleReport, toast]);
+  }, [ensembleReport, captures, toast]);
 
   const handleRetake = () => {
     reset();
     setStep('skin');
     setStepIndex(0);
     setCaptures({ skin: null, fingernails: null, undereye: null });
+  };
+
+  const handleBackClick = () => {
+    if (step === 'results') {
+      handleRetake();
+    } else if (stepIndex === 0) {
+      onBack?.();
+    } else {
+      setStepIndex((i) => i - 1);
+      setStep(STEPS[stepIndex - 1].id);
+    }
   };
 
   // ── Render helpers ──────────────────────────────────────────────────────
@@ -546,10 +572,7 @@ export function EnsembleAnalysisPanel({ onBack }: EnsembleAnalysisPanelProps) {
       {onBack && step !== 'analysing' && (
         <Button
           variant="ghost"
-          onClick={step === 'results' ? handleRetake : (stepIndex === 0 ? onBack : () => {
-            setStepIndex((i) => i - 1);
-            setStep(STEPS[stepIndex - 1].id);
-          })}
+          onClick={handleBackClick}
           className="group text-muted-foreground hover:text-foreground transition-colors gap-3 uppercase text-[10px] font-black tracking-[0.3em] h-12 rounded-full"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
