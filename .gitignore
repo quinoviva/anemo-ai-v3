@@ -53,3 +53,8 @@ dataconnect-debug.log
 
 # machine learning data
 /dataset
+
+
+.cache/
+.firebase/logs/
+*.log

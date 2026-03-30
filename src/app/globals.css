@@ -173,4 +173,16 @@
   .animate-slow-pulse {
     animation: slow-pulse 8s ease-in-out infinite;
   }
+
+  /* HUD scan-line sweep (used by CameraAnalysis) */
+  @keyframes scanY {
+    0%   { top: -2px; opacity: 0; }
+    5%   { opacity: 0.6; }
+    95%  { opacity: 0.6; }
+    100% { top: 100%; opacity: 0; }
+  }
+
+  .animate-scan-y {
+    animation: scanY 3.5s linear infinite;
+  }
 }
