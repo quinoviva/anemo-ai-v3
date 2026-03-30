@@ -264,7 +264,7 @@ function runConsensusWorker(
     callbacks.workerRef.current?.terminate();
 
     try {
-      const worker = new Worker('/workers/consensus-worker.js');
+      const worker = new Worker('/workers/consensus-worker.js', { type: 'module' });
       callbacks.workerRef.current = worker;
 
       worker.onmessage = (event: MessageEvent) => {
