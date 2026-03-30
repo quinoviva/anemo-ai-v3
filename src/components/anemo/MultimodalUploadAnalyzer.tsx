@@ -1,27 +1,19 @@
 'use client';
 
 /**
- * MultimodalUploadAnalyzer
- * ========================
- * Redesigned image-upload analysis page for Anemo AI.
+ * MultimodalUploadAnalyzer — Sequential Camera-First Analysis
+ * ===========================================================
+ * Workflow:
+ *   Step 1-3 (one at a time):
+ *     → Camera (primary, inline) OR upload (secondary)
+ *     → Gemini validates correct body part
+ *     → Shows short XAI description → "Next" to proceed
+ *     → Error + "Retry" if rejected
+ *   Step 4 (optional): CBC lab report
+ *   Step 5: Cross-modal validation spinner
+ *   Step 6: Full diagnostic report (PDF + Firebase save)
  *
- * Layout
- * ------
- * 1. Page header — matches Dashboard typography (font-light, tracking-tighter)
- * 2. 3-card bento grid — Skin / Under-eye / Fingernails, each with its own
- *    body-part colour accent (Amber / Crimson / Blue)
- * 3. Drag-and-drop drop zone → inline preview → scan HUD animation
- * 4. Per-card states: idle | uploading | analyzing | success | error
- * 5. "Run Full Analysis" CTA — enabled when all 3 succeed
- * 6. Optional CBC lab report upload step
- * 7. Final validation step → ImageAnalysisReport
- *
- * Design System
- * -------------
- * - .glass-panel / .glass-panel-hover / .glass-button from globals.css
- * - --primary (crimson), --background, --border, --muted-foreground CSS vars
- * - framer-motion for all transitions
- * - shadcn/ui: Button, Badge, Progress
+ * Design: Glassmorphism matching Dashboard, ultra-modern premium.
  */
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
@@ -36,6 +28,7 @@ import {
   XCircle,
   RefreshCw,
   ArrowLeft,
+  ArrowRight,
   ChevronRight,
   FileText,
   Zap,
@@ -43,9 +36,10 @@ import {
   Activity,
   Loader2,
   SkipForward,
+  Sparkles,
+  AlertCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { useUser } from '@/firebase';
@@ -67,66 +61,69 @@ import { RealTimeCamera } from './RealTimeCamera';
 // ─────────────────────────────────────────────────────────────────────────────
 
 type BodyPart = 'skin' | 'under-eye' | 'fingernails';
-type CardStatus = 'idle' | 'analyzing' | 'success' | 'error';
-type PageStep = 'capture' | 'cbc' | 'validating' | 'results';
+type CaptureStatus = 'idle' | 'analyzing' | 'success' | 'error';
+type PagePhase = 'capture' | 'cbc' | 'validating' | 'results';
 
-const MAX_FILE_SIZE = 8 * 1024 * 1024; // 8 MB
+const MAX_FILE_SIZE = 8 * 1024 * 1024;
 
-interface CardConfig {
+interface PartConfig {
   id: BodyPart;
+  stepNum: number;
   label: string;
   sublabel: string;
   icon: React.ReactNode;
-  color: string;          // hex for inline styles
-  colorClass: string;     // Tailwind text-* for JSX
-  borderClass: string;    // Tailwind border-*
-  bgClass: string;        // Tailwind bg-*
-  glowClass: string;      // Tailwind bg-* (blurred glow)
+  color: string;
+  colorClass: string;
+  borderClass: string;
+  bgClass: string;
   hint: string;
+  instruction: string;
 }
 
-const CARDS: CardConfig[] = [
+const PARTS: PartConfig[] = [
   {
     id: 'skin',
-    label: 'Palm · Skin',
-    sublabel: '001',
+    stepNum: 1,
+    label: 'Palm Skin',
+    sublabel: 'Palmar Analysis',
     icon: <Hand strokeWidth={1.5} />,
     color: '#f59e0b',
     colorClass: 'text-amber-400',
     borderClass: 'border-amber-500/30',
     bgClass: 'bg-amber-500/10',
-    glowClass: 'bg-amber-500/20',
-    hint: 'Hold your palm face-up. Ensure the creases are clearly visible.',
+    hint: 'Hold your palm face-up in good lighting.',
+    instruction: 'Position your open palm flat with fingers together. Ensure palm creases are clearly visible.',
   },
   {
     id: 'under-eye',
-    label: 'Conjunctiva · Eye',
-    sublabel: '002',
+    stepNum: 2,
+    label: 'Conjunctiva',
+    sublabel: 'Palpebral Analysis',
     icon: <Eye strokeWidth={1.5} />,
     color: '#ef4444',
     colorClass: 'text-red-400',
     borderClass: 'border-red-500/30',
     bgClass: 'bg-red-500/10',
-    glowClass: 'bg-red-500/20',
-    hint: 'Pull your lower eyelid slightly down. Look up toward a light source.',
+    hint: 'Pull lower eyelid down gently and look upward.',
+    instruction: 'Gently pull your lower eyelid downward. Look up toward a bright light source. The inner pink lining should be visible.',
   },
   {
     id: 'fingernails',
-    label: 'Nailbed · Nail',
-    sublabel: '003',
+    stepNum: 3,
+    label: 'Nailbed',
+    sublabel: 'Capillary Analysis',
     icon: <Fingerprint strokeWidth={1.5} />,
     color: '#3b82f6',
     colorClass: 'text-blue-400',
     borderClass: 'border-blue-500/30',
     bgClass: 'bg-blue-500/10',
-    glowClass: 'bg-blue-500/20',
-    hint: 'Keep nails bare (no polish). Show 4 fingers flat to the camera.',
+    hint: 'Show 4 bare fingernails. No polish or acrylics.',
+    instruction: 'Hold 4 fingers flat, nails facing the camera. Ensure nails are completely bare with no polish.',
   },
 ];
 
-// Per-card state shape
-interface CardState {
-  status: CardStatus;
+interface CaptureState {
+  status: CaptureStatus;
   imageUrl: string | null;
   dataUri: string | null;
   analysisResult: string | null;
@@ -134,7 +131,7 @@ interface CardState {
   error: string | null;
 }
 
-const INITIAL_CARD: CardState = {
+const INITIAL_CAPTURE: CaptureState = {
   status: 'idle',
   imageUrl: null,
   dataUri: null,
@@ -151,15 +148,13 @@ function resizeImage(file: File, maxDim = 1600): Promise<string> {
   return new Promise((resolve) => {
     const img = new Image();
     img.onload = () => {
-      let w = img.width;
-      let h = img.height;
+      let w = img.width, h = img.height;
       if (w > h && w > maxDim) { h = Math.round(h * maxDim / w); w = maxDim; }
       else if (h > maxDim) { w = Math.round(w * maxDim / h); h = maxDim; }
-      const canvas = document.createElement('canvas');
-      canvas.width = w;
-      canvas.height = h;
-      canvas.getContext('2d')?.drawImage(img, 0, 0, w, h);
-      resolve(canvas.toDataURL('image/jpeg', 0.88));
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      c.getContext('2d')?.drawImage(img, 0, 0, w, h);
+      resolve(c.toDataURL('image/jpeg', 0.88));
       URL.revokeObjectURL(img.src);
     };
     img.src = URL.createObjectURL(file);
@@ -176,371 +171,531 @@ function dataUriToFile(dataUri: string, name = 'capture.jpg'): File {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// UploadCard — single body-part card
+// StepProgressBar
 // ─────────────────────────────────────────────────────────────────────────────
 
-interface UploadCardProps {
-  config: CardConfig;
-  cardState: CardState;
-  onFile: (file: File) => void;
-  onRetry: () => void;
-  onCamera: () => void;
+function StepProgressBar({
+  currentStep,
+  captures,
+}: {
+  currentStep: number;
+  captures: Record<BodyPart, CaptureState>;
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      {PARTS.map((part, idx) => {
+        const cs = captures[part.id];
+        const isDone = cs.status === 'success';
+        const isCurrent = idx + 1 === currentStep;
+        const isError = cs.status === 'error';
+
+        return (
+          <React.Fragment key={part.id}>
+            <div className="flex flex-col items-center gap-1.5">
+              <motion.div
+                animate={{
+                  scale: isCurrent ? 1.1 : 1,
+                  boxShadow: isCurrent ? `0 0 0 3px ${part.color}40` : 'none',
+                }}
+                className={cn(
+                  'w-9 h-9 rounded-full flex items-center justify-center border-2 transition-all duration-300',
+                  isDone ? 'border-emerald-400 bg-emerald-500/20' :
+                  isError ? 'border-red-400 bg-red-500/10' :
+                  isCurrent ? `border-current bg-current/10` : 'border-border/40 bg-muted/20',
+                )}
+                style={isCurrent ? { borderColor: part.color, backgroundColor: `${part.color}15`, color: part.color } : {}}
+              >
+                {isDone
+                  ? <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                  : isError
+                    ? <XCircle className="w-4 h-4 text-red-400" />
+                    : <span className={cn('w-4 h-4', isCurrent ? '' : 'text-muted-foreground/50')} style={isCurrent ? { color: part.color } : {}}>
+                        {part.icon}
+                      </span>
+                }
+              </motion.div>
+              <span className={cn(
+                'text-[8px] font-black uppercase tracking-[0.2em] transition-all',
+                isCurrent ? 'opacity-100' : 'opacity-40',
+              )} style={isCurrent ? { color: part.color } : {}}>
+                {part.label}
+              </span>
+            </div>
+
+            {idx < PARTS.length - 1 && (
+              <motion.div
+                className="flex-1 h-px transition-all duration-700"
+                style={{
+                  background: captures[PARTS[idx].id].status === 'success'
+                    ? 'linear-gradient(90deg, #34d399, #34d399)'
+                    : 'hsl(var(--border))',
+                  opacity: 0.5,
+                }}
+              />
+            )}
+          </React.Fragment>
+        );
+      })}
+    </div>
+  );
 }
 
-function UploadCard({ config, cardState, onFile, onRetry, onCamera }: UploadCardProps) {
+// ─────────────────────────────────────────────────────────────────────────────
+// CaptureStep — the main single-parameter step
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface CaptureStepProps {
+  part: PartConfig;
+  captureState: CaptureState;
+  onFile: (file: File) => void;
+  onRetry: () => void;
+  onCameraOpen: () => void;
+  onNext: () => void;
+  isLastStep: boolean;
+  step: number;
+}
+
+function CaptureStep({
+  part,
+  captureState,
+  onFile,
+  onRetry,
+  onCameraOpen,
+  onNext,
+  isLastStep,
+  step,
+}: CaptureStepProps) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const file = e.dataTransfer.files[0];
-    if (file) onFile(file);
-  };
-
-  const { status, imageUrl, analysisResult, error } = cardState;
+  const { status, imageUrl, description, analysisResult, error } = captureState;
 
   return (
     <motion.div
-      layout
-      className={cn(
-        'relative overflow-hidden rounded-[2.5rem] glass-panel flex flex-col transition-all duration-500',
-        status === 'success' && 'border-emerald-500/30',
-        status === 'error' && 'border-red-500/30',
-        status === 'idle' && config.borderClass,
-        status === 'analyzing' && config.borderClass,
-      )}
+      key={`step-${step}`}
+      initial={{ opacity: 0, x: 30 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -30 }}
+      transition={{ duration: 0.35, ease: [0.25, 1, 0.5, 1] }}
+      className="flex flex-col gap-5 w-full"
     >
-      {/* Ambient glow */}
-      <div
-        className={cn(
-          'absolute -top-24 -right-24 w-56 h-56 rounded-full blur-[80px] opacity-0 transition-opacity duration-700 pointer-events-none',
-          config.glowClass,
-          (status === 'idle' || status === 'analyzing') && 'opacity-30',
-          status === 'success' && 'opacity-0',
-          status === 'error' && 'opacity-0',
-        )}
-      />
-
-      {/* Card header */}
-      <div className="flex items-center justify-between px-6 pt-6 pb-4">
-        <div className="flex items-center gap-3">
-          <div className={cn('p-2.5 rounded-2xl border w-10 h-10 flex items-center justify-center', config.bgClass, config.borderClass)}>
-            <span style={{ color: config.color }} className="w-5 h-5">{config.icon}</span>
-          </div>
-          <div>
-            <p className="text-sm font-bold tracking-tight">{config.label}</p>
-            <p className="text-[9px] font-mono text-muted-foreground uppercase tracking-[0.3em]">
-              Specimen {config.sublabel}
-            </p>
-          </div>
+      {/* ── Step header ── */}
+      <div className="flex items-start gap-4">
+        <div
+          className="p-3 rounded-2xl border flex-shrink-0"
+          style={{ backgroundColor: `${part.color}15`, borderColor: `${part.color}40` }}
+        >
+          <span className="w-6 h-6 block" style={{ color: part.color }}>{part.icon}</span>
         </div>
-
-        {/* Status badge */}
-        <AnimatePresence mode="wait">
-          {status === 'idle' && (
-            <motion.div key="idle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              <span className={cn('text-[9px] font-black uppercase tracking-[0.25em] px-3 py-1 rounded-full border', config.bgClass, config.borderClass, config.colorClass)}>
-                Awaiting
-              </span>
-            </motion.div>
-          )}
-          {status === 'analyzing' && (
-            <motion.div key="analyzing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20">
-              <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-              <span className="text-[9px] font-black uppercase tracking-[0.25em] text-primary">Scanning</span>
-            </motion.div>
-          )}
-          {status === 'success' && (
-            <motion.div key="success" initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
-              className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30">
-              <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-              <span className="text-[9px] font-black uppercase tracking-[0.25em] text-emerald-400">Captured</span>
-            </motion.div>
-          )}
-          {status === 'error' && (
-            <motion.div key="error" initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
-              className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/30">
-              <XCircle className="w-3 h-3 text-red-400" />
-              <span className="text-[9px] font-black uppercase tracking-[0.25em] text-red-400">Rejected</span>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-0.5">
+            <span className="text-[9px] font-black uppercase tracking-[0.4em] text-muted-foreground">
+              Step {part.stepNum} of 3
+            </span>
+            <span className="text-[9px] font-black uppercase tracking-[0.4em]" style={{ color: part.color }}>
+              · {part.sublabel}
+            </span>
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-light tracking-tight">
+            Capture{' '}
+            <span className="font-black italic" style={{ color: part.color }}>
+              {part.label}
+            </span>
+          </h2>
+          <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{part.instruction}</p>
+        </div>
       </div>
 
-      {/* Image preview / drop zone */}
-      <div className="px-6">
-        <AnimatePresence mode="wait">
-          {/* ── No image: drop zone ── */}
-          {!imageUrl && status === 'idle' && (
-            <motion.div
-              key="dropzone"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onDrop={handleDrop}
+      {/* ── Main action area ── */}
+      <AnimatePresence mode="wait">
+
+        {/* ── IDLE: Camera button + drag-drop upload ── */}
+        {status === 'idle' && (
+          <motion.div
+            key="idle"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="space-y-3"
+          >
+            {/* Primary camera CTA */}
+            <button
+              onClick={onCameraOpen}
+              className="group relative w-full rounded-[2rem] overflow-hidden border-2 transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] focus:outline-none"
+              style={{ borderColor: `${part.color}40`, backgroundColor: `${part.color}08` }}
+            >
+              {/* subtle glow */}
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                style={{ background: `radial-gradient(ellipse at center, ${part.color}15 0%, transparent 70%)` }} />
+
+              <div className="relative flex flex-col items-center justify-center py-10 sm:py-14 gap-5">
+                {/* Camera icon ring */}
+                <div className="relative">
+                  <div className="absolute inset-0 rounded-full animate-ping opacity-20"
+                    style={{ backgroundColor: part.color }} />
+                  <div className="relative w-20 h-20 rounded-full flex items-center justify-center border-2 backdrop-blur-sm"
+                    style={{ backgroundColor: `${part.color}20`, borderColor: `${part.color}60` }}>
+                    <Camera className="w-9 h-9" style={{ color: part.color }} />
+                  </div>
+                </div>
+
+                <div className="text-center space-y-1">
+                  <p className="text-base font-bold tracking-tight">Use Camera</p>
+                  <p className="text-[11px] text-muted-foreground">{part.hint}</p>
+                </div>
+
+                <div
+                  className="px-6 py-2.5 rounded-full text-[11px] font-black uppercase tracking-[0.3em] text-white transition-all group-hover:scale-105"
+                  style={{ backgroundColor: part.color, boxShadow: `0 10px 30px -8px ${part.color}70` }}
+                >
+                  Open Camera
+                </div>
+              </div>
+            </button>
+
+            {/* Divider */}
+            <div className="flex items-center gap-4">
+              <div className="flex-1 h-px bg-border/40" />
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/50">or upload</span>
+              <div className="flex-1 h-px bg-border/40" />
+            </div>
+
+            {/* Upload zone */}
+            <div
+              onDrop={(e) => { e.preventDefault(); setIsDragging(false); const f = e.dataTransfer.files[0]; if (f) onFile(f); }}
               onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
               onDragLeave={() => setIsDragging(false)}
               onClick={() => fileRef.current?.click()}
               className={cn(
-                'w-full aspect-video rounded-2xl border-2 border-dashed flex flex-col items-center justify-center gap-3 cursor-pointer transition-all duration-300',
+                'relative w-full rounded-2xl border border-dashed flex flex-col items-center justify-center gap-3 py-7 cursor-pointer transition-all duration-300',
                 isDragging
-                  ? cn('border-opacity-100 scale-[1.01]', config.borderClass, config.bgClass)
-                  : 'border-border/40 hover:border-border/70 bg-muted/20 hover:bg-muted/30',
+                  ? 'scale-[1.01]'
+                  : 'border-border/40 hover:border-border/70',
               )}
+              style={isDragging ? {
+                borderColor: part.color,
+                backgroundColor: `${part.color}08`,
+              } : {}}
             >
-              <div className={cn('p-3 rounded-2xl transition-all', isDragging ? config.bgClass : 'bg-muted/40')}>
-                <UploadCloud className={cn('w-7 h-7 transition-colors', isDragging ? config.colorClass : 'text-muted-foreground')} />
+              <div className={cn('p-2.5 rounded-xl transition-all', isDragging ? '' : 'bg-muted/40')}
+                style={isDragging ? { backgroundColor: `${part.color}20` } : {}}>
+                <UploadCloud className="w-5 h-5 transition-colors" style={{ color: isDragging ? part.color : undefined }}
+                  strokeWidth={1.5} />
               </div>
-              <div className="text-center px-4">
+              <div className="text-center">
                 <p className="text-xs font-semibold text-muted-foreground">
-                  Drop image here, or <span style={{ color: config.color }} className="font-bold">browse</span>
+                  Drop image here, or{' '}
+                  <span className="font-bold" style={{ color: part.color }}>browse</span>
                 </p>
-                <p className="text-[10px] text-muted-foreground/60 mt-0.5">PNG, JPG up to 8 MB</p>
+                <p className="text-[10px] text-muted-foreground/50 mt-0.5">PNG · JPG · up to 8 MB</p>
               </div>
-            </motion.div>
-          )}
+            </div>
 
-          {/* ── Analyzing: image + scan HUD overlay ── */}
-          {imageUrl && status === 'analyzing' && (
+            <input ref={fileRef} type="file" accept="image/*" className="sr-only"
+              onChange={(e) => { const f = e.target.files?.[0]; if (f) onFile(f); e.target.value = ''; }} />
+          </motion.div>
+        )}
+
+        {/* ── ANALYZING: Image preview + scan overlay ── */}
+        {status === 'analyzing' && imageUrl && (
+          <motion.div
+            key="analyzing"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="relative w-full rounded-[2rem] overflow-hidden"
+            style={{ aspectRatio: '4/3' }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={imageUrl} alt="specimen" className="w-full h-full object-cover blur-sm saturate-150 scale-105" />
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-[3px]" />
+
+            {/* Scan sweep */}
             <motion.div
-              key="analyzing"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="w-full aspect-video rounded-2xl overflow-hidden relative"
+              className="absolute inset-x-0 h-[2px] pointer-events-none"
+              style={{
+                background: `linear-gradient(90deg, transparent, ${part.color}, transparent)`,
+                boxShadow: `0 0 16px 4px ${part.color}`,
+              }}
+              animate={{ top: ['0%', '100%', '0%'] }}
+              transition={{ duration: 2.2, repeat: Infinity, ease: 'linear' }}
+            />
+
+            {/* HUD corners */}
+            <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
+              {['M4,16 L4,4 L16,4', 'M84,4 L96,4 L96,16', 'M4,84 L4,96 L16,96', 'M96,84 L96,96 L84,96'].map((d, i) => (
+                <path key={i} d={d} fill="none" stroke={part.color} strokeWidth="1.8" strokeLinecap="round" opacity="0.8" />
+              ))}
+            </svg>
+
+            {/* Centre */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
+              <HeartLoader size={44} strokeWidth={2} />
+              <div className="text-center">
+                <p className="text-[11px] font-black uppercase tracking-[0.5em] text-white/70">
+                  AI Analyzing…
+                </p>
+                <p className="text-[10px] text-white/40 mt-1">Validating specimen integrity</p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* ── SUCCESS: Image + XAI description + Next button ── */}
+        {status === 'success' && imageUrl && (
+          <motion.div
+            key="success"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            className="space-y-4"
+          >
+            {/* Image with success glow */}
+            <div
+              className="relative w-full rounded-[2rem] overflow-hidden"
+              style={{ aspectRatio: '4/3', boxShadow: `0 0 0 2px ${part.color}30, 0 20px 60px -15px ${part.color}30` }}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={imageUrl} alt="specimen" className="w-full h-full object-cover blur-sm saturate-150" />
+              <img src={imageUrl} alt="specimen" className="w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
 
-              {/* Dark backdrop */}
-              <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px]" />
-
-              {/* Scanning laser sweep */}
-              <motion.div
-                className="absolute inset-x-0 h-[2px] pointer-events-none"
-                style={{ background: `linear-gradient(90deg, transparent, ${config.color}, transparent)`, boxShadow: `0 0 12px 2px ${config.color}` }}
-                animate={{ top: ['0%', '100%', '0%'] }}
-                transition={{ duration: 2.5, repeat: Infinity, ease: 'linear' }}
-              />
-
-              {/* HUD corner brackets */}
-              <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
-                <path d="M5,15 L5,5 L15,5" fill="none" stroke={config.color} strokeWidth="1.5" strokeLinecap="round" />
-                <path d="M85,5 L95,5 L95,15" fill="none" stroke={config.color} strokeWidth="1.5" strokeLinecap="round" />
-                <path d="M5,85 L5,95 L15,95" fill="none" stroke={config.color} strokeWidth="1.5" strokeLinecap="round" />
-                <path d="M85,95 L95,95 L95,85" fill="none" stroke={config.color} strokeWidth="1.5" strokeLinecap="round" />
-              </svg>
-
-              {/* Centre content */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-                <HeartLoader size={40} strokeWidth={2} />
-                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/70">
-                  Neural Scan Active…
-                </p>
+              {/* Success badge */}
+              <div className="absolute top-4 right-4 flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/80 backdrop-blur-sm">
+                <CheckCircle2 className="w-3.5 h-3.5 text-white" />
+                <span className="text-[9px] font-black uppercase tracking-[0.3em] text-white">Verified</span>
               </div>
-            </motion.div>
-          )}
 
-          {/* ── Success: image + XAI description ── */}
-          {imageUrl && status === 'success' && (
-            <motion.div
-              key="success"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              className="space-y-3"
-            >
-              <div className="w-full aspect-video rounded-2xl overflow-hidden relative">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={imageUrl} alt="specimen" className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                {/* Success tick overlay */}
-                <div className="absolute bottom-3 right-3">
-                  <div className="p-1.5 rounded-full bg-emerald-500/80 backdrop-blur-sm">
-                    <CheckCircle2 className="w-4 h-4 text-white" />
+              {/* Analysis result badge */}
+              {analysisResult && (
+                <div className="absolute bottom-4 left-4">
+                  <div
+                    className="px-3 py-1.5 rounded-full backdrop-blur-sm border text-[9px] font-black uppercase tracking-[0.3em]"
+                    style={{
+                      backgroundColor: `${part.color}30`,
+                      borderColor: `${part.color}50`,
+                      color: part.color,
+                    }}
+                  >
+                    {analysisResult}
                   </div>
                 </div>
-              </div>
-
-              {/* XAI result blurb */}
-              {analysisResult && (
-                <div className="p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
-                  <p className="text-[11px] leading-relaxed text-muted-foreground">{analysisResult}</p>
-                </div>
               )}
-            </motion.div>
-          )}
+            </div>
 
-          {/* ── Error state ── */}
-          {status === 'error' && (
-            <motion.div
-              key="error"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              className="w-full aspect-video rounded-2xl overflow-hidden relative"
-            >
+            {/* XAI description card */}
+            {description && (
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="glass-panel rounded-2xl p-4 space-y-2"
+              >
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-3.5 h-3.5 text-primary" />
+                  <span className="text-[9px] font-black uppercase tracking-[0.3em] text-primary">AI Observation</span>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
+              </motion.div>
+            )}
+
+            {/* Actions */}
+            <div className="flex gap-3">
+              <Button
+                variant="ghost"
+                onClick={onRetry}
+                className="h-11 px-5 rounded-full glass-button text-[10px] font-black uppercase tracking-[0.2em] gap-2"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                Retake
+              </Button>
+              <Button
+                onClick={onNext}
+                className="flex-1 h-11 rounded-full text-[11px] font-black uppercase tracking-[0.3em] gap-2 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                style={{
+                  backgroundColor: part.color,
+                  boxShadow: `0 12px 30px -8px ${part.color}60`,
+                  color: 'white',
+                }}
+              >
+                {isLastStep ? (
+                  <>
+                    <Zap className="w-4 h-4 fill-white" />
+                    Run Full Analysis
+                  </>
+                ) : (
+                  <>
+                    Next Step
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
+              </Button>
+            </div>
+          </motion.div>
+        )}
+
+        {/* ── ERROR: Rejection card ── */}
+        {status === 'error' && (
+          <motion.div
+            key="error"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            className="space-y-4"
+          >
+            {/* Error preview */}
+            <div className="relative w-full rounded-[2rem] overflow-hidden border-2 border-red-500/30"
+              style={{ aspectRatio: '4/3' }}>
               {imageUrl
                 ? /* eslint-disable-next-line @next/next/no-img-element */
-                  <img src={imageUrl} alt="rejected" className="w-full h-full object-cover opacity-30" />
+                  <img src={imageUrl} alt="rejected" className="w-full h-full object-cover opacity-25" />
                 : <div className="w-full h-full bg-red-950/30" />
               }
-              <div className="absolute inset-0 bg-red-950/50 backdrop-blur-sm flex flex-col items-center justify-center gap-3 p-4">
-                <ShieldAlert className="w-8 h-8 text-red-400" />
-                <p className="text-[11px] text-red-300 text-center leading-relaxed font-medium">{error}</p>
+              <div className="absolute inset-0 bg-red-950/50 backdrop-blur-sm flex flex-col items-center justify-center gap-4 p-6">
+                <div className="p-4 rounded-2xl bg-red-500/20 border border-red-500/30">
+                  <ShieldAlert className="w-8 h-8 text-red-400" />
+                </div>
+                <div className="text-center space-y-2">
+                  <p className="text-sm font-bold text-red-300">Image Rejected</p>
+                  <p className="text-xs text-red-400/80 leading-relaxed max-w-xs">{error}</p>
+                </div>
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+            </div>
 
-      {/* Hint text */}
-      <div className="px-6 pt-3">
-        <p className="text-[10px] text-muted-foreground/60 leading-relaxed italic">{config.hint}</p>
-      </div>
+            {/* Retry actions */}
+            <div className="flex gap-3">
+              <Button
+                onClick={onCameraOpen}
+                className="flex-1 h-11 rounded-full text-[11px] font-black uppercase tracking-[0.2em] gap-2 text-white"
+                style={{ backgroundColor: part.color }}
+              >
+                <Camera className="w-4 h-4" />
+                Retry Camera
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => fileRef.current?.click()}
+                className="flex-1 h-11 rounded-full glass-button text-[10px] font-black uppercase tracking-[0.2em] gap-2"
+              >
+                <UploadCloud className="w-3.5 h-3.5" />
+                Upload
+              </Button>
+            </div>
 
-      {/* Action buttons */}
-      <div className="px-6 pb-6 pt-4 flex gap-2 mt-auto">
-        {(status === 'idle' || status === 'error') && (
-          <>
-            <Button
-              size="sm"
-              onClick={() => fileRef.current?.click()}
-              className={cn('flex-1 h-10 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] gap-2 transition-all', config.bgClass, config.borderClass, config.colorClass, 'border hover:opacity-90')}
-              style={{ backgroundColor: 'transparent' }}
-            >
-              <UploadCloud className="w-3.5 h-3.5" /> Upload
-            </Button>
-            <Button
-              size="sm"
-              onClick={onCamera}
-              className="flex-1 h-10 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] gap-2 text-white border-0 transition-all hover:opacity-90 hover:scale-[1.02]"
-              style={{ backgroundColor: config.color }}
-            >
-              <Camera className="w-3.5 h-3.5" /> Camera
-            </Button>
-          </>
+            <input ref={fileRef} type="file" accept="image/*" className="sr-only"
+              onChange={(e) => { const f = e.target.files?.[0]; if (f) { onRetry(); setTimeout(() => onFile(f), 50); } e.target.value = ''; }} />
+          </motion.div>
         )}
-        {status === 'success' && (
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={onRetry}
-            className="w-full h-9 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground gap-2"
-          >
-            <RefreshCw className="w-3 h-3" /> Retake
-          </Button>
-        )}
-        {status === 'analyzing' && (
-          <div className="w-full h-9 rounded-2xl bg-muted/30 flex items-center justify-center gap-2">
-            <Loader2 className="w-3.5 h-3.5 text-muted-foreground animate-spin" />
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Processing…</span>
-          </div>
-        )}
-      </div>
-
-      <input
-        ref={fileRef}
-        type="file"
-        accept="image/*"
-        className="sr-only"
-        onChange={(e) => { const f = e.target.files?.[0]; if (f) onFile(f); e.target.value = ''; }}
-      />
+      </AnimatePresence>
     </motion.div>
   );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// CbcUploadCard — optional lab report upload
+// CbcStep
 // ─────────────────────────────────────────────────────────────────────────────
 
-interface CbcUploadCardProps {
+interface CbcStepProps {
   onFile: (file: File) => void;
   onSkip: () => void;
   isAnalyzing: boolean;
   cbcImageUrl: string | null;
 }
 
-function CbcUploadCard({ onFile, onSkip, isAnalyzing, cbcImageUrl }: CbcUploadCardProps) {
+function CbcStep({ onFile, onSkip, isAnalyzing, cbcImageUrl }: CbcStepProps) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="w-full max-w-xl mx-auto space-y-6"
+      initial={{ opacity: 0, x: 30 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -30 }}
+      transition={{ duration: 0.35, ease: [0.25, 1, 0.5, 1] }}
+      className="flex flex-col gap-5 w-full"
     >
-      <div className="text-center space-y-2">
-        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">Optional · Step 4</p>
-        <h2 className="text-3xl font-light tracking-tight">Lab Report <span className="text-blue-400 italic font-medium">Sync</span></h2>
-        <p className="text-sm text-muted-foreground max-w-sm mx-auto leading-relaxed">
-          Upload a CBC lab report photo to enhance accuracy. The AI cross-references hemoglobin values with your visual scan.
-        </p>
+      <div className="flex items-start gap-4">
+        <div className="p-3 rounded-2xl bg-blue-500/10 border border-blue-500/30 flex-shrink-0">
+          <FileText className="w-6 h-6 text-blue-400" />
+        </div>
+        <div>
+          <div className="text-[9px] font-black uppercase tracking-[0.4em] text-muted-foreground mb-0.5">
+            Optional · Step 4
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-light tracking-tight">
+            Lab Report{' '}
+            <span className="font-black italic text-blue-400">Sync</span>
+          </h2>
+          <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+            Upload a CBC report photo to cross-reference hemoglobin values and boost accuracy.
+          </p>
+        </div>
       </div>
 
-      <div
-        onDrop={(e) => { e.preventDefault(); setIsDragging(false); const f = e.dataTransfer.files[0]; if (f) onFile(f); }}
-        onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
-        onDragLeave={() => setIsDragging(false)}
-        onClick={() => !isAnalyzing && fileRef.current?.click()}
-        className={cn(
-          'glass-panel rounded-[2rem] p-8 flex flex-col items-center gap-5 cursor-pointer transition-all duration-300',
-          isDragging && 'border-blue-500/50 bg-blue-500/5 scale-[1.01]',
-          isAnalyzing && 'pointer-events-none',
-        )}
-      >
-        {isAnalyzing ? (
-          <div className="flex flex-col items-center gap-4 py-4">
-            <div className="relative">
-              <motion.div
-                className="w-16 h-16 rounded-full border-2 border-blue-500/20 flex items-center justify-center"
-                animate={{ boxShadow: ['0 0 0 0 rgba(59,130,246,0.3)', '0 0 0 20px rgba(59,130,246,0)'] }}
-                transition={{ duration: 1.5, repeat: Infinity }}
-              >
-                <FileText className="w-7 h-7 text-blue-400 animate-pulse" />
-              </motion.div>
+      {isAnalyzing ? (
+        <div className="glass-panel rounded-[2rem] p-10 flex flex-col items-center gap-5">
+          <motion.div
+            className="w-16 h-16 rounded-full border-2 border-blue-500/30 flex items-center justify-center"
+            animate={{ boxShadow: ['0 0 0 0 rgba(59,130,246,0.3)', '0 0 0 24px rgba(59,130,246,0)'] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+          >
+            <FileText className="w-7 h-7 text-blue-400 animate-pulse" />
+          </motion.div>
+          <p className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-400">Parsing CBC Data…</p>
+        </div>
+      ) : cbcImageUrl ? (
+        <div className="relative w-full rounded-[2rem] overflow-hidden border border-blue-500/30"
+          style={{ aspectRatio: '4/3' }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={cbcImageUrl} alt="CBC report" className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+          <div className="absolute bottom-4 left-4">
+            <div className="px-3 py-1.5 rounded-full bg-blue-500/70 backdrop-blur-sm">
+              <span className="text-[9px] font-black uppercase tracking-[0.3em] text-white">Report Loaded</span>
             </div>
-            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-400">Parsing Lab Data…</p>
           </div>
-        ) : cbcImageUrl ? (
-          <div className="relative w-full aspect-video rounded-xl overflow-hidden">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={cbcImageUrl} alt="CBC report" className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+        </div>
+      ) : (
+        <div
+          onDrop={(e) => { e.preventDefault(); setIsDragging(false); const f = e.dataTransfer.files[0]; if (f) onFile(f); }}
+          onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+          onDragLeave={() => setIsDragging(false)}
+          onClick={() => fileRef.current?.click()}
+          className={cn(
+            'glass-panel rounded-[2rem] flex flex-col items-center justify-center gap-5 py-12 cursor-pointer transition-all duration-300 border',
+            isDragging ? 'border-blue-500/50 bg-blue-500/5 scale-[1.01]' : 'border-border/40',
+          )}
+        >
+          <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20">
+            <FileText className="w-8 h-8 text-blue-400" />
           </div>
-        ) : (
-          <>
-            <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20">
-              <FileText className="w-8 h-8 text-blue-400" />
-            </div>
-            <div className="text-center">
-              <p className="text-sm font-semibold text-muted-foreground">
-                Drop CBC report here, or <span className="text-blue-400 font-bold">browse</span>
-              </p>
-              <p className="text-[10px] text-muted-foreground/50 mt-1">Photo of printed or digital report</p>
-            </div>
-          </>
-        )}
-      </div>
+          <div className="text-center">
+            <p className="text-sm font-semibold text-muted-foreground">
+              Drop CBC report, or <span className="text-blue-400 font-bold">browse</span>
+            </p>
+            <p className="text-[10px] text-muted-foreground/50 mt-1">Photo of printed or on-screen report</p>
+          </div>
+        </div>
+      )}
 
       <div className="flex gap-3">
-        <Button
-          onClick={() => fileRef.current?.click()}
-          disabled={isAnalyzing}
-          className="flex-1 h-12 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-black uppercase tracking-[0.2em] gap-2"
-        >
-          <UploadCloud className="w-4 h-4" /> Upload Report
-        </Button>
+        {!isAnalyzing && !cbcImageUrl && (
+          <Button
+            onClick={() => fileRef.current?.click()}
+            className="flex-1 h-12 rounded-full bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-black uppercase tracking-[0.25em] gap-2"
+          >
+            <UploadCloud className="w-4 h-4" /> Upload Report
+          </Button>
+        )}
         <Button
           variant="ghost"
           onClick={onSkip}
           disabled={isAnalyzing}
-          className="flex-1 h-12 rounded-2xl glass-button text-[11px] font-black uppercase tracking-[0.2em] gap-2"
+          className={cn(
+            'h-12 rounded-full glass-button text-[11px] font-black uppercase tracking-[0.2em] gap-2',
+            cbcImageUrl ? 'flex-1' : '',
+          )}
         >
-          <SkipForward className="w-4 h-4" /> Skip
+          <SkipForward className="w-4 h-4" />
+          {cbcImageUrl ? 'Continue' : 'Skip'}
         </Button>
       </div>
 
@@ -551,7 +706,7 @@ function CbcUploadCard({ onFile, onSkip, isAnalyzing, cbcImageUrl }: CbcUploadCa
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// ValidatingView — cross-modal validation spinner
+// ValidatingView
 // ─────────────────────────────────────────────────────────────────────────────
 
 function ValidatingView() {
@@ -562,50 +717,50 @@ function ValidatingView() {
     'Applying hemoglobin regression model…',
     'Generating clinical summary…',
   ];
-  const [stepIdx, setStepIdx] = useState(0);
+  const [idx, setIdx] = useState(0);
 
   useEffect(() => {
-    const id = setInterval(() => setStepIdx((i) => (i + 1) % steps.length), 1400);
+    const id = setInterval(() => setIdx((i) => (i + 1) % steps.length), 1500);
     return () => clearInterval(id);
   }, []);
+
+  const pct = Math.round((idx / (steps.length - 1)) * 100);
 
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="flex flex-col items-center justify-center min-h-[60vh] gap-10 px-6"
+      className="flex flex-col items-center justify-center min-h-[60vh] gap-10 px-6 text-center"
     >
+      {/* Pulsing icon */}
       <div className="relative">
         <motion.div
-          className="w-28 h-28 rounded-full border-2 border-primary/20 flex items-center justify-center"
-          animate={{ boxShadow: ['0 0 0 0 hsl(var(--primary)/0.3)', '0 0 0 28px hsl(var(--primary)/0)'] }}
+          className="w-32 h-32 rounded-full border-2 border-primary/20 flex items-center justify-center"
+          animate={{ boxShadow: ['0 0 0 0 hsl(var(--primary)/0.25)', '0 0 0 32px hsl(var(--primary)/0)'] }}
           transition={{ duration: 2, repeat: Infinity, ease: 'easeOut' }}
         >
-          <Activity className="w-12 h-12 text-primary animate-pulse" />
+          <Activity className="w-14 h-14 text-primary" />
         </motion.div>
-        <div className="absolute inset-0 rounded-full border-2 border-primary/10 animate-slow-pulse" />
       </div>
 
-      <div className="text-center space-y-3 max-w-xs">
+      <div className="space-y-3 max-w-xs">
         <h3 className="text-2xl font-light tracking-tight">Validating Results</h3>
         <AnimatePresence mode="wait">
           <motion.p
-            key={stepIdx}
+            key={idx}
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
-            className="text-sm text-muted-foreground leading-relaxed"
+            className="text-sm text-muted-foreground"
           >
-            {steps[stepIdx]}
+            {steps[idx]}
           </motion.p>
         </AnimatePresence>
       </div>
 
       <div className="w-full max-w-sm space-y-2">
-        <Progress value={(stepIdx / (steps.length - 1)) * 100} className="h-1" />
-        <p className="text-[9px] font-mono uppercase tracking-widest text-muted-foreground text-center">
-          {Math.round((stepIdx / (steps.length - 1)) * 100)}% complete
-        </p>
+        <Progress value={pct} className="h-1.5" />
+        <p className="text-[9px] font-mono uppercase tracking-widest text-muted-foreground">{pct}%</p>
       </div>
     </motion.div>
   );
@@ -615,7 +770,7 @@ function ValidatingView() {
 // Main Component
 // ─────────────────────────────────────────────────────────────────────────────
 
-interface MultimodalUploadAnalyzerProps {
+export interface MultimodalUploadAnalyzerProps {
   onClose?: () => void;
 }
 
@@ -623,32 +778,28 @@ export function MultimodalUploadAnalyzer({ onClose }: MultimodalUploadAnalyzerPr
   const { user } = useUser();
   const { toast } = useToast();
 
-  // ── Page step ──────────────────────────────────────────────────────────────
-  const [pageStep, setPageStep] = useState<PageStep>('capture');
+  const [pagePhase, setPagePhase] = useState<PagePhase>('capture');
+  const [currentStep, setCurrentStep] = useState(1); // 1-based index into PARTS
+  const [showCamera, setShowCamera] = useState(false);
 
-  // ── Per-card state ─────────────────────────────────────────────────────────
-  const [cards, setCards] = useState<Record<BodyPart, CardState>>({
-    'skin': { ...INITIAL_CARD },
-    'under-eye': { ...INITIAL_CARD },
-    'fingernails': { ...INITIAL_CARD },
+  const [captures, setCaptures] = useState<Record<BodyPart, CaptureState>>({
+    skin: { ...INITIAL_CAPTURE },
+    'under-eye': { ...INITIAL_CAPTURE },
+    fingernails: { ...INITIAL_CAPTURE },
   });
 
-  // ── Camera ─────────────────────────────────────────────────────────────────
-  const [cameraTarget, setCameraTarget] = useState<BodyPart | null>(null);
-
-  // ── CBC ────────────────────────────────────────────────────────────────────
   const [cbcImageUrl, setCbcImageUrl] = useState<string | null>(null);
   const [cbcResult, setCbcResult] = useState<any>(null);
   const [cbcAnalyzing, setCbcAnalyzing] = useState(false);
-
-  // ── Validation & results ───────────────────────────────────────────────────
   const [validationResult, setValidationResult] = useState<any>(null);
 
-  // Build ImageAnalysisReport-compatible analyses object
+  const currentPart = PARTS[currentStep - 1];
+
+  // ── Build report-compatible analyses map ──────────────────────────────────
   const analysesForReport = React.useMemo<Record<string, AnalysisState>>(() => {
-    const result: Record<string, AnalysisState> = {};
-    for (const [key, c] of Object.entries(cards)) {
-      result[key] = {
+    const out: Record<string, AnalysisState> = {};
+    for (const [key, c] of Object.entries(captures)) {
+      out[key] = {
         file: null,
         imageUrl: c.imageUrl,
         dataUri: c.dataUri,
@@ -660,50 +811,40 @@ export function MultimodalUploadAnalyzer({ onClose }: MultimodalUploadAnalyzerPr
         status: c.status === 'success' ? 'success' : c.status === 'error' ? 'error' : 'idle',
       };
     }
-    return result;
-  }, [cards]);
+    return out;
+  }, [captures]);
 
-  // ── Derived ────────────────────────────────────────────────────────────────
-  const successCount = Object.values(cards).filter((c) => c.status === 'success').length;
-  const allCaptured = successCount === 3;
-  const anyAnalyzing = Object.values(cards).some((c) => c.status === 'analyzing');
-
-  // ── Handle file selection for a body part ──────────────────────────────────
+  // ── Handle image file ─────────────────────────────────────────────────────
   const handleFile = useCallback(async (part: BodyPart, file: File) => {
     if (!file.type.startsWith('image/')) {
       toast({ title: 'Invalid file', description: 'Please upload an image file.', variant: 'destructive' });
       return;
     }
     if (file.size > MAX_FILE_SIZE) {
-      toast({ title: 'File too large', description: 'Maximum file size is 8 MB.', variant: 'destructive' });
+      toast({ title: 'File too large', description: 'Max 8 MB.', variant: 'destructive' });
       return;
     }
 
     const imageUrl = URL.createObjectURL(file);
     const dataUri = await resizeImage(file);
 
-    setCards((prev) => ({
+    setCaptures((prev) => ({
       ...prev,
-      [part]: { ...INITIAL_CARD, status: 'analyzing', imageUrl, dataUri },
+      [part]: { ...INITIAL_CAPTURE, status: 'analyzing', imageUrl, dataUri },
     }));
 
     try {
       const result = await runGenerateImageDescription({ photoDataUri: dataUri, bodyPart: part });
 
       if (!result.isValid) {
-        setCards((prev) => ({
+        setCaptures((prev) => ({
           ...prev,
           [part]: { ...prev[part], status: 'error', error: result.description },
         }));
-        toast({
-          title: `${part} image rejected`,
-          description: result.description,
-          variant: 'destructive',
-        });
         return;
       }
 
-      setCards((prev) => ({
+      setCaptures((prev) => ({
         ...prev,
         [part]: {
           ...prev[part],
@@ -714,36 +855,43 @@ export function MultimodalUploadAnalyzer({ onClose }: MultimodalUploadAnalyzerPr
       }));
 
       saveImageForTraining(dataUri, part, result.analysisResult ?? '', user?.displayName ?? 'Anonymous');
-
     } catch (err: any) {
       const msg = err?.message?.includes('429')
-        ? 'AI at capacity — please wait 60 s and retry.'
-        : err instanceof Error ? err.message : 'Unknown error';
-
-      setCards((prev) => ({
+        ? 'AI at capacity — please wait a moment and retry.'
+        : err instanceof Error ? err.message : 'Analysis failed.';
+      setCaptures((prev) => ({
         ...prev,
         [part]: { ...prev[part], status: 'error', error: msg },
       }));
-      toast({ title: `${part} analysis failed`, description: msg, variant: 'destructive' });
     }
   }, [user, toast]);
 
-  // ── Camera capture callback ────────────────────────────────────────────────
+  // ── Camera capture ────────────────────────────────────────────────────────
   const handleCameraCapture = useCallback((dataUri: string) => {
-    if (!cameraTarget) return;
-    setCameraTarget(null);
+    setShowCamera(false);
     const file = dataUriToFile(dataUri);
-    handleFile(cameraTarget, file);
-  }, [cameraTarget, handleFile]);
+    handleFile(currentPart.id, file);
+  }, [currentPart, handleFile]);
 
-  // ── Retry a single card ────────────────────────────────────────────────────
-  const retryCard = useCallback((part: BodyPart) => {
-    const prev = cards[part];
-    if (prev.imageUrl) URL.revokeObjectURL(prev.imageUrl);
-    setCards((p) => ({ ...p, [part]: { ...INITIAL_CARD } }));
-  }, [cards]);
+  // ── Retry ─────────────────────────────────────────────────────────────────
+  const handleRetry = useCallback((part: BodyPart) => {
+    setCaptures((prev) => {
+      const c = prev[part];
+      if (c.imageUrl) URL.revokeObjectURL(c.imageUrl);
+      return { ...prev, [part]: { ...INITIAL_CAPTURE } };
+    });
+  }, []);
 
-  // ── CBC upload ─────────────────────────────────────────────────────────────
+  // ── Next step ─────────────────────────────────────────────────────────────
+  const handleNext = useCallback(() => {
+    if (currentStep < 3) {
+      setCurrentStep((s) => s + 1);
+    } else {
+      setPagePhase('cbc');
+    }
+  }, [currentStep]);
+
+  // ── CBC ───────────────────────────────────────────────────────────────────
   const handleCbcFile = useCallback(async (file: File) => {
     const imageUrl = URL.createObjectURL(file);
     setCbcImageUrl(imageUrl);
@@ -763,62 +911,61 @@ export function MultimodalUploadAnalyzer({ onClose }: MultimodalUploadAnalyzerPr
     }
   }, [user, toast]);
 
-  // ── Skip CBC ───────────────────────────────────────────────────────────────
   const handleSkipCbc = useCallback(async () => {
     await runValidation(null);
   }, []);
 
-  // ── Final cross-modal validation ───────────────────────────────────────────
   const runValidation = useCallback(async (cbcData: any) => {
-    setPageStep('validating');
+    setPagePhase('validating');
     try {
       const imageReport = {
-        conjunctiva: cards['under-eye']?.analysisResult ?? '',
-        skin: cards['skin']?.analysisResult ?? '',
-        fingernails: cards['fingernails']?.analysisResult ?? '',
+        conjunctiva: captures['under-eye']?.analysisResult ?? '',
+        skin: captures['skin']?.analysisResult ?? '',
+        fingernails: captures['fingernails']?.analysisResult ?? '',
       };
       const validation = await validateMultimodalResults({
         medicalInfo: {},
         imageAnalysisReport: imageReport,
         cbcAnalysis: cbcData ? {
-          hemoglobin: cbcData.parameters?.find((p: any) =>
-            p.parameter?.toLowerCase().includes('hemoglobin'))?.value ?? 'N/A',
-          rbc: cbcData.parameters?.find((p: any) =>
-            p.parameter?.toLowerCase().includes('rbc'))?.value ?? 'N/A',
+          hemoglobin: cbcData.parameters?.find((p: any) => p.parameter?.toLowerCase().includes('hemoglobin'))?.value ?? 'N/A',
+          rbc: cbcData.parameters?.find((p: any) => p.parameter?.toLowerCase().includes('rbc'))?.value ?? 'N/A',
         } : undefined,
       });
       setValidationResult(validation);
     } catch {
-      // proceed to results even if validation fails
+      // proceed to results anyway
     } finally {
-      setTimeout(() => setPageStep('results'), 1500);
+      setTimeout(() => setPagePhase('results'), 1800);
     }
-  }, [cards]);
+  }, [captures]);
 
-  // ── Reset everything ───────────────────────────────────────────────────────
+  // ── Reset ─────────────────────────────────────────────────────────────────
   const handleReset = useCallback(() => {
-    Object.values(cards).forEach((c) => { if (c.imageUrl) URL.revokeObjectURL(c.imageUrl); });
+    Object.values(captures).forEach((c) => { if (c.imageUrl) URL.revokeObjectURL(c.imageUrl); });
     if (cbcImageUrl) URL.revokeObjectURL(cbcImageUrl);
-    setCards({ 'skin': { ...INITIAL_CARD }, 'under-eye': { ...INITIAL_CARD }, 'fingernails': { ...INITIAL_CARD } });
+    setCaptures({ skin: { ...INITIAL_CAPTURE }, 'under-eye': { ...INITIAL_CAPTURE }, fingernails: { ...INITIAL_CAPTURE } });
     setCbcImageUrl(null);
     setCbcResult(null);
     setValidationResult(null);
-    setPageStep('capture');
-  }, [cards, cbcImageUrl]);
+    setCurrentStep(1);
+    setPagePhase('capture');
+  }, [captures, cbcImageUrl]);
 
-  // ── Camera open: show RealTimeCamera fullscreen ────────────────────────────
-  if (cameraTarget) {
+  // ──────────────────────────────────────────────────────────────────────────
+  // Render: fullscreen camera overlay
+  if (showCamera) {
     return (
       <RealTimeCamera
-        bodyPart={cameraTarget === 'under-eye' ? 'under-eye' : cameraTarget === 'fingernails' ? 'fingernails' : 'skin'}
+        bodyPart={currentPart.id}
+        accentColor={currentPart.color}
         onCapture={handleCameraCapture}
-        onClose={() => setCameraTarget(null)}
+        onClose={() => setShowCamera(false)}
       />
     );
   }
 
-  // ── Results ────────────────────────────────────────────────────────────────
-  if (pageStep === 'results') {
+  // Render: results
+  if (pagePhase === 'results') {
     return (
       <div className="px-4 pb-10 pt-4">
         <ImageAnalysisReport
@@ -830,153 +977,108 @@ export function MultimodalUploadAnalyzer({ onClose }: MultimodalUploadAnalyzerPr
     );
   }
 
-  // ── Validating spinner ─────────────────────────────────────────────────────
-  if (pageStep === 'validating') {
+  // Render: validating
+  if (pagePhase === 'validating') {
     return <ValidatingView />;
   }
 
-  // ── CBC upload step ────────────────────────────────────────────────────────
-  if (pageStep === 'cbc') {
-    return (
-      <div className="min-h-screen flex flex-col">
-        {/* Back button */}
-        <div className="px-4 pt-4">
-          <Button
-            variant="ghost"
-            onClick={() => setPageStep('capture')}
-            disabled={cbcAnalyzing}
-            className="group text-muted-foreground hover:text-foreground gap-3 uppercase text-[10px] font-black tracking-[0.3em] h-10 rounded-full"
-          >
-            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-            Back
-          </Button>
-        </div>
-        <div className="flex-1 flex items-center justify-center px-4 py-8">
-          <CbcUploadCard
-            onFile={handleCbcFile}
-            onSkip={handleSkipCbc}
-            isAnalyzing={cbcAnalyzing}
-            cbcImageUrl={cbcImageUrl}
-          />
-        </div>
-      </div>
-    );
-  }
-
-  // ── Main capture step ──────────────────────────────────────────────────────
+  // ──────────────────────────────────────────────────────────────────────────
+  // Main layout — shared chrome for capture + cbc steps
   return (
-    <div className="min-h-screen flex flex-col pb-10">
+    <div className="min-h-screen flex flex-col">
 
-      {/* ── Page header ─────────────────────────────────────────────────────── */}
-      <div className="px-4 pt-5 pb-6">
-        <div className="flex items-start justify-between gap-4">
-          {onClose && (
+      {/* ── Header chrome ── */}
+      <div className="relative px-4 sm:px-6 pt-5 pb-4">
+        {/* Back button */}
+        <div className="flex items-center justify-between mb-5">
+          {onClose && pagePhase === 'capture' && currentStep === 1 ? (
             <Button
               variant="ghost"
               onClick={onClose}
-              className="group text-muted-foreground hover:text-foreground gap-3 uppercase text-[10px] font-black tracking-[0.3em] h-10 rounded-full shrink-0 mt-1"
+              className="group text-muted-foreground hover:text-foreground gap-2.5 uppercase text-[9px] font-black tracking-[0.35em] h-9 rounded-full"
             >
-              <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+              <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
               Back
             </Button>
+          ) : pagePhase === 'capture' && currentStep > 1 ? (
+            <Button
+              variant="ghost"
+              onClick={() => setCurrentStep((s) => Math.max(1, s - 1))}
+              className="group text-muted-foreground hover:text-foreground gap-2.5 uppercase text-[9px] font-black tracking-[0.35em] h-9 rounded-full"
+            >
+              <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
+              Back
+            </Button>
+          ) : pagePhase === 'cbc' ? (
+            <Button
+              variant="ghost"
+              onClick={() => setPagePhase('capture')}
+              disabled={cbcAnalyzing}
+              className="group text-muted-foreground hover:text-foreground gap-2.5 uppercase text-[9px] font-black tracking-[0.35em] h-9 rounded-full"
+            >
+              <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
+              Back
+            </Button>
+          ) : (
+            <div />
           )}
 
-          <div className="flex-1 min-w-0">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-light tracking-tighter text-foreground leading-[0.95] flex flex-wrap items-baseline gap-x-3">
-              <span className="opacity-70">Multimodal</span>
-              <span className="font-black text-transparent bg-clip-text bg-gradient-to-r from-primary via-red-500 to-rose-400">
-                Analysis
-              </span>
-              <span className="text-primary animate-pulse">.</span>
-            </h1>
-            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground mt-2">
-              Upload three specimens · AI visual screening
-            </p>
-          </div>
-
-          {/* Global progress indicator */}
-          <div className="shrink-0 flex flex-col items-end gap-1.5 mt-1">
-            <div className="flex items-center gap-1.5">
-              {CARDS.map((c) => (
-                <div
-                  key={c.id}
-                  className={cn(
-                    'w-2 h-2 rounded-full transition-all duration-500',
-                    cards[c.id].status === 'success' ? 'bg-emerald-400 shadow-[0_0_6px_theme(colors.emerald.400)]' :
-                    cards[c.id].status === 'analyzing' ? 'animate-pulse bg-primary' :
-                    cards[c.id].status === 'error' ? 'bg-red-400' :
-                    'bg-muted-foreground/20',
-                  )}
-                />
-              ))}
-            </div>
-            <p className="text-[9px] font-mono text-muted-foreground uppercase tracking-widest">
-              {successCount}/3 captured
+          {/* Global title */}
+          <div className="text-right">
+            <p className="text-[8px] font-black uppercase tracking-[0.5em] text-muted-foreground/60">
+              Anemo AI · Multimodal
             </p>
           </div>
         </div>
+
+        {/* Page title */}
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-light tracking-tighter leading-tight mb-1">
+          <span className="opacity-60">Anemia</span>{' '}
+          <span className="font-black text-transparent bg-clip-text bg-gradient-to-r from-primary via-red-500 to-rose-400">
+            Screening
+          </span>
+          <span className="text-primary">.</span>
+        </h1>
+        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground mb-5">
+          Visual multimodal analysis · 3-parameter specimen
+        </p>
+
+        {/* Step progress — only during capture phase */}
+        {pagePhase === 'capture' && (
+          <StepProgressBar currentStep={currentStep} captures={captures} />
+        )}
       </div>
 
-      {/* ── 3-card grid ─────────────────────────────────────────────────────── */}
-      <div className="px-4 grid grid-cols-1 md:grid-cols-3 gap-4 flex-1">
-        {CARDS.map((config) => (
-          <UploadCard
-            key={config.id}
-            config={config}
-            cardState={cards[config.id]}
-            onFile={(f) => handleFile(config.id, f)}
-            onRetry={() => retryCard(config.id)}
-            onCamera={() => setCameraTarget(config.id)}
-          />
-        ))}
-      </div>
+      {/* ── Ambient glow behind content ── */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full blur-[180px] pointer-events-none opacity-[0.06] -z-10"
+        style={{ backgroundColor: currentPart.color }} />
 
-      {/* ── CTA bar ─────────────────────────────────────────────────────────── */}
-      <div className="px-4 pt-6">
-        <AnimatePresence>
-          {allCaptured && (
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 8 }}
-              className="glass-panel rounded-[2rem] p-5 flex flex-col sm:flex-row items-center justify-between gap-4"
-            >
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-                </div>
-                <div>
-                  <p className="text-sm font-bold">All specimens captured</p>
-                  <p className="text-[10px] text-muted-foreground">Ready to run cross-modal validation</p>
-                </div>
-              </div>
-              <Button
-                onClick={() => setPageStep('cbc')}
-                className="w-full sm:w-auto h-12 px-8 rounded-full bg-primary text-white text-[11px] font-black uppercase tracking-[0.3em] gap-2 hover:scale-105 active:scale-95 transition-all shadow-[0_20px_60px_-15px_hsl(var(--primary)/0.5)]"
-              >
-                <Zap className="w-4 h-4 fill-white" />
-                Run Full Analysis
-                <ChevronRight className="w-4 h-4" />
-              </Button>
-            </motion.div>
+      {/* ── Step content ── */}
+      <div className="flex-1 px-4 sm:px-6 pb-10">
+        <AnimatePresence mode="wait">
+          {pagePhase === 'capture' && (
+            <CaptureStep
+              key={`capture-${currentStep}`}
+              part={currentPart}
+              captureState={captures[currentPart.id]}
+              onFile={(f) => handleFile(currentPart.id, f)}
+              onRetry={() => handleRetry(currentPart.id)}
+              onCameraOpen={() => setShowCamera(true)}
+              onNext={handleNext}
+              isLastStep={currentStep === 3}
+              step={currentStep}
+            />
+          )}
+          {pagePhase === 'cbc' && (
+            <CbcStep
+              key="cbc"
+              onFile={handleCbcFile}
+              onSkip={handleSkipCbc}
+              isAnalyzing={cbcAnalyzing}
+              cbcImageUrl={cbcImageUrl}
+            />
           )}
         </AnimatePresence>
-
-        {/* Progress hint while still capturing */}
-        {!allCaptured && (
-          <div className="flex items-center justify-center gap-3 py-4">
-            {anyAnalyzing ? (
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                <span className="text-[11px] font-semibold uppercase tracking-widest">Scanning…</span>
-              </div>
-            ) : (
-              <p className="text-[11px] text-muted-foreground font-medium uppercase tracking-[0.2em]">
-                Upload all 3 specimens to continue
-              </p>
-            )}
-          </div>
-        )}
       </div>
     </div>
   );
