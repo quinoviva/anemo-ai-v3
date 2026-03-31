@@ -554,10 +554,12 @@ export function CameraAnalysis({ onBack }: CameraAnalysisProps) {
         const img = new Image();
         await new Promise<void>((res, rej) => {
           img.onload = () => {
-            const c = canvasRef.current!;
+            const c = canvasRef.current;
+            if (!c) { res(); return; }
             c.width = img.naturalWidth;
             c.height = img.naturalHeight;
             c.getContext('2d')?.drawImage(img, 0, 0);
+            img.src = ''; // free memory
             res();
           };
           img.onerror = rej;
@@ -616,7 +618,12 @@ export function CameraAnalysis({ onBack }: CameraAnalysisProps) {
     if (skinCanvasRef.current) inputs.Skin = skinCanvasRef.current;
     if (nailsCanvasRef.current) inputs.Fingernails = nailsCanvasRef.current;
     if (eyeCanvasRef.current) inputs.Undereye = eyeCanvasRef.current;
-    runAnalysis(inputs).then(() => setStep('results'));
+    runAnalysis(inputs)
+      .then(() => setStep('results'))
+      .catch((err) => {
+        console.error('Ensemble analysis failed:', err);
+        setStep('skin'); // reset to first step on error
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step]);
 
@@ -754,9 +761,12 @@ export function CameraAnalysis({ onBack }: CameraAnalysisProps) {
               }}
               onBack={() => {
                 if (stepIndex > 0) {
-                  setStepIndex((i) => i - 1);
-                  setStep(STEPS[stepIndex - 1].id);
-                  setCameraReady(false);
+                  setStepIndex((prev) => {
+                    const newIdx = prev - 1;
+                    setStep(STEPS[newIdx].id);
+                    setCameraReady(false);
+                    return newIdx;
+                  });
                 } else {
                   onBack?.();
                 }

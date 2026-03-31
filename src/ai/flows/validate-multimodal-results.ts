@@ -52,6 +52,8 @@ export const validateMultimodalResultsFlow = ai.defineFlow(
 
         **User Profile (Symptomatic Context):**
         - **Sex:** ${input.medicalInfo.sex || 'Not specified'}
+        - **Age:** ${input.medicalInfo.age || 'Not specified'}
+        - **Menstrual Context:** ${input.medicalInfo.menstrualContext || 'Not applicable'}
         - **Fatigue Level:** ${input.medicalInfo.fatigue || 'Not specified'}
         - **Cardiovascular Strain:** ${input.medicalInfo.cardiovascularStrain || 'Not specified'}
         - **Physical Indicators:** ${input.medicalInfo.physicalIndicators || 'Not specified'}

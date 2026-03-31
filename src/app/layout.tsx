@@ -11,7 +11,7 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: 'Anemo AI — Health Intelligence',
+  title: 'Anemo',
   description: 'CNN-powered non-invasive anemia screening. Scan your palm, conjunctiva, and nailbed to detect anemia risk in seconds.',
   manifest: '/manifest.json',
   appleWebApp: {

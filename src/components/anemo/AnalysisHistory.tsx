@@ -71,9 +71,7 @@ import jsPDF from 'jspdf';
 type ImageReport = PersonalizedRecommendationsOutput & {
     id: string;
     type: 'image';
-    createdAt: {
-        toDate: () => Date;
-    };
+    createdAt: { toDate: () => Date } | Date | null;
     imageAnalysisSummary: string;
     hemoglobin?: number;
     notes?: string;
@@ -82,14 +80,20 @@ type ImageReport = PersonalizedRecommendationsOutput & {
 export type CbcReport = AnalyzeCbcReportOutput & {
     id: string;
     type: 'cbc';
-    createdAt: {
-        toDate: () => Date;
-    };
+    createdAt: { toDate: () => Date } | Date | null;
     hospitalName?: string;
     doctorName?: string;
 };
 
 export type HistoryItem = ImageReport | CbcReport;
+
+/** Safely converts Firestore Timestamp or Date to a JS Date */
+function toDate(ts: { toDate: () => Date } | Date | null | undefined): Date | null {
+  if (!ts) return null;
+  if (ts instanceof Date) return ts;
+  if (typeof (ts as any).toDate === 'function') return (ts as any).toDate();
+  return null;
+}
 
 function CalendarView({ records, onViewReport }: { records: any[]; onViewReport: (r: any) => void }) {
   const [calMonth, setCalMonth] = useState(() => {
@@ -101,7 +105,8 @@ function CalendarView({ records, onViewReport }: { records: any[]; onViewReport:
     const map: Record<string, any[]> = {};
     records.forEach(r => {
       if (!r.createdAt) return;
-      const d = r.createdAt.toDate ? r.createdAt.toDate() : new Date(r.createdAt);
+      const d = toDate(r.createdAt);
+      if (!d) return;
       const key = d.toISOString().slice(0, 10);
       if (!map[key]) map[key] = [];
       map[key].push(r);
@@ -280,8 +285,8 @@ export function AnalysisHistory() {
             ...cbcHistory.map((item: any) => ({ ...item, type: 'cbc' } as CbcReport))
         ];
         return combined.sort((a, b) => {
-            const aTime = a.createdAt?.toDate?.()?.getTime?.() ?? 0;
-            const bTime = b.createdAt?.toDate?.()?.getTime?.() ?? 0;
+            const aTime = toDate(a.createdAt)?.getTime() ?? 0;
+            const bTime = toDate(b.createdAt)?.getTime() ?? 0;
             return bTime - aTime;
         });
     }, [imageHistory, cbcHistory]);
@@ -308,7 +313,10 @@ export function AnalysisHistory() {
 
             if (search.trim()) {
                 const q = search.trim().toLowerCase();
-                const dateStr = item.createdAt ? format(item.createdAt.toDate(), 'MMMM d, yyyy').toLowerCase() : '';
+                const dateStr = (() => {
+                    const d = toDate(item.createdAt);
+                    return d ? format(d, 'MMMM d, yyyy').toLowerCase() : '';
+                })();
                 const riskStr = item.type === 'image' ? String((item as ImageReport).riskScore) : ((item as CbcReport).summary ?? '').toLowerCase();
                 if (!dateStr.includes(q) && !riskStr.includes(q)) return false;
             }
@@ -378,7 +386,7 @@ export function AnalysisHistory() {
         pdf.setFontSize(9);
         pdf.setFont('helvetica', 'normal');
         pdf.setTextColor(120, 120, 120);
-        pdf.text(`Generated: ${format(item.createdAt.toDate(), 'MMMM d, yyyy · h:mm a')}`, margin, y);
+        pdf.text(`Generated: ${format(toDate(item.createdAt) ?? new Date(), 'MMMM d, yyyy · h:mm a')}`, margin, y);
         pdf.text(`Record ID: ${item.id.substring(0, 16)}`, pageW - margin, y, { align: 'right' });
         y += 5;
         pdf.setDrawColor(220, 38, 38);
@@ -488,7 +496,7 @@ export function AnalysisHistory() {
         pdf.text('ANEMO AI — For screening purposes only. Not a medical diagnosis. Consult a licensed healthcare professional.', pageW / 2, pageH - 11, { align: 'center' });
         pdf.text(`anemo.ai · ${format(new Date(), 'yyyy')}`, pageW / 2, pageH - 6, { align: 'center' });
 
-        pdf.save(`anemo-report-${item.id.substring(0, 8)}-${format(item.createdAt.toDate(), 'yyyyMMdd')}.pdf`);
+        pdf.save(`anemo-report-${item.id.substring(0, 8)}-${format(toDate(item.createdAt) ?? new Date(), 'yyyyMMdd')}.pdf`);
         toast({ title: 'Report Downloaded', description: 'Your Anemo AI report has been saved as PDF.' });
     }, [toast]);
 
@@ -497,8 +505,8 @@ export function AnalysisHistory() {
             ['Date', 'Time', 'Type', 'Risk Score / Assessment', 'Anemia Type', 'Confidence', 'Hgb (g/dL)', 'Summary'],
         ];
         filteredHistory.forEach((item) => {
-            const date = item.createdAt ? format(item.createdAt.toDate(), 'yyyy-MM-dd') : '';
-            const time = item.createdAt ? format(item.createdAt.toDate(), 'HH:mm:ss') : '';
+            const date = (() => { const d = toDate(item.createdAt); return d ? format(d, 'yyyy-MM-dd') : ''; })();
+            const time = (() => { const d = toDate(item.createdAt); return d ? format(d, 'HH:mm:ss') : ''; })();
             if (item.type === 'image') {
                 const img = item as ImageReport;
                 rows.push([
@@ -667,8 +675,8 @@ export function AnalysisHistory() {
                             <Calendar className="w-5 h-5 text-white/40 group-hover:text-primary/60 transition-colors" />
                         </div>
                         <div className="flex flex-col space-y-1">
-                            <span className="text-base font-bold text-white tracking-tight">{item.createdAt ? format(item.createdAt.toDate(), 'MMMM d, yyyy') : 'N/A'}</span>
-                            <span className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em]">{item.createdAt ? format(item.createdAt.toDate(), 'h:mm a') : ''}</span>
+                            <span className="text-base font-bold text-white tracking-tight">{toDate(item.createdAt) ? format(toDate(item.createdAt)!, 'MMMM d, yyyy') : 'N/A'}</span>
+                            <span className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em]">{toDate(item.createdAt) ? format(toDate(item.createdAt)!, 'h:mm a') : ''}</span>
                         </div>
                     </div>
                 </TableCell>
@@ -840,7 +848,7 @@ export function AnalysisHistory() {
                                     Historical <span className="font-serif italic text-primary/80">Result</span>
                                 </DialogTitle>
                                 <p className="text-white/40 font-medium uppercase tracking-[0.2em] text-[11px]">
-                                    Calibration: {report.createdAt ? format(report.createdAt.toDate(), 'PPP, p') : ''}
+                                    Calibration: {toDate(report.createdAt) ? format(toDate(report.createdAt)!, 'PPP, p') : ''}
                                 </p>
                             </DialogHeader>
 
@@ -977,8 +985,8 @@ export function AnalysisHistory() {
                                                 <Calendar className={cn("w-4 h-4", validationImageReport?.id === item.id ? "text-primary" : "text-white/20")} />
                                             </div>
                                             <div className="flex flex-col items-start space-y-1">
-                                                <span className="text-sm font-bold text-white">{format(item.createdAt.toDate(), 'MMMM d, yyyy')}</span>
-                                                <span className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em]">{format(item.createdAt.toDate(), 'h:mm a')}</span>
+                                                <span className="text-sm font-bold text-white">{toDate(item.createdAt) ? format(toDate(item.createdAt)!, 'MMMM d, yyyy') : 'N/A'}</span>
+                                                <span className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em]">{toDate(item.createdAt) ? format(toDate(item.createdAt)!, 'h:mm a') : ''}</span>
                                             </div>
                                         </div>
                                         <Badge variant={getBadgeVariant(item.riskScore)} className="font-black text-[10px] tracking-widest uppercase px-3 py-1 rounded-lg border-none">
@@ -1217,7 +1225,7 @@ export function AnalysisHistory() {
             {isCompareOpen && compareItems.length === 2 && (() => {
                 const [a, b] = compareItems as ImageReport[];
                 const fields: Array<{ label: string; aVal: string; bVal: string }> = [
-                    { label: 'Date', aVal: a.createdAt ? format(a.createdAt.toDate(), 'PP') : 'N/A', bVal: b.createdAt ? format(b.createdAt.toDate(), 'PP') : 'N/A' },
+                    { label: 'Date', aVal: toDate(a.createdAt) ? format(toDate(a.createdAt)!, 'PP') : 'N/A', bVal: toDate(b.createdAt) ? format(toDate(b.createdAt)!, 'PP') : 'N/A' },
                     { label: 'Risk Score', aVal: String(a.riskScore) + '/100', bVal: String(b.riskScore) + '/100' },
                     { label: 'Verdict', aVal: a.anemiaType || 'N/A', bVal: b.anemiaType || 'N/A' },
                     { label: 'Confidence', aVal: (a.confidenceScore || 0) + '%', bVal: (b.confidenceScore || 0) + '%' },

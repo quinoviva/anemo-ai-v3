@@ -62,12 +62,21 @@ function calculateHash(data: string): string {
   return crypto.createHash('sha256').update(data).digest('hex');
 }
 
+const ALLOWED_BODY_PARTS = new Set(['skin', 'fingernails', 'undereye', 'lab_reports']);
+
+function safeBodyPart(bodyPart: string): string {
+  const lower = bodyPart.toLowerCase().trim();
+  if (!ALLOWED_BODY_PARTS.has(lower)) {
+    throw new Error(`Invalid body part: ${bodyPart}`);
+  }
+  return lower;
+}
+
 /**
  * Checks if an image has been processed before and returns its cached result.
  */
 export async function checkImageConsistency(dataUri: string, bodyPart: string) {
-  // Sanitize bodyPart to prevent directory traversal
-  const safePart = path.basename(bodyPart).replace(/[^a-zA-Z0-9_-]/g, '_');
+  const safePart = safeBodyPart(bodyPart);
   try {
     const hash = calculateHash(dataUri);
     const cacheDir = path.join(process.cwd(), '.cache', 'analysis_results');
@@ -99,8 +108,7 @@ export async function checkImageConsistency(dataUri: string, bodyPart: string) {
  * Caches an analysis result to ensure consistency.
  */
 export async function cacheAnalysisResult(dataUri: string, bodyPart: string, result: GenerateImageDescriptionOutput) {
-  // Sanitize bodyPart to prevent directory traversal
-  const safePart = path.basename(bodyPart).replace(/[^a-zA-Z0-9_-]/g, '_');
+  const safePart = safeBodyPart(bodyPart);
   try {
     const hash = calculateHash(dataUri);
     const cacheDir = path.join(process.cwd(), '.cache', 'analysis_results');
