@@ -28,7 +28,9 @@ import {
   Activity,
   ShieldAlert,
   Copy,
-  Check
+  Check,
+  Share2,
+  Columns2
 } from 'lucide-react';
 import type { PersonalizedRecommendationsOutput } from '@/ai/flows/provide-personalized-recommendations';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
@@ -72,6 +74,7 @@ export function ImageAnalysisReport({ analyses, labReport, onReset }: ImageAnaly
   const [isDownloading, setIsDownloading] = useState(false);
   const [userLocation, setUserLocation] = useState<string>('Iloilo City');
   const [copiedRec, setCopiedRec] = useState(false);
+  const [comparisonMode, setComparisonMode] = useState(false);
   const { theme } = useTheme();
   const { toast } = useToast();
   const reportRef = useRef<HTMLDivElement>(null);
@@ -154,6 +157,24 @@ export function ImageAnalysisReport({ analyses, labReport, onReset }: ImageAnaly
     generateReport();
   }, [generateReport]);
 
+  const handleShare = async () => {
+    try {
+      const shareData = {
+        title: `Anemo AI Diagnostic Report`,
+        text: `Anemia Risk Score: ${report.riskScore}/100 — ${report.anemiaType}. Est. Hgb: ${report.imageAnalysisSummary?.match(/(\d+\.?\d*)\s*g\/dL/i)?.[0] ?? 'N/A'}. Confidence: ${report.confidenceScore}%.`,
+        url: typeof window !== 'undefined' ? window.location.href : '',
+      };
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(`${shareData.text}\n${shareData.url}`);
+        toast({ title: "Report link copied to clipboard" });
+      }
+    } catch (e) {
+      // ignore AbortError
+    }
+  };
+
   const handleDownloadPdf = async () => {
     const input = reportRef.current;
     if (!input) return;
@@ -225,6 +246,9 @@ export function ImageAnalysisReport({ analyses, labReport, onReset }: ImageAnaly
             <Button onClick={onReset} variant="outline" className="flex-1 sm:flex-none h-14 rounded-full px-8 text-xs font-bold tracking-widest uppercase border-white/10 hover:bg-white/5 transition-all shadow-md">
                 <RefreshCw className="w-4 h-4 mr-3" /> Reset
             </Button>
+            <Button onClick={handleShare} variant="outline" className="flex-1 sm:flex-none h-14 rounded-full px-8 text-xs font-bold tracking-widest uppercase border-white/10 hover:bg-white/5 transition-all shadow-md">
+                <Share2 className="w-4 h-4 mr-3" /> Share
+            </Button>
             <Button onClick={handleDownloadPdf} disabled={isDownloading} className="flex-1 sm:flex-none h-14 rounded-full px-8 bg-primary text-primary-foreground text-xs font-bold tracking-widest uppercase hover:scale-[1.03] active:scale-95 transition-all shadow-xl group">
                 {isDownloading ? <Loader2 className="w-5 h-5 mr-3 animate-spin" /> : <Download className="w-5 h-5 mr-3 group-hover:-translate-y-1 transition-transform" />} Export
             </Button>
@@ -232,10 +256,10 @@ export function ImageAnalysisReport({ analyses, labReport, onReset }: ImageAnaly
       </div>
 
       {/* Main Print/Report Container */}
-      <div ref={reportRef} className="bg-card border border-border shadow-2xl rounded-[3rem] md:rounded-[4.5rem] relative isolate w-full py-16 px-8 sm:p-20 md:p-24 lg:p-32 space-y-24 overflow-hidden">
+      <div ref={reportRef} data-print-report className="bg-card border border-border shadow-2xl rounded-[3rem] md:rounded-[4.5rem] relative isolate w-full py-16 px-8 sm:p-20 md:p-24 lg:p-32 space-y-24 overflow-hidden">
           
           <div className="absolute inset-0 bg-grid-white/[0.01] bg-[size:60px_60px] z-0 pointer-events-none" />
-          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[150px] -mr-40 -mt-40 pointer-events-none opacity-50" />
+          <div className="absolute top-0 right-0 w-[300px] h-[300px] md:w-[600px] md:h-[600px] bg-primary/5 rounded-full blur-[150px] -mr-40 -mt-40 pointer-events-none opacity-50" />
 
           {/* Report Header Logo & Date */}
           <div className="flex flex-col lg:flex-row items-center justify-between gap-12 relative z-10 border-b border-border/50 pb-16">
@@ -259,7 +283,7 @@ export function ImageAnalysisReport({ analyses, labReport, onReset }: ImageAnaly
           {/* Primary Assessment Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 relative z-10">
               {/* Verdict Frame */}
-              <div className="lg:col-span-8 p-12 md:p-16 lg:p-20 rounded-[3rem] bg-white/[0.02] border border-white/5 flex flex-col justify-between relative overflow-hidden group shadow-lg">
+              <div className="lg:col-span-8 p-6 md:p-12 lg:p-16 xl:p-20 rounded-[3rem] bg-white/[0.02] border border-white/5 flex flex-col justify-between relative overflow-hidden group shadow-lg">
                   <div className="absolute right-0 top-0 opacity-5 scale-150 translate-x-1/4 -translate-y-1/4">
                      <Dna className="w-96 h-96 text-primary" />
                   </div>
@@ -268,23 +292,58 @@ export function ImageAnalysisReport({ analyses, labReport, onReset }: ImageAnaly
                       <span className="text-xs font-bold text-primary/80 uppercase tracking-widest leading-none">Diagnostic Verdict</span>
                   </div>
                   <div className="relative z-10">
-                      <h3 className="text-4xl md:text-5xl lg:text-7xl font-black text-foreground tracking-tighter leading-[0.9] text-balance">
-                         {report.anemiaType.split(' ')[0]} <span className="italic-font text-primary">{report.anemiaType.split(' ').slice(1).join(' ')}</span>
-                      </h3>
-                      <div className="h-1.5 w-32 bg-primary/40 rounded-full mt-10" />
+                      <div className="flex items-center gap-4 flex-wrap">
+                        <h3 className="text-4xl md:text-5xl lg:text-7xl font-black text-foreground tracking-tighter leading-[0.9] text-balance">
+                           {report.anemiaType.split(' ')[0]} <span className="italic-font text-primary">{report.anemiaType.split(' ').slice(1).join(' ')}</span>
+                        </h3>
+                        {/moderate|severe|critical/i.test(report.anemiaType) && (
+                          <span className="animate-pulse inline-flex h-3 w-3 rounded-full bg-primary shadow-[0_0_12px_rgba(255,0,68,0.8)]" />
+                        )}
+                      </div>
+                      <div className="h-1.5 w-32 bg-primary/40 rounded-full mt-6" />
                   </div>
               </div>
               
               {/* Confidence Indicator */}
-              <div className="lg:col-span-4 p-12 md:p-16 rounded-[3rem] bg-amber-500/5 border border-amber-500/10 flex flex-col items-center justify-center text-center gap-8 relative isolate overflow-hidden">
+              <div className="lg:col-span-4 p-6 md:p-12 lg:p-16 rounded-[3rem] bg-amber-500/5 border border-amber-500/10 flex flex-col items-center justify-center text-center gap-8 relative isolate overflow-hidden">
                   <div className="absolute inset-0 bg-amber-500/10 blur-[80px] rounded-full scale-150 opacity-30" />
                   <div className="relative isolate">
-                      <h4 className="text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter text-foreground leading-none">{report.confidenceScore}<span className="text-2xl text-amber-500 ml-1 italic-font">%</span></h4>
+                      <h4 className={`text-5xl md:text-6xl lg:text-8xl font-black tracking-tighter leading-none ${report.confidenceScore >= 80 ? 'text-emerald-400' : report.confidenceScore >= 60 ? 'text-amber-400' : 'text-red-400'}`}>{report.confidenceScore}<span className="text-2xl text-amber-500 ml-1 italic-font">%</span></h4>
                   </div>
-                  <div className="space-y-4 relative z-10">
-                       <span className="text-[11px] font-bold text-amber-500 uppercase tracking-widest leading-none">Confidence Score</span>
+                  <div className="space-y-4 relative z-10 flex flex-col items-center">
+                       <div className="flex items-center justify-center gap-2">
+                         <span className="text-[11px] font-bold text-amber-500 uppercase tracking-widest leading-none">Confidence Score</span>
+                         <button
+                           type="button"
+                           title="This score reflects how many of our 10 AI models agreed on your result. 90% means 9 out of 10 models reached the same diagnosis — higher is more reliable."
+                           className="w-5 h-5 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 hover:bg-amber-500/30 transition-colors flex-shrink-0"
+                           aria-label="Confidence score explanation"
+                         >
+                           <span className="text-[9px] font-black">?</span>
+                         </button>
+                       </div>
                        <div className="flex gap-2 justify-center">{[1,2,3,4,5].map(i => <div key={i} className="w-2 h-2 rounded-full bg-amber-500/40" />)}</div>
+                       {report.confidenceScore >= 80 && (
+                         <p className="text-[9px] text-amber-500/60 font-bold uppercase tracking-widest">
+                           {Math.round(report.confidenceScore / 10)}/10 models agreed
+                         </p>
+                       )}
                   </div>
+                  {/* Copy Hgb value */}
+                  {report.imageAnalysisSummary && /\d+\.?\d*\s*g\/dL/i.test(report.imageAnalysisSummary) && (() => {
+                    const match = report.imageAnalysisSummary.match(/(\d+\.?\d*)\s*g\/dL/i);
+                    if (!match) return null;
+                    return (
+                      <button
+                        onClick={() => { navigator.clipboard.writeText(match[0]); }}
+                        className="flex items-center gap-2 px-4 py-2 rounded-full glass-button border border-amber-500/20 text-[10px] font-black uppercase tracking-widest text-amber-500 hover:bg-amber-500/10 transition-all relative z-10"
+                        title="Copy Hgb value"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                        Hgb: {match[0]}
+                      </button>
+                    );
+                  })()}
               </div>
           </div>
 
@@ -295,6 +354,17 @@ export function ImageAnalysisReport({ analyses, labReport, onReset }: ImageAnaly
                     <div className="flex-1 h-px bg-border/50" />
                     <h4 className="text-lg md:text-2xl font-black tracking-widest uppercase text-foreground">Parameter <span className="text-primary italic-font">Telemetry</span></h4>
                     <div className="flex-1 h-px bg-border/50" />
+                    <button
+                      onClick={() => setComparisonMode(m => !m)}
+                      className={cn(
+                        "flex items-center gap-2 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all border",
+                        comparisonMode
+                          ? "bg-primary text-white border-primary shadow-lg shadow-primary/20"
+                          : "glass-button border-primary/20 text-primary hover:bg-primary/10"
+                      )}
+                    >
+                      <Columns2 className="w-3.5 h-3.5" /> {comparisonMode ? 'Normal View' : 'Compare Mode'}
+                    </button>
                </div>
                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
                     {Object.entries(analyses).map(([key, value], idx) => {
@@ -324,6 +394,92 @@ export function ImageAnalysisReport({ analyses, labReport, onReset }: ImageAnaly
                         )
                     })}
                </div>
+
+               {/* Comparison Mode Panel */}
+               {comparisonMode && (
+                 <div className="mt-8 rounded-[2.5rem] border border-primary/20 bg-primary/5 overflow-hidden">
+                   {/* Header */}
+                   <div className="px-8 py-5 border-b border-primary/10 flex items-center gap-4">
+                     <Columns2 className="w-5 h-5 text-primary" />
+                     <span className="text-sm font-black uppercase tracking-widest text-primary">Side-by-Side Parameter Analysis</span>
+                   </div>
+                   {/* 3-column comparison */}
+                   <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-primary/10">
+                     {Object.entries(analyses).map(([key, value], idx) => {
+                       const colors = [
+                         { bg: 'bg-amber-500/10', border: 'border-amber-500/20', text: 'text-amber-500', ring: 'ring-amber-500/30' },
+                         { bg: 'bg-blue-500/10', border: 'border-blue-500/20', text: 'text-blue-500', ring: 'ring-blue-500/30' },
+                         { bg: 'bg-rose-500/10', border: 'border-rose-500/20', text: 'text-rose-500', ring: 'ring-rose-500/30' },
+                       ][idx] || { bg: 'bg-white/5', border: 'border-white/10', text: 'text-white', ring: 'ring-white/10' };
+                       const label = key === 'under-eye' ? 'Conjunctiva' : key === 'fingernails' ? 'Nailbed' : 'Skin';
+                       const verdict = value.analysisResult || 'N/A';
+                       const isNormal = /normal/i.test(verdict);
+                       return (
+                         <div key={key} className="flex flex-col">
+                           {/* Image */}
+                           <div className="relative aspect-square overflow-hidden">
+                             {value.imageUrl ? (
+                               <img
+                                 src={value.imageUrl}
+                                 alt={label}
+                                 className="w-full h-full object-cover"
+                                 loading="lazy"
+                               />
+                             ) : (
+                               <div className="w-full h-full bg-white/5 flex items-center justify-center">
+                                 <span className="text-white/20 text-xs uppercase tracking-widest">No Image</span>
+                               </div>
+                             )}
+                             {/* Overlay label */}
+                             <div className={cn("absolute bottom-0 inset-x-0 p-4 bg-gradient-to-t from-black/80 to-transparent")}>
+                               <span className={cn("text-[10px] font-black uppercase tracking-widest", colors.text)}>
+                                 {String(idx + 1).padStart(2, '0')} — {label}
+                               </span>
+                             </div>
+                           </div>
+                           {/* Result panel */}
+                           <div className={cn("p-5 flex-1 space-y-3", colors.bg)}>
+                             <div className="flex items-center justify-between">
+                               <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">AI Verdict</span>
+                               <span className={cn(
+                                 "text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full",
+                                 isNormal ? "bg-emerald-500/20 text-emerald-400" : "bg-primary/20 text-primary"
+                               )}>
+                                 {isNormal ? '✓ Normal' : '⚠ Abnormal'}
+                               </span>
+                             </div>
+                             <p className={cn("text-sm font-black tracking-tight", colors.text)}>{verdict}</p>
+                             <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">
+                               {value.description || 'No description available.'}
+                             </p>
+                           </div>
+                         </div>
+                       );
+                     })}
+                   </div>
+                   {/* Summary row */}
+                   <div className="px-8 py-5 border-t border-primary/10 flex flex-wrap items-center gap-6">
+                     <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Overall Assessment</span>
+                     <div className="flex gap-3 flex-wrap">
+                       {Object.entries(analyses).map(([key, value]) => {
+                         const label = key === 'under-eye' ? 'Conjunctiva' : key === 'fingernails' ? 'Nailbed' : 'Skin';
+                         const isNormal = /normal/i.test(value.analysisResult || '');
+                         return (
+                           <span key={key} className={cn(
+                             "px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest",
+                             isNormal ? "bg-emerald-500/20 text-emerald-400" : "bg-primary/20 text-primary"
+                           )}>
+                             {label}: {value.analysisResult || 'N/A'}
+                           </span>
+                         );
+                       })}
+                     </div>
+                     <span className="ml-auto text-[10px] text-muted-foreground italic">
+                       Hgb: {report.imageAnalysisSummary?.match(/(\d+\.?\d*)\s*g\/dL/i)?.[0] ?? 'Est. from ensemble'}
+                     </span>
+                   </div>
+                 </div>
+               )}
           </div>
 
           {/* Clinical Neural Logic Block */}

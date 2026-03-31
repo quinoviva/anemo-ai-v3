@@ -10,8 +10,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 
 import { useUser, useFirestore, useAuth, useDoc, useMemoFirebase } from '@/firebase';
-import { CardContent, CardDescription, CardHeader, CardTitle, } from '@/components/ui/card';
-import { GlassSurface } from '@/components/ui/glass-surface';
+import { CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -109,6 +108,7 @@ export default function ProfilePage() {
   const watchHeight = Number(form.watch('height'));
   const watchWeight = Number(form.watch('weight'));
   const watchDob = form.watch('dateOfBirth');
+  const watchAddress = form.watch('address');
 
   // Calculate BMI if height and weight are present
   const bmi = (watchHeight && watchWeight) 
@@ -280,27 +280,36 @@ export default function ProfilePage() {
 
   if (isGuest) {
     return (
-        <GlassSurface intensity="medium" className="text-center">
+        <div className="glass-panel rounded-[2.5rem] text-center">
             <CardContent className="p-10 flex flex-col items-center justify-center gap-4">
                  <div className="p-4 bg-primary/10 rounded-full"><User className="h-10 w-10 text-primary" /></div>
                 <h3 className="text-xl font-semibold">Profile Not Available in Guest Mode</h3>
                 <p className="text-muted-foreground">To save your profile and medical history, please create an account.</p>
-                <Button asChild className="mt-2"><Link href="/signup"><LogIn className="mr-2 h-4 w-4" />Sign Up Now</Link></Button>
+                <Button asChild className="mt-2 rounded-full"><Link href="/signup"><LogIn className="mr-2 h-4 w-4" />Sign Up Now</Link></Button>
             </CardContent>
-        </GlassSurface>
+        </div>
     )
   }
 
   return (
     <div className="space-y-10 max-w-5xl mx-auto">
-      {/* Header Summary */}
+      {/* Page Header */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring', stiffness: 50, damping: 20 }}>
+        <h1 className="text-4xl sm:text-6xl md:text-8xl font-light tracking-tighter text-foreground leading-[0.9] flex flex-wrap items-baseline gap-x-4">
+          <span className="font-black text-transparent bg-clip-text bg-gradient-to-r from-primary via-red-500 to-rose-400 drop-shadow-sm">Profile</span>
+          <span className="text-primary animate-pulse">.</span>
+        </h1>
+        <p className="text-xl md:text-2xl text-muted-foreground font-light tracking-widest uppercase mt-4">Health &amp; Medical Record</p>
+      </motion.div>
+
+      {/* Profile Summary Card */}
       <motion.div 
-        initial={{ opacity: 0, y: -20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: 'spring', stiffness: 50, damping: 20, delay: 0.1 }}
         className="grid md:grid-cols-3 gap-6"
       >
-        <GlassSurface intensity="high" className="md:col-span-2 p-8 flex flex-col md:flex-row items-center gap-8 border-primary/20">
+        <div className="glass-panel rounded-[2.5rem] md:col-span-2 p-8 flex flex-col md:flex-row items-center gap-8 border-primary/20">
             <div className="relative group">
                 <Avatar className="h-32 w-32 ring-4 ring-primary/10 ring-offset-4 ring-offset-background transition-transform group-hover:scale-105 duration-500">
                   <AvatarImage src={form.watch('photoURL') || undefined} />
@@ -313,37 +322,39 @@ export default function ProfilePage() {
                 </label>
             </div>
             <div className="text-center md:text-left space-y-2">
-                <h1 className="text-4xl font-bold tracking-tight">{watchFirstName} {watchLastName}</h1>
+                <h2 className="text-4xl font-bold tracking-tight">{watchFirstName} {watchLastName}</h2>
                 <p className="text-muted-foreground flex items-center justify-center md:justify-start gap-2">
                     <MapPin className="h-4 w-4" /> {form.watch('address') || 'Add address in settings'}
                 </p>
                 <div className="flex flex-wrap gap-2 pt-2 justify-center md:justify-start">
-                    <Badge variant="outline" className="bg-primary/5 text-primary border-primary/10 capitalize">{watchSex || 'No Sex Set'}</Badge>
-                    <Badge variant="outline" className="bg-emerald-500/5 text-emerald-600 border-emerald-500/10">{form.watch('bloodType') || 'Unknown Blood Type'}</Badge>
+                    <Badge variant="outline" className="bg-primary/5 text-primary border-primary/10 capitalize rounded-full">{watchSex || 'Not specified'}</Badge>
+                    <Badge variant="outline" className="bg-emerald-500/5 text-emerald-600 border-emerald-500/10 rounded-full">{form.watch('bloodType') || 'Unknown Blood Type'}</Badge>
                 </div>
             </div>
-        </GlassSurface>
+        </div>
 
-        <GlassSurface intensity="medium" className="p-8 flex flex-col justify-center gap-4 bg-gradient-to-br from-primary/5 to-transparent">
+        <div className="glass-panel rounded-[2.5rem] p-8 flex flex-col justify-center gap-4">
             <div className="flex items-center gap-3">
-                <Activity className="h-5 w-5 text-primary" />
-                <span className="font-bold text-sm uppercase tracking-widest text-muted-foreground">Vital Metrics</span>
+                <div className="p-2 rounded-2xl bg-primary/10 border border-primary/20">
+                  <Activity className="h-4 w-4 text-primary" />
+                </div>
+                <span className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Vital Metrics</span>
             </div>
             <div className="grid grid-cols-2 gap-4">
                 <div>
-                    <p className="text-xs text-muted-foreground uppercase font-bold">BMI Index</p>
-                    <p className="text-2xl font-bold">{bmi || '--'}</p>
+                    <p className="text-xs text-muted-foreground uppercase font-bold">BMI</p>
+                    <p className="text-3xl font-black text-foreground">{bmi || '--'}</p>
                 </div>
                 <div>
                     <p className="text-xs text-muted-foreground uppercase font-bold">Age</p>
-                    <p className="text-2xl font-bold">
+                    <p className="text-3xl font-black text-foreground">
                         {watchDob ? 2026 - Number(watchDob.split('/').pop() ?? '0') : '--'}
                     </p>
                 </div>
             </div>
             <Progress value={bmi ? (Number(bmi) / 40) * 100 : 0} className="h-1.5" />
-            <p className="text-[10px] text-muted-foreground italic">Metric calculations based on provided medical data.</p>
-        </GlassSurface>
+            <p className="text-[10px] text-muted-foreground italic">Based on provided medical data.</p>
+        </div>
       </motion.div>
 
       <Form {...form}>
@@ -352,10 +363,12 @@ export default function ProfilePage() {
           <div className="grid lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-8">
                 {/* Personal Section */}
-                <GlassSurface intensity="medium" className="overflow-hidden">
+                <div className="glass-panel rounded-[2.5rem] overflow-hidden">
                     <div className="bg-primary/5 p-6 border-b border-primary/10 flex items-center gap-3">
-                        <UserCircle className="h-5 w-5 text-primary" />
-                        <h2 className="text-xl font-bold">Basic Information</h2>
+                        <div className="p-2 rounded-2xl bg-primary/10 border border-primary/20">
+                          <UserCircle className="h-4 w-4 text-primary" />
+                        </div>
+                        <h2 className="text-lg font-bold">Basic Information</h2>
                     </div>
                     <CardContent className="p-8 space-y-6">
                         <div className="grid gap-6 md:grid-cols-2">
@@ -392,20 +405,27 @@ export default function ProfilePage() {
                             render={({ field }) => (
                                 <FormItem>
                                 <FormLabel>Location / Address</FormLabel>
-                                <FormControl><Textarea className="bg-background/50 min-h-[100px]" placeholder="Your city or specific address..." {...field} /></FormControl>
-                                <FormDescription>Helps us locate clinics near you.</FormDescription>
+                                <FormControl><Textarea className="bg-background/50 min-h-[100px]" placeholder="Your city or specific address..." maxLength={300} {...field} /></FormControl>
+                                <div className="flex justify-between items-center">
+                                  <FormDescription>Helps us locate clinics near you.</FormDescription>
+                                  <span className={`text-[10px] font-medium tabular-nums ${(watchAddress?.length ?? 0) >= 280 ? 'text-destructive' : 'text-muted-foreground'}`}>
+                                    {watchAddress?.length ?? 0}/300
+                                  </span>
+                                </div>
                                 <FormMessage />
                                 </FormItem>
                             )}
                             />
                     </CardContent>
-                </GlassSurface>
+                </div>
 
                 {/* Medical Records */}
-                <GlassSurface intensity="medium" className="overflow-hidden">
+                <div className="glass-panel rounded-[2.5rem] overflow-hidden">
                      <div className="bg-emerald-500/5 p-6 border-b border-emerald-500/10 flex items-center gap-3">
-                        <ShieldCheck className="h-5 w-5 text-emerald-600" />
-                        <h2 className="text-xl font-bold">Clinical Data</h2>
+                        <div className="p-2 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
+                          <ShieldCheck className="h-4 w-4 text-emerald-600" />
+                        </div>
+                        <h2 className="text-lg font-bold">Clinical Data</h2>
                     </div>
                     <CardContent className="p-8 space-y-8">
                         <div className="grid gap-6 md:grid-cols-3">
@@ -523,15 +543,17 @@ export default function ProfilePage() {
                             )} />
                         </div>
                     </CardContent>
-                </GlassSurface>
+                </div>
             </div>
 
             <aside className="space-y-8">
                  {isFemale && (
-                    <GlassSurface intensity="medium" className="overflow-hidden border-rose-500/20">
+                    <div className="glass-panel rounded-[2.5rem] overflow-hidden border-rose-500/20">
                         <div className="bg-rose-500/5 p-6 border-b border-rose-500/10 flex items-center gap-3">
-                            <Heart className="h-5 w-5 text-rose-500" />
-                            <h2 className="text-xl font-bold">Women's Health</h2>
+                            <div className="p-2 rounded-2xl bg-rose-500/10 border border-rose-500/20">
+                              <Heart className="h-4 w-4 text-rose-500" />
+                            </div>
+                            <h2 className="text-lg font-bold">Women's Health</h2>
                         </div>
                         <CardContent className="p-6 space-y-6">
                             <FormField
@@ -600,21 +622,21 @@ export default function ProfilePage() {
                                 )}
                             />
                         </CardContent>
-                    </GlassSurface>
+                    </div>
                 )}
 
-                <GlassSurface intensity="high" className="p-6 bg-primary/10 border-primary/20 sticky top-24">
+                <div className="glass-panel rounded-[2.5rem] p-6 border-primary/20 sticky top-24">
                     <h3 className="font-bold mb-4 flex items-center gap-2">
-                        <Info className="h-4 w-4" /> Save Information
+                        <Info className="h-4 w-4 text-primary" /> Save Information
                     </h3>
                     <p className="text-sm text-muted-foreground mb-6">
-                        Complete your medical profile to improve the accuracy of our AI diagnostics by up to 35%.
+                        Complete your medical profile to improve AI diagnostic accuracy by up to 35%.
                     </p>
-                    <Button type="submit" className="w-full shadow-lg shadow-primary/20" disabled={isLoading || isUploading}>
+                    <Button type="submit" className="w-full rounded-full shadow-lg shadow-primary/20" disabled={isLoading || isUploading}>
                         {isLoading && <HeartLoader size={20} strokeWidth={3} className="mr-2" />}
                         {isLoading ? 'Processing...' : 'Sync Profile'}
                     </Button>
-                </GlassSurface>
+                </div>
             </aside>
           </div>
 

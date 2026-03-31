@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import {
     Table,
     TableBody,
@@ -30,11 +30,16 @@ import {
     Sparkles,
     ArrowUpRight,
     TrendingUp,
-    History
+    History,
+    Filter,
+    FileDown,
+    StickyNote,
+    Check,
+    X,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useUser, useFirestore, useCollection, useMemoFirebase, useDoc } from '@/firebase';
-import { collection, query, orderBy, doc } from 'firebase/firestore';
+import { collection, query, orderBy, doc, limit } from 'firebase/firestore';
 import { format } from 'date-fns';
 import { PersonalizedRecommendationsOutput } from '@/ai/flows/provide-personalized-recommendations';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '../ui/dialog';
@@ -84,6 +89,102 @@ export type CbcReport = AnalyzeCbcReportOutput & {
 
 export type HistoryItem = ImageReport | CbcReport;
 
+function CalendarView({ records, onViewReport }: { records: any[]; onViewReport: (r: any) => void }) {
+  const [calMonth, setCalMonth] = useState(() => {
+    const d = new Date();
+    return { year: d.getFullYear(), month: d.getMonth() };
+  });
+
+  const recordsByDate = useMemo(() => {
+    const map: Record<string, any[]> = {};
+    records.forEach(r => {
+      if (!r.createdAt) return;
+      const d = r.createdAt.toDate ? r.createdAt.toDate() : new Date(r.createdAt);
+      const key = d.toISOString().slice(0, 10);
+      if (!map[key]) map[key] = [];
+      map[key].push(r);
+    });
+    return map;
+  }, [records]);
+
+  const { year, month } = calMonth;
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const prevMonth = () => setCalMonth(prev => prev.month === 0 ? { year: prev.year - 1, month: 11 } : { ...prev, month: prev.month - 1 });
+  const nextMonth = () => setCalMonth(prev => prev.month === 11 ? { year: prev.year + 1, month: 0 } : { ...prev, month: prev.month + 1 });
+
+  const monthName = new Date(year, month, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const today = new Date().toISOString().slice(0, 10);
+
+  const getSeverityDot = (dayRecords: any[]) => {
+    if (!dayRecords?.length) return null;
+    const hasSevere = dayRecords.some(r => r.anemiaType?.toLowerCase().includes('severe'));
+    const hasModerate = dayRecords.some(r => r.anemiaType?.toLowerCase().includes('moderate'));
+    if (hasSevere) return 'bg-red-500';
+    if (hasModerate) return 'bg-amber-500';
+    return 'bg-emerald-500';
+  };
+
+  return (
+    <div className="rounded-[2.5rem] glass-panel border-primary/10 p-6 md:p-8 space-y-6">
+      {/* Month navigation */}
+      <div className="flex items-center justify-between">
+        <button onClick={prevMonth} className="p-2 rounded-xl glass-button border-primary/10 hover:border-primary/30 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <h3 className="text-sm font-black uppercase tracking-widest text-foreground">{monthName}</h3>
+        <button onClick={nextMonth} className="p-2 rounded-xl glass-button border-primary/10 hover:border-primary/30 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+
+      {/* Day headers */}
+      <div className="grid grid-cols-7 gap-1">
+        {days.map(d => (
+          <div key={d} className="text-center text-[9px] font-black uppercase tracking-widest text-muted-foreground py-2">{d}</div>
+        ))}
+      </div>
+
+      {/* Calendar grid */}
+      <div className="grid grid-cols-7 gap-1">
+        {Array.from({ length: firstDay }).map((_, i) => <div key={`empty-${i}`} />)}
+        {Array.from({ length: daysInMonth }).map((_, i) => {
+          const day = i + 1;
+          const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+          const dayRecords = recordsByDate[dateKey];
+          const dotColor = getSeverityDot(dayRecords);
+          const isToday = dateKey === today;
+          return (
+            <button
+              key={day}
+              onClick={() => dayRecords?.length && onViewReport(dayRecords[0])}
+              className={`aspect-square flex flex-col items-center justify-center gap-0.5 rounded-xl text-xs font-bold transition-all ${
+                dayRecords?.length
+                  ? 'glass-button border border-primary/20 hover:border-primary/40 cursor-pointer'
+                  : 'text-muted-foreground/40 cursor-default'
+              } ${isToday ? 'ring-1 ring-primary/50' : ''}`}
+            >
+              <span className={isToday ? 'text-primary font-black' : ''}>{day}</span>
+              {dotColor && <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`} />}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Legend */}
+      <div className="flex items-center gap-4 pt-2 border-t border-white/5">
+        {[['bg-emerald-500', 'Normal/Mild'], ['bg-amber-500', 'Moderate'], ['bg-red-500', 'Severe']].map(([color, label]) => (
+          <div key={label} className="flex items-center gap-1.5">
+            <span className={`w-2 h-2 rounded-full ${color}`} />
+            <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">{label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function AnalysisHistory() {
     const { user } = useUser();
     const firestore = useFirestore();
@@ -95,23 +196,56 @@ export function AnalysisHistory() {
     const [isValidationDialogOpen, setIsValidationDialogOpen] = useState(false);
     const [validationResult, setValidationResult] = useState<{ reliabilityScore: number, discrepancyAlert: boolean } | null>(null);
     const [userSex, setUserSex] = useState<string>('');
+    const [search, setSearch] = useState('');
+    const [typeFilter, setTypeFilter] = useState<'all' | 'image' | 'cbc'>('all');
+    const [riskFilter, setRiskFilter] = useState<'all' | 'high' | 'moderate' | 'low'>('all');
+    const [pageLimit, setPageLimit] = useState(20);
+    const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
+    const [noteValue, setNoteValue] = useState('');
+    const [selectedIds, setSelectedIds] = useState<string[]>([]);
+    const [isCompareOpen, setIsCompareOpen] = useState(false);
+    const [viewMode, setViewMode] = useState<'table' | 'calendar'>('table');
+
+    const toggleSelect = (id: string) => {
+        setSelectedIds(prev =>
+            prev.includes(id) ? prev.filter(x => x !== id) : prev.length < 2 ? [...prev, id] : [prev[1], id]
+        );
+    };
+    const [isPulling, setIsPulling] = useState(false);
+    const pullStartY = useRef<number>(0);
+    const PULL_THRESHOLD = 80;
+
+    const handleTouchStart = (e: React.TouchEvent) => {
+        pullStartY.current = e.touches[0].clientY;
+    };
+
+    const handleTouchEnd = (e: React.TouchEvent) => {
+        const delta = e.changedTouches[0].clientY - pullStartY.current;
+        if (delta > PULL_THRESHOLD && window.scrollY === 0) {
+            setIsPulling(true);
+            setPageLimit(20);
+            setTimeout(() => setIsPulling(false), 800);
+        }
+    };
 
 
     const imageAnalysesQuery = useMemoFirebase(() => {
         if (!user || !firestore) return null;
         return query(
             collection(firestore, `users/${user.uid}/imageAnalyses`),
-            orderBy('createdAt', 'desc')
+            orderBy('createdAt', 'desc'),
+            limit(pageLimit)
         );
-    }, [user, firestore]);
+    }, [user, firestore, pageLimit]);
 
     const labReportsQuery = useMemoFirebase(() => {
         if (!user || !firestore) return null;
         return query(
             collection(firestore, `users/${user.uid}/labReports`),
-            orderBy('createdAt', 'desc')
+            orderBy('createdAt', 'desc'),
+            limit(pageLimit)
         );
-    }, [user, firestore]);
+    }, [user, firestore, pageLimit]);
 
     const cycleLogsQuery = useMemoFirebase(() => {
         if (!user || !firestore) return null;
@@ -150,10 +284,58 @@ export function AnalysisHistory() {
         });
     }, [imageHistory, cbcHistory]);
 
-    const getBadgeVariant = (riskScore: number) => {
+    const filteredHistory = useMemo(() => {
+        return history.filter((item) => {
+            if (typeFilter !== 'all' && item.type !== typeFilter) return false;
+
+            if (riskFilter !== 'all') {
+                if (item.type === 'image') {
+                    const score = (item as ImageReport).riskScore;
+                    if (riskFilter === 'high' && score <= 75) return false;
+                    if (riskFilter === 'moderate' && (score <= 50 || score > 75)) return false;
+                    if (riskFilter === 'low' && score > 50) return false;
+                } else {
+                    const assessment = (item as CbcReport).overallAssessment?.toLowerCase() ?? '';
+                    const isHigh = /high|severe|critical/.test(assessment);
+                    const isModerate = /moderate|mild/.test(assessment);
+                    if (riskFilter === 'high' && !isHigh) return false;
+                    if (riskFilter === 'moderate' && !isModerate) return false;
+                    if (riskFilter === 'low' && (isHigh || isModerate)) return false;
+                }
+            }
+
+            if (search.trim()) {
+                const q = search.trim().toLowerCase();
+                const dateStr = item.createdAt ? format(item.createdAt.toDate(), 'MMMM d, yyyy').toLowerCase() : '';
+                const riskStr = item.type === 'image' ? String((item as ImageReport).riskScore) : ((item as CbcReport).overallAssessment ?? '').toLowerCase();
+                if (!dateStr.includes(q) && !riskStr.includes(q)) return false;
+            }
+
+            return true;
+        });
+    }, [history, typeFilter, riskFilter, search]);
+
+    const compareItems = selectedIds.map(id => filteredHistory.find(h => h.id === id)).filter(Boolean) as HistoryItem[];
+
+    const getBadgeVariant = useCallback((riskScore: number) => {
         if (riskScore > 75) return 'destructive';
         if (riskScore > 50) return 'secondary';
         return 'default';
+    }, []);
+
+    const handleSaveNote = async (reportId: string, type: 'image' | 'cbc') => {
+        if (!user || !firestore) return;
+        const collectionName = type === 'image' ? 'imageAnalyses' : 'labReports';
+        const docRef = doc(firestore, `users/${user.uid}/${collectionName}`, reportId);
+        try {
+            const { updateDoc } = await import('firebase/firestore');
+            await updateDoc(docRef, { notes: noteValue });
+            toast({ title: 'Note Saved', description: 'Your annotation has been saved.' });
+            setEditingNoteId(null);
+            setNoteValue('');
+        } catch {
+            toast({ title: 'Save Failed', description: 'Could not save note.', variant: 'destructive' });
+        }
     };
 
     const handleDelete = (reportId: string, type: 'image' | 'cbc') => {
@@ -308,6 +490,44 @@ export function AnalysisHistory() {
         toast({ title: 'Report Downloaded', description: 'Your Anemo AI report has been saved as PDF.' });
     }, [toast]);
 
+    const handleExportCSV = useCallback(() => {
+        const rows = [
+            ['Date', 'Time', 'Type', 'Risk Score / Assessment', 'Anemia Type', 'Confidence', 'Hgb (g/dL)', 'Summary'],
+        ];
+        filteredHistory.forEach((item) => {
+            const date = item.createdAt ? format(item.createdAt.toDate(), 'yyyy-MM-dd') : '';
+            const time = item.createdAt ? format(item.createdAt.toDate(), 'HH:mm:ss') : '';
+            if (item.type === 'image') {
+                const img = item as ImageReport;
+                rows.push([
+                    date, time, 'Image Scan',
+                    String(img.riskScore),
+                    img.anemiaType || '',
+                    String(img.confidenceScore || 0) + '%',
+                    img.hemoglobin ? String(img.hemoglobin.toFixed(1)) : '',
+                    (img.imageAnalysisSummary || '').replace(/,/g, ';').replace(/\n/g, ' '),
+                ]);
+            } else {
+                const cbc = item as CbcReport;
+                rows.push([
+                    date, time, 'CBC Report',
+                    cbc.overallAssessment || '',
+                    '', '', '',
+                    '',
+                ]);
+            }
+        });
+        const csv = rows.map(r => r.map(v => `"${v}"`).join(',')).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `anemo-history-${format(new Date(), 'yyyy-MM-dd')}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+        toast({ title: 'CSV Exported', description: `${filteredHistory.length} records downloaded.` });
+    }, [filteredHistory, toast]);
+
     const handleValidation = async () => {
         if (!user || !firestore || !validationCbcReport || !validationImageReport) {
             toast({
@@ -431,8 +651,16 @@ export function AnalysisHistory() {
                 viewport={{ once: true }}
                 className="group border-b border-white/5 hover:bg-white/[0.03] transition-all duration-300"
             >
-                <TableCell className="py-8 px-8">
+                <TableCell className="py-4 px-4 md:py-8 md:px-8">
                     <div className="flex items-center gap-6">
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.includes(item.id)}
+                          onChange={() => toggleSelect(item.id)}
+                          disabled={!isImage}
+                          className="w-4 h-4 rounded accent-primary cursor-pointer disabled:opacity-20 flex-shrink-0"
+                          title={isImage ? 'Select for comparison' : 'Only image scans can be compared'}
+                        />
                         <div className="w-12 h-12 rounded-2xl bg-zinc-900 border border-white/10 flex items-center justify-center group-hover:border-primary/30 transition-colors">
                             <Calendar className="w-5 h-5 text-white/40 group-hover:text-primary/60 transition-colors" />
                         </div>
@@ -476,7 +704,7 @@ export function AnalysisHistory() {
                         </div>
                     )}
                 </TableCell>
-                <TableCell className="text-right px-8">
+                <TableCell className="text-right px-4 md:px-8">
                     <div className="flex items-center justify-center gap-2 md:gap-3">
                         {!isImage && (
                             <Button
@@ -510,6 +738,42 @@ export function AnalysisHistory() {
                             <Download className="h-4 w-4 flex-shrink-0 group-hover/btn:scale-110 transition-transform" />
                             <span className="hidden md:inline text-[10px] font-black uppercase tracking-widest">PDF</span>
                         </Button>
+
+                        {/* Add/Edit Note */}
+                        {editingNoteId === item.id ? (
+                          <div className="flex items-center gap-2">
+                            <input
+                              autoFocus
+                              value={noteValue}
+                              onChange={e => setNoteValue(e.target.value)}
+                              onKeyDown={e => {
+                                if (e.key === 'Enter') handleSaveNote(item.id, isImage ? 'image' : 'cbc');
+                                if (e.key === 'Escape') { setEditingNoteId(null); setNoteValue(''); }
+                              }}
+                              placeholder="Add note…"
+                              className="h-10 w-36 px-3 rounded-2xl bg-white/5 border border-white/10 text-xs text-white/80 placeholder-white/20 outline-none focus:border-primary/40"
+                              maxLength={120}
+                            />
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-10 w-10 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400"
+                              onClick={() => handleSaveNote(item.id, isImage ? 'image' : 'cbc')}
+                            >
+                              <Check className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            title={(item as any).notes || 'Add note'}
+                            className="h-10 w-10 md:h-12 md:w-12 rounded-2xl glass-button border border-white/10 hover:border-primary/30 hover:text-primary transition-all"
+                            onClick={() => { setEditingNoteId(item.id); setNoteValue((item as any).notes || ''); }}
+                          >
+                            <StickyNote className="h-4 w-4 md:h-5 md:w-5" />
+                          </Button>
+                        )}
 
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
@@ -741,7 +1005,12 @@ export function AnalysisHistory() {
 
     return (
         <>
-            <div className="space-y-16">
+            <div className="space-y-16" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+                {isPulling && (
+                    <div className="flex justify-center py-4 text-primary">
+                        <div className="w-6 h-6 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+                    </div>
+                )}
                 {userSex === 'Female' && (cbcHistory && cbcHistory.length > 0 || cycleLogs && cycleLogs.length > 0) && (
                     <motion.div
                         initial={{ opacity: 0, y: 30 }}
@@ -766,7 +1035,7 @@ export function AnalysisHistory() {
                     <div className="absolute -bottom-40 -right-40 w-[600px] h-[600px] bg-blue-500/5 rounded-full blur-[160px] opacity-40 pointer-events-none group-hover:opacity-60 transition-opacity duration-1000" />
 
                     <div className="rounded-[3rem] glass-panel border-white/5 overflow-hidden shadow-[0_40px_100px_-20px_rgba(0,0,0,0.5)] relative z-10">
-                        <div className="p-12 border-b border-white/5 bg-white/[0.02] flex flex-col md:flex-row md:items-center justify-between gap-8">
+                        <div className="p-6 md:p-12 border-b border-white/5 bg-white/[0.02] flex flex-col md:flex-row md:items-center justify-between gap-8">
                             <div className="flex items-center gap-6">
                                 <div className="w-16 h-16 bg-gradient-to-br from-zinc-800 to-zinc-900 rounded-[2rem] border border-white/10 flex items-center justify-center shadow-2xl">
                                     <History className="w-8 h-8 text-primary" />
@@ -791,28 +1060,128 @@ export function AnalysisHistory() {
                                         {history.length} <span className="text-white/30 ml-1">Records</span>
                                     </span>
                                 </div>
+                                <button
+                                    onClick={handleExportCSV}
+                                    className="h-10 px-5 rounded-2xl glass-button border border-primary/20 text-[10px] font-black uppercase tracking-widest text-primary hover:bg-primary/10 transition-all flex items-center gap-2"
+                                >
+                                    <FileDown className="w-3.5 h-3.5" /> Export CSV
+                                </button>
+                                {/* View Mode Toggle */}
+                                <div className="flex items-center gap-1 p-1 rounded-xl bg-muted/30 border border-white/5">
+                                  <button
+                                    onClick={() => setViewMode('table')}
+                                    className={`p-2 rounded-lg transition-colors ${viewMode === 'table' ? 'bg-primary/20 text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+                                    title="List view"
+                                  >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                                  </button>
+                                  <button
+                                    onClick={() => setViewMode('calendar')}
+                                    className={`p-2 rounded-lg transition-colors ${viewMode === 'calendar' ? 'bg-primary/20 text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+                                    title="Calendar view"
+                                  >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                                  </button>
+                                </div>
                             </div>
                         </div>
 
+                        {/* Filter Bar */}
+                        <div className="px-4 py-4 md:px-12 md:py-6 border-b border-white/5">
+                            <div className="glass-panel rounded-[2rem] p-4 flex flex-wrap gap-3 items-center">
+                                {/* Search */}
+                                <div className="flex items-center gap-2 flex-1 min-w-[160px] bg-white/5 border border-white/10 rounded-full px-4 py-2">
+                                    <Search className="w-3.5 h-3.5 text-white/30 flex-shrink-0" />
+                                    <input
+                                        type="text"
+                                        value={search}
+                                        onChange={(e) => setSearch(e.target.value)}
+                                        placeholder="Search by date or risk…"
+                                        className="bg-transparent text-[11px] font-bold text-white/70 placeholder-white/20 outline-none w-full uppercase tracking-widest"
+                                    />
+                                </div>
+
+                                {/* Divider */}
+                                <div className="h-6 w-px bg-white/10 hidden sm:block" />
+
+                                {/* Type filter */}
+                                <div className="flex items-center gap-1.5">
+                                    <Filter className="w-3 h-3 text-white/20 flex-shrink-0" />
+                                    {(['all', 'image', 'cbc'] as const).map((t) => (
+                                        <button
+                                            key={t}
+                                            onClick={() => setTypeFilter(t)}
+                                            className={cn(
+                                                'glass-button rounded-full px-4 py-1.5 text-[10px] font-black uppercase tracking-widest transition-all',
+                                                typeFilter === t
+                                                    ? 'bg-primary/15 border-primary/40 text-primary'
+                                                    : 'text-white/40 hover:text-white/70'
+                                            )}
+                                        >
+                                            {t === 'all' ? 'All' : t === 'image' ? 'Image Scan' : 'CBC Report'}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                {/* Divider */}
+                                <div className="h-6 w-px bg-white/10 hidden sm:block" />
+
+                                {/* Risk filter */}
+                                <div className="flex items-center gap-1.5">
+                                    {(['all', 'high', 'moderate', 'low'] as const).map((r) => (
+                                        <button
+                                            key={r}
+                                            onClick={() => setRiskFilter(r)}
+                                            className={cn(
+                                                'glass-button rounded-full px-4 py-1.5 text-[10px] font-black uppercase tracking-widest transition-all',
+                                                riskFilter === r
+                                                    ? 'bg-primary/15 border-primary/40 text-primary'
+                                                    : 'text-white/40 hover:text-white/70'
+                                            )}
+                                        >
+                                            {r === 'all' ? 'All' : r === 'high' ? 'High Risk' : r === 'moderate' ? 'Moderate' : 'Low Risk'}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        {viewMode === 'table' ? (
                         <div className="overflow-x-auto">
                             <Table>
                                 <TableHeader>
                                     <TableRow className="border-b border-white/5 hover:bg-transparent h-20">
-                                        <TableHead className="text-[11px] font-black uppercase tracking-[0.4em] text-white/20 px-12">Date</TableHead>
+                                        <TableHead className="text-[11px] font-black uppercase tracking-[0.4em] text-white/20 px-4 md:px-12">Date</TableHead>
                                         <TableHead className="text-[11px] font-black uppercase tracking-[0.4em] text-white/20">Sequence Mode</TableHead>
                                         <TableHead className="text-[11px] font-black uppercase tracking-[0.4em] text-white/20">Diagnostic</TableHead>
-                                        <TableHead className="text-right text-[11px] font-black uppercase tracking-[0.4em] text-white/20 px-12">Action</TableHead>
+                                        <TableHead className="text-right text-[11px] font-black uppercase tracking-[0.4em] text-white/20 px-4 md:px-12">Action</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {history.map(renderHistoryRow)}
+                                    {filteredHistory.map(renderHistoryRow)}
                                 </TableBody>
                             </Table>
                         </div>
+                        ) : (
+                          <div className="p-6 md:p-8">
+                            <CalendarView records={filteredHistory} onViewReport={setReportToView} />
+                          </div>
+                        )}
 
                         <div className="p-12 bg-zinc-950/40 border-t border-white/5 text-center relative overflow-hidden">
                             <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
-                            <p className="text-[11px] font-black text-white/10 uppercase tracking-[1em] relative z-10">End</p>
+                            {history.length >= pageLimit ? (
+                              <button
+                                onClick={() => setPageLimit(prev => prev + 20)}
+                                className="relative z-10 h-12 px-10 rounded-full glass-button border border-primary/20 text-[10px] font-black uppercase tracking-widest text-primary hover:bg-primary/10 transition-all"
+                              >
+                                Load More Records
+                              </button>
+                            ) : (
+                              <p className="text-[11px] font-black text-white/10 uppercase tracking-[1em] relative z-10">
+                                {filteredHistory.length} of {history.length} Records
+                              </p>
+                            )}
                         </div>
                     </div>
                 </motion.div>
@@ -820,6 +1189,67 @@ export function AnalysisHistory() {
 
             {renderReportModal()}
             {renderValidationDialog()}
+
+            {/* Compare floating bar */}
+            {selectedIds.length > 0 && (
+              <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 px-6 py-4 rounded-full glass-panel border border-primary/30 shadow-2xl backdrop-blur-xl">
+                <span className="text-[11px] font-black uppercase tracking-widest text-primary">{selectedIds.length}/2 Selected</span>
+                {selectedIds.length === 2 && (
+                  <button
+                    onClick={() => setIsCompareOpen(true)}
+                    className="px-5 py-2 rounded-full bg-primary text-white text-[10px] font-black uppercase tracking-widest hover:opacity-90 transition-all"
+                  >
+                    Compare
+                  </button>
+                )}
+                <button
+                  onClick={() => setSelectedIds([])}
+                  className="w-8 h-8 rounded-full glass-button border border-white/10 text-white/40 hover:text-white flex items-center justify-center"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
+
+            {/* Side-by-side comparison dialog */}
+            {isCompareOpen && compareItems.length === 2 && (() => {
+                const [a, b] = compareItems as ImageReport[];
+                const fields: Array<{ label: string; aVal: string; bVal: string }> = [
+                    { label: 'Date', aVal: a.createdAt ? format(a.createdAt.toDate(), 'PP') : 'N/A', bVal: b.createdAt ? format(b.createdAt.toDate(), 'PP') : 'N/A' },
+                    { label: 'Risk Score', aVal: String(a.riskScore) + '/100', bVal: String(b.riskScore) + '/100' },
+                    { label: 'Verdict', aVal: a.anemiaType || 'N/A', bVal: b.anemiaType || 'N/A' },
+                    { label: 'Confidence', aVal: (a.confidenceScore || 0) + '%', bVal: (b.confidenceScore || 0) + '%' },
+                    { label: 'Hgb', aVal: a.hemoglobin ? a.hemoglobin.toFixed(1) + ' g/dL' : 'N/A', bVal: b.hemoglobin ? b.hemoglobin.toFixed(1) + ' g/dL' : 'N/A' },
+                ];
+                return (
+                    <Dialog open={true} onOpenChange={(open) => !open && setIsCompareOpen(false)}>
+                        <DialogContent className="sm:max-w-3xl bg-[#080808] border-white/10 rounded-[3rem] p-0 overflow-hidden">
+                            <div className="p-10 space-y-8">
+                                <DialogHeader>
+                                    <DialogTitle className="text-3xl font-light tracking-tighter text-white">
+                                        Side-by-Side <span className="italic text-primary">Comparison</span>
+                                    </DialogTitle>
+                                    <DialogDescription className="text-white/40 text-xs uppercase tracking-widest">
+                                        Comparing 2 selected scan records
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <div className="space-y-3">
+                                    {fields.map(({ label, aVal, bVal }) => (
+                                        <div key={label} className="grid grid-cols-[120px_1fr_1fr] gap-4 items-center py-3 border-b border-white/5">
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-white/30">{label}</span>
+                                            <span className={`text-sm font-bold text-center py-2 px-4 rounded-2xl ${label === 'Risk Score' && a.riskScore > b.riskScore ? 'text-red-400 bg-red-500/10' : 'text-white/80 bg-white/5'}`}>{aVal}</span>
+                                            <span className={`text-sm font-bold text-center py-2 px-4 rounded-2xl ${label === 'Risk Score' && b.riskScore > a.riskScore ? 'text-red-400 bg-red-500/10' : 'text-white/80 bg-white/5'}`}>{bVal}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="flex justify-end">
+                                    <Button variant="ghost" onClick={() => setIsCompareOpen(false)} className="rounded-2xl text-white/40 hover:text-white">Close</Button>
+                                </div>
+                            </div>
+                        </DialogContent>
+                    </Dialog>
+                );
+            })()}
         </>
     );
 }

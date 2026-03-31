@@ -59,6 +59,7 @@ import { useUser, useFirestore } from '@/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { enqueueFirestoreSave } from '@/lib/offline-queue';
 import { cn } from '@/lib/utils';
+import { haptic } from '@/lib/haptic';
 import type { BodyPart } from '@/lib/ensemble/consensus-engine';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -586,6 +587,7 @@ export function CameraAnalysis({ onBack }: CameraAnalysisProps) {
         description: err instanceof Error ? err.message : String(err),
         variant: 'destructive',
       });
+      haptic.error();
     } finally {
       setIsCapturing(false);
       setCountdown(null);
@@ -666,6 +668,16 @@ export function CameraAnalysis({ onBack }: CameraAnalysisProps) {
     if (!user || !firestore || user.isAnonymous) return;
     if (savedRef.current) return;
     savedRef.current = true;
+    // Haptic feedback on scan complete
+    haptic.success();
+
+    // Browser notification
+    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+        new Notification('Anemo AI — Scan Complete', {
+            body: `${severity} detected. Est. Hgb: ${consensusHgb?.toFixed(1)} g/dL. Risk: ${Math.round(Math.max(0, Math.min(100, ((16 - (consensusHgb ?? 12)) / 11) * 100)))}`,
+            icon: '/icons/icon-192x192.png',
+        });
+    }
 
     const riskScore = Math.round(
       Math.max(0, Math.min(100, ((16 - consensusHgb) / 11) * 100)),
@@ -676,7 +688,12 @@ export function CameraAnalysis({ onBack }: CameraAnalysisProps) {
       mode: 'live-camera',
       riskScore,
       anemiaType: severity,
-      confidenceScore: Math.round(ensembleReport.overallConfidence * 100),
+      confidenceScore: Math.round(
+        (ensembleReport.allConfidenceScores.length > 0
+          ? ensembleReport.allConfidenceScores.reduce((a, b) => a + b, 0) /
+            ensembleReport.allConfidenceScores.length
+          : 0) * 100
+      ),
       imageAnalysisSummary:
         report ||
         `${severity} anemia indicators detected. Est. Hgb: ${consensusHgb.toFixed(1)} g/dL`,

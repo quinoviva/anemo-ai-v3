@@ -2,195 +2,308 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Droplet, Shield, Smartphone, Monitor, Activity, Heart, Zap } from 'lucide-react';
+import {
+  Droplet,
+  Activity,
+  Microscope,
+  FlaskConical,
+  Cpu,
+  Brain,
+  TrendingUp,
+  Globe,
+  Shield,
+} from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import './anemia-info.css';
 
 const containerVariants = {
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-    },
+    transition: { staggerChildren: 0.1 },
   },
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0 },
+  hidden: { opacity: 0, y: 24 },
+  show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 80 } },
 };
+
+const anemiaTypes = [
+  {
+    icon: Droplet,
+    title: 'Iron-Deficiency',
+    desc: 'The most common type. Caused by insufficient iron in diet, poor absorption, or blood loss.',
+    accentColor: '#ef4444',
+    badge: 'Most Common',
+  },
+  {
+    icon: FlaskConical,
+    title: 'Vitamin-Deficiency',
+    desc: 'Lack of B12 or folate impairs red blood cell production, causing megaloblastic anemia.',
+    accentColor: '#3b82f6',
+    badge: 'B12 & Folate',
+  },
+  {
+    icon: Activity,
+    title: 'Aplastic Anemia',
+    desc: 'A rare but serious condition where the bone marrow stops producing enough blood cells.',
+    accentColor: '#8b5cf6',
+    badge: 'Rare & Serious',
+  },
+  {
+    icon: Microscope,
+    title: 'Hemolytic Anemia',
+    desc: 'Red blood cells are destroyed faster than they can be produced by the bone marrow.',
+    accentColor: '#f59e0b',
+    badge: 'RBC Destruction',
+  },
+];
+
+const howItWorksSteps = [
+  {
+    number: '01',
+    icon: Cpu,
+    title: 'Capture',
+    desc: 'Upload a photo of your eye conjunctiva or fingernails using your camera or file upload.',
+  },
+  {
+    number: '02',
+    icon: Brain,
+    title: 'Analyze',
+    desc: 'Our CNN model analyzes pallor and blood indicators with clinical-grade accuracy in seconds.',
+  },
+  {
+    number: '03',
+    icon: TrendingUp,
+    title: 'Act',
+    desc: 'Receive a personalized risk score, remedy suggestions, and trend tracking over time.',
+  },
+];
+
+const whoStats = [
+  { value: '2B+', label: 'People Affected Globally' },
+  { value: '50%', label: 'of Pregnant Women' },
+  { value: '#1', label: 'Nutritional Disorder Worldwide' },
+  { value: '42%', label: 'Children Under 5 Affected' },
+];
 
 export default function AboutAnemiaPage() {
   return (
-    <div className="w-full max-w-7xl mx-auto space-y-12 pb-20">
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" asChild className="rounded-full">
-          <Link href="/dashboard">
-            <ArrowLeft className="h-5 w-5 mr-2" />
-            Backboard
-          </Link>
-        </Button>
-      </div>
-
+    <div className="w-full max-w-7xl mx-auto space-y-16 pb-24">
       <motion.div
         variants={containerVariants}
         initial="hidden"
-        whileInView="show"
-        viewport={{ once: true, amount: 0.1 }}
+        animate="show"
         className="space-y-16"
       >
-        {/* Hero Section */}
-        <motion.div variants={itemVariants} className="text-center space-y-6">
-          <h1 className="text-4xl md:text-7xl lg:text-8xl tracking-tighter leading-tight flex flex-wrap items-center justify-center gap-x-4">
-            <span className="text-foreground">Understanding</span>
-            <i className="bg-clip-text text-transparent font-black bg-gradient-to-r from-red-600 via-red-500 to-rose-400 animate-gradient-x py-2 px-1 drop-shadow-sm">
+        {/* Hero */}
+        <motion.div variants={itemVariants} className="space-y-4 pt-4">
+          <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-bold uppercase tracking-widest px-3 py-1.5">
+            <Droplet className="h-3 w-3" />
+            Hematological Intelligence
+          </span>
+          <h1 className="text-6xl md:text-8xl font-light tracking-tighter text-foreground leading-[0.9]">
+            Understanding{' '}
+            <span className="font-black text-transparent bg-clip-text bg-gradient-to-r from-primary via-red-500 to-rose-400">
               Anemia
-            </i>
+            </span>
+            <span className="text-primary animate-pulse">.</span>
           </h1>
-          <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto font-light leading-relaxed">
-            A silent condition affecting millions. Learn how Anemo helps you detect, monitor, and combat anemia effectively.
+          <p className="text-xl md:text-2xl text-muted-foreground font-light tracking-widest uppercase">
+            Hematological Intelligence
           </p>
         </motion.div>
 
-        {/* What is Anemia & Effects */}
-        <div className="grid md:grid-cols-2 gap-8">
-          <motion.div variants={itemVariants} className="glass-card p-8 space-y-6 relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-              <Droplet className="h-40 w-40" />
+        {/* Two-column bento: What is Anemia + Common Effects */}
+        <div className="grid md:grid-cols-2 gap-6">
+          <motion.div
+            variants={itemVariants}
+            className="rounded-[2.5rem] bg-background/60 backdrop-blur-xl border border-primary/10 shadow-lg p-8 space-y-6 relative overflow-hidden group"
+          >
+            <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
+              <Droplet className="h-48 w-48" />
             </div>
             <div className="flex items-center gap-3">
-              <div className="p-3 bg-red-500/10 rounded-full animate-pulse-red">
-                <Droplet className="h-6 w-6 text-red-500" />
+              <div className="p-3 rounded-2xl bg-primary/10 border border-primary/20">
+                <Droplet className="h-5 w-5 text-primary" />
               </div>
-              <h2 className="text-3xl font-semibold">What is Anemia?</h2>
+              <span className="rounded-full bg-primary/10 text-primary border border-primary/20 text-[10px] font-bold uppercase tracking-widest px-3 py-1">
+                Definition
+              </span>
             </div>
-            <p className="text-muted-foreground leading-relaxed text-lg">
-              Anemia is a condition in which you lack enough healthy red blood cells to carry adequate oxygen to your body's tissues. Having anemia, also referred to as low hemoglobin, can make you feel tired and weak.
+            <h2 className="text-2xl font-semibold tracking-tight">What is Anemia?</h2>
+            <p className="text-muted-foreground leading-relaxed">
+              Anemia is a condition in which you lack enough healthy red blood cells to carry
+              adequate oxygen to your body&apos;s tissues. Having anemia, also referred to as low
+              hemoglobin, can make you feel tired and weak.
             </p>
-            <div className="space-y-4 pt-4">
-              <h3 className="font-semibold text-xl">Common Effects:</h3>
-              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {['Extreme Fatigue', 'Weakness', 'Pale Skin', 'Chest Pain', 'Headache', 'Cold Hands/Feet'].map((effect) => (
-                  <li key={effect} className="flex items-center gap-2 text-muted-foreground">
-                    <span className="h-2 w-2 bg-red-400 rounded-full" />
-                    {effect}
-                  </li>
-                ))}
-              </ul>
+            <div className="rounded-2xl bg-primary/5 border border-primary/10 p-4 space-y-1">
+              <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Key Indicator</p>
+              <p className="font-semibold text-sm">
+                Hemoglobin &lt; 12 g/dL (women) or &lt; 13 g/dL (men)
+              </p>
             </div>
           </motion.div>
 
-          <motion.div variants={itemVariants} className="glass-card p-8 space-y-6 relative overflow-hidden animate-float">
+          <motion.div
+            variants={itemVariants}
+            className="rounded-[2.5rem] bg-background/60 backdrop-blur-xl border border-primary/10 shadow-lg p-8 space-y-6"
+          >
             <div className="flex items-center gap-3">
-              <div className="p-3 bg-blue-500/10 rounded-full">
-                <Shield className="h-6 w-6 text-blue-500" />
+              <div className="p-3 rounded-2xl bg-red-500/10 border border-red-500/20">
+                <Activity className="h-5 w-5 text-red-500" />
               </div>
-              <h2 className="text-3xl font-semibold">Our Solution</h2>
+              <span className="rounded-full bg-red-500/10 text-red-500 border border-red-500/20 text-[10px] font-bold uppercase tracking-widest px-3 py-1">
+                Symptoms
+              </span>
             </div>
-            <p className="text-muted-foreground leading-relaxed text-lg">
-              We created <span className="font-bold text-foreground">Anemo</span> to bridge the gap between expensive medical diagnostics and accessible daily health monitoring.
+            <h2 className="text-2xl font-semibold tracking-tight">Common Effects</h2>
+            <p className="text-muted-foreground text-sm leading-relaxed">
+              These symptoms often develop gradually and may be mild at first.
             </p>
-            <div className="space-y-4">
-              <div className="flex gap-4">
-                <div className="h-12 w-1 bg-gradient-to-b from-blue-500 to-transparent rounded-full" />
-                <div>
-                  <h4 className="font-bold text-lg">AI-Powered Detection</h4>
-                  <p className="text-muted-foreground">Using advanced Convolutional Neural Networks (CNN) to analyze pallor in fingernails and conjunctiva.</p>
-                </div>
-              </div>
-              <div className="flex gap-4">
-                <div className="h-12 w-1 bg-gradient-to-b from-emerald-500 to-transparent rounded-full" />
-                <div>
-                  <h4 className="font-bold text-lg">Instant Insights</h4>
-                  <p className="text-muted-foreground">Get real-time risk assessments and personalized health recommendations without waiting for lab results.</p>
-                </div>
-              </div>
-            </div>
+            <ul className="grid grid-cols-2 gap-3">
+              {[
+                'Extreme Fatigue',
+                'Weakness',
+                'Pale Skin',
+                'Chest Pain',
+                'Headache',
+                'Cold Hands/Feet',
+                'Dizziness',
+                'Shortness of Breath',
+              ].map((effect) => (
+                <li key={effect} className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <span className="h-1.5 w-1.5 bg-red-400 rounded-full flex-shrink-0" />
+                  {effect}
+                </li>
+              ))}
+            </ul>
           </motion.div>
         </div>
 
-        {/* How to Use */}
-        <motion.div variants={itemVariants} className="space-y-8">
-          <div className="text-center">
-            <h2 className="text-4xl tracking-tight">How to Use <i className="bg-clip-text text-transparent font-black bg-gradient-to-r from-red-600 via-red-500 to-rose-400 animate-gradient-x py-2 px-1 drop-shadow-sm">Anemo</i></h2>
-            <p className="text-muted-foreground mt-2">Seamless experience across all your devices.</p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-8">
-            {/* Web Usage */}
-            <div className="glass-card p-8 border-l-4 border-l-purple-500 space-y-4">
-              <div className="flex items-center gap-3 mb-6">
-                <Monitor className="h-8 w-8 text-purple-500" />
-                <h3 className="text-2xl font-bold">Web Application</h3>
-              </div>
-              <ul className="space-y-4">
-                <li className="flex gap-3">
-                  <div className="bg-purple-500/20 text-purple-500 h-8 w-8 rounded-full flex items-center justify-center font-bold text-sm">1</div>
-                  <div>
-                    <p className="font-medium">Dashboard Overview</p>
-                    <p className="text-sm text-muted-foreground">Access your health summary, recent analyses, and quick actions directly from the home screen.</p>
-                  </div>
-                </li>
-                <li className="flex gap-3">
-                  <div className="bg-purple-500/20 text-purple-500 h-8 w-8 rounded-full flex items-center justify-center font-bold text-sm">2</div>
-                  <div>
-                    <p className="font-medium">Upload Analysis</p>
-                    <p className="text-sm text-muted-foreground">Use the "Start Analysis" card to upload high-quality images of your eye (conjunctiva) or fingernails.</p>
-                  </div>
-                </li>
-                <li className="flex gap-3">
-                  <div className="bg-purple-500/20 text-purple-500 h-8 w-8 rounded-full flex items-center justify-center font-bold text-sm">3</div>
-                  <div>
-                    <p className="font-medium">Detailed Reports</p>
-                    <p className="text-sm text-muted-foreground">View comprehensive breakdowns of your risk factors and track historical trends via the "Full History" section.</p>
-                  </div>
-                </li>
-              </ul>
+        {/* Types of Anemia */}
+        <motion.div variants={itemVariants} className="space-y-6">
+          <div className="flex items-center gap-3">
+            <div className="p-3 rounded-2xl bg-primary/10 border border-primary/20">
+              <Microscope className="h-5 w-5 text-primary" />
             </div>
-
-            {/* Mobile Usage */}
-            <div className="glass-card p-8 border-l-4 border-l-orange-500 space-y-4">
-              <div className="flex items-center gap-3 mb-6">
-                <Smartphone className="h-8 w-8 text-orange-500" />
-                <h3 className="text-2xl font-bold">Mobile Experience</h3>
+            <div>
+              <h2 className="text-2xl font-semibold tracking-tight">Types of Anemia</h2>
+              <p className="text-sm text-muted-foreground">Each type has distinct causes and treatments</p>
+            </div>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
+            {anemiaTypes.map(({ icon: Icon, title, desc, accentColor, badge }) => (
+              <div
+                key={title}
+                className="rounded-[2.5rem] bg-background/60 backdrop-blur-xl border border-primary/10 shadow-lg p-6 space-y-4 hover:border-primary/30 transition-colors"
+                style={{ borderTop: `3px solid ${accentColor}` }}
+              >
+                <div className="flex items-start justify-between">
+                  <div
+                    className="p-3 rounded-2xl border"
+                    style={{ backgroundColor: `${accentColor}20`, borderColor: `${accentColor}40` }}
+                  >
+                    <Icon className="h-5 w-5" style={{ color: accentColor }} />
+                  </div>
+                  <span
+                    className="rounded-full text-[10px] font-bold uppercase tracking-widest px-2 py-1 border"
+                    style={{
+                      backgroundColor: `${accentColor}20`,
+                      color: accentColor,
+                      borderColor: `${accentColor}40`,
+                    }}
+                  >
+                    {badge}
+                  </span>
+                </div>
+                <div>
+                  <h3 className="font-bold text-base mb-1">{title}</h3>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{desc}</p>
+                </div>
               </div>
-              <ul className="space-y-4">
-                <li className="flex gap-3">
-                  <div className="bg-orange-500/20 text-orange-500 h-8 w-8 rounded-full flex items-center justify-center font-bold text-sm">1</div>
-                  <div>
-                    <p className="font-medium">Responsive Design</p>
-                    <p className="text-sm text-muted-foreground">Anemo is fully optimized for touch. Navigate using the bottom menu or hamburger menu on smaller screens.</p>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* How Anemo Works */}
+        <motion.div variants={itemVariants} className="space-y-6">
+          <div className="flex items-center gap-3">
+            <div className="p-3 rounded-2xl bg-primary/10 border border-primary/20">
+              <Cpu className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-semibold tracking-tight">How Anemo Works</h2>
+              <p className="text-sm text-muted-foreground">AI-powered detection in three simple steps</p>
+            </div>
+          </div>
+          <div className="grid md:grid-cols-3 gap-5">
+            {howItWorksSteps.map(({ number, icon: Icon, title, desc }) => (
+              <div
+                key={number}
+                className="rounded-[2.5rem] bg-background/60 backdrop-blur-xl border border-primary/10 shadow-lg p-7 space-y-4 hover:border-primary/30 transition-colors"
+              >
+                <div className="flex items-start justify-between">
+                  <span className="text-5xl font-black text-primary/10 leading-none select-none">
+                    {number}
+                  </span>
+                  <div className="p-3 rounded-2xl bg-primary/10 border border-primary/20">
+                    <Icon className="h-5 w-5 text-primary" />
                   </div>
-                </li>
-                <li className="flex gap-3">
-                  <div className="bg-orange-500/20 text-orange-500 h-8 w-8 rounded-full flex items-center justify-center font-bold text-sm">2</div>
-                  <div>
-                    <p className="font-medium">Camera Integration</p>
-                    <p className="text-sm text-muted-foreground">Take photos directly within the app for analysis. Ensure good lighting for the best results.</p>
-                  </div>
-                </li>
-                <li className="flex gap-3">
-                  <div className="bg-orange-500/20 text-orange-500 h-8 w-8 rounded-full flex items-center justify-center font-bold text-sm">3</div>
-                  <div>
-                    <p className="font-medium">On-the-Go Monitoring</p>
-                    <p className="text-sm text-muted-foreground">Check your status, find nearby clinics using GPS, and chat with the AI assistant anywhere.</p>
-                  </div>
-                </li>
-              </ul>
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold mb-1">{title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* WHO Stats Bento */}
+        <motion.div
+          variants={itemVariants}
+          className="rounded-[2.5rem] bg-background/60 backdrop-blur-xl border border-blue-500/20 shadow-lg p-8 md:p-12 relative overflow-hidden"
+          style={{ borderLeft: '4px solid #3b82f6' }}
+        >
+          <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none">
+            <Globe className="h-64 w-64" />
+          </div>
+          <div className="relative z-10 space-y-8">
+            <div className="flex items-center gap-3">
+              <div className="p-3 rounded-2xl bg-blue-500/10 border border-blue-500/20">
+                <Globe className="h-5 w-5 text-blue-500" />
+              </div>
+              <span className="rounded-full bg-blue-500/10 text-blue-500 border border-blue-500/20 text-[10px] font-bold uppercase tracking-widest px-3 py-1">
+                WHO Statistics
+              </span>
+            </div>
+            <h2 className="text-2xl md:text-3xl font-bold tracking-tight">A Global Health Crisis</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+              {whoStats.map(({ value, label }) => (
+                <div
+                  key={label}
+                  className="rounded-2xl bg-background/50 border border-border/50 p-5 text-center space-y-1"
+                >
+                  <p className="text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-primary via-red-500 to-rose-400">
+                    {value}
+                  </p>
+                  <p className="text-xs text-muted-foreground font-medium leading-tight">{label}</p>
+                </div>
+              ))}
             </div>
           </div>
         </motion.div>
 
         {/* Call to Action */}
-        <motion.div variants={itemVariants} className="text-center py-12">
-          <p className="text-2xl font-light mb-8">Ready to take control of your health?</p>
-          <div className="flex justify-center gap-4">
-            <Button size="lg" className="rounded-full text-lg px-8" asChild>
-              <Link href="/dashboard/analysis">Start Analysis Now</Link>
-            </Button>
-          </div>
+        <motion.div variants={itemVariants} className="text-center py-8 space-y-6">
+          <p className="text-2xl font-light text-muted-foreground">
+            Ready to take control of your health?
+          </p>
+          <Button size="lg" className="rounded-full text-lg px-10" asChild>
+            <Link href="/dashboard/analysis">Start Analysis Now</Link>
+          </Button>
         </motion.div>
       </motion.div>
     </div>

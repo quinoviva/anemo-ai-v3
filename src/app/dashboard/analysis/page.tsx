@@ -15,16 +15,12 @@ import {
   Cpu,
   ChevronRight,
   Link as LucideLink,
-  UserCircle,
-  AlertTriangle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
-import { doc } from 'firebase/firestore';
 
 const LocalCbcAnalyzer = dynamic(
   () => import('@/components/anemo/LocalCbcAnalyzer').then(mod => mod.LocalCbcAnalyzer),
@@ -58,15 +54,6 @@ const itemVariants = {
 
 export default function AnalysisPage() {
   const [analysisMode, setAnalysisMode] = useState<'select' | 'local-cbc'>('select');
-  const { user } = useUser();
-  const firestore = useFirestore();
-
-  const userDocRef = useMemoFirebase(() => {
-    if (!user || !firestore) return null;
-    return doc(firestore, 'users', user.uid);
-  }, [user, firestore]);
-  const { data: userData } = useDoc(userDocRef);
-  const profileIncomplete = userData != null && (!userData?.medicalInfo?.sex || !userData?.medicalInfo?.age);
 
   if (analysisMode === 'local-cbc') {
     return (
@@ -128,28 +115,6 @@ export default function AnalysisPage() {
                 </div>
               </motion.div>
             </div>
-
-            {/* Profile Completion Gate Banner */}
-            {profileIncomplete && (
-              <motion.div variants={itemVariants}>
-                <div className="flex items-center gap-4 p-4 md:p-5 rounded-2xl bg-amber-500/10 border border-amber-500/20 backdrop-blur-sm">
-                  <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center shrink-0">
-                    <AlertTriangle className="w-5 h-5 text-amber-400" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-amber-300 leading-none mb-1">Profile Incomplete</p>
-                    <p className="text-xs text-amber-400/70 font-light">
-                      Add your sex and age so the AI can personalise your analysis and apply gender-specific clinical logic.
-                    </p>
-                  </div>
-                  <Button asChild size="sm" className="shrink-0 h-9 px-4 rounded-xl bg-amber-500/20 border border-amber-500/30 hover:bg-amber-500/30 text-amber-300 font-black text-[10px] uppercase tracking-widest transition-all">
-                    <Link href="/dashboard/profile" className="flex items-center gap-1.5">
-                      <UserCircle className="w-3.5 h-3.5" /> Complete Profile
-                    </Link>
-                  </Button>
-                </div>
-              </motion.div>
-            )}
 
             {/* Main Selection Bento Grid - Responsive Stacking */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-10">

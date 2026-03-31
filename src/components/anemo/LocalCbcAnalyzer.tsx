@@ -2,15 +2,11 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHeader, TableHead, TableRow } from '@/components/ui/table';
-import { Input } from '@/components/ui/input';
-import { Upload, FileText, Download, RefreshCw, AlertTriangle, CheckCircle, Cpu, FileUp } from 'lucide-react';
+import { FileText, Download, RefreshCw, AlertTriangle, CheckCircle, Cpu, FileUp } from 'lucide-react';
 import HeartLoader from '@/components/ui/HeartLoader';
 import { useToast } from '@/hooks/use-toast';
 import { runLocalCbcAnalysis } from '@/ai/local-ai';
+import { runAnalyzeCbcReport } from '@/app/actions';
 import Tesseract from 'tesseract.js';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -33,6 +29,7 @@ export function LocalCbcAnalyzer({ onBack }: LocalCbcAnalyzerProps) {
    const [result, setResult] = useState<{ summary?: string; parameters?: { parameter: string; value: string; unit: string; isNormal: boolean }[]; error?: string } | null>(null);
    const [error, setError] = useState<string | null>(null);
    const [isNanoAvailable, setIsNanoAvailable] = useState<boolean | null>(null);
+   const [isDragging, setIsDragging] = useState(false);
 
    const reportRef = useRef<HTMLDivElement>(null);
    const fileInputRef = useRef<HTMLInputElement>(null);
@@ -83,6 +80,20 @@ export function LocalCbcAnalyzer({ onBack }: LocalCbcAnalyzerProps) {
       }
    };
 
+   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      setIsDragging(true);
+   };
+
+   const handleDragLeave = () => setIsDragging(false);
+
+   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      setIsDragging(false);
+      const droppedFile = e.dataTransfer.files[0];
+      if (droppedFile) handleFileChange({ target: { files: e.dataTransfer.files } } as any);
+   };
+
    const processImage = async () => {
       if (!file || !previewUrl) return;
 
@@ -121,7 +132,9 @@ export function LocalCbcAnalyzer({ onBack }: LocalCbcAnalyzerProps) {
             // OR we could fallback to cloud if that was the requirement. 
             // The prompt specifically asked for "local ai will analyze".
             // If local AI fails/missing, we should probably inform the user.
-            throw new Error('Gemini Nano (Local AI) is not available in this browser. Please use Chrome Canary or a supported environment.');
+            toast({ title: 'Using cloud AI analysis', description: 'Gemini Nano is unavailable — falling back to cloud AI.' });
+            const cloudResult = await runAnalyzeCbcReport({ reportText: text, patientInfo: { age: null, sex: null } });
+            analysisResult = { summary: cloudResult.overallAssessment, parameters: cloudResult.parameters };
          }
 
          if (analysisResult.error) {
@@ -183,148 +196,202 @@ export function LocalCbcAnalyzer({ onBack }: LocalCbcAnalyzerProps) {
    };
 
    return (
-      <div className="max-w-4xl mx-auto space-y-6">
-         <div className="flex items-center justify-between">
-            <Button variant="ghost" onClick={onBack}>&larr; Back to Options</Button>
-         </div>
+      <div className="w-full space-y-8">
+         {/* Back Button */}
+         <button
+            onClick={onBack}
+            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group"
+         >
+            <span className="h-8 w-8 rounded-full glass-panel flex items-center justify-center group-hover:border-primary/20 transition-colors">
+               ←
+            </span>
+            <span>Back to Analysis Options</span>
+         </button>
 
-         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Input Section */}
-            <Card className="h-fit">
-               <CardHeader>
-                  <CardTitle>Upload CBC Report</CardTitle>
-                  <CardDescription>Select a clear image of your Complete Blood Count result.</CardDescription>
-               </CardHeader>
-               <CardContent className="space-y-4">
+         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Upload Section */}
+            <div className="glass-panel rounded-[2.5rem] overflow-hidden">
+               <div className="p-8 border-b border-primary/10">
+                  <div className="flex items-center gap-4">
+                     <div className="p-3 rounded-2xl bg-primary/10 border border-primary/20">
+                        <FileText className="h-5 w-5 text-primary" />
+                     </div>
+                     <div>
+                        <h3 className="text-lg font-semibold tracking-tight">Upload CBC Report</h3>
+                        <p className="text-sm text-muted-foreground">Clear image of your Complete Blood Count result</p>
+                     </div>
+                  </div>
+               </div>
+               <div className="p-8 space-y-6">
+                  {isNanoAvailable === false && (
+                     <div className="flex items-start gap-3 p-4 rounded-2xl bg-blue-500/5 border border-blue-500/20">
+                        <Cpu className="h-4 w-4 text-blue-500 mt-0.5 shrink-0" />
+                        <p className="text-sm text-blue-600 dark:text-blue-400">
+                           Gemini Nano unavailable — using cloud AI for analysis.
+                        </p>
+                     </div>
+                  )}
+
+                  {/* Drop Zone */}
                   <div
-                     className="border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-muted/50 transition-colors min-h-[200px]"
+                     className={`rounded-2xl border-2 border-dashed p-8 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-300 min-h-[220px] ${
+                        isDragging
+                           ? 'border-primary/60 bg-primary/5'
+                           : 'border-primary/20 hover:border-primary/40 hover:bg-primary/5'
+                     }`}
                      onClick={() => fileInputRef.current?.click()}
+                     onDragOver={handleDragOver}
+                     onDragLeave={handleDragLeave}
+                     onDrop={handleDrop}
                   >
                      {previewUrl ? (
-                        <img src={previewUrl} alt="Preview" className="max-h-[300px] w-full object-contain rounded-md" />
+                        <div className="w-full space-y-3">
+                           <img src={previewUrl} alt="Preview" className="max-h-[260px] w-full object-contain rounded-xl" />
+                           {file && (
+                              <p className="text-xs text-muted-foreground">
+                                 {file.name} &bull; {file.size < 1024 * 1024
+                                    ? `${(file.size / 1024).toFixed(0)} KB`
+                                    : `${(file.size / (1024 * 1024)).toFixed(1)} MB`}
+                              </p>
+                           )}
+                        </div>
                      ) : (
                         <>
-                           <FileUp className="h-10 w-10 text-muted-foreground mb-4" />
-                           <p className="text-sm font-medium">Click to upload or drag and drop</p>
-                           <p className="text-xs text-muted-foreground mt-1">JPG, PNG supported</p>
+                           <div className="p-4 rounded-full bg-primary/10 mb-4">
+                              <FileUp className="h-8 w-8 text-primary" />
+                           </div>
+                           <p className="text-base font-medium">Drop CBC image here</p>
+                           <p className="text-sm text-muted-foreground mt-1">or click to browse</p>
+                           <p className="text-xs text-muted-foreground/60 mt-3 uppercase tracking-widest font-bold">JPG · PNG · JPEG</p>
                         </>
                      )}
-                     <input
-                        type="file"
-                        ref={fileInputRef}
-                        className="hidden"
-                        accept="image/*"
-                        onChange={handleFileChange}
-                     />
+                     <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
                   </div>
 
                   {file && status !== 'analyzing' && status !== 'ocr' && (
-                     <Button className="w-full" onClick={processImage}>
-                        <Cpu className="mr-2 h-4 w-4" /> Analyze with AI
-                     </Button>
+                     <button
+                        onClick={processImage}
+                        className="w-full h-14 rounded-full bg-primary text-white font-bold tracking-wide flex items-center justify-center gap-3 hover:opacity-90 transition-opacity shadow-lg shadow-primary/20"
+                     >
+                        <Cpu className="h-5 w-5" />
+                        Analyze with AI
+                     </button>
                   )}
 
                   {(status === 'ocr' || status === 'analyzing') && (
-                     <div className="space-y-2 text-center py-4">
-                        <HeartLoader size={32} strokeWidth={3} className="mx-auto" />
-                        <p className="text-sm font-medium">
-                           {status === 'ocr' ? `Reading Text (${progress}%)` : 'AI Processing...'}
+                     <div className="flex flex-col items-center gap-3 py-6">
+                        <HeartLoader size={36} strokeWidth={3} />
+                        <p className="text-sm font-semibold">
+                           {status === 'ocr' ? `Reading Text… ${progress}%` : 'AI Processing…'}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                           {status === 'ocr' ? 'Extracting data from image' : 'AI is analyzing the results'}
+                           {status === 'ocr' ? 'Extracting CBC parameters from image' : 'Calibrating against clinical ranges'}
                         </p>
                      </div>
                   )}
 
                   {status === 'error' && (
-                     <Alert variant="destructive">
-                        <AlertTriangle className="h-4 w-4" />
-                        <AlertTitle>Analysis Failed</AlertTitle>
-                        <AlertDescription>{error}</AlertDescription>
-                     </Alert>
+                     <div className="flex items-start gap-3 p-4 rounded-2xl bg-destructive/5 border border-destructive/20">
+                        <AlertTriangle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
+                        <div>
+                           <p className="text-sm font-semibold text-destructive">Analysis Failed</p>
+                           <p className="text-sm text-muted-foreground mt-1">{error}</p>
+                        </div>
+                     </div>
                   )}
-               </CardContent>
-            </Card>
+               </div>
+            </div>
 
             {/* Results Section */}
-            <div className="space-y-4">
+            <div className="space-y-6">
                {status === 'complete' && result ? (
-                  <div className="space-y-4">
-                     <Card ref={reportRef} className="bg-background print:shadow-none">
-                        <CardHeader className="border-b pb-4">
-                           <div className="flex justify-between items-start">
-                              <div>
-                                 <CardTitle className="text-2xl text-primary">CBC Analysis Report</CardTitle>
-                                 <CardDescription>Generated via On-Device AI • {new Date().toLocaleDateString()}</CardDescription>
-                              </div>
-                              <Cpu className="h-6 w-6 text-muted-foreground opacity-20" />
-                           </div>
-                        </CardHeader>
-                        <CardContent className="pt-6 space-y-6">
-
-                           {/* Summary Box */}
-                           <div className={`p-4 rounded-lg border ${result.summary?.includes('POSITIVE') ? 'bg-red-500/10 border-red-500/20' : result.summary?.includes('NEGATIVE') ? 'bg-green-500/10 border-green-500/20' : 'bg-muted border-muted-foreground/20'}`}>
-                              <h4 className={`font-semibold mb-1 flex items-center gap-2 ${result.summary?.includes('POSITIVE') ? 'text-red-700' : result.summary?.includes('NEGATIVE') ? 'text-green-700' : 'text-muted-foreground'}`}>
-                                 {result.summary?.includes('POSITIVE') ? <AlertTriangle className="h-4 w-4" /> : result.summary?.includes('NEGATIVE') ? <CheckCircle className="h-4 w-4" /> : <FileText className="h-4 w-4" />}
-                                 Assessment Summary
-                              </h4>
-                              <p className="text-sm text-foreground/80 leading-relaxed">
-                                 {result.summary || 'No summary generated.'}
+                  <>
+                     <div ref={reportRef} className="glass-panel rounded-[2.5rem] overflow-hidden">
+                        <div className="p-8 border-b border-primary/10 flex items-center justify-between">
+                           <div>
+                              <h3 className="text-lg font-semibold text-primary">CBC Analysis Report</h3>
+                              <p className="text-xs text-muted-foreground mt-1 uppercase tracking-widest font-bold">
+                                 On-Device AI · {new Date().toLocaleDateString()}
                               </p>
                            </div>
+                           <Cpu className="h-6 w-6 text-muted-foreground/20" />
+                        </div>
+                        <div className="p-8 space-y-6">
+                           {/* Summary */}
+                           <div className={`p-5 rounded-2xl border ${
+                              result.summary?.includes('POSITIVE')
+                                 ? 'bg-red-500/5 border-red-500/20'
+                                 : result.summary?.includes('NEGATIVE')
+                                 ? 'bg-emerald-500/5 border-emerald-500/20'
+                                 : 'bg-primary/5 border-primary/10'
+                           }`}>
+                              <div className={`flex items-center gap-2 mb-2 text-sm font-bold uppercase tracking-widest ${
+                                 result.summary?.includes('POSITIVE') ? 'text-red-500' :
+                                 result.summary?.includes('NEGATIVE') ? 'text-emerald-500' : 'text-primary'
+                              }`}>
+                                 {result.summary?.includes('POSITIVE') ? <AlertTriangle className="h-4 w-4" /> :
+                                  result.summary?.includes('NEGATIVE') ? <CheckCircle className="h-4 w-4" /> :
+                                  <FileText className="h-4 w-4" />}
+                                 Assessment
+                              </div>
+                              <p className="text-sm text-foreground/80 leading-relaxed">{result.summary || 'No summary generated.'}</p>
+                           </div>
 
-                           {/* Parameters Table */}
+                           {/* Parameters */}
                            {result.parameters && result.parameters.length > 0 ? (
-                              <Table>
-                                 <TableHeader>
-                                    <TableRow>
-                                       <TableHead>Parameter</TableHead>
-                                       <TableHead>Value</TableHead>
-                                       <TableHead>Status</TableHead>
-                                    </TableRow>
-                                 </TableHeader>
-                                 <TableBody>
-                                    {(result.parameters ?? []).map((p, i: number) => (
-                                       <TableRow key={i}>
-                                          <TableCell className="font-medium">{p?.parameter ?? '—'}</TableCell>
-                                          <TableCell>{p?.value} <span className="text-xs text-muted-foreground">{p?.unit}</span></TableCell>
-                                          <TableCell>
-                                             <Badge variant={p?.isNormal === false ? 'destructive' : 'outline'}>
-                                                {p?.isNormal === false ? 'Abnormal' : 'Normal'}
-                                             </Badge>
-                                          </TableCell>
-                                       </TableRow>
-                                    ))}
-                                 </TableBody>
-                              </Table>
+                              <div className="space-y-2">
+                                 {(result.parameters ?? []).map((p, i: number) => (
+                                    <div key={i} className="flex items-center justify-between p-4 rounded-2xl bg-muted/30 border border-border/40">
+                                       <span className="text-sm font-medium">{p?.parameter ?? '—'}</span>
+                                       <div className="flex items-center gap-3">
+                                          <span className="text-sm tabular-nums">{p?.value} <span className="text-xs text-muted-foreground">{p?.unit}</span></span>
+                                          <span className={`text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border ${
+                                             p?.isNormal === false
+                                                ? 'bg-red-500/10 text-red-500 border-red-500/20'
+                                                : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+                                          }`}>
+                                             {p?.isNormal === false ? 'Abnormal' : 'Normal'}
+                                          </span>
+                                       </div>
+                                    </div>
+                                 ))}
+                              </div>
                            ) : (
-                              <div className="text-center py-8 text-muted-foreground italic">
+                              <div className="py-8 text-center text-muted-foreground italic text-sm">
                                  No structured parameters extracted.
                               </div>
                            )}
 
-                           <div className="text-[10px] text-muted-foreground pt-4 border-t">
-                              Disclaimer: This analysis is performed by an experimental AI model. Results may vary and should not be treated as a definitive medical diagnosis. Always consult a healthcare professional.
-                           </div>
-                        </CardContent>
-                     </Card>
+                           <p className="text-[10px] text-muted-foreground/60 pt-4 border-t border-border/40 leading-relaxed">
+                              Disclaimer: This is an experimental AI analysis. Not a medical diagnosis. Always consult a healthcare professional.
+                           </p>
+                        </div>
+                     </div>
 
-                     <Button className="w-full" size="lg" onClick={downloadPdf}>
-                        <Download className="mr-2 h-4 w-4" /> Download PDF Report
-                     </Button>
-                  </div>
+                     <button
+                        onClick={downloadPdf}
+                        className="w-full h-14 rounded-full glass-button border border-primary/20 font-bold text-sm uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-primary/10 transition-colors"
+                     >
+                        <Download className="h-4 w-4 text-primary" />
+                        Download PDF Report
+                     </button>
+                  </>
                ) : (
-                  <div className="h-full flex flex-col items-center justify-center p-8 border rounded-xl border-dashed bg-muted/20 text-muted-foreground">
+                  <div className="glass-panel rounded-[2.5rem] h-full min-h-[400px] flex flex-col items-center justify-center gap-4 text-center p-8">
                      {status === 'idle' && (
                         <>
-                           <FileText className="h-16 w-16 mb-4 opacity-20" />
-                           <p>Upload an image to see the analysis report here.</p>
+                           <div className="p-5 rounded-full bg-muted/50">
+                              <FileText className="h-10 w-10 text-muted-foreground/40" />
+                           </div>
+                           <p className="text-sm text-muted-foreground">Upload a CBC image to see results here</p>
                         </>
                      )}
                      {(status === 'ocr' || status === 'analyzing') && (
                         <>
-                           <RefreshCw className="h-16 w-16 mb-4 animate-spin opacity-20" />
-                           <p>Generating report...</p>
+                           <div className="p-5 rounded-full bg-primary/5">
+                              <RefreshCw className="h-10 w-10 text-primary/40 animate-spin" />
+                           </div>
+                           <p className="text-sm text-muted-foreground">Generating report…</p>
                         </>
                      )}
                   </div>

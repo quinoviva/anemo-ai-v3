@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Activity,
+  Flame,
   Camera,
   MessageSquare,
   Plus,
@@ -22,6 +23,7 @@ import { doc, collection, query, orderBy, limit } from 'firebase/firestore';
 import { runFindNearbyClinics } from '@/app/actions';
 
 // UI Components
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
@@ -36,6 +38,7 @@ import { WaterReminder } from '@/components/anemo/WaterReminder';
 import '@/app/dashboard/games/iron-catcher/thumbnail.css';
 
 // Dynamic Imports
+const AreaChartWrapper = dynamic(() => import('@/components/anemo/HemoglobinTrendChart'), { ssr: false });
 const ColorBends = dynamic(() => import('@/components/ColorBends'), { ssr: false });
 const ChatbotPopup = dynamic(() => import('@/components/anemo/ChatbotPopup').then(mod => mod.ChatbotPopup), { ssr: false });
 const MenstrualCycleCorrelator = dynamic(() => import('@/components/anemo/MenstrualCycleCorrelator').then(mod => mod.MenstrualCycleCorrelator), { ssr: false });
@@ -60,7 +63,7 @@ const itemVariants = {
 };
 
 // --- Helper Components ---
-const BentoCard = ({
+const BentoCard = React.memo(({
   children,
   className = '',
   colSpan = 'col-span-1',
@@ -83,7 +86,8 @@ const BentoCard = ({
       {children}
     </div>
   </motion.div>
-);
+));
+BentoCard.displayName = 'BentoCard';
 
 export default function DashboardPage() {
   const { user } = useUser();
@@ -112,9 +116,15 @@ export default function DashboardPage() {
     return query(collection(firestore, `users/${user.uid}/imageAnalyses`), orderBy('createdAt', 'desc'), limit(1));
   }, [user, firestore]);
 
+  const imageHistoryQuery = useMemoFirebase(() => {
+    if (!user || !firestore) return null;
+    return query(collection(firestore, `users/${user.uid}/imageAnalyses`), orderBy('createdAt', 'desc'), limit(60));
+  }, [user, firestore]);
+
   const { data: cycleLogs } = useCollection<any>(cycleLogsQuery);
   const { data: cbcHistory } = useCollection<any>(labReportsQuery);
   const { data: imageAnalyses } = useCollection<any>(imageAnalysesQuery);
+  const { data: imageHistory } = useCollection<any>(imageHistoryQuery);
 
   const userDocRef = useMemoFirebase(() => {
     if (!user || !firestore) return null;
@@ -133,20 +143,114 @@ export default function DashboardPage() {
     }
   }, [userData]);
 
-  useEffect(() => {
-    const fetchClinics = async () => {
-      setIsLoadingClinics(true);
-      try {
-        const response = await runFindNearbyClinics({ query: location });
-        setClinics(response.results);
-      } catch (error) { console.error(error); }
-      finally { setIsLoadingClinics(false); }
-    };
-    fetchClinics();
+  const fetchClinics = useCallback(async (signal: { cancelled: boolean }) => {
+    setIsLoadingClinics(true);
+    try {
+      const response = await runFindNearbyClinics({ query: location });
+      if (!signal.cancelled) setClinics(response.results);
+    } catch (error) {
+      if (!signal.cancelled) console.error(error);
+    } finally {
+      if (!signal.cancelled) setIsLoadingClinics(false);
+    }
   }, [location]);
+
+  useEffect(() => {
+    const signal = { cancelled: false };
+    fetchClinics(signal);
+    return () => { signal.cancelled = true; };
+  }, [fetchClinics]);
 
   const userName = userData?.firstName || (user?.displayName ? user.displayName.split(' ')[0] : null);
   const latestImage = imageAnalyses?.[0];
+
+  const scanStreak = useMemo(() => {
+    if (!imageHistory?.length) return 0;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const scanDays = new Set(
+      imageHistory
+        .filter((doc: any) => doc.createdAt)
+        .map((doc: any) => {
+          const d = doc.createdAt.toDate();
+          d.setHours(0, 0, 0, 0);
+          return d.getTime();
+        })
+    );
+    let streak = 0;
+    const check = new Date(today);
+    while (scanDays.has(check.getTime())) {
+      streak++;
+      check.setDate(check.getDate() - 1);
+    }
+    return streak;
+  }, [imageHistory]);
+
+  const hgbTrend = useMemo(() => {
+    if (!imageHistory || imageHistory.length < 3) return null;
+    const withHgb = imageHistory
+      .filter((d: any) => d.hemoglobin && typeof d.hemoglobin === 'number')
+      .slice(0, 3);
+    if (withHgb.length < 3) return null;
+    const [newest, mid, oldest] = withHgb;
+    const drop1 = newest.hemoglobin - mid.hemoglobin;
+    const drop2 = mid.hemoglobin - oldest.hemoglobin;
+    if (drop1 < 0 && drop2 < 0) {
+      const totalDrop = oldest.hemoglobin - newest.hemoglobin;
+      return { direction: 'down' as const, amount: Math.abs(totalDrop).toFixed(1), latestHgb: newest.hemoglobin };
+    }
+    if (drop1 > 0 && drop2 > 0) {
+      const totalRise = newest.hemoglobin - oldest.hemoglobin;
+      return { direction: 'up' as const, amount: totalRise.toFixed(1), latestHgb: newest.hemoglobin };
+    }
+    return null;
+  }, [imageHistory]);
+
+  const weeklySummary = useMemo(() => {
+    if (!imageHistory?.length) return null;
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    const thisWeek = imageHistory.filter((d: any) => {
+      if (!d.createdAt) return false;
+      return d.createdAt.toDate() >= oneWeekAgo;
+    });
+    if (thisWeek.length === 0) return null;
+    const avgRisk = Math.round(thisWeek.reduce((sum: number, d: any) => sum + (d.riskScore || 0), 0) / thisWeek.length);
+    const avgHgb = thisWeek.filter((d: any) => d.hemoglobin).length > 0
+      ? (thisWeek.reduce((sum: number, d: any) => sum + (d.hemoglobin || 0), 0) / thisWeek.filter((d: any) => d.hemoglobin).length).toFixed(1)
+      : null;
+    const prevWeekStart = new Date(oneWeekAgo);
+    prevWeekStart.setDate(prevWeekStart.getDate() - 7);
+    const prevWeek = imageHistory.filter((d: any) => {
+      if (!d.createdAt) return false;
+      const date = d.createdAt.toDate();
+      return date >= prevWeekStart && date < oneWeekAgo;
+    });
+    const prevAvgRisk = prevWeek.length > 0
+      ? Math.round(prevWeek.reduce((sum: number, d: any) => sum + (d.riskScore || 0), 0) / prevWeek.length)
+      : null;
+    return { scans: thisWeek.length, avgRisk, avgHgb, prevAvgRisk, improved: prevAvgRisk !== null && avgRisk < prevAvgRisk };
+  }, [imageHistory]);
+
+  // Hemoglobin trend from CBC history
+  const hemoglobinData = useMemo(() => {
+    if (!cbcHistory || cbcHistory.length === 0) return [];
+    return cbcHistory
+      .slice()
+      .reverse()
+      .map((item: any) => {
+        const hgbParam = item.parameters?.find((p: any) =>
+          p.parameter?.toLowerCase().includes('hemoglobin') || p.parameter?.toLowerCase().includes('hgb')
+        );
+        const ts = item.createdAt;
+        const date = ts?.toDate ? ts.toDate() : ts?.seconds ? new Date(ts.seconds * 1000) : null;
+        return {
+          date: date ? format(date, 'MMM d') : '—',
+          hgb: hgbParam?.value ? parseFloat(hgbParam.value) : null,
+        };
+      })
+      .filter((d: any) => d.hgb !== null && !isNaN(d.hgb));
+  }, [cbcHistory]);
 
   return (
     <div className="relative w-full">
@@ -280,6 +384,30 @@ export default function DashboardPage() {
           </div>
         </motion.div>
 
+        {/* Hgb Trend Alert */}
+        {hgbTrend && (
+          <div className={cn(
+            "flex items-center gap-4 px-6 py-4 rounded-2xl border text-sm font-bold mb-2",
+            hgbTrend.direction === 'down'
+              ? "bg-red-500/10 border-red-500/20 text-red-400"
+              : "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+          )}>
+            <span className="text-xl">{hgbTrend.direction === 'down' ? '⚠️' : '📈'}</span>
+            <div className="flex-1">
+              <span className="font-black uppercase tracking-widest text-[10px] block">
+                {hgbTrend.direction === 'down' ? 'Hgb Declining' : 'Hgb Improving'}
+              </span>
+              <span className="text-xs text-muted-foreground font-medium">
+                {hgbTrend.direction === 'down'
+                  ? `Your hemoglobin has dropped ${hgbTrend.amount} g/dL across your last 3 scans (now ~${Number(hgbTrend.latestHgb).toFixed(1)} g/dL). Consider consulting a doctor.`
+                  : `Your hemoglobin has improved by ${hgbTrend.amount} g/dL across your last 3 scans. Keep it up!`
+                }
+              </span>
+            </div>
+            <Link href="/dashboard/history" className="text-[10px] font-black uppercase tracking-widest shrink-0 hover:underline">View Trend →</Link>
+          </div>
+        )}
+
         {/* --- Bento Grid Layout --- */}
         <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-6 md:gap-8 auto-rows-[minmax(240px,auto)]">
 
@@ -291,7 +419,7 @@ export default function DashboardPage() {
             onClick={() => window.location.href = '/dashboard/analysis'}
           >
             {/* Ultra Modern Radial Blur */}
-            <div className="absolute -top-40 -right-40 w-[600px] h-[600px] bg-red-600/40 rounded-full blur-[160px] group-hover:bg-red-600/50 transition-colors duration-1000 mix-blend-multiply dark:mix-blend-screen" />
+            <div className="absolute -top-40 -right-40 w-[300px] h-[300px] md:w-[600px] md:h-[600px] bg-red-600/40 rounded-full blur-[160px] group-hover:bg-red-600/50 transition-colors duration-1000 mix-blend-multiply dark:mix-blend-screen" />
             <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-red-600/20 rounded-full blur-[140px]" />
 
             <div className="relative z-10 h-full p-12 flex flex-col justify-between">
@@ -306,14 +434,14 @@ export default function DashboardPage() {
               </div>
 
               <div className="max-w-xl space-y-8">
-                <h2 className="text-7xl md:text-9xl font-light tracking-tighter text-foreground leading-none drop-shadow-sm">
+                <h2 className="text-4xl sm:text-5xl md:text-7xl lg:text-9xl font-light tracking-tighter text-foreground leading-none drop-shadow-sm">
                   Visual <span className="font-medium text-red-600 italic">Scan</span>
                 </h2>
                 <p className="text-2xl text-muted-foreground font-extralight leading-relaxed max-w-lg">
                   Neural analysis for hematological markers via non-invasive imaging.
                 </p>
                 <div className="flex items-center gap-8 pt-6">
-                  <Button className="rounded-full px-14 py-9 bg-red-600 hover:bg-red-500 text-white shadow-[0_20px_50px_-10px_rgba(220,38,38,0.5)] transition-all duration-500 hover:scale-105 active:scale-95 text-sm font-bold tracking-[0.2em] uppercase border-none ring-offset-2 ring-red-600/20">
+                  <Button className="rounded-full px-8 py-5 md:px-14 md:py-9 bg-red-600 hover:bg-red-500 text-white shadow-[0_20px_50px_-10px_rgba(220,38,38,0.5)] transition-all duration-500 hover:scale-105 active:scale-95 text-sm font-bold tracking-[0.2em] uppercase border-none ring-offset-2 ring-red-600/20">
                     Launch Analysis
                   </Button>
                   <div className="h-px w-40 bg-gradient-to-r from-red-500/60 to-transparent" />
@@ -343,13 +471,20 @@ export default function DashboardPage() {
             <div className="relative z-10 flex flex-col items-center justify-center space-y-12 my-10">
               {latestImage ? (
                 <>
-                  <div className="relative">
-                    <div className="absolute inset-0 bg-amber-500/40 blur-[100px] rounded-full scale-150 animate-pulse duration-[3000ms]" />
-                    <span className="relative text-[10rem] font-thin tracking-tighter text-foreground leading-none drop-shadow-2xl">
-                      {latestImage.riskScore}
-                    </span>
-                    <div className="absolute top-10 -right-10 flex items-center justify-center">
-                      <div className="h-6 w-6 rounded-full bg-red-500 animate-pulse shadow-[0_0_25px_rgba(239,68,68,1)]" />
+                  {/* Severity color ring */}
+                  <div className="relative flex items-center justify-center">
+                    {/* Outer color ring based on severity */}
+                    <svg className="absolute -inset-8 w-[calc(100%+4rem)] h-[calc(100%+4rem)]" viewBox="0 0 200 200" fill="none">
+                      <circle cx="100" cy="100" r="88" strokeWidth="6" stroke={latestImage.riskScore > 75 ? 'rgba(239,68,68,0.5)' : latestImage.riskScore > 50 ? 'rgba(245,158,11,0.5)' : 'rgba(34,197,94,0.5)'} strokeDasharray="553" strokeDashoffset={553 - (553 * latestImage.riskScore / 100)} strokeLinecap="round" style={{ transform: 'rotate(-90deg)', transformOrigin: '50% 50%', transition: 'stroke-dashoffset 2s ease-out' }} />
+                    </svg>
+                    <div className="absolute inset-0 rounded-full blur-[80px] scale-150 animate-pulse duration-[3000ms]" style={{ backgroundColor: latestImage.riskScore > 75 ? 'rgba(239,68,68,0.3)' : latestImage.riskScore > 50 ? 'rgba(245,158,11,0.3)' : 'rgba(34,197,94,0.3)' }} />
+                    <div className="relative text-center">
+                      <span className="text-[5rem] sm:text-[7rem] md:text-[10rem] font-thin tracking-tighter text-foreground leading-none drop-shadow-2xl block">
+                        {latestImage.riskScore}
+                      </span>
+                      <span className={`text-[10px] font-black uppercase tracking-[0.4em] mt-2 block ${latestImage.riskScore > 75 ? 'text-red-500' : latestImage.riskScore > 50 ? 'text-amber-500' : 'text-emerald-500'}`}>
+                        {latestImage.riskScore > 75 ? '⚠ Critical' : latestImage.riskScore > 50 ? 'Moderate Risk' : 'Normal Range'}
+                      </span>
                     </div>
                   </div>
                   <div className="w-full space-y-4">
@@ -358,7 +493,8 @@ export default function DashboardPage() {
                         initial={{ width: 0 }}
                         animate={{ width: `${latestImage.riskScore}%` }}
                         transition={{ duration: 2, ease: "easeOut" }}
-                        className="h-full bg-amber-500 shadow-[0_0_25px_theme(colors.amber.500)]"
+                        className="h-full"
+                        style={{ backgroundColor: latestImage.riskScore > 75 ? 'rgb(239,68,68)' : latestImage.riskScore > 50 ? 'rgb(245,158,11)' : 'rgb(34,197,94)' }}
                       />
                     </div>
                     <div className="flex justify-between text-[10px] uppercase tracking-[0.4em] font-black text-muted-foreground/60">
@@ -368,11 +504,14 @@ export default function DashboardPage() {
                   </div>
                 </>
               ) : (
-                <div className="text-center space-y-6 py-12 opacity-50">
-                  <div className="w-32 h-32 rounded-full border border-dashed border-amber-500/60 flex items-center justify-center mx-auto bg-amber-500/5 shadow-[0_0_30px_rgba(245,158,11,0.1)]">
-                    <Activity className="h-14 w-14 text-amber-500" />
+                <div className="text-center space-y-6 py-8">
+                  <div className="w-32 h-32 rounded-full border border-dashed border-amber-500/40 flex items-center justify-center mx-auto bg-amber-500/5">
+                    <Activity className="h-14 w-14 text-amber-500/60" />
                   </div>
-                  <p className="text-[10px] uppercase tracking-widest font-bold text-amber-500">Awaiting Calibration</p>
+                  <p className="text-[10px] uppercase tracking-widest font-bold text-amber-500/60">No scan yet</p>
+                  <Link href="/dashboard/analysis" className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-primary text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary/20 hover:opacity-90 transition-opacity">
+                    <Camera className="h-3.5 w-3.5" /> Start First Scan
+                  </Link>
                 </div>
               )}
             </div>
@@ -464,7 +603,29 @@ export default function DashboardPage() {
             </div>
           </BentoCard>
 
-          {/* 5. Cycle Tracker (Conditional) - Rose Theme */}
+          {/* 5. Hemoglobin Trend Chart */}
+          {hemoglobinData.length > 0 && (
+            <BentoCard
+              colSpan="col-span-1 md:col-span-4 lg:col-span-6"
+              className="p-10 bg-gradient-to-br from-primary/10 via-background to-background border-primary/20 shadow-[0_20px_60px_-15px_rgba(255,0,68,0.1)]"
+            >
+              <div className="relative z-10 flex items-center justify-between mb-6">
+                <div className="space-y-1">
+                  <h3 className="text-xs font-bold uppercase tracking-[0.3em] text-primary/70">CBC History</h3>
+                  <p className="text-2xl font-light tracking-tight">Hemoglobin <span className="font-medium text-primary italic">Trend</span></p>
+                </div>
+                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary/5 border border-primary/10 text-xs font-bold uppercase tracking-widest text-primary/70">
+                  <Activity className="h-3.5 w-3.5" />
+                  Last {hemoglobinData.length} Report{hemoglobinData.length !== 1 ? 's' : ''}
+                </div>
+              </div>
+              <div className="h-[180px] w-full">
+                <AreaChartWrapper data={hemoglobinData} />
+              </div>
+            </BentoCard>
+          )}
+
+          {/* 6. Cycle Tracker (Conditional) - Rose Theme */}
           {userSex === 'Female' && (
             <BentoCard
               colSpan="col-span-1 md:col-span-4 lg:col-span-6"
@@ -499,7 +660,7 @@ export default function DashboardPage() {
             </BentoCard>
           )}
 
-          {/* Water Reminder (Blue Theme Container) */}
+          {/* 7. Water Reminder (Blue Theme Container) */}
           <BentoCard
             colSpan="col-span-1 md:col-span-2 lg:col-span-3"
             className="p-0 border-blue-500/30 overflow-visible shadow-[0_30px_80px_-20px_rgba(59,130,246,0.3)] bg-gradient-to-br from-blue-600/20 via-blue-900/5 to-background relative group"
@@ -558,6 +719,69 @@ export default function DashboardPage() {
               </div>
             </div>
           </BentoCard>
+
+          {/* Scan Streak Widget */}
+          <BentoCard
+            colSpan="col-span-1 md:col-span-2 lg:col-span-2"
+            className="p-10 justify-between bg-gradient-to-br from-emerald-600/20 via-background to-background border-emerald-500/20 group"
+          >
+            <div className="flex items-center gap-4 mb-6">
+              <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
+                <Flame className="w-5 h-5 text-emerald-500" />
+              </div>
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500">Scan Streak</p>
+                <p className="text-[9px] text-muted-foreground uppercase tracking-widest">Consecutive days</p>
+              </div>
+            </div>
+            <div className="flex items-end gap-3">
+              <span className="text-7xl font-thin tracking-tighter text-foreground leading-none">
+                {scanStreak}
+              </span>
+              <div className="pb-2 text-3xl">{scanStreak >= 7 ? '🔥' : scanStreak >= 3 ? '⚡' : '💪'}</div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-4">
+              {scanStreak === 0 ? 'Scan today to start your streak!' : scanStreak === 1 ? 'Great start — scan tomorrow to continue!' : `Keep going! ${scanStreak} day${scanStreak !== 1 ? 's' : ''} strong.`}
+            </p>
+          </BentoCard>
+
+          {/* Weekly Summary */}
+          {weeklySummary && (
+            <BentoCard
+              colSpan="col-span-1 md:col-span-2 lg:col-span-2"
+              className="p-8 justify-between bg-gradient-to-br from-indigo-600/20 via-background to-background border-indigo-500/20 group"
+            >
+              <div className="flex items-center gap-4 mb-4">
+                <div className="p-3 rounded-2xl bg-indigo-500/10 border border-indigo-500/20">
+                  <TrendingUp className="w-5 h-5 text-indigo-400" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400">This Week</p>
+                  <p className="text-[9px] text-muted-foreground uppercase tracking-widest">Health Summary</p>
+                </div>
+                {weeklySummary.improved && (
+                  <span className="ml-auto text-[9px] px-2 py-1 rounded-full bg-emerald-500/20 text-emerald-400 font-black uppercase tracking-widest">↑ Improved</span>
+                )}
+              </div>
+              <div className="grid grid-cols-3 gap-3 my-4">
+                <div className="text-center">
+                  <p className="text-3xl font-thin text-foreground">{weeklySummary.scans}</p>
+                  <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mt-1">Scans</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-3xl font-thin text-foreground">{weeklySummary.avgRisk}</p>
+                  <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mt-1">Avg Risk</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-3xl font-thin text-foreground">{weeklySummary.avgHgb ?? '—'}</p>
+                  <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mt-1">Avg Hgb</p>
+                </div>
+              </div>
+              <Link href="/dashboard/history" className="text-[9px] font-black uppercase tracking-widest text-indigo-400 hover:underline">
+                View Full History →
+              </Link>
+            </BentoCard>
+          )}
 
         </div>
 

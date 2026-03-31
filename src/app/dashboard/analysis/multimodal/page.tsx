@@ -25,14 +25,7 @@ export default function MultimodalAnalysisPage() {
   const router = useRouter();
 
   return (
-    <div className="relative w-full min-h-screen bg-background overflow-hidden isolate">
-      {/* Subtle grid texture */}
-      <div className="absolute inset-0 bg-grid-black/[0.02] dark:bg-grid-white/[0.02] bg-[size:60px_60px] z-0 pointer-events-none" />
-
-      {/* Ambient glow orbs */}
-      <div className="absolute top-1/4 -right-20 w-[500px] h-[500px] bg-primary/15 rounded-full blur-[160px] opacity-30 animate-slow-pulse pointer-events-none" />
-      <div className="absolute -bottom-40 -left-60 w-[700px] h-[700px] bg-blue-500/10 rounded-full blur-[200px] opacity-20 animate-float pointer-events-none" />
-
+    <div className="relative w-full min-h-screen overflow-hidden">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -41,9 +34,6 @@ export default function MultimodalAnalysisPage() {
       >
         <MultimodalUploadAnalyzer onClose={() => router.push('/dashboard/analysis')} />
       </motion.div>
-
-      {/* Edge vignette */}
-      <div className="absolute inset-0 pointer-events-none shadow-[inset_0_0_150px_rgba(0,0,0,0.08)] dark:shadow-[inset_0_0_150px_rgba(0,0,0,0.35)] z-50" />
     </div>
   );
 }

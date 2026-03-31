@@ -186,3 +186,40 @@
     animation: scanY 3.5s linear infinite;
   }
 }
+
+/* ── Print Styles for Diagnostic Reports ──────────────────────────── */
+@media print {
+  /* Hide navigation, FAB, header, footer */
+  header, footer, nav,
+  [data-print-hide],
+  .fixed,
+  [aria-label="New Scan"] {
+    display: none !important;
+  }
+
+  /* Reset backgrounds for print */
+  body, html {
+    background: white !important;
+    color: black !important;
+  }
+
+  /* Make report container full width */
+  [data-print-report] {
+    width: 100% !important;
+    max-width: 100% !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Ensure images print */
+  img {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Page break helpers */
+  .print-break-before { page-break-before: always; }
+  .print-break-avoid { page-break-inside: avoid; }
+}

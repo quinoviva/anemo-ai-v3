@@ -41,6 +41,20 @@ import crypto from 'crypto';
 // Use Admin App for checking credentials presence
 const adminApp = getAdminApp();
 
+// ── Server-side rate limiting ──────────────────────────────────────────────
+// In-memory store: userId → last call timestamp per action
+const rateLimitStore = new Map<string, number>();
+const RATE_LIMIT_MS = 3000; // 3s cooldown per user per action
+
+function checkRateLimit(key: string): void {
+  const now = Date.now();
+  const last = rateLimitStore.get(key) ?? 0;
+  if (now - last < RATE_LIMIT_MS) {
+    throw new Error('Rate limit exceeded. Please wait a moment before trying again.');
+  }
+  rateLimitStore.set(key, now);
+}
+
 /**
  * Calculates a SHA-256 hash of a data URI or base64 string.
  */
@@ -101,8 +115,9 @@ export async function cacheAnalysisResult(dataUri: string, bodyPart: string, res
 }
 
 export async function runGenerateImageDescription(
-  input: GenerateImageDescriptionInput
+  input: GenerateImageDescriptionInput & { userId?: string }
 ): Promise<GenerateImageDescriptionOutput> {
+  if (input.userId) checkRateLimit(`imgDesc:${input.userId}`);
   try {
     // 1. Check for consistency
     const consistency = await checkImageConsistency(input.photoDataUri, input.bodyPart);
@@ -277,8 +292,9 @@ export async function runProvidePersonalizedRecommendations(
 
 
 export async function runAnswerAnemiaQuestion(
-  input: AnswerAnemiaQuestionInput
+  input: AnswerAnemiaQuestionInput & { userId?: string }
 ): Promise<AnswerAnemiaQuestionOutput> {
+  if (input.userId) checkRateLimit(`chat:${input.userId}`);
   return await answerAnemiaQuestion(input);
 }
 

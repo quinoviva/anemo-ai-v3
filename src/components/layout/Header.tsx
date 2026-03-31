@@ -38,7 +38,7 @@ import {
   Activity,
   History
 } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTheme } from 'next-themes';
 import { Logo } from './Logo';
 import { SequentialImageAnalyzer } from '../anemo/SequentialImageAnalyzer';
@@ -65,6 +65,8 @@ export function Header() {
   const pathname = usePathname();
   const { setTheme } = useTheme();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [otherMenuOpen, setOtherMenuOpen] = useState(false);
+  const otherMenuRef = useRef<HTMLDivElement>(null);
 
   const isGuest = auth.currentUser?.isAnonymous;
 
@@ -147,19 +149,26 @@ export function Header() {
               </Link>
             </div>
 
-            <DropdownMenu>
+            <DropdownMenu open={otherMenuOpen} onOpenChange={setOtherMenuOpen}>
+              <div
+                ref={otherMenuRef}
+                onMouseLeave={() => setOtherMenuOpen(false)}
+                className="relative"
+              >
               <DropdownMenuTrigger asChild>
-                <button className={cn(
+                <button
+                  onMouseEnter={() => setOtherMenuOpen(true)}
+                  className={cn(
                   'flex items-center gap-1 px-4 py-2 text-xs font-bold tracking-widest rounded-full transition-all duration-300 outline-none h-10',
                   otherLinks.some(l => l.href === pathname)
                     ? 'text-primary bg-primary/5'
                     : 'text-muted-foreground hover:text-foreground hover:bg-primary/5'
                 )}>
-                  OTHER
-                  <ChevronDown className="h-3 w-3 opacity-50" />
+                  MORE
+                  <ChevronDown className={cn("h-3 w-3 opacity-50 transition-transform duration-200", otherMenuOpen && "rotate-180")} />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="center" sideOffset={10} className="w-56 p-2 bg-background/80 backdrop-blur-xl border border-primary/10 rounded-2xl shadow-xl">
+              <DropdownMenuContent align="center" sideOffset={10} className="w-56 p-2 bg-background/90 backdrop-blur-xl border border-primary/10 rounded-2xl shadow-xl">
                 {otherLinks.map(({ href, label, icon: Icon }) => (
                   <DropdownMenuItem key={href} asChild className="p-3 cursor-pointer focus:bg-primary/5 rounded-xl text-muted-foreground focus:text-primary transition-colors">
                     <Link href={href} className="flex items-center gap-3">
@@ -169,6 +178,7 @@ export function Header() {
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
+              </div>
             </DropdownMenu>
           </nav>
 
@@ -184,7 +194,7 @@ export function Header() {
             </button>
 
             {/* User Profile Menu */}
-            <DropdownMenu>
+            <DropdownMenu modal={false}>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-11 w-11 rounded-full hover:bg-primary/5 transition-all" aria-label="Open user menu">
                   <Avatar className="h-9 w-9 border border-primary/10">
@@ -329,7 +339,29 @@ export function Header() {
                 </div>
               </div>
 
-              <div className="mt-auto pt-8 border-t border-primary/5">
+              <div className="mt-auto pt-8 border-t border-primary/5 space-y-4">
+                {/* Theme Toggle */}
+                <div className="flex items-center justify-between px-2">
+                  <span className="text-[10px] font-black tracking-[0.3em] text-muted-foreground uppercase">Theme</span>
+                  <div className="flex items-center gap-1 p-1 rounded-full bg-primary/5 border border-primary/10">
+                    {(['light', 'dark', 'system'] as const).map((t) => {
+                      const Icon = t === 'light' ? Sun : t === 'dark' ? Moon : Monitor;
+                      return (
+                        <button
+                          key={t}
+                          onClick={() => setTheme(t)}
+                          className={cn(
+                            'w-9 h-9 rounded-full flex items-center justify-center transition-all',
+                            theme === t ? 'bg-primary text-white shadow-md' : 'text-muted-foreground hover:text-primary'
+                          )}
+                          aria-label={t}
+                        >
+                          <Icon className="w-4 h-4" />
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
                 <div className="p-6 rounded-3xl bg-primary/5 border border-primary/10">
                   <p className="text-xs font-bold text-foreground mb-1 uppercase tracking-tight">Anemo</p>
                   <p className="text-[10px] text-muted-foreground leading-relaxed">Neural diagnostics for blood health assessment.</p>

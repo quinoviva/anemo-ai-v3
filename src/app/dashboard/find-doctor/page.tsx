@@ -144,63 +144,53 @@ export default function FindDoctorPage() {
   };
 
   return (
-    <div className="relative min-h-screen w-full overflow-hidden text-foreground">
-      <style>{customStyles}</style>
-      
-      {/* Background Ambient Effects */}
-      <div className="fixed inset-0 -z-10 pointer-events-none">
-         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-500/5 rounded-full blur-[120px]" />
-         <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-emerald-500/5 rounded-full blur-[120px]" />
-      </div>
+    <div className="relative w-full overflow-hidden text-foreground">
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 h-full">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         
         {/* --- LEFT SIDEBAR (Search & Info) --- */}
         <motion.div 
           initial={{ opacity: 0, x: -20 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
+          animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6 }}
           className="lg:col-span-4 space-y-6"
         >
            {/* Header Card */}
-           <div className="rounded-[2.5rem] bg-gradient-to-br from-background to-background/50 border border-white/10 p-8 shadow-2xl relative overflow-hidden group">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-[60px] -mr-20 -mt-20 group-hover:bg-blue-500/20 transition-colors duration-700" />
-              
+           <div className="glass-panel rounded-[2.5rem] p-8 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 rounded-full blur-[60px] -mr-20 -mt-20 pointer-events-none" />
               <div className="relative z-10">
                  <div className="flex items-center gap-3 mb-6">
                     <div className="p-3 bg-blue-500/10 rounded-2xl border border-blue-500/20">
-                       <MapPin className="h-6 w-6 text-blue-500" />
+                       <MapPin className="h-5 w-5 text-blue-500" />
                     </div>
-                    <span className="text-xs font-bold uppercase tracking-widest text-blue-500">Global Network</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-blue-500">Global Network</span>
                  </div>
                  
-                 <h1 className="text-4xl md:text-5xl font-light tracking-tighter mb-4">Find Care</h1>
+                 <h1 className="text-5xl md:text-6xl font-light tracking-tighter leading-[0.9] mb-4">
+                   <span className="opacity-80">Find</span>{' '}
+                   <span className="font-black text-transparent bg-clip-text bg-gradient-to-r from-primary via-red-500 to-rose-400">Care</span>
+                   <span className="text-primary animate-pulse">.</span>
+                 </h1>
                  <p className="text-muted-foreground leading-relaxed">
-                    Locate top-rated clinics, hospitals, and specialists in your municipality. 
-                    Example: <span className="text-foreground font-medium">"Pototan"</span>
+                    Locate clinics, hospitals, and specialists in your area.
+                    Try: <span className="text-foreground font-medium">"Pototan"</span> or <span className="text-foreground font-medium">"Iloilo City"</span>
                  </p>
               </div>
-
-              {/* Custom Animation Element */}
-              <div className="absolute -bottom-16 -left-16 w-48 h-48 border-[20px] border-blue-500/5 rounded-full sidebar-ring" />
-              <div className="absolute -bottom-16 -left-16 w-32 h-32 border-[10px] border-emerald-500/5 rounded-full sidebar-ring-reverse" />
            </div>
 
            {/* Search Input Box */}
-           <div className="rounded-[2rem] bg-background/60 backdrop-blur-xl border border-white/10 p-2 shadow-lg">
+           <div className="glass-panel rounded-[2rem] p-2">
               <form onSubmit={handleSearch} className="flex gap-2">
-                <div className="relative flex-grow group">
-                    <div className="absolute inset-0 bg-blue-500/20 blur-md opacity-0 group-focus-within:opacity-100 transition-opacity duration-500 rounded-full" />
+                <div className="relative flex-grow">
                     <Input
                         type="text"
                         placeholder="Search municipality..."
-                        className="relative pl-6 pr-4 h-14 rounded-full bg-white/5 border-white/10 focus-visible:border-blue-500/50 focus-visible:ring-0 transition-all text-base shadow-inner"
+                        className="pl-6 pr-4 h-14 rounded-full bg-background/50 border-primary/10 focus-visible:border-primary/40 focus-visible:ring-0 transition-all text-base"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
                 </div>
-                <Button type="submit" disabled={isSearching} className="h-14 w-14 rounded-full bg-blue-600 hover:bg-blue-500 shadow-lg shadow-blue-500/20 shrink-0">
+                <Button type="submit" disabled={isSearching} className="h-14 w-14 rounded-full bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 shrink-0">
                     {isSearching ? <HeartLoader size={20} strokeWidth={3} /> : <Search className="h-5 w-5" />}
                 </Button>
                </form>
@@ -235,7 +225,7 @@ export default function FindDoctorPage() {
                         viewport={{ once: true }}
                         exit={{ opacity: 0, scale: 0.9 }}
                         transition={{ duration: 0.3, delay: i * 0.1 }}
-                        className="h-64 rounded-[2rem] bg-white/5 border border-white/10 animate-pulse"
+                        className="h-64 rounded-[2rem] glass-panel animate-pulse"
                       />
                    ))
                 ) : hasSearched && results.length > 0 ? (
@@ -243,11 +233,10 @@ export default function FindDoctorPage() {
                       <motion.div
                         key={index}
                         initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
+                        animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.9 }}
                         transition={{ duration: 0.4, delay: index * 0.05 }}
-                        className="group relative rounded-[2.5rem] bg-background/40 backdrop-blur-md border border-white/10 overflow-hidden hover:border-blue-500/30 transition-all duration-500 hover:shadow-2xl hover:shadow-blue-500/5 hover:-translate-y-1"
+                        className="group relative rounded-[2.5rem] glass-panel overflow-hidden hover:border-primary/20 hover:shadow-primary/5 transition-all duration-500 hover:-translate-y-1"
                       >
                          <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
                          
@@ -285,7 +274,7 @@ export default function FindDoctorPage() {
                             </div>
 
 
-                            <div className="space-y-3 pt-6 border-t border-white/5">
+                            <div className="space-y-3 pt-6 border-t border-primary/10">
                                {clinic.hours && (
                                  <div className="flex items-center gap-3 text-sm text-muted-foreground">
                                     <Clock className="h-4 w-4 shrink-0 opacity-70" />
@@ -302,13 +291,13 @@ export default function FindDoctorPage() {
                             
                             {/* Hover Actions Overlay */}
                             <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 bg-background/90 backdrop-blur-xl border-t border-white/10 flex gap-2">
-                                <Button className="flex-1 rounded-xl bg-blue-600 hover:bg-blue-500 text-white shadow-lg" asChild>
+                                <Button className="flex-1 rounded-xl bg-primary hover:bg-primary/90 text-white shadow-lg" asChild>
                                     <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(clinic.name + ' ' + clinic.address)}`} target="_blank" rel="noopener noreferrer">
                                         <Navigation className="mr-2 h-4 w-4" /> Navigate
                                     </a>
                                 </Button>
                                 {clinic.website && clinic.website !== 'N/A' && (
-                                    <Button variant="outline" size="icon" className="rounded-xl border-white/10 hover:bg-white/5" asChild>
+                                    <Button variant="outline" size="icon" className="rounded-full border-primary/20 hover:bg-primary/5" asChild>
                                         <a href={clinic.website} target="_blank" rel="noopener noreferrer">
                                             <Globe className="h-4 w-4" />
                                         </a>
@@ -324,7 +313,7 @@ export default function FindDoctorPage() {
                         animate={{ opacity: 1 }}
                         className="col-span-full py-20 text-center space-y-6"
                     >
-                        <div className="w-24 h-24 rounded-full bg-white/5 border border-dashed border-white/20 flex items-center justify-center mx-auto animate-spin-slow">
+                        <div className="w-24 h-24 rounded-full bg-white/5 border border-dashed border-primary/20 flex items-center justify-center mx-auto">
                             <Search className="h-8 w-8 text-muted-foreground/50" />
                         </div>
                         <div>
@@ -332,7 +321,7 @@ export default function FindDoctorPage() {
                             <p className="text-sm text-muted-foreground/60">Try searching for a larger municipality or "Iloilo City"</p>
                         </div>
                         <div className="pt-4">
-                            <Button onClick={handleSeedDatabase} variant="outline" className="rounded-full border-white/10 gap-2">
+                            <Button onClick={handleSeedDatabase} variant="outline" className="rounded-full border-primary/20 gap-2">
                                 <Database className="h-4 w-4" /> Seed Database
                             </Button>
                         </div>

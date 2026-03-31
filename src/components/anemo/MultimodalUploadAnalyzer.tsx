@@ -38,19 +38,15 @@ import {
   SkipForward,
   Sparkles,
   AlertCircle,
-  Calendar,
   Heart,
   Info,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Calendar as CalendarComponent } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useToast } from '@/hooks/use-toast';
 import { useUser, useFirestore, useMemoFirebase, useDoc } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import { cn } from '@/lib/utils';
-import { format } from 'date-fns';
 import HeartLoader from '@/components/ui/HeartLoader';
 import {
   runGenerateImageDescription,
@@ -792,19 +788,29 @@ interface CyclePreAnalysisModalProps {
 }
 
 function CyclePreAnalysisModal({ onComplete, onSkip }: CyclePreAnalysisModalProps) {
-  const [lmpDate, setLmpDate] = useState<Date | undefined>(undefined);
-  const [lmpOpen, setLmpOpen] = useState(false);
+  const [lmpDate, setLmpDate] = useState<string>('');
+  const [cycleDescription, setCycleDescription] = useState<string>('');
+  const [cycleLength, setCycleLength] = useState<string>('');
   const [isRegular, setIsRegular] = useState<boolean | null>(null);
   const [symptoms, setSymptoms] = useState<string[]>([]);
   const [step, setStep] = useState<1 | 2>(1);
 
+  const cycleDescriptionOptions = [
+    'Regular (21–35 days)',
+    'Irregular',
+    'Currently Pregnant / Postpartum',
+  ];
+
   const symptomOptions = [
-    'Heavy menstrual flow',
-    'Fatigue / low energy',
-    'Dizziness',
-    'Pale skin',
-    'Shortness of breath',
-    'Hair loss',
+    'Heavy menstrual flow (soaking >1 pad/hr)',
+    'Unusual fatigue / low energy',
+    'Dizziness or lightheadedness',
+    'Pale skin or pale inner eyelids',
+    'Shortness of breath on exertion',
+    'Hair thinning or loss',
+    'Cold hands or feet',
+    'Brittle or spoon-shaped nails',
+    'Cravings for non-food items (ice, dirt)',
   ];
 
   const toggleSymptom = (s: string) =>
@@ -812,8 +818,10 @@ function CyclePreAnalysisModal({ onComplete, onSkip }: CyclePreAnalysisModalProp
 
   const handleComplete = () => {
     const ctx = [
-      lmpDate ? `Last menstrual period: ${format(lmpDate, 'MMMM d, yyyy')}` : null,
+      lmpDate ? `Last menstrual period: ${lmpDate}` : null,
+      cycleDescription ? `Cycle description: ${cycleDescription}` : null,
       isRegular !== null ? `Cycle regularity: ${isRegular ? 'Regular' : 'Irregular'}` : null,
+      cycleLength ? `Average cycle length: ${cycleLength} days` : null,
       symptoms.length > 0 ? `Reported symptoms: ${symptoms.join(', ')}` : null,
     ]
       .filter(Boolean)
@@ -821,18 +829,14 @@ function CyclePreAnalysisModal({ onComplete, onSkip }: CyclePreAnalysisModalProp
     onComplete(ctx);
   };
 
+  const today = new Date().toISOString().split('T')[0];
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="min-h-screen flex flex-col items-center justify-center px-4 py-12 bg-background"
+      className="min-h-screen flex flex-col items-center justify-center px-4 py-12"
     >
-      {/* Background glow */}
-      <div className="fixed inset-0 pointer-events-none -z-10">
-        <div className="absolute top-[-20%] right-[-10%] w-[60vw] h-[60vw] bg-rose-500/10 rounded-full blur-[160px]" />
-        <div className="absolute bottom-[-20%] left-[-10%] w-[50vw] h-[50vw] bg-primary/10 rounded-full blur-[140px]" />
-      </div>
-
       <div className="w-full max-w-lg glass-panel rounded-[2.5rem] overflow-hidden border-rose-500/20">
         {/* Header */}
         <div className="p-8 border-b border-rose-500/10">
@@ -850,6 +854,22 @@ function CyclePreAnalysisModal({ onComplete, onSkip }: CyclePreAnalysisModalProp
           </p>
         </div>
 
+        {/* Step indicator */}
+        <div className="px-8 pt-5 flex items-center gap-2">
+          {[1, 2].map((s) => (
+            <div
+              key={s}
+              className={cn(
+                'h-1 flex-1 rounded-full transition-all duration-500',
+                step >= s ? 'bg-rose-400' : 'bg-border/40'
+              )}
+            />
+          ))}
+          <span className="text-[9px] font-black uppercase tracking-[0.3em] text-muted-foreground ml-2">
+            {step}/2
+          </span>
+        </div>
+
         <AnimatePresence mode="wait">
           {step === 1 && (
             <motion.div
@@ -859,59 +879,65 @@ function CyclePreAnalysisModal({ onComplete, onSkip }: CyclePreAnalysisModalProp
               exit={{ opacity: 0, x: -20 }}
               className="p-8 space-y-6"
             >
+              {/* LMP date */}
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">
-                  Last Menstrual Period (LMP)
+                  When did your last period start?
                 </label>
-                <Popover open={lmpOpen} onOpenChange={setLmpOpen}>
-                  <PopoverTrigger asChild>
-                    <button
-                      className={cn(
-                        'w-full h-12 px-4 rounded-2xl glass-panel border border-border/60 focus:border-rose-400/60 focus:outline-none text-sm transition-colors text-left flex items-center gap-3',
-                        !lmpDate && 'text-muted-foreground'
-                      )}
-                    >
-                      <Calendar className="w-4 h-4 text-rose-400 shrink-0" />
-                      {lmpDate ? format(lmpDate, 'MMMM d, yyyy') : 'Select date'}
-                    </button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <CalendarComponent
-                      mode="single"
-                      selected={lmpDate}
-                      onSelect={(d) => { setLmpDate(d); setLmpOpen(false); }}
-                      disabled={(date) => date > new Date() || date < new Date('2000-01-01')}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
+                <input
+                  type="date"
+                  max={today}
+                  value={lmpDate}
+                  onChange={(e) => setLmpDate(e.target.value)}
+                  className="w-full h-12 px-4 rounded-2xl glass-panel border border-border/60 focus:border-rose-400/60 focus:outline-none text-sm transition-colors bg-background/50"
+                />
               </div>
 
+              {/* Cycle description */}
               <div className="space-y-3">
                 <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">
-                  Is your cycle regular?
+                  How would you describe your cycle?
                 </p>
-                <div className="flex gap-3">
-                  {[true, false].map((v) => (
+                <div className="flex flex-col gap-2">
+                  {cycleDescriptionOptions.map((opt) => (
                     <button
-                      key={String(v)}
-                      onClick={() => setIsRegular(v)}
+                      key={opt}
+                      onClick={() => {
+                        setCycleDescription(opt);
+                        setIsRegular(opt === 'Regular (21–35 days)');
+                      }}
                       className={cn(
-                        'flex-1 h-11 rounded-2xl text-[10px] font-black uppercase tracking-[0.25em] border transition-all',
-                        isRegular === v
+                        'w-full h-11 px-4 rounded-full text-[10px] font-black uppercase tracking-[0.2em] border transition-all text-left',
+                        cycleDescription === opt
                           ? 'bg-rose-500/20 border-rose-500/50 text-rose-400'
                           : 'bg-muted/30 border-border/40 text-muted-foreground hover:border-rose-500/30',
                       )}
                     >
-                      {v ? 'Yes, Regular' : 'No, Irregular'}
+                      {opt}
                     </button>
                   ))}
                 </div>
               </div>
 
+              {/* Cycle length */}
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">
+                  Average cycle length (days)?
+                </label>
+                <input
+                  type="number"
+                  min={21}
+                  max={45}
+                  placeholder="e.g. 28"
+                  value={cycleLength}
+                  onChange={(e) => setCycleLength(e.target.value)}
+                  className="w-full h-12 px-4 rounded-2xl glass-panel border border-border/60 focus:border-rose-400/60 focus:outline-none text-sm transition-colors bg-background/50"
+                />
+              </div>
+
               <Button
                 onClick={() => setStep(2)}
-                className="w-full h-12 rounded-2xl bg-rose-500 hover:bg-rose-400 text-white font-black text-[10px] uppercase tracking-[0.3em]"
+                className="w-full h-12 rounded-full bg-rose-500 hover:bg-rose-400 text-white font-black text-[10px] uppercase tracking-[0.3em]"
               >
                 Continue <ChevronRight className="w-4 h-4 ml-1" />
               </Button>
@@ -928,9 +954,9 @@ function CyclePreAnalysisModal({ onComplete, onSkip }: CyclePreAnalysisModalProp
             >
               <div className="space-y-3">
                 <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">
-                  Any current symptoms? (select all that apply)
+                  Which of these have you noticed recently?
                 </p>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 gap-2">
                   {symptomOptions.map((s) => (
                     <button
                       key={s}
@@ -946,19 +972,22 @@ function CyclePreAnalysisModal({ onComplete, onSkip }: CyclePreAnalysisModalProp
                     </button>
                   ))}
                 </div>
+                <p className="text-[10px] italic text-muted-foreground/60 leading-relaxed pt-1">
+                  These symptoms may indicate iron-deficiency anemia. Your answers help calibrate the AI analysis.
+                </p>
               </div>
 
               <div className="flex gap-3">
                 <Button
                   variant="ghost"
                   onClick={() => setStep(1)}
-                  className="h-12 px-6 rounded-2xl glass-button text-[10px] font-black uppercase tracking-[0.2em]"
+                  className="h-12 px-6 rounded-full glass-button text-[10px] font-black uppercase tracking-[0.2em]"
                 >
                   <ArrowLeft className="w-3.5 h-3.5 mr-1" /> Back
                 </Button>
                 <Button
                   onClick={handleComplete}
-                  className="flex-1 h-12 rounded-2xl bg-primary hover:bg-primary/90 text-white font-black text-[10px] uppercase tracking-[0.3em]"
+                  className="flex-1 h-12 rounded-full bg-primary hover:bg-primary/90 text-white font-black text-[10px] uppercase tracking-[0.3em]"
                 >
                   <Zap className="w-4 h-4 mr-1 fill-white" /> Start Scan
                 </Button>

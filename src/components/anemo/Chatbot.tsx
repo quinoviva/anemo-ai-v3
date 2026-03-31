@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { runAnswerAnemiaQuestion } from '@/app/actions';
 import { CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,12 +8,12 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import { useUser, useFirestore, useCollection, useMemoFirebase, useDoc } from '@/firebase';
 import { addDoc, collection, serverTimestamp, query, orderBy, doc } from 'firebase/firestore';
-import { Bot, User, Send, Sparkles, Trash2, RefreshCw, Minus, X, Zap } from 'lucide-react';
+import { Bot, User, Send, Sparkles, Trash2, RefreshCw, Minus, X, Zap, Mic } from 'lucide-react';
 import HeartLoader from '@/components/ui/HeartLoader';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 
-type Message = { role: 'user' | 'assistant'; content: string; id?: string };
+type Message = { role: 'user' | 'assistant'; content: string; id?: string; createdAt?: Date | null };
 type ChatbotProps = {
   isPopup?: boolean;
   onClose?: () => void;
@@ -32,8 +32,38 @@ export function Chatbot({ isPopup = false, onClose, onMinimize }: ChatbotProps) 
   const firestore = useFirestore();
   const [userInput, setUserInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef<any>(null);
+
+  const toggleVoice = () => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      toast({ title: 'Not supported', description: 'Voice input is not available on this browser.', variant: 'destructive' });
+      return;
+    }
+    if (isListening) {
+      recognitionRef.current?.stop();
+      setIsListening(false);
+      return;
+    }
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = 'en-US';
+    recognition.onresult = (e: any) => {
+      const transcript = e.results[0]?.[0]?.transcript ?? '';
+      setUserInput(prev => (prev ? prev + ' ' + transcript : transcript));
+    };
+    recognition.onend = () => setIsListening(false);
+    recognition.onerror = () => setIsListening(false);
+    recognitionRef.current = recognition;
+    recognition.start();
+    setIsListening(true);
+  };
   const [isInitializing, setIsInitializing] = useState(true);
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+  const lastSentAtRef = useRef<number>(0);
+  const COOLDOWN_MS = 4000; // 4s cooldown between messages
   const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -70,7 +100,8 @@ export function Chatbot({ isPopup = false, onClose, onMinimize }: ChatbotProps) 
   const history: Message[] = historyData ? historyData.map(doc => ({
       role: (doc.role ?? 'assistant') as 'user' | 'assistant',
       content: doc.content ?? '',
-      id: doc.id
+      id: doc.id,
+      createdAt: doc.createdAt?.toDate?.() ?? null,
   })) : [];
 
   // Initialization Effect
@@ -109,6 +140,13 @@ export function Chatbot({ isPopup = false, onClose, onMinimize }: ChatbotProps) 
 
   const sendMessage = async (message: string) => {
     if (!message.trim() || isLoading || !user || !firestore) return;
+    
+    const now = Date.now();
+    if (now - lastSentAtRef.current < COOLDOWN_MS) {
+      toast({ title: 'Please wait', description: 'Sending too fast — give the AI a moment.', variant: 'destructive' });
+      return;
+    }
+    lastSentAtRef.current = now;
 
     setUserInput('');
     setIsLoading(true);
@@ -172,6 +210,59 @@ export function Chatbot({ isPopup = false, onClose, onMinimize }: ChatbotProps) 
       return part;
     });
   };
+
+  const formatRelTime = (date: Date | null | undefined) => {
+    if (!date) return '';
+    const diff = Date.now() - date.getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'just now';
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  };
+
+  const messageList = useMemo(() => history.map((msg, i) => (
+    <motion.div 
+      key={i} 
+      initial={{ opacity: 0, y: 15, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.35, ease: "easeOut" }}
+      className={cn("flex gap-3 md:gap-4 group", msg.role === 'user' ? "flex-row-reverse" : "flex-row")}
+    >
+      {/* Avatars */}
+      <div className="shrink-0 pt-1">
+          {msg.role === 'assistant' ? (
+              <div className="h-8 w-8 md:h-9 md:w-9 rounded-full bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border border-cyan-500/20 flex items-center justify-center backdrop-blur-md shadow-lg">
+                  <Bot size={14} className="md:size-[16px] text-cyan-400"/>
+              </div>
+          ) : (
+              <div className="h-8 w-8 md:h-9 md:w-9 rounded-full bg-gradient-to-br from-indigo-500 to-blue-600 border border-indigo-400/30 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                  <User size={14} className="md:size-[16px] text-white"/>
+              </div>
+          )}
+      </div>
+      
+      {/* Message Bubbles */}
+      <div className={cn("flex flex-col gap-1", msg.role === 'user' ? 'items-end' : 'items-start')}>
+        <div className={cn(
+          "max-w-[88%] md:max-w-[75%] rounded-[1.25rem] px-4 py-3 md:px-5 md:py-3.5 text-sm leading-relaxed shadow-sm transition-all duration-300",
+          msg.role === 'assistant' 
+              ? "bg-white/5 hover:bg-white/10 border border-white/5 text-foreground rounded-tl-sm" 
+              : "bg-gradient-to-br from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-600/10 rounded-tr-sm border border-indigo-500/50"
+        )}>
+          <div className="whitespace-pre-wrap tracking-wide font-light">
+            {formatMessage(msg.content)}
+          </div>
+        </div>
+        {msg.createdAt && (
+          <span className="text-[9px] text-muted-foreground/50 font-medium tracking-wide px-1">
+            {formatRelTime(msg.createdAt)}
+          </span>
+        )}
+      </div>
+    </motion.div>
+  )), [history]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const ChatHeader = () => (
     <div className="relative border-b border-white/5 px-6 py-4 flex flex-row items-center justify-between z-20 bg-background/50 backdrop-blur-2xl shrink-0">
@@ -240,40 +331,7 @@ export function Chatbot({ isPopup = false, onClose, onMinimize }: ChatbotProps) 
         <ScrollArea className="flex-1 w-full h-full">
           <div className="space-y-6 max-w-4xl mx-auto px-4 py-6 md:px-8 md:py-8">
             <AnimatePresence initial={false}>
-            {history.map((msg, i) => (
-              <motion.div 
-                key={i} 
-                initial={{ opacity: 0, y: 15, scale: 0.98 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ duration: 0.35, ease: "easeOut" }}
-                className={cn("flex gap-3 md:gap-4 group", msg.role === 'user' ? "flex-row-reverse" : "flex-row")}
-              >
-                {/* Avatars */}
-                <div className="shrink-0 pt-1">
-                    {msg.role === 'assistant' ? (
-                        <div className="h-8 w-8 md:h-9 md:w-9 rounded-full bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border border-cyan-500/20 flex items-center justify-center backdrop-blur-md shadow-lg">
-                            <Bot size={14} className="md:size-[16px] text-cyan-400"/>
-                        </div>
-                    ) : (
-                        <div className="h-8 w-8 md:h-9 md:w-9 rounded-full bg-gradient-to-br from-indigo-500 to-blue-600 border border-indigo-400/30 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-                            <User size={14} className="md:size-[16px] text-white"/>
-                        </div>
-                    )}
-                </div>
-                
-                {/* Message Bubbles */}
-                <div className={cn(
-                    "max-w-[88%] md:max-w-[75%] rounded-[1.25rem] px-4 py-3 md:px-5 md:py-3.5 text-sm leading-relaxed shadow-sm transition-all duration-300",
-                    msg.role === 'assistant' 
-                        ? "bg-white/5 hover:bg-white/10 border border-white/5 text-foreground rounded-tl-sm" 
-                        : "bg-gradient-to-br from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-600/10 rounded-tr-sm border border-indigo-500/50"
-                )}>
-                  <div className="whitespace-pre-wrap tracking-wide font-light">
-                    {formatMessage(msg.content)}
-                  </div>
-                </div>
-              </motion.div>
-            ))}
+            {messageList}
             </AnimatePresence>
             
              {history.length === 1 && !isLoading && (
@@ -348,6 +406,19 @@ export function Chatbot({ isPopup = false, onClose, onMinimize }: ChatbotProps) 
                     </div>
                 </div>
                 
+                <button
+                    type="button"
+                    onClick={toggleVoice}
+                    className={cn(
+                        "flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-all border",
+                        isListening
+                            ? "bg-primary text-white border-primary animate-pulse"
+                            : "glass-button border-primary/20 text-muted-foreground hover:text-primary"
+                    )}
+                    aria-label="Voice input"
+                >
+                    <Mic className="w-4 h-4" />
+                </button>
                 <Button 
                     type="submit" 
                     size="icon" 
