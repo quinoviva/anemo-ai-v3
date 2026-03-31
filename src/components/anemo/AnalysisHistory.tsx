@@ -295,7 +295,7 @@ export function AnalysisHistory() {
                     if (riskFilter === 'moderate' && (score <= 50 || score > 75)) return false;
                     if (riskFilter === 'low' && score > 50) return false;
                 } else {
-                    const assessment = (item as CbcReport).overallAssessment?.toLowerCase() ?? '';
+                    const assessment = (item as CbcReport).summary?.toLowerCase() ?? '';
                     const isHigh = /high|severe|critical/.test(assessment);
                     const isModerate = /moderate|mild/.test(assessment);
                     if (riskFilter === 'high' && !isHigh) return false;
@@ -307,7 +307,7 @@ export function AnalysisHistory() {
             if (search.trim()) {
                 const q = search.trim().toLowerCase();
                 const dateStr = item.createdAt ? format(item.createdAt.toDate(), 'MMMM d, yyyy').toLowerCase() : '';
-                const riskStr = item.type === 'image' ? String((item as ImageReport).riskScore) : ((item as CbcReport).overallAssessment ?? '').toLowerCase();
+                const riskStr = item.type === 'image' ? String((item as ImageReport).riskScore) : ((item as CbcReport).summary ?? '').toLowerCase();
                 if (!dateStr.includes(q) && !riskStr.includes(q)) return false;
             }
 
@@ -511,7 +511,7 @@ export function AnalysisHistory() {
                 const cbc = item as CbcReport;
                 rows.push([
                     date, time, 'CBC Report',
-                    cbc.overallAssessment || '',
+                    cbc.summary || '',
                     '', '', '',
                     '',
                 ]);

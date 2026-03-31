@@ -133,8 +133,8 @@ export function LocalCbcAnalyzer({ onBack }: LocalCbcAnalyzerProps) {
             // The prompt specifically asked for "local ai will analyze".
             // If local AI fails/missing, we should probably inform the user.
             toast({ title: 'Using cloud AI analysis', description: 'Gemini Nano is unavailable — falling back to cloud AI.' });
-            const cloudResult = await runAnalyzeCbcReport({ reportText: text, patientInfo: { age: null, sex: null } });
-            analysisResult = { summary: cloudResult.overallAssessment, parameters: cloudResult.parameters };
+            const cloudResult = await runAnalyzeCbcReport({ photoDataUri: previewUrl! });
+            analysisResult = { summary: cloudResult.summary, parameters: cloudResult.parameters };
          }
 
          if (analysisResult.error) {
