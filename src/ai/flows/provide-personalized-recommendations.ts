@@ -78,6 +78,7 @@ const prompt = ai.definePrompt({
 -   Your entire response MUST be a valid JSON object that conforms to the output schema.
 -   Do NOT include any text, explanations, or markdown outside of the JSON structure.
 -   The 'recommendations' field must be a single string containing formatted bullet points (using '*' or '-').
+-   Respond ONLY with a valid JSON object matching the schema. Do not include markdown code fences, explanations, or extra text outside the JSON.
 `,
 });
 
@@ -88,7 +89,7 @@ const providePersonalizedRecommendationsFlow = ai.defineFlow(
     outputSchema: PersonalizedRecommendationsOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
+    const {output} = await prompt(input, { config: { temperature: 0.2 } });
     return output!;
   }
 );

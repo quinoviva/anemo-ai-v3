@@ -130,7 +130,7 @@ export default function DashboardPage() {
     if (!user || !firestore) return null;
     return doc(firestore, 'users', user.uid);
   }, [user, firestore]);
-  const { data: userData } = useDoc(userDocRef);
+  const { data: userData, isLoading: isUserDataLoading } = useDoc(userDocRef);
 
   // Effects
   useEffect(() => {
@@ -314,12 +314,16 @@ export default function DashboardPage() {
           </motion.div>
 
           <motion.div variants={itemVariants}>
-            <div className="text-right hidden md:block">
-              <p className="text-sm font-bold uppercase tracking-widest text-muted-foreground">System Status</p>
-              <div className="flex items-center justify-end gap-2 mt-2">
-                <div className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_15px_theme(colors.emerald.500)] animate-pulse" />
-                <span className="text-sm font-medium tracking-tight">Active</span>
+            <div className="text-right hidden md:flex flex-col items-end gap-1">
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">Scan Streak</p>
+              <div className="flex items-center justify-end gap-2">
+                <Flame className="w-4 h-4 text-emerald-500" />
+                <span className="text-2xl font-thin tracking-tighter text-foreground leading-none">{scanStreak}</span>
+                <span className="text-base">{scanStreak >= 7 ? '🔥' : scanStreak >= 3 ? '⚡' : '💪'}</span>
               </div>
+              <p className="text-[9px] text-muted-foreground uppercase tracking-widest">
+                {scanStreak === 0 ? 'Start today' : `${scanStreak} day${scanStreak !== 1 ? 's' : ''} strong`}
+              </p>
             </div>
           </motion.div>
         </div>
@@ -604,29 +608,42 @@ export default function DashboardPage() {
           </BentoCard>
 
           {/* 5. Hemoglobin Trend Chart */}
-          {hemoglobinData.length > 0 && (
-            <BentoCard
-              colSpan="col-span-1 md:col-span-4 lg:col-span-6"
-              className="p-10 bg-gradient-to-br from-primary/10 via-background to-background border-primary/20 shadow-[0_20px_60px_-15px_rgba(255,0,68,0.1)]"
-            >
-              <div className="relative z-10 flex items-center justify-between mb-6">
-                <div className="space-y-1">
-                  <h3 className="text-xs font-bold uppercase tracking-[0.3em] text-primary/70">CBC History</h3>
-                  <p className="text-2xl font-light tracking-tight">Hemoglobin <span className="font-medium text-primary italic">Trend</span></p>
-                </div>
+          <BentoCard
+            colSpan="col-span-1 md:col-span-4 lg:col-span-6"
+            className="p-10 bg-gradient-to-br from-primary/10 via-background to-background border-primary/20 shadow-[0_20px_60px_-15px_rgba(255,0,68,0.1)]"
+          >
+            <div className="relative z-10 flex items-center justify-between mb-6">
+              <div className="space-y-1">
+                <h3 className="text-xs font-bold uppercase tracking-[0.3em] text-primary/70">CBC History</h3>
+                <p className="text-2xl font-light tracking-tight">Hemoglobin <span className="font-medium text-primary italic">Trend</span></p>
+              </div>
+              {hemoglobinData.length > 0 && (
                 <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary/5 border border-primary/10 text-xs font-bold uppercase tracking-widest text-primary/70">
                   <Activity className="h-3.5 w-3.5" />
                   Last {hemoglobinData.length} Report{hemoglobinData.length !== 1 ? 's' : ''}
                 </div>
-              </div>
+              )}
+            </div>
+            {hemoglobinData.length > 0 ? (
               <div className="h-[180px] w-full">
                 <AreaChartWrapper data={hemoglobinData} />
               </div>
-            </BentoCard>
-          )}
+            ) : (
+              <div className="h-[180px] w-full flex flex-col items-center justify-center gap-4 opacity-50">
+                <Activity className="h-12 w-12 text-primary/40" />
+                <div className="text-center space-y-1">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">No CBC reports yet</p>
+                  <p className="text-xs text-muted-foreground font-light">Upload a lab report to track your hemoglobin over time</p>
+                </div>
+                <Link href="/dashboard/analysis/cbc" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-widest hover:bg-primary/20 transition-colors">
+                  Upload CBC Report
+                </Link>
+              </div>
+            )}
+          </BentoCard>
 
           {/* 6. Cycle Tracker (Conditional) - Rose Theme */}
-          {userSex === 'Female' && (
+          {!isUserDataLoading && userSex === 'Female' && (
             <BentoCard
               colSpan="col-span-1 md:col-span-4 lg:col-span-6"
               className="p-12 bg-gradient-to-r from-rose-500/20 via-transparent to-transparent border border-rose-500/20 shadow-[0_20px_60px_-15px_rgba(244,63,94,0.1)]"
@@ -720,68 +737,7 @@ export default function DashboardPage() {
             </div>
           </BentoCard>
 
-          {/* Scan Streak Widget */}
-          <BentoCard
-            colSpan="col-span-1 md:col-span-2 lg:col-span-2"
-            className="p-10 justify-between bg-gradient-to-br from-emerald-600/20 via-background to-background border-emerald-500/20 group"
-          >
-            <div className="flex items-center gap-4 mb-6">
-              <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
-                <Flame className="w-5 h-5 text-emerald-500" />
-              </div>
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500">Scan Streak</p>
-                <p className="text-[9px] text-muted-foreground uppercase tracking-widest">Consecutive days</p>
-              </div>
-            </div>
-            <div className="flex items-end gap-3">
-              <span className="text-7xl font-thin tracking-tighter text-foreground leading-none">
-                {scanStreak}
-              </span>
-              <div className="pb-2 text-3xl">{scanStreak >= 7 ? '🔥' : scanStreak >= 3 ? '⚡' : '💪'}</div>
-            </div>
-            <p className="text-xs text-muted-foreground mt-4">
-              {scanStreak === 0 ? 'Scan today to start your streak!' : scanStreak === 1 ? 'Great start — scan tomorrow to continue!' : `Keep going! ${scanStreak} day${scanStreak !== 1 ? 's' : ''} strong.`}
-            </p>
-          </BentoCard>
-
-          {/* Weekly Summary */}
-          {weeklySummary && (
-            <BentoCard
-              colSpan="col-span-1 md:col-span-2 lg:col-span-2"
-              className="p-8 justify-between bg-gradient-to-br from-indigo-600/20 via-background to-background border-indigo-500/20 group"
-            >
-              <div className="flex items-center gap-4 mb-4">
-                <div className="p-3 rounded-2xl bg-indigo-500/10 border border-indigo-500/20">
-                  <TrendingUp className="w-5 h-5 text-indigo-400" />
-                </div>
-                <div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400">This Week</p>
-                  <p className="text-[9px] text-muted-foreground uppercase tracking-widest">Health Summary</p>
-                </div>
-                {weeklySummary.improved && (
-                  <span className="ml-auto text-[9px] px-2 py-1 rounded-full bg-emerald-500/20 text-emerald-400 font-black uppercase tracking-widest">↑ Improved</span>
-                )}
-              </div>
-              <div className="grid grid-cols-3 gap-3 my-4">
-                <div className="text-center">
-                  <p className="text-3xl font-thin text-foreground">{weeklySummary.scans}</p>
-                  <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mt-1">Scans</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-3xl font-thin text-foreground">{weeklySummary.avgRisk}</p>
-                  <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mt-1">Avg Risk</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-3xl font-thin text-foreground">{weeklySummary.avgHgb ?? '—'}</p>
-                  <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mt-1">Avg Hgb</p>
-                </div>
-              </div>
-              <Link href="/dashboard/history" className="text-[9px] font-black uppercase tracking-widest text-indigo-400 hover:underline">
-                View Full History →
-              </Link>
-            </BentoCard>
-          )}
+          {/* Weekly Summary - REMOVED */}
 
         </div>
 

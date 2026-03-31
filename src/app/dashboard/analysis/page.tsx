@@ -1,31 +1,18 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Camera,
   FileText,
-  Sparkles,
-  CheckCircle2,
   Zap,
   ShieldCheck,
-  ArrowRight,
-  ArrowLeft,
   Activity,
   Layers,
   Cpu,
   ChevronRight,
-  Link as LucideLink,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import dynamic from 'next/dynamic';
-
-const LocalCbcAnalyzer = dynamic(
-  () => import('@/components/anemo/LocalCbcAnalyzer').then(mod => mod.LocalCbcAnalyzer),
-  { ssr: false }
-);
 
 // --- Animation Variants (Matching Dashboard) ---
 const containerVariants = {
@@ -53,47 +40,17 @@ const itemVariants = {
 };
 
 export default function AnalysisPage() {
-  const [analysisMode, setAnalysisMode] = useState<'select' | 'local-cbc'>('select');
-
-  if (analysisMode === 'local-cbc') {
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        className="min-h-screen pb-20 px-4 md:px-0"
-      >
-        <div className="mb-8">
-          <Button
-            variant="ghost"
-            onClick={() => setAnalysisMode('select')}
-            className="group text-muted-foreground hover:text-foreground transition-colors gap-3 uppercase text-[10px] font-black tracking-[0.3em] h-12 rounded-full"
-          >
-            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-            Return to Hub
-          </Button>
-        </div>
-        <div className="w-full max-w-full overflow-hidden">
-          <LocalCbcAnalyzer onBack={() => setAnalysisMode('select')} />
-        </div>
-      </motion.div>
-    );
-  }
-
   return (
     <div className="relative w-full min-h-[80vh] flex flex-col items-center justify-start py-6 px-4 md:px-0 overflow-hidden">
-
       <AnimatePresence mode="wait">
-        {analysisMode === 'select' && (
-          <motion.div
-            key="selection"
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, amount: 0.1 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="w-full space-y-12 md:space-y-16"
-          >
+        <motion.div
+          key="selection"
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, amount: 0.1 }}
+          className="w-full space-y-12 md:space-y-16"
+        >
             {/* Header Section */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
               <motion.div variants={itemVariants} className="space-y-4 w-full md:w-auto">
@@ -173,10 +130,8 @@ export default function AnalysisPage() {
               </Link>
 
               {/* Option 2: Quick CBC Analysis */}
-              <motion.div
-                variants={itemVariants}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => setAnalysisMode('local-cbc')}
+              <Link
+                href="/dashboard/analysis/cbc"
                 className="group relative overflow-hidden rounded-[2.5rem] glass-panel glass-panel-hover flex flex-col p-8 md:p-12 cursor-pointer min-h-[450px] md:min-h-[550px] justify-between border-blue-500/20 shadow-[0_20px_60px_-15px_rgba(37,99,235,0.1)]"
               >
                 {/* Radial Blur Glow */}
@@ -217,14 +172,14 @@ export default function AnalysisPage() {
                   </div>
                 </div>
 
-                <Button className="relative z-10 w-full justify-between group/btn bg-blue-600 hover:bg-blue-500 text-white rounded-3xl h-16 md:h-20 transition-all px-8 md:px-10 shadow-2xl shadow-blue-500/20 overflow-hidden mt-8">
+                <div className="relative z-10 w-full flex items-center justify-between group/btn bg-blue-600 hover:bg-blue-500 text-white rounded-3xl h-16 md:h-20 transition-all px-8 md:px-10 shadow-2xl shadow-blue-500/20 overflow-hidden mt-8">
                   <span className="text-xs md:text-sm font-black uppercase tracking-[0.3em] relative z-10">Upload Report</span>
                   <div className="p-2 md:p-2.5 rounded-full bg-white/20 border border-white/20 group-hover/btn:bg-white group-hover/btn:text-blue-600 transition-all relative z-10">
                     <ChevronRight className="h-4 w-4 md:h-5 md:w-5" />
                   </div>
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-[200%] group-hover/btn:animate-[shimmer_2s_infinite] pointer-events-none" />
-                </Button>
-              </motion.div>
+                </div>
+              </Link>
 
             </div>
 
@@ -239,7 +194,6 @@ export default function AnalysisPage() {
               </div>
             </div>
           </motion.div>
-        )}
       </AnimatePresence>
     </div>
   );

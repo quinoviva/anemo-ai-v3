@@ -333,6 +333,19 @@ export function AnalysisHistory() {
         return 'default';
     }, []);
 
+    const getSeverityColors = useCallback((anemiaType: string) => {
+        const lower = (anemiaType || '').toLowerCase();
+        if (lower.includes('none') || lower.includes('normal'))
+            return { badge: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30', dot: 'bg-emerald-400' };
+        if (lower.includes('mild'))
+            return { badge: 'bg-yellow-500/15 text-yellow-400 border-yellow-500/30', dot: 'bg-yellow-400' };
+        if (lower.includes('moderate'))
+            return { badge: 'bg-orange-500/15 text-orange-400 border-orange-500/30', dot: 'bg-orange-400' };
+        if (lower.includes('severe') || lower.includes('critical'))
+            return { badge: 'bg-red-500/15 text-red-400 border-red-500/30', dot: 'bg-red-400' };
+        return { badge: 'bg-primary/15 text-primary border-primary/30', dot: 'bg-primary' };
+    }, []);
+
     const handleSaveNote = async (reportId: string, type: 'image' | 'cbc') => {
         if (!user || !firestore) return;
         const collectionName = type === 'image' ? 'imageAnalyses' : 'labReports';
@@ -650,175 +663,199 @@ export function AnalysisHistory() {
         );
     }
 
-    const renderHistoryRow = (item: HistoryItem) => {
+    const renderHistoryCard = (item: HistoryItem) => {
         const isImage = item.type === 'image';
+        const date = toDate(item.createdAt);
+        const severityColors = isImage
+            ? getSeverityColors((item as ImageReport).anemiaType || '')
+            : { badge: 'bg-blue-500/15 text-blue-400 border-blue-500/30', dot: 'bg-blue-400' };
+        const hgbMatch = isImage
+            ? (item as ImageReport).imageAnalysisSummary?.match(/(\d+\.?\d*)\s*g\/dL/i)
+            : null;
 
         return (
-            <motion.tr
+            <motion.div
                 key={item.id}
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 12 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                className="group border-b border-white/5 hover:bg-white/[0.03] transition-all duration-300"
+                className="glass-panel rounded-3xl p-5 flex flex-col gap-4 relative overflow-hidden group border border-white/5 hover:border-primary/20 transition-all duration-300"
             >
-                <TableCell className="py-4 px-4 md:py-8 md:px-8">
-                    <div className="flex items-center gap-6">
-                        <input
-                          type="checkbox"
-                          checked={selectedIds.includes(item.id)}
-                          onChange={() => toggleSelect(item.id)}
-                          disabled={!isImage}
-                          className="w-4 h-4 rounded accent-primary cursor-pointer disabled:opacity-20 flex-shrink-0"
-                          title={isImage ? 'Select for comparison' : 'Only image scans can be compared'}
-                        />
-                        <div className="w-12 h-12 rounded-2xl bg-zinc-900 border border-white/10 flex items-center justify-center group-hover:border-primary/30 transition-colors">
-                            <Calendar className="w-5 h-5 text-white/40 group-hover:text-primary/60 transition-colors" />
+                {/* Top row: date + type badge */}
+                <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:border-primary/30 transition-colors flex-shrink-0">
+                            <Calendar className="w-4 h-4 text-white/40" />
                         </div>
-                        <div className="flex flex-col space-y-1">
-                            <span className="text-base font-bold text-white tracking-tight">{toDate(item.createdAt) ? format(toDate(item.createdAt)!, 'MMMM d, yyyy') : 'N/A'}</span>
-                            <span className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em]">{toDate(item.createdAt) ? format(toDate(item.createdAt)!, 'h:mm a') : ''}</span>
+                        <div>
+                            <p className="text-sm font-bold text-foreground leading-tight">
+                                {date ? format(date, 'MMM d, yyyy') : 'N/A'}
+                            </p>
+                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
+                                {date ? format(date, 'h:mm a') : ''}
+                            </p>
                         </div>
                     </div>
-                </TableCell>
-                <TableCell>
-                    <div className="flex items-center gap-4">
-                        <div className={cn(
-                            "w-3 h-3 rounded-full",
-                            isImage
-                                ? "bg-primary shadow-[0_0_15px_rgba(var(--primary),0.6)]"
-                                : "bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.6)]"
-                        )} />
-                        <span className="text-[11px] font-black uppercase tracking-[0.3em] text-white/80">
-                            {isImage ? 'AI Neural Scan' : 'Clinical Data'}
+                    <div className="flex items-center gap-2">
+                        <input
+                            type="checkbox"
+                            checked={selectedIds.includes(item.id)}
+                            onChange={() => toggleSelect(item.id)}
+                            disabled={!isImage}
+                            className="w-3.5 h-3.5 rounded accent-primary cursor-pointer disabled:opacity-20 flex-shrink-0"
+                            title={isImage ? 'Select for comparison' : 'Only image scans can be compared'}
+                        />
+                        <span className={cn(
+                            "text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full border",
+                            isImage ? 'bg-primary/10 text-primary border-primary/20' : 'bg-blue-500/10 text-blue-400 border-blue-500/20'
+                        )}>
+                            {isImage ? 'Image Scan' : 'CBC'}
                         </span>
                     </div>
-                </TableCell>
-                <TableCell>
+                </div>
+
+                {/* Middle: severity badge + hgb (image) or summary (cbc) */}
+                <div className="flex flex-col gap-2">
                     {isImage ? (
-                        <div className="flex items-center gap-6">
-                            <Badge variant={getBadgeVariant((item as ImageReport).riskScore)} className="rounded-xl font-black px-4 py-1.5 text-[10px] tracking-[0.2em] uppercase border-none">
-                                Risk Index: {(item as ImageReport).riskScore}
-                            </Badge>
-                            <span className="text-sm font-medium text-white/40 truncate max-w-[200px] hidden lg:inline-block italic">
-                                "{(item as ImageReport).imageAnalysisSummary.substring(0, 50)}..."
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <span className={cn(
+                                "inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full border",
+                                severityColors.badge
+                            )}>
+                                <span className={cn("w-1.5 h-1.5 rounded-full", severityColors.dot)} />
+                                {(item as ImageReport).anemiaType || 'Unknown'}
+                            </span>
+                            {hgbMatch && (
+                                <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400">
+                                    Hgb {hgbMatch[0]}
+                                </span>
+                            )}
+                            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-auto">
+                                Risk {(item as ImageReport).riskScore}/100
                             </span>
                         </div>
                     ) : (
-                        <div className="flex items-center gap-4">
-                            <div className="p-2 rounded-lg bg-blue-500/10 border border-blue-500/20">
-                                <FileText className="w-4 h-4 text-blue-400" />
-                            </div>
-                            <span className="text-sm font-medium text-white/60 truncate max-w-[300px]">
-                                {(item as CbcReport).summary}
-                            </span>
-                        </div>
+                        <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+                            {(item as CbcReport).summary}
+                        </p>
                     )}
-                </TableCell>
-                <TableCell className="text-right px-4 md:px-8">
-                    <div className="flex items-center justify-center gap-2 md:gap-3">
-                        {!isImage && (
+                </div>
+
+                {/* Notes preview */}
+                {(item as any).notes && (
+                    <p className="text-[10px] text-muted-foreground/60 italic px-3 py-2 rounded-xl bg-white/[0.02] border border-white/5 truncate">
+                        &ldquo;{(item as any).notes}&rdquo;
+                    </p>
+                )}
+
+                {/* Action buttons */}
+                <div className="flex items-center gap-2 pt-2 border-t border-white/5">
+                    {/* View */}
+                    <Button
+                        variant="ghost"
+                        className="flex-1 h-9 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:text-white transition-all flex items-center justify-center gap-1.5 text-[10px] font-black uppercase tracking-widest"
+                        onClick={() => setReportToView(item)}
+                    >
+                        <Eye className="h-3.5 w-3.5 flex-shrink-0" />
+                        <span className="hidden sm:inline">View</span>
+                    </Button>
+
+                    {/* PDF */}
+                    <Button
+                        variant="ghost"
+                        className="flex-1 h-9 rounded-2xl bg-emerald-500/5 border border-emerald-500/10 hover:bg-emerald-500/15 hover:text-emerald-400 transition-all flex items-center justify-center gap-1.5 text-[10px] font-black uppercase tracking-widest"
+                        onClick={() => handleDownloadPDF(item)}
+                    >
+                        <Download className="h-3.5 w-3.5 flex-shrink-0" />
+                        <span className="hidden sm:inline">PDF</span>
+                    </Button>
+
+                    {/* CBC cross-reference */}
+                    {!isImage && (
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-9 w-9 rounded-2xl bg-blue-500/5 border border-blue-500/10 hover:bg-blue-500/20 hover:text-blue-400 transition-all"
+                            onClick={() => {
+                                setValidationCbcReport(item as CbcReport);
+                                setIsValidationDialogOpen(true);
+                            }}
+                        >
+                            <ShieldCheck className="h-3.5 w-3.5" />
+                            <span className="sr-only">Cross-Reference</span>
+                        </Button>
+                    )}
+
+                    {/* Add/Edit Note */}
+                    {editingNoteId === item.id ? (
+                        <div className="flex items-center gap-1">
+                            <input
+                                autoFocus
+                                value={noteValue}
+                                onChange={e => setNoteValue(e.target.value)}
+                                onKeyDown={e => {
+                                    if (e.key === 'Enter') handleSaveNote(item.id, isImage ? 'image' : 'cbc');
+                                    if (e.key === 'Escape') { setEditingNoteId(null); setNoteValue(''); }
+                                }}
+                                placeholder="Add note…"
+                                className="h-9 w-28 px-3 rounded-2xl bg-white/5 border border-white/10 text-xs text-white/80 placeholder-white/20 outline-none focus:border-primary/40"
+                                maxLength={120}
+                            />
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-10 w-10 md:h-12 md:w-12 rounded-2xl bg-blue-500/5 border border-blue-500/10 hover:bg-blue-500/20 hover:text-blue-400 transition-all group/btn"
-                                onClick={() => {
-                                    setValidationCbcReport(item as CbcReport);
-                                    setIsValidationDialogOpen(true);
-                                }}
+                                className="h-9 w-9 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400"
+                                onClick={() => handleSaveNote(item.id, isImage ? 'image' : 'cbc')}
                             >
-                                <ShieldCheck className="h-4 w-4 md:h-5 md:w-5 group-hover/btn:scale-110 transition-transform" />
-                                <span className="sr-only">Cross-Reference</span>
+                                <Check className="h-3.5 w-3.5" />
                             </Button>
-                        )}
+                        </div>
+                    ) : (
                         <Button
-                            variant="ghost"
-                            className="h-10 md:h-12 px-3 md:px-6 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:text-white transition-all group/btn flex items-center gap-1.5 md:gap-2"
-                            onClick={() => setReportToView(item)}
-                        >
-                            <Eye className="h-4 w-4 flex-shrink-0" />
-                            <span className="hidden md:inline text-[10px] font-black uppercase tracking-widest">View</span>
-                            <ArrowUpRight className="hidden md:inline h-4 w-4 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />
-                        </Button>
-
-                        <Button
-                            variant="ghost"
-                            className="h-10 md:h-12 px-3 md:px-6 rounded-2xl bg-emerald-500/5 border border-emerald-500/10 hover:bg-emerald-500/20 hover:text-emerald-400 transition-all group/btn flex items-center gap-1.5 md:gap-2"
-                            onClick={() => handleDownloadPDF(item)}
-                        >
-                            <Download className="h-4 w-4 flex-shrink-0 group-hover/btn:scale-110 transition-transform" />
-                            <span className="hidden md:inline text-[10px] font-black uppercase tracking-widest">PDF</span>
-                        </Button>
-
-                        {/* Add/Edit Note */}
-                        {editingNoteId === item.id ? (
-                          <div className="flex items-center gap-2">
-                            <input
-                              autoFocus
-                              value={noteValue}
-                              onChange={e => setNoteValue(e.target.value)}
-                              onKeyDown={e => {
-                                if (e.key === 'Enter') handleSaveNote(item.id, isImage ? 'image' : 'cbc');
-                                if (e.key === 'Escape') { setEditingNoteId(null); setNoteValue(''); }
-                              }}
-                              placeholder="Add note…"
-                              className="h-10 w-36 px-3 rounded-2xl bg-white/5 border border-white/10 text-xs text-white/80 placeholder-white/20 outline-none focus:border-primary/40"
-                              maxLength={120}
-                            />
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-10 w-10 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400"
-                              onClick={() => handleSaveNote(item.id, isImage ? 'image' : 'cbc')}
-                            >
-                              <Check className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        ) : (
-                          <Button
                             variant="ghost"
                             size="icon"
                             title={(item as any).notes || 'Add note'}
-                            className="h-10 w-10 md:h-12 md:w-12 rounded-2xl glass-button border border-white/10 hover:border-primary/30 hover:text-primary transition-all"
+                            className="h-9 w-9 rounded-2xl glass-button border border-white/10 hover:border-primary/30 hover:text-primary transition-all"
                             onClick={() => { setEditingNoteId(item.id); setNoteValue((item as any).notes || ''); }}
-                          >
-                            <StickyNote className="h-4 w-4 md:h-5 md:w-5" />
-                          </Button>
-                        )}
+                        >
+                            <StickyNote className="h-3.5 w-3.5" />
+                        </Button>
+                    )}
 
-                        <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-10 w-10 md:h-12 md:w-12 rounded-2xl bg-red-500/5 border border-red-500/10 hover:bg-red-500/20 hover:text-red-400 transition-all group/btn"
+                    {/* Delete */}
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-9 w-9 rounded-2xl bg-red-500/5 border border-red-500/10 hover:bg-red-500/20 hover:text-red-400 transition-all"
+                            >
+                                <Trash2 className="h-3.5 w-3.5" />
+                                <span className="sr-only">Delete</span>
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent className="bg-[#0a0a0a] border-white/10 rounded-[3rem] p-12">
+                            <AlertDialogHeader className="space-y-4">
+                                <AlertDialogTitle className="text-4xl font-light tracking-tighter text-white uppercase">
+                                    Purge <span className="font-serif italic text-red-500">Record</span>?
+                                </AlertDialogTitle>
+                                <AlertDialogDescription className="text-white/40 text-lg font-light leading-relaxed">
+                                    This action is irreversible. The selected diagnostic intelligence will be permanently removed from your profile&apos;s historical evolution.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter className="mt-12 gap-4">
+                                <AlertDialogCancel className="h-14 px-8 rounded-2xl border-white/10 bg-white/5 hover:bg-white/10 text-white font-bold text-xs uppercase tracking-widest transition-all">CANCEL</AlertDialogCancel>
+                                <AlertDialogAction
+                                    onClick={() => handleDelete(item.id, isImage ? 'image' : 'cbc')}
+                                    className="h-14 px-10 bg-red-600 hover:bg-red-500 text-white font-black text-xs uppercase tracking-widest rounded-2xl shadow-xl shadow-red-600/20 transition-all"
                                 >
-                                    <Trash2 className="h-4 w-4 md:h-5 md:w-5 group-hover/btn:scale-110 transition-transform" />
-                                    <span className="sr-only">Purge</span>
-                                </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent className="bg-[#0a0a0a] border-white/10 rounded-[3rem] p-12">
-                                <AlertDialogHeader className="space-y-4">
-                                    <AlertDialogTitle className="text-4xl font-light tracking-tighter text-white uppercase">
-                                        Purge <span className="font-serif italic text-red-500">Record</span>?
-                                    </AlertDialogTitle>
-                                    <AlertDialogDescription className="text-white/40 text-lg font-light leading-relaxed">
-                                        This action is irreversible. The selected diagnostic intelligence will be permanently removed from your profile's historical evolution.
-                                    </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter className="mt-12 gap-4">
-                                    <AlertDialogCancel className="h-14 px-8 rounded-2xl border-white/10 bg-white/5 hover:bg-white/10 text-white font-bold text-xs uppercase tracking-widest transition-all">CANCEL</AlertDialogCancel>
-                                    <AlertDialogAction
-                                        onClick={() => handleDelete(item.id, isImage ? 'image' : 'cbc')}
-                                        className='h-14 px-10 bg-red-600 hover:bg-red-500 text-white font-black text-xs uppercase tracking-widest rounded-2xl shadow-xl shadow-red-600/20 transition-all'
-                                    >
-                                        PURGE INTELLIGENCE
-                                    </AlertDialogAction>
-                                </AlertDialogFooter>
-                            </AlertDialogContent>
-                        </AlertDialog>
-                    </div>
-                </TableCell>
-            </motion.tr>
+                                    PURGE INTELLIGENCE
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                </div>
+            </motion.div>
         );
     }
 
@@ -1157,20 +1194,10 @@ export function AnalysisHistory() {
                         </div>
 
                         {viewMode === 'table' ? (
-                        <div className="overflow-x-auto">
-                            <Table>
-                                <TableHeader>
-                                    <TableRow className="border-b border-white/5 hover:bg-transparent h-20">
-                                        <TableHead className="text-[11px] font-black uppercase tracking-[0.4em] text-white/20 px-4 md:px-12">Date</TableHead>
-                                        <TableHead className="text-[11px] font-black uppercase tracking-[0.4em] text-white/20">Sequence Mode</TableHead>
-                                        <TableHead className="text-[11px] font-black uppercase tracking-[0.4em] text-white/20">Diagnostic</TableHead>
-                                        <TableHead className="text-right text-[11px] font-black uppercase tracking-[0.4em] text-white/20 px-4 md:px-12">Action</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {filteredHistory.map(renderHistoryRow)}
-                                </TableBody>
-                            </Table>
+                        <div className="p-4 md:p-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {filteredHistory.map(item => renderHistoryCard(item))}
+                            </div>
                         </div>
                         ) : (
                           <div className="p-6 md:p-8">

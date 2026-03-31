@@ -52,7 +52,7 @@ const generateImageDescriptionFlow = ai.defineFlow(
     const {output} = await ai.generate({
       model: gemini15Flash,
       config: {
-        temperature: 0.0,
+        temperature: 0.2,
       },
       prompt: [
         {
@@ -82,7 +82,9 @@ Examine the following specific biomarkers for anemia:
 *   **description**: Technical observation (if valid) OR an extremely concise, direct error message (if invalid).
 *   **analysisResult**: Choose ONE: "ANEMIA POSITIVE (Significant Pallor Detected)", "ANEMIA NEGATIVE (Healthy Vascular Presentation)", or "INCONCLUSIVE (Ambiguous Spectral Features)".
 *   **confidenceScore**: 0-100 (Be conservative).
-*   **recommendations**: A precise next step (e.g., "Confirm with CBC lab report for clinical validation.").`
+*   **recommendations**: A precise next step (e.g., "Confirm with CBC lab report for clinical validation.").
+
+Respond ONLY with a valid JSON object matching the schema. Do not include markdown code fences, explanations, or extra text outside the JSON.`
         },
         {
           media: {

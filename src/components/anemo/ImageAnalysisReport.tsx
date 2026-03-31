@@ -210,6 +210,19 @@ export function ImageAnalysisReport({ analyses, labReport, onReset }: ImageAnaly
       return 'primary';
   };
 
+  const getSeverityColors = (anemiaType: string) => {
+    const lower = (anemiaType || '').toLowerCase();
+    if (lower.includes('none') || lower.includes('normal'))
+      return { badge: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30', borderL: 'border-l-emerald-500', text: 'text-emerald-400', dot: 'bg-emerald-400', bar: 'bg-emerald-500/40' };
+    if (lower.includes('mild'))
+      return { badge: 'bg-yellow-500/15 text-yellow-400 border-yellow-500/30', borderL: 'border-l-yellow-500', text: 'text-yellow-400', dot: 'bg-yellow-400', bar: 'bg-yellow-500/40' };
+    if (lower.includes('moderate'))
+      return { badge: 'bg-orange-500/15 text-orange-400 border-orange-500/30', borderL: 'border-l-orange-500', text: 'text-orange-400', dot: 'bg-orange-400', bar: 'bg-orange-500/40' };
+    if (lower.includes('severe') || lower.includes('critical'))
+      return { badge: 'bg-red-500/15 text-red-400 border-red-500/30', borderL: 'border-l-red-500', text: 'text-red-400', dot: 'bg-red-400', bar: 'bg-red-500/40' };
+    return { badge: 'bg-primary/15 text-primary border-primary/30', borderL: 'border-l-primary', text: 'text-primary', dot: 'bg-primary', bar: 'bg-primary/40' };
+  };
+
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center p-12 md:p-24 space-y-12 min-h-[600px] relative overflow-hidden">
@@ -252,8 +265,8 @@ export function ImageAnalysisReport({ analyses, labReport, onReset }: ImageAnaly
             <Button onClick={handleShare} variant="outline" className="flex-1 sm:flex-none h-14 rounded-full px-8 text-xs font-bold tracking-widest uppercase border-white/10 hover:bg-white/5 transition-all shadow-md">
                 <Share2 className="w-4 h-4 mr-3" /> Share
             </Button>
-            <Button onClick={handleDownloadPdf} disabled={isDownloading} className="flex-1 sm:flex-none h-14 rounded-full px-8 bg-primary text-primary-foreground text-xs font-bold tracking-widest uppercase hover:scale-[1.03] active:scale-95 transition-all shadow-xl group">
-                {isDownloading ? <Loader2 className="w-5 h-5 mr-3 animate-spin" /> : <Download className="w-5 h-5 mr-3 group-hover:-translate-y-1 transition-transform" />} Export
+            <Button onClick={handleDownloadPdf} disabled={isDownloading} className="flex-1 sm:flex-none h-14 rounded-full px-8 bg-primary text-primary-foreground text-xs font-bold tracking-widest uppercase hover:scale-[1.03] active:scale-95 transition-all shadow-xl shadow-primary/20 ring-1 ring-primary/40 group">
+                {isDownloading ? <Loader2 className="w-5 h-5 mr-3 animate-spin" /> : <Download className="w-5 h-5 mr-3 group-hover:-translate-y-1 transition-transform" />} Export PDF
             </Button>
         </div>
       </div>
@@ -286,7 +299,10 @@ export function ImageAnalysisReport({ analyses, labReport, onReset }: ImageAnaly
           {/* Primary Assessment Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 relative z-10">
               {/* Verdict Frame */}
-              <div className="lg:col-span-8 p-6 md:p-12 lg:p-16 xl:p-20 rounded-[3rem] bg-white/[0.02] border border-white/5 flex flex-col justify-between relative overflow-hidden group shadow-lg">
+              <div className={cn(
+                "lg:col-span-8 p-6 md:p-12 lg:p-16 xl:p-20 rounded-[3rem] bg-white/[0.02] border border-white/5 border-l-[6px] flex flex-col justify-between relative overflow-hidden group shadow-lg",
+                getSeverityColors(report.anemiaType).borderL
+              )}>
                   <div className="absolute right-0 top-0 opacity-5 scale-150 translate-x-1/4 -translate-y-1/4">
                      <Dna className="w-96 h-96 text-primary" />
                   </div>
@@ -295,15 +311,38 @@ export function ImageAnalysisReport({ analyses, labReport, onReset }: ImageAnaly
                       <span className="text-xs font-bold text-primary/80 uppercase tracking-widest leading-none">Diagnostic Verdict</span>
                   </div>
                   <div className="relative z-10">
-                      <div className="flex items-center gap-4 flex-wrap">
-                        <h3 className="text-4xl md:text-5xl lg:text-7xl font-black text-foreground tracking-tighter leading-[0.9] text-balance">
-                           {report.anemiaType.split(' ')[0]} <span className="italic-font text-primary">{report.anemiaType.split(' ').slice(1).join(' ')}</span>
-                        </h3>
+                      {/* Severity badge */}
+                      <div className="mb-6 flex items-center gap-3 flex-wrap">
+                        <span className={cn(
+                          "inline-flex items-center gap-2 px-4 py-1.5 rounded-full border text-[10px] font-black uppercase tracking-[0.25em]",
+                          getSeverityColors(report.anemiaType).badge
+                        )}>
+                          <span className={cn("w-2 h-2 rounded-full", getSeverityColors(report.anemiaType).dot)} />
+                          {report.anemiaType}
+                        </span>
                         {/moderate|severe|critical/i.test(report.anemiaType) && (
                           <span className="animate-pulse inline-flex h-3 w-3 rounded-full bg-primary shadow-[0_0_12px_rgba(255,0,68,0.8)]" />
                         )}
                       </div>
-                      <div className="h-1.5 w-32 bg-primary/40 rounded-full mt-6" />
+                      <div className="flex items-end gap-4 flex-wrap">
+                        <h3 className="text-4xl md:text-5xl lg:text-7xl font-black text-foreground tracking-tighter leading-[0.9] text-balance">
+                           {report.anemiaType.split(' ')[0]} <span className="italic-font text-primary">{report.anemiaType.split(' ').slice(1).join(' ')}</span>
+                        </h3>
+                      </div>
+                      {/* Hemoglobin display if available */}
+                      {report.imageAnalysisSummary && (() => {
+                        const match = report.imageAnalysisSummary.match(/(\d+\.?\d*)\s*g\/dL/i);
+                        if (!match) return null;
+                        return (
+                          <div className="mt-8 flex items-baseline gap-3">
+                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">Est. Hemoglobin</span>
+                            <span className={cn("text-3xl font-black tracking-tighter", getSeverityColors(report.anemiaType).text)}>
+                              {match[0]}
+                            </span>
+                          </div>
+                        );
+                      })()}
+                      <div className={cn("h-1.5 w-32 rounded-full mt-6", getSeverityColors(report.anemiaType).bar)} />
                   </div>
               </div>
               
@@ -332,19 +371,28 @@ export function ImageAnalysisReport({ analyses, labReport, onReset }: ImageAnaly
                          </p>
                        )}
                   </div>
-                  {/* Copy Hgb value */}
-                  {report.imageAnalysisSummary && /\d+\.?\d*\s*g\/dL/i.test(report.imageAnalysisSummary) && (() => {
+                  {/* Hgb prominent display */}
+                  {report.imageAnalysisSummary && (() => {
                     const match = report.imageAnalysisSummary.match(/(\d+\.?\d*)\s*g\/dL/i);
                     if (!match) return null;
                     return (
-                      <button
-                        onClick={() => { navigator.clipboard.writeText(match[0]); }}
-                        className="flex items-center gap-2 px-4 py-2 rounded-full glass-button border border-amber-500/20 text-[10px] font-black uppercase tracking-widest text-amber-500 hover:bg-amber-500/10 transition-all relative z-10"
-                        title="Copy Hgb value"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
-                        Hgb: {match[0]}
-                      </button>
+                      <div className="flex flex-col items-center gap-2 relative z-10">
+                        <div className="px-6 py-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex flex-col items-center gap-1">
+                          <span className="text-[9px] font-black uppercase tracking-[0.3em] text-amber-500/60">Hemoglobin</span>
+                          <div className="flex items-baseline gap-1">
+                            <span className="text-2xl font-black tracking-tighter text-amber-400">{match[1]}</span>
+                            <span className="text-[10px] font-bold text-amber-500/60">g/dL</span>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => { navigator.clipboard.writeText(match[0]); }}
+                          className="flex items-center gap-2 px-4 py-1.5 rounded-full glass-button border border-amber-500/20 text-[9px] font-black uppercase tracking-widest text-amber-500/60 hover:bg-amber-500/10 hover:text-amber-400 transition-all"
+                          title="Copy Hgb value"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                          Copy
+                        </button>
+                      </div>
                     );
                   })()}
               </div>
