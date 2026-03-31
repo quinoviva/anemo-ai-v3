@@ -7,9 +7,11 @@ import {ImageAnalysisReport} from '@/ai/schemas/image-analysis-report';
 
 const MedicalInfoSchema = z.object({
   sex: z.string().optional(),
+  age: z.string().optional(),
   fatigue: z.string().optional(),
   cardiovascularStrain: z.string().optional(),
   physicalIndicators: z.string().optional(),
+  menstrualContext: z.string().optional(),
 });
 
 const ValidationInputSchema = z.object({

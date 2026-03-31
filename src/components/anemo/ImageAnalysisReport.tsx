@@ -67,8 +67,10 @@ type ImageAnalysisReportProps = {
   onReset: () => void;
 };
 
+type ReportState = PersonalizedRecommendationsOutput & { imageAnalysisSummary?: string };
+
 export function ImageAnalysisReport({ analyses, labReport, onReset }: ImageAnalysisReportProps) {
-  const [report, setReport] = useState<PersonalizedRecommendationsOutput | null>(null);
+  const [report, setReport] = useState<ReportState | null>(null);
   const [clinics, setClinics] = useState<Clinic[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -123,7 +125,7 @@ export function ImageAnalysisReport({ analyses, labReport, onReset }: ImageAnaly
           labReport: labReportSummary,
           userProfile: userProfileString,
       });
-      setReport(reportResult);
+      setReport({ ...reportResult, imageAnalysisSummary: allImageDescriptions });
       if (isOnline) {
           try {
             const clinicsResult = await runFindNearbyClinics({ query: userLocation });
@@ -158,6 +160,7 @@ export function ImageAnalysisReport({ analyses, labReport, onReset }: ImageAnaly
   }, [generateReport]);
 
   const handleShare = async () => {
+    if (!report) return;
     try {
       const shareData = {
         title: `Anemo AI Diagnostic Report`,

@@ -742,6 +742,7 @@ export function CameraAnalysis({ onBack }: CameraAnalysisProps) {
               currentStep={currentStepCfg.id}
               lux={lux}
               lowLight={lowLight}
+              highLight={highLight}
               isCapturing={isCapturing}
               countdown={countdown}
               canCapture={canCapture}
@@ -814,6 +815,7 @@ interface CameraViewProps {
   currentStep: CaptureStep;
   lux: number | null;
   lowLight: boolean;
+  highLight: boolean;
   isCapturing: boolean;
   countdown: number | null;
   canCapture: boolean;
@@ -834,6 +836,7 @@ function CameraView({
   currentStep,
   lux,
   lowLight,
+  highLight,
   isCapturing,
   countdown,
   canCapture,

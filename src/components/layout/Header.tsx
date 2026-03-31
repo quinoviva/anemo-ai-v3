@@ -63,7 +63,7 @@ export function Header() {
   const firestore = useFirestore();
   const router = useRouter();
   const pathname = usePathname();
-  const { setTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [otherMenuOpen, setOtherMenuOpen] = useState(false);
   const otherMenuRef = useRef<HTMLDivElement>(null);
