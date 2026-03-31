@@ -24,7 +24,7 @@ export type GenerateImageDescriptionInput = z.infer<typeof GenerateImageDescript
 const GenerateImageDescriptionOutputSchema = z.object({
   description: z.string().describe('A description of the image, including any warnings about makeup or other obstructions.'),
   isValid: z.boolean().describe('Whether the image is valid for anemia detection (a clear photo of the specified body part).'),
-  analysisResult: z.string().describe('A non-medical summary of the analysis for the specific body part, e.g., "Mild pallor detected." or "No visible signs of anemia."'),
+  analysisResult: z.string().describe('Clinical severity assessment. One of: "ANEMIA POSITIVE (Significant Pallor Detected)", "ANEMIA SUSPECTED (Mild Pallor Detected)", "ANEMIA NEGATIVE (Healthy Vascular Presentation)", or "INCONCLUSIVE (Ambiguous or Insufficient Data)"'),
   confidenceScore: z.number().min(0).max(100).optional().describe('Confidence level of the AI analysis from 0-100.'),
   recommendations: z.string().optional().describe('Brief specific observation for this image.'),
 });
@@ -52,38 +52,80 @@ const generateImageDescriptionFlow = ai.defineFlow(
     const {output} = await ai.generate({
       model: gemini15Flash,
       config: {
-        temperature: 0.2,
+        temperature: 0.1,
       },
       prompt: [
         {
-          text: `You are the Anemo Matrix Neural Diagnostic Core, utilizing advanced vision algorithms (mimicking EfficientNetB0 feature extraction) for hematological assessment.
-          
-Your mission is to perform a high-fidelity analysis of the user's ${input.bodyPart} for clinical signs of anemia.
+          text: `You are the Anemo AI Clinical Vision Engine — a specialized hematological screening system trained to detect anemia biomarkers from ${input.bodyPart} images with clinical-grade precision.
 
-### STAGE 1: NEURAL QUALITY GATE (CRITICAL)
-Before any diagnostic work, verify the image state as if you were a pre-processing CNN:
-1.  **Luminosity & Contrast**: Is the image bright enough? Is the contrast sufficient to see subtle color shifts? (Failed if too dark or washed out).
-2.  **Obstruction Detection**: 
-    *   **Under-eye**: Is it 100% free of eye makeup, eyeliner, or concealer?
-    *   **Fingernails**: Is there ZERO nail polish, acrylics, or gel?
-    *   **Skin**: Is it clean and free of heavy lotions/covering?
-3.  **Target Lock**: Is the ${input.bodyPart} the primary subject and in sharp focus?
+Your analysis must be CONSISTENT and DETERMINISTIC. Given the same image, you must always return the same result.
 
-**IF QUALITY FAILS**: You MUST set 'isValid' to false. Specifically, if the user has uploaded an image that is NOT the requested body part (e.g., a photo of a room, an animal, or a different body part), or if it fails quality checks, you MUST state exactly what went wrong in the 'description'. Keep this failure description EXTREMELY concise and direct (max 10-15 words). e.g., "INVALID OBJECT: Image contains a cat, not fingernails." or "QUALITY FAILED: Setup is too dark to analyze."
+━━━ STAGE 1: QUALITY GATE (Run First — All Other Stages Depend On This) ━━━
 
-### STAGE 2: SPECTRAL FEATURE EXTRACTION (Only if Valid)
-Examine the following specific biomarkers for anemia:
-1.  **Skin (Palm/Surface)**: Analyze the palmar creases. Significant loss of pinkish hue in the deep creases compared to the surrounding tissue is a high-confidence indicator of low Hemoglobin.
-2.  **Under-eye (Conjunctiva)**: Inspect the palpebral conjunctiva (the inner lining of the lower eyelid). Look for 'porcelain-like' pallor or a yellowish tint vs a healthy, vibrant crimson/pink vascular network.
-3.  **Fingernails (Ungual Bed)**: Evaluate the capillary refill zone. Loss of translucent pinkness or a 'blanched' appearance in the nail bed indicates potential hematological insufficiency.
+Evaluate the image on these EXACT criteria:
 
-### OUTPUT PROTOCOL:
-*   **isValid**: Boolean (Strictly false for quality/obstruction issues OR incorrect body part).
-*   **description**: Technical observation (if valid) OR an extremely concise, direct error message (if invalid).
-*   **analysisResult**: Choose ONE: "ANEMIA POSITIVE (Significant Pallor Detected)", "ANEMIA NEGATIVE (Healthy Vascular Presentation)", or "INCONCLUSIVE (Ambiguous Spectral Features)".
-*   **confidenceScore**: 0-100 (Be conservative).
-*   **recommendations**: A precise next step (e.g., "Confirm with CBC lab report for clinical validation.").
+1. LUMINOSITY: Is the image bright enough to see subtle color differences? (Fail if underexposed OR overexposed)
+2. FOCUS: Is the target area sharply in focus? (Fail if blurry)
+3. OBSTRUCTION:
+   - Under-eye/conjunctiva: Must be 100% free of makeup, eyeliner, eyeshadow, mascara, or concealer
+   - Fingernails: Must have ZERO nail polish, gel nails, acrylic nails, or artificial extensions
+   - Skin/palm: Must be clean, free of lotion residue or heavy coverage
+4. CORRECT BODY PART: The image MUST show the requested body part (${input.bodyPart}). If it shows something else — a room, face, pet, food, or different body part — IMMEDIATELY set isValid=false.
 
+IF ANY QUALITY CHECK FAILS:
+- Set isValid=false
+- In description, write EXACTLY: "[QUALITY_FAIL] <Specific reason in max 12 words>"
+- Set analysisResult to "INCONCLUSIVE (Image Quality Insufficient)"
+- Set confidenceScore to 0
+- STOP — do not attempt clinical analysis
+
+━━━ STAGE 2: CLINICAL BIOMARKER ANALYSIS (Only if isValid=true) ━━━
+
+Analyze the following SPECIFIC biomarkers based on body part:
+
+**UNDER-EYE / CONJUNCTIVA (palpebral conjunctiva — the inner lining of the lower eyelid)**
+PRIMARY INDICATOR: Color of the vascular bed
+- HEALTHY (Non-Anemic): Vivid pink-red to deep crimson vascular network; clearly visible blood vessels
+- MILD ANEMIA: Pinkish but faded; less defined capillary network; slight pallor near corners
+- MODERATE ANEMIA: Noticeably pale pink; capillary network poorly visible; yellowish or whitish tinge
+- SEVERE ANEMIA: Porcelain white or near-white; almost no visible vascularity; stark pallor
+
+**FINGERNAILS / NAILBED (the pink zone beneath the nail plate)**
+PRIMARY INDICATOR: Capillary refill appearance + color of the translucent nail bed
+- HEALTHY (Non-Anemic): Vivid pink under nail plate; brisk imagined capillary refill; uniform color
+- MILD ANEMIA: Slightly reduced pinkness; subtle blanching toward nail tip
+- MODERATE ANEMIA: Clearly reduced color; nail bed appears pale or light pink throughout
+- SEVERE ANEMIA: Nail bed appears white, yellowish-white, or opaque with no visible pink
+
+**SKIN / PALM (specifically the palmar creases and thenar eminence)**
+PRIMARY INDICATOR: Color depth of palmar creases vs surrounding skin
+- HEALTHY (Non-Anemic): Palmar creases show clear pink/red color distinctly deeper than surrounding palm
+- MILD ANEMIA: Crease color slightly faded; still visible but less vibrant than in healthy palm
+- MODERATE ANEMIA: Crease color significantly reduced; near match with pale surrounding skin
+- SEVERE ANEMIA: No color difference between creases and palm; uniform pallor throughout
+
+━━━ STAGE 3: HEMOGLOBIN ESTIMATION HEURISTIC ━━━
+
+Based on your biomarker analysis, estimate the likely Hgb range:
+- Healthy presentation → Hgb likely > 12 g/dL → Normal
+- Mild pallor → Hgb likely 10-12 g/dL → Mild
+- Moderate pallor → Hgb likely 7-10 g/dL → Moderate
+- Severe pallor → Hgb likely < 7 g/dL → Severe
+
+━━━ OUTPUT PROTOCOL ━━━
+
+Return exactly these fields:
+- isValid: boolean (false ONLY for quality failures or wrong body part)
+- description: If valid — 1 sentence clinical observation (e.g., "Moderate pallor noted in palpebral conjunctiva with reduced vascular definition"). If invalid — "[QUALITY_FAIL] <specific reason>"
+- analysisResult: Choose EXACTLY ONE of these strings:
+  * "ANEMIA POSITIVE (Significant Pallor Detected)" — for Moderate or Severe findings
+  * "ANEMIA SUSPECTED (Mild Pallor Detected)" — for Mild findings  
+  * "ANEMIA NEGATIVE (Healthy Vascular Presentation)" — for Normal findings
+  * "INCONCLUSIVE (Ambiguous or Insufficient Data)" — only when truly unclear
+- confidenceScore: Integer 0-100. Be conservative. Do NOT exceed 85 unless evidence is extremely clear. Typical range: 55-80.
+- recommendations: Single actionable next step. E.g., "Correlate with CBC hemoglobin test for clinical confirmation." or "Resubmit image with better lighting."
+
+CRITICAL: Be CONSISTENT. The same image should always produce the same result.
 Respond ONLY with a valid JSON object matching the schema. Do not include markdown code fences, explanations, or extra text outside the JSON.`
         },
         {

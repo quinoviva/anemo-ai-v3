@@ -1,0 +1,42 @@
+# Anemo AI — ML Training Requirements
+# =====================================
+# Install with: pip install -r scripts/ml/requirements.txt
+#
+# Python 3.10+ required
+# CUDA 11.8+ recommended for GPU training (or use Google Colab)
+
+# Core deep learning
+tensorflow==2.15.0
+tensorflowjs==4.17.0          # .h5 → TF.js converter
+torch==2.2.0                  # for SWA optimizer support
+torchvision==0.17.0
+
+# Computer vision
+opencv-python==4.9.0.80
+Pillow==10.2.0
+albumentations==1.4.0         # advanced augmentation
+
+# Scientific computing
+numpy==1.26.4
+scipy==1.12.0
+scikit-learn==1.4.0
+pandas==2.2.0
+matplotlib==3.8.2
+seaborn==0.13.2
+
+# Dataset acquisition
+kaggle==1.6.6                 # Kaggle API client
+requests==2.31.0
+tqdm==4.66.1
+gdown==5.1.0                  # Google Drive downloads
+
+# Calibration & evaluation
+netcal==1.3.5                 # Temperature scaling / Platt calibration
+mlxtend==0.23.1               # Plot confusion matrix
+
+# Experiment tracking (optional but recommended)
+wandb==0.16.3                 # Weights & Biases
+
+# Jupyter
+ipykernel==6.29.0
+ipywidgets==8.1.2

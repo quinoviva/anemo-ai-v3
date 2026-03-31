@@ -54,6 +54,16 @@ dataconnect-debug.log
 # machine learning data
 /dataset
 
+# ML training artifacts (large files — keep .h5 models out of git)
+/models_output/
+*.h5
+
+# TF.js weight shards (binary, too large for git)
+public/models/**/*.bin
+# Keep model.json files in git (small, text-based topology descriptors)
+!public/models/**/model.json
+!public/models/**/metadata.json
+
 
 .cache/
 .firebase/logs/
