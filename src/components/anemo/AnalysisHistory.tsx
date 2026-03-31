@@ -59,7 +59,7 @@ import {
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
-import { CbcReport as CbcReportType, AnalysisReportViewer } from './AnalysisReportViewer';
+import { AnalysisReportViewer } from './AnalysisReportViewer';
 import { AnalyzeCbcReportOutput } from '@/ai/flows/analyze-cbc-report';
 import { runValidateMultimodalResults } from '@/app/actions';
 import { MenstrualCycleCorrelator, CycleLogType } from './MenstrualCycleCorrelator';
@@ -1250,13 +1250,28 @@ export function AnalysisHistory() {
 
             {/* Side-by-side comparison dialog */}
             {isCompareOpen && compareItems.length === 2 && (() => {
-                const [a, b] = compareItems as ImageReport[];
-                const fields: Array<{ label: string; aVal: string; bVal: string }> = [
-                    { label: 'Date', aVal: toDate(a.createdAt) ? format(toDate(a.createdAt)!, 'PP') : 'N/A', bVal: toDate(b.createdAt) ? format(toDate(b.createdAt)!, 'PP') : 'N/A' },
-                    { label: 'Risk Score', aVal: String(a.riskScore) + '/100', bVal: String(b.riskScore) + '/100' },
-                    { label: 'Verdict', aVal: a.anemiaType || 'N/A', bVal: b.anemiaType || 'N/A' },
-                    { label: 'Confidence', aVal: (a.confidenceScore || 0) + '%', bVal: (b.confidenceScore || 0) + '%' },
-                    { label: 'Hgb', aVal: a.hemoglobin ? a.hemoglobin.toFixed(1) + ' g/dL' : 'N/A', bVal: b.hemoglobin ? b.hemoglobin.toFixed(1) + ' g/dL' : 'N/A' },
+                const [itemA, itemB] = compareItems;
+                const isImageA = itemA.type === 'image';
+                const isImageB = itemB.type === 'image';
+                const imgA = isImageA ? (itemA as ImageReport) : null;
+                const imgB = isImageB ? (itemB as ImageReport) : null;
+                const cbcA = !isImageA ? (itemA as CbcReport) : null;
+                const cbcB = !isImageB ? (itemB as CbcReport) : null;
+
+                const getLabel = (item: HistoryItem) => item.type === 'image' ? 'Image Scan' : 'CBC Report';
+                const getVerdict = (item: HistoryItem) => item.type === 'image' ? (item as ImageReport).anemiaType || 'N/A' : (item as CbcReport).summary?.slice(0, 40) || 'N/A';
+                const getConfidence = (item: HistoryItem) => item.type === 'image' ? `${(item as ImageReport).confidenceScore || 0}%` : 'N/A';
+                const getRisk = (item: HistoryItem) => item.type === 'image' ? `${(item as ImageReport).riskScore}/100` : 'N/A';
+                const getRiskNum = (item: HistoryItem) => item.type === 'image' ? ((item as ImageReport).riskScore || 0) : 0;
+                const getHgb = (item: HistoryItem) => item.type === 'image' && (item as ImageReport).hemoglobin ? `${(item as ImageReport).hemoglobin!.toFixed(1)} g/dL` : 'N/A';
+
+                const fields: Array<{ label: string; aVal: string; bVal: string; highlight?: boolean }> = [
+                    { label: 'Date', aVal: toDate(itemA.createdAt) ? format(toDate(itemA.createdAt)!, 'PP') : 'N/A', bVal: toDate(itemB.createdAt) ? format(toDate(itemB.createdAt)!, 'PP') : 'N/A' },
+                    { label: 'Type', aVal: getLabel(itemA), bVal: getLabel(itemB) },
+                    { label: 'Verdict', aVal: getVerdict(itemA), bVal: getVerdict(itemB) },
+                    { label: 'Risk Score', aVal: getRisk(itemA), bVal: getRisk(itemB), highlight: true },
+                    { label: 'Confidence', aVal: getConfidence(itemA), bVal: getConfidence(itemB) },
+                    { label: 'Hgb', aVal: getHgb(itemA), bVal: getHgb(itemB) },
                 ];
                 return (
                     <Dialog open={true} onOpenChange={(open) => !open && setIsCompareOpen(false)}>
@@ -1267,18 +1282,23 @@ export function AnalysisHistory() {
                                         Side-by-Side <span className="italic text-primary">Comparison</span>
                                     </DialogTitle>
                                     <DialogDescription className="text-white/40 text-xs uppercase tracking-widest">
-                                        Comparing 2 selected scan records
+                                        Comparing 2 selected records
                                     </DialogDescription>
                                 </DialogHeader>
                                 <div className="space-y-3">
-                                    {fields.map(({ label, aVal, bVal }) => (
+                                    {fields.map(({ label, aVal, bVal, highlight }) => (
                                         <div key={label} className="grid grid-cols-[120px_1fr_1fr] gap-4 items-center py-3 border-b border-white/5">
                                             <span className="text-[10px] font-black uppercase tracking-widest text-white/30">{label}</span>
-                                            <span className={`text-sm font-bold text-center py-2 px-4 rounded-2xl ${label === 'Risk Score' && a.riskScore > b.riskScore ? 'text-red-400 bg-red-500/10' : 'text-white/80 bg-white/5'}`}>{aVal}</span>
-                                            <span className={`text-sm font-bold text-center py-2 px-4 rounded-2xl ${label === 'Risk Score' && b.riskScore > a.riskScore ? 'text-red-400 bg-red-500/10' : 'text-white/80 bg-white/5'}`}>{bVal}</span>
+                                            <span className={`text-sm font-bold text-center py-2 px-4 rounded-2xl ${highlight && getRiskNum(itemA) > getRiskNum(itemB) ? 'text-red-400 bg-red-500/10' : 'text-white/80 bg-white/5'}`}>{aVal}</span>
+                                            <span className={`text-sm font-bold text-center py-2 px-4 rounded-2xl ${highlight && getRiskNum(itemB) > getRiskNum(itemA) ? 'text-red-400 bg-red-500/10' : 'text-white/80 bg-white/5'}`}>{bVal}</span>
                                         </div>
                                     ))}
                                 </div>
+                                {(cbcA || cbcB) && (
+                                    <div className="text-xs text-white/30 text-center">
+                                        CBC reports show summary text. Image scans show full numeric comparison.
+                                    </div>
+                                )}
                                 <div className="flex justify-end">
                                     <Button variant="ghost" onClick={() => setIsCompareOpen(false)} className="rounded-2xl text-white/40 hover:text-white">Close</Button>
                                 </div>
