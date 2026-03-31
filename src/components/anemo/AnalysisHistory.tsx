@@ -75,6 +75,8 @@ type ImageReport = PersonalizedRecommendationsOutput & {
         toDate: () => Date;
     };
     imageAnalysisSummary: string;
+    hemoglobin?: number;
+    notes?: string;
 };
 
 export type CbcReport = AnalyzeCbcReportOutput & {
