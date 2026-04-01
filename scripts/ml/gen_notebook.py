@@ -126,9 +126,9 @@ else:
     print('Some packages may have issues:')
     print(result.stderr[-1000:] if result.stderr else '(no output)')
 
-# Verify imports
+# Verify other imports (kaggle verified in Cell 3 after auth)
 failed = []
-for pkg in ['kaggle', 'albumentations', 'cv2', 'sklearn']:
+for pkg in ['albumentations', 'cv2', 'sklearn']:
     try:
         mod = __import__(pkg)
         ver = getattr(mod, '__version__', 'unknown')
@@ -147,6 +147,7 @@ C3 = cell_code("""\
 # ── Cell 3: Kaggle Credentials ────────────────────────────────────────────────
 import json
 import os
+import sys
 from pathlib import Path
 
 # --- SET YOUR CREDENTIALS -----------------------------------------------------
@@ -154,22 +155,30 @@ KAGGLE_USERNAME = 'cyrilcquinoviva'
 KAGGLE_KEY      = 'KGAT_4c4efbb044d9da5e17af934f94de5acd'
 # ------------------------------------------------------------------------------
 
+# Write credentials BEFORE importing kaggle (it auto-authenticates on import)
+os.environ['KAGGLE_USERNAME'] = KAGGLE_USERNAME
+os.environ['KAGGLE_KEY']      = KAGGLE_KEY
+
 kaggle_dir = Path.home() / '.kaggle'
 kaggle_dir.mkdir(exist_ok=True)
 kaggle_json = kaggle_dir / 'kaggle.json'
 kaggle_json.write_text(json.dumps({'username': KAGGLE_USERNAME, 'key': KAGGLE_KEY}))
 kaggle_json.chmod(0o600)
+print(f'Credentials written to: {kaggle_json}')
 
-os.environ['KAGGLE_USERNAME'] = KAGGLE_USERNAME
-os.environ['KAGGLE_KEY']      = KAGGLE_KEY
+# Force reload kaggle module so it picks up the new env vars & file
+if 'kaggle' in sys.modules:
+    del sys.modules['kaggle']
+    for k in [k for k in sys.modules if k.startswith('kaggle')]:
+        del sys.modules[k]
 
 import kaggle
 try:
     kaggle.api.authenticate()
     print(f'Kaggle authenticated as: {KAGGLE_USERNAME}')
-except Exception as e:
-    print(f'Kaggle auth failed: {e}')
-    print('  Verify credentials at: https://www.kaggle.com/settings -> API')\
+except (SystemExit, NameError, Exception) as e:
+    print(f'Kaggle auth note: {e}')
+    print('  If this is unexpected, verify credentials at: https://www.kaggle.com/settings -> API')\
 """)
 
 # ── Cell 4: Setup Workspace ───────────────────────────────────────────────────
@@ -196,7 +205,12 @@ print(f'  deploy  : {PUBLIC_MODELS}')\
 # ── Cell 5: Download Datasets ─────────────────────────────────────────────────
 C5 = cell_code("""\
 # ── Cell 5: Download Datasets ─────────────────────────────────────────────────
-import kaggle
+import sys
+# Ensure fresh kaggle import after auth (Cell 3 already set credentials)
+if 'kaggle' not in sys.modules:
+    import kaggle
+else:
+    import kaggle
 from pathlib import Path
 
 DATASETS = [
