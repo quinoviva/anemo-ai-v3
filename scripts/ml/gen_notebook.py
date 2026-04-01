@@ -205,31 +205,53 @@ print(f'  deploy  : {PUBLIC_MODELS}')\
 # ── Cell 5: Download Datasets ─────────────────────────────────────────────────
 C5 = cell_code("""\
 # ── Cell 5: Download Datasets ─────────────────────────────────────────────────
+# ┌─────────────────────────────────────────────────────────────────────────────┐
+# │ IMPORTANT — Accept dataset rules BEFORE running this cell                  │
+# │                                                                             │
+# │ Kaggle API returns 403 Forbidden if you haven't manually agreed to each    │
+# │ dataset's rules on the website.  Open each URL below while logged in and   │
+# │ click the Download button (or "I Agree") at least once:                    │
+# │                                                                             │
+# │  1. https://www.kaggle.com/datasets/amandam1/anemia-dataset                │
+# │  2. https://www.kaggle.com/datasets/longntt2001/anemia-detection-from-nailbeds │
+# │  3. https://www.kaggle.com/datasets/kavindra07/conjunctiva-images-anemia   │
+# │  4. https://www.kaggle.com/datasets/subhajeetdas/anemia-detection-nailbed  │
+# │  5. https://www.kaggle.com/datasets/thefearlesscoder/nail-dataset-for-blood-hemoglobin-estimation │
+# │  6. https://www.kaggle.com/datasets/omkar-thombre/anemia-detection-dataset │
+# │                                                                             │
+# │ After accepting, re-run this cell.                                         │
+# └─────────────────────────────────────────────────────────────────────────────┘
+
 import sys
-# Ensure fresh kaggle import after auth (Cell 3 already set credentials)
-if 'kaggle' not in sys.modules:
-    import kaggle
-else:
-    import kaggle
+import kaggle
 from pathlib import Path
 
+# Datasets grouped by body-part category.
+# priority=1 → required; priority=2 → supplemental fallback
 DATASETS = [
-    # (dataset_id,                                         dest_subdir,         priority)
-    ('amandam1/anemia-dataset',                            'conjunctiva',         1),
-    ('longntt2001/anemia-detection-from-nailbeds',         'nailbed',             1),
+    # (dataset_id,                                              dest_subdir,         priority)
+    # ── Conjunctiva / Eye datasets ─────────────────────────────────────────────
+    ('amandam1/anemia-dataset',                               'conjunctiva',         1),
+    ('kavindra07/conjunctiva-images-anemia',                  'conjunctiva_alt',     2),
+    ('omkar-thombre/anemia-detection-dataset',                'conjunctiva_palm',    2),
+    # ── Nailbed datasets ───────────────────────────────────────────────────────
+    ('longntt2001/anemia-detection-from-nailbeds',            'nailbed',             1),
+    ('subhajeetdas/anemia-detection-nailbed',                 'nailbed_alt',         2),
     ('thefearlesscoder/nail-dataset-for-blood-hemoglobin-estimation',
-                                                           'nailbed_hgb',         2),
-    ('ehababoelnaga/anemia-types-classification',          'clinical',            2),
-    ('omkar-thombre/anemia-detection-dataset',             'conjunctiva_palm',    2),
+                                                              'nailbed_hgb',         2),
+    # ── Palm / Skin datasets ───────────────────────────────────────────────────
+    ('ehababoelnaga/anemia-types-classification',             'clinical',            2),
 ]
 
 downloaded = {}
+failed_403 = []
+
 for dataset_id, dest_name, priority in sorted(DATASETS, key=lambda x: x[2]):
     dest = DATASET_RAW / dest_name
     if dest.exists():
-        imgs = list(dest.rglob('*.jpg')) + list(dest.rglob('*.png'))
+        imgs = list(dest.rglob('*.jpg')) + list(dest.rglob('*.png')) + list(dest.rglob('*.jpeg'))
         if len(imgs) > 10:
-            print(f'  skip {dataset_id}: {len(imgs)} images already downloaded')
+            print(f'  skip {dataset_id}: {len(imgs)} images already present')
             downloaded[dest_name] = dest
             continue
 
@@ -238,15 +260,31 @@ for dataset_id, dest_name, priority in sorted(DATASETS, key=lambda x: x[2]):
     try:
         kaggle.api.dataset_download_files(
             dataset_id, path=str(dest), unzip=True, quiet=False)
-        imgs = list(dest.rglob('*.jpg')) + list(dest.rglob('*.png'))
+        imgs = list(dest.rglob('*.jpg')) + list(dest.rglob('*.png')) + list(dest.rglob('*.jpeg'))
         print(f'    OK: {len(imgs)} images')
-        downloaded[dest_name] = dest
+        if len(imgs) > 0:
+            downloaded[dest_name] = dest
+        else:
+            print(f'    WARNING: dataset downloaded but contains no images (may be CSV-only)')
     except Exception as e:
-        print(f'    FAIL (priority={priority}): {e}')
-        if priority == 1:
-            print('    Primary dataset - check credentials and retry.')
+        err = str(e)
+        if '403' in err:
+            failed_403.append(dataset_id)
+            print(f'    403 FORBIDDEN — must accept rules first!')
+            print(f'    → Visit: https://www.kaggle.com/datasets/{dataset_id}')
+            print(f'    → Click Download, accept any rules, then re-run this cell.')
+        else:
+            print(f'    FAIL (priority={priority}): {e}')
 
-print(f'\\nDownloaded {len(downloaded)} datasets')\
+print(f'\\n{"="*60}')
+print(f'Downloaded: {len(downloaded)} dataset(s)')
+if failed_403:
+    print(f'\\n⚠  {len(failed_403)} dataset(s) need rule acceptance on Kaggle.com:')
+    for d in failed_403:
+        print(f'   → https://www.kaggle.com/datasets/{d}')
+    print('\\nAfter visiting each URL and accepting, re-run this cell.')
+if not downloaded and not failed_403:
+    raise RuntimeError('No datasets downloaded and no 403 errors — check Kaggle credentials (Cell 3).')\
 """)
 
 # ── Cell 6: Organise Dataset ──────────────────────────────────────────────────
