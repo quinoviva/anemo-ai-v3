@@ -40,21 +40,28 @@ C0 = cell_md("""\
 
 **One-click GPU training for anemia detection using a 10-model CNN ensemble.**
 
-This notebook:
-1. Verifies GPU availability
-2. Installs all dependencies
-3. Configures Kaggle credentials
-4. Downloads anemia datasets from Kaggle
-5. Organises dataset into train/val/test splits
-6. Trains **10 CNN architectures** per body part (conjunctiva, fingernails, skin)
-7. Converts best models to TF.js INT8-quantised format
-8. Downloads models as a ZIP for deployment
+This notebook (15 cells):
+1. GPU & environment check
+2. Install all dependencies (albumentations v1.x pinned, tensorflowjs, seaborn)
+3. Configure Kaggle credentials
+4. Download anemia datasets from Kaggle (5 datasets)
+5. Organise dataset into 70/15/15 train/val/test splits
+6. **Dataset Preview** — class distribution charts, random sample grids, augmentation comparison
+7. Train **10 CNN architectures** per body part (conjunctiva, fingernails, skin)
+8. **Confusion Matrices** — normalised heatmaps per body part
+9. **Grad-CAM Saliency Maps** — visualise model attention on random images per class
+10. **Ensemble Weight Config** — AUC-weighted ensemble JSON for app deployment
+11. Convert best model to TF.js INT8-quantised format
+12. Download all models + configs as ZIP
+
+**Architectures:** EfficientNetV2S · EfficientNetB0 · ResNet50V2 · DenseNet121 · InceptionV3 ·
+MobileNetV3Large · Xception · NASNetMobile · EfficientNetB4 · DenseNet201
 
 **Before running:**
-- Set runtime to GPU: Runtime → Change runtime type → T4 GPU
-- Run cells top-to-bottom (Shift+Enter)
+- Runtime → Change runtime type → T4 GPU → Save
+- Run all cells top-to-bottom (Runtime → Run all, or Shift+Enter per cell)
 
-**Expected training time:** ~4–8 h on T4 GPU (10 architectures × 3 body parts)\
+**Expected time:** ~4–8 h on T4 GPU for all 10 architectures × 3 body parts\
 """)
 
 # ── Cell 1: GPU Check ─────────────────────────────────────────────────────────
@@ -810,9 +817,464 @@ print(f'\\n{SEP}')
 print('All done! Upload the downloaded ZIP to your deployment.')\
 """)
 
+# ── Cell 6b: Dataset Preview & Augmentation Visualization ────────────────────
+C6b = cell_code("""\
+# ── Cell 6b: Dataset Preview & Augmentation Visualization ────────────────────
+# Plots class distribution, random sample grids, and augmentation pipeline.
+# Self-contained: redefines CLAHE + augmentation pipeline locally.
+import random
+import numpy as np
+import cv2
+import matplotlib.pyplot as plt
+import albumentations as A
+from pathlib import Path
+from PIL import Image
+
+# Local CLAHE for preview (same as training)
+def _clahe_preview(img):
+    img = np.clip(img, 0, 255).astype(np.uint8)
+    lab = cv2.cvtColor(img, cv2.COLOR_RGB2LAB)
+    l, a, b = cv2.split(lab)
+    cl = cv2.createCLAHE(clipLimit=2.5, tileGridSize=(8, 8)).apply(l)
+    return cv2.cvtColor(cv2.merge([cl, a, b]), cv2.COLOR_LAB2RGB).astype(np.float32)
+
+# Local augmentation pipeline for preview (v1.x API, safe)
+_aug_preview = A.Compose([
+    A.HorizontalFlip(p=0.5),
+    A.RandomBrightnessContrast(brightness_limit=0.3, contrast_limit=0.3, p=0.8),
+    A.HueSaturationValue(hue_shift_limit=15, sat_shift_limit=30, val_shift_limit=20, p=0.6),
+    A.ShiftScaleRotate(shift_limit=0.1, scale_limit=0.15, rotate_limit=30, p=0.6),
+    A.GaussNoise(var_limit=(5.0, 30.0), p=0.4),
+    A.CoarseDropout(max_holes=8, max_height=24, max_width=24, min_holes=2, p=0.3),
+])
+
+CLS_COLORS = {
+    '0_Normal': '#27ae60', '1_Mild': '#f39c12',
+    '2_Moderate': '#e67e22', '3_Severe': '#c0392b',
+}
+CLS_LABELS = {
+    '0_Normal': 'Normal', '1_Mild': 'Mild Anemia',
+    '2_Moderate': 'Moderate Anemia', '3_Severe': 'Severe Anemia',
+}
+PREVIEW_CLASSES = ['0_Normal', '1_Mild', '2_Moderate', '3_Severe']
+
+def _load_preview_samples(folder, n=4, size=224):
+    folder = Path(folder)
+    if not folder.exists():
+        return []
+    paths = list(folder.glob('*.jpg')) + list(folder.glob('*.jpeg')) + list(folder.glob('*.png'))
+    random.shuffle(paths)
+    imgs = []
+    for p in paths:
+        if len(imgs) >= n:
+            break
+        try:
+            imgs.append(np.array(Image.open(p).convert('RGB').resize((size, size))))
+        except Exception:
+            pass
+    return imgs
+
+for body_part in ['conjunctiva', 'fingernails', 'skin']:
+    train_dir = DATASET_PROC / body_part / 'train'
+    if not train_dir.exists():
+        print(f'  No processed data for {body_part} — run Cell 6 first')
+        continue
+
+    print(f'\\n{"=" * 50}')
+    print(f'  PREVIEW: {body_part.upper()}')
+    print(f'{"=" * 50}')
+
+    # 1. Class Distribution Bar Chart
+    counts = {}
+    for cn in PREVIEW_CLASSES:
+        d = train_dir / cn
+        counts[cn] = (
+            sum(1 for _ in d.glob('*.jpg')) + sum(1 for _ in d.glob('*.png'))
+        ) if d.exists() else 0
+
+    total = sum(counts.values())
+    fig, ax = plt.subplots(figsize=(9, 4))
+    bars = ax.bar(
+        [CLS_LABELS[cn] for cn in PREVIEW_CLASSES],
+        [counts[cn] for cn in PREVIEW_CLASSES],
+        color=[CLS_COLORS[cn] for cn in PREVIEW_CLASSES],
+        edgecolor='white', linewidth=1.5, width=0.6,
+    )
+    for bar, v in zip(bars, [counts[cn] for cn in PREVIEW_CLASSES]):
+        pct = (v / total * 100) if total > 0 else 0
+        ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.5,
+                f'{v}\\n({pct:.1f}%)', ha='center', va='bottom',
+                fontweight='bold', fontsize=10)
+    ax.set_title(f'{body_part.title()} — Training Set Distribution (total={total})',
+                 fontsize=12, fontweight='bold')
+    ax.set_ylabel('Number of images')
+    for spine in ['top', 'right']:
+        ax.spines[spine].set_visible(False)
+    plt.tight_layout()
+    plt.savefig(str(MODELS_OUT / f'dist_{body_part}.png'), dpi=110, bbox_inches='tight')
+    plt.show()
+    print(f'  Saved: dist_{body_part}.png')
+
+    # 2. Random Sample Grid (4 classes × 4 images)
+    fig, axes = plt.subplots(4, 4, figsize=(14, 14))
+    fig.suptitle(f'{body_part.title()} — Random Samples per Class',
+                 fontsize=13, fontweight='bold')
+    for row, cn in enumerate(PREVIEW_CLASSES):
+        samples = _load_preview_samples(train_dir / cn, n=4)
+        for col in range(4):
+            ax = axes[row][col]
+            ax.imshow(samples[col] if col < len(samples)
+                      else np.zeros((224, 224, 3), np.uint8))
+            ax.axis('off')
+            if col == 0:
+                ax.set_ylabel(
+                    CLS_LABELS[cn], fontsize=10, fontweight='bold',
+                    color=CLS_COLORS[cn], rotation=0, labelpad=80, va='center')
+    plt.tight_layout()
+    plt.savefig(str(MODELS_OUT / f'samples_{body_part}.png'), dpi=110, bbox_inches='tight')
+    plt.show()
+    print(f'  Saved: samples_{body_part}.png')
+
+    # 3. Augmentation Pipeline Preview
+    sample_img = None
+    for cn in PREVIEW_CLASSES:
+        s = _load_preview_samples(train_dir / cn, n=1)
+        if s:
+            sample_img = s[0]
+            break
+
+    if sample_img is not None:
+        n_aug = 5
+        fig, axes = plt.subplots(2, n_aug + 1, figsize=(18, 6))
+        fig.suptitle(f'{body_part.title()} — Augmentation Pipeline',
+                     fontsize=12, fontweight='bold')
+
+        axes[0][0].imshow(sample_img)
+        axes[0][0].set_title('Original', fontsize=9)
+        axes[0][0].axis('off')
+        axes[1][0].imshow(_clahe_preview(sample_img.astype(np.float32)).astype(np.uint8))
+        axes[1][0].set_title('+ CLAHE', fontsize=9)
+        axes[1][0].axis('off')
+
+        for i in range(1, n_aug + 1):
+            aug = _aug_preview(image=sample_img)['image']
+            axes[0][i].imshow(aug)
+            axes[0][i].set_title(f'Aug {i}', fontsize=9)
+            axes[0][i].axis('off')
+            axes[1][i].imshow(_clahe_preview(aug.astype(np.float32)).astype(np.uint8))
+            axes[1][i].set_title(f'Aug {i} + CLAHE', fontsize=9)
+            axes[1][i].axis('off')
+
+        plt.tight_layout()
+        plt.savefig(str(MODELS_OUT / f'aug_{body_part}.png'), dpi=110, bbox_inches='tight')
+        plt.show()
+        print(f'  Saved: aug_{body_part}.png')
+
+print('\\nDataset preview complete!')
+""")
+
+# ── Cell 7b: Confusion Matrices ───────────────────────────────────────────────
+C7b = cell_code("""\
+# ── Cell 7b: Confusion Matrices per Body Part ────────────────────────────────
+# Loads the best model per body part (by AUC) and plots normalised confusion
+# matrices side-by-side with raw counts. Requires Cell 7 to have run first.
+import gc
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import tensorflow as tf
+from pathlib import Path
+from sklearn.metrics import confusion_matrix, classification_report
+
+SHORT_LABELS = ['Normal', 'Mild', 'Moderate', 'Severe']
+
+print('Generating confusion matrices...')
+
+for body_part, models_info in trained_models.items():
+    ranked = sorted(models_info.items(), key=lambda x: x[1]['test_auc'], reverse=True)
+    arch_name, best_info = ranked[0]
+    h5_path = Path(best_info['path'])
+    size    = best_info['input_size']
+
+    print(f'\\n  {body_part.upper()} — {arch_name} (AUC={best_info["test_auc"]:.4f})')
+
+    if not h5_path.exists():
+        print(f'    Model file not found: {h5_path}')
+        continue
+
+    try:
+        model = tf.keras.models.load_model(str(h5_path), compile=False)
+    except Exception as e:
+        print(f'    Could not load model: {e}')
+        continue
+
+    arch_config = MODELS_CONFIG.get(arch_name)
+    if arch_config is None:
+        print(f'    Architecture config not found for {arch_name}')
+        del model; tf.keras.backend.clear_session(); gc.collect()
+        continue
+
+    # Try test split first, fall back to val
+    X, y = load_split_arch(DATASET_PROC, body_part, 'test', arch_config, augment=False)
+    if len(X) == 0:
+        X, y = load_split_arch(DATASET_PROC, body_part, 'val', arch_config, augment=False)
+    if len(X) == 0:
+        print('    No test/val data available')
+        del model; tf.keras.backend.clear_session(); gc.collect()
+        continue
+
+    y_pred = np.argmax(model.predict(X, verbose=0, batch_size=16), axis=1)
+    del model
+    tf.keras.backend.clear_session()
+    gc.collect()
+
+    cm_raw  = confusion_matrix(y, y_pred, labels=list(range(NUM_CLASSES)))
+    cm_norm = cm_raw.astype('float') / (cm_raw.sum(axis=1, keepdims=True) + 1e-8)
+
+    fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+    fig.suptitle(f'Confusion Matrix — {body_part.title()} ({arch_name})',
+                 fontsize=13, fontweight='bold')
+
+    for ax, data, title, fmt in [
+        (axes[0], cm_raw,  'Raw Counts',        'd'),
+        (axes[1], cm_norm, 'Normalised (row %)', '.2%'),
+    ]:
+        sns.heatmap(
+            data, annot=True, fmt=fmt, cmap='Blues',
+            xticklabels=SHORT_LABELS, yticklabels=SHORT_LABELS,
+            ax=ax, linewidths=0.5, linecolor='white',
+            cbar_kws={'shrink': 0.8},
+        )
+        ax.set_title(title, fontsize=11, fontweight='bold')
+        ax.set_xlabel('Predicted', fontsize=10)
+        ax.set_ylabel('Actual', fontsize=10)
+
+    plt.tight_layout()
+    plt.savefig(str(MODELS_OUT / f'confusion_{body_part}.png'), dpi=120, bbox_inches='tight')
+    plt.show()
+    print(classification_report(y, y_pred, target_names=CLASS_NAMES, zero_division=0))
+    print(f'  Saved: confusion_{body_part}.png')
+
+print('\\nConfusion matrices complete!')
+""")
+
+# ── Cell 7c: Grad-CAM / Saliency Heatmaps ────────────────────────────────────
+C7c = cell_code("""\
+# ── Cell 7c: Grad-CAM / Saliency Heatmaps ────────────────────────────────────
+# Generates gradient saliency maps for random samples from each class.
+# Gradient saliency is architecture-agnostic (works with EfficientNet, etc.)
+# and shows pixel-level importance for the predicted class.
+import gc
+import random
+import numpy as np
+import cv2
+import matplotlib.pyplot as plt
+import tensorflow as tf
+from pathlib import Path
+from PIL import Image
+
+GRADCAM_COLORS = {
+    '0_Normal': '#27ae60', '1_Mild': '#f39c12',
+    '2_Moderate': '#e67e22', '3_Severe': '#c0392b',
+}
+GRADCAM_LABELS = {
+    '0_Normal': 'Normal', '1_Mild': 'Mild Anemia',
+    '2_Moderate': 'Moderate Anemia', '3_Severe': 'Severe Anemia',
+}
+N_SAMPLES = 3   # images per class per body part
+
+def _compute_saliency(model, img_proc):
+    '''Gradient saliency map — works with any Keras architecture.'''
+    img_var = tf.Variable(img_proc[np.newaxis].astype('float32'))
+    with tf.GradientTape() as tape:
+        preds  = model(img_var, training=False)
+        top_i  = int(tf.argmax(preds[0]))
+        score  = preds[0, top_i]
+    grads   = tape.gradient(score, img_var)[0]   # (H, W, 3)
+    grads   = tf.abs(grads)
+    sal     = tf.reduce_max(grads, axis=-1).numpy()  # (H, W)
+    sal_min, sal_max = sal.min(), sal.max()
+    sal     = (sal - sal_min) / (sal_max - sal_min + 1e-8)
+    return sal, top_i, float(tf.reduce_max(preds[0]))
+
+def _overlay(orig_rgb, saliency):
+    '''Overlay colour heatmap on the original image.'''
+    h, w    = orig_rgb.shape[:2]
+    sal_up  = cv2.resize(saliency, (w, h))
+    heat    = cv2.applyColorMap(np.uint8(255 * sal_up), cv2.COLORMAP_JET)
+    heat    = cv2.cvtColor(heat, cv2.COLOR_BGR2RGB)
+    overlay = 0.55 * orig_rgb.astype(float) + 0.45 * heat.astype(float)
+    return np.clip(overlay, 0, 255).astype(np.uint8)
+
+def _load_sample_paths(folder, n):
+    folder = Path(folder)
+    if not folder.exists():
+        return []
+    paths = list(folder.glob('*.jpg')) + list(folder.glob('*.jpeg')) + list(folder.glob('*.png'))
+    random.shuffle(paths)
+    return paths[:n * 3]   # buffer for failures
+
+for body_part, models_info in trained_models.items():
+    ranked    = sorted(models_info.items(), key=lambda x: x[1]['test_auc'], reverse=True)
+    arch_name, best_info = ranked[0]
+    h5_path   = Path(best_info['path'])
+    size      = best_info['input_size']
+
+    print(f'\\nGrad-CAM: {body_part.upper()} — {arch_name}')
+    if not h5_path.exists():
+        print(f'  Model not found: {h5_path}')
+        continue
+
+    try:
+        model = tf.keras.models.load_model(str(h5_path), compile=False)
+    except Exception as e:
+        print(f'  Could not load model: {e}')
+        continue
+
+    arch_config   = MODELS_CONFIG.get(arch_name)
+    preprocess_fn = arch_config['preprocess'] if arch_config else (lambda x: x)
+
+    fig_cols = N_SAMPLES * 2
+    fig_rows = len(CLASS_NAMES)
+    fig, axes = plt.subplots(fig_rows, fig_cols, figsize=(fig_cols * 2.6, fig_rows * 2.8))
+    fig.suptitle(
+        f'Grad-CAM Saliency Maps: {body_part.title()} ({arch_name})\\n'
+        'Column pairs: Original | Model Focus Heatmap',
+        fontsize=11, fontweight='bold',
+    )
+
+    for row, cn in enumerate(CLASS_NAMES):
+        test_dir  = DATASET_PROC / body_part / 'test'  / cn
+        train_dir = DATASET_PROC / body_part / 'train' / cn
+        paths = _load_sample_paths(test_dir, N_SAMPLES)
+        if len(paths) < N_SAMPLES:
+            paths += _load_sample_paths(train_dir, N_SAMPLES - len(paths))
+
+        drawn = 0
+        for img_path in paths:
+            if drawn >= N_SAMPLES:
+                break
+            try:
+                orig = np.array(Image.open(img_path).convert('RGB').resize((size, size)))
+                proc = preprocess_fn(apply_clahe(orig.astype(np.float32)))
+                sal, pred_i, conf = _compute_saliency(model, proc)
+                heat_img = _overlay(orig, sal)
+
+                c_o = drawn * 2
+                c_h = c_o + 1
+                ax_o = axes[row][c_o] if fig_rows > 1 else axes[c_o]
+                ax_h = axes[row][c_h] if fig_rows > 1 else axes[c_h]
+
+                ax_o.imshow(orig)
+                ax_o.axis('off')
+                if drawn == 0:
+                    ax_o.set_ylabel(
+                        GRADCAM_LABELS.get(cn, cn),
+                        fontsize=9, fontweight='bold',
+                        color=GRADCAM_COLORS.get(cn, '#888'),
+                        rotation=0, labelpad=80, va='center',
+                    )
+
+                pred_cn  = CLASS_NAMES[pred_i] if pred_i < len(CLASS_NAMES) else '?'
+                correct  = (pred_i == row)
+                tc       = '#27ae60' if correct else '#e74c3c'
+                verdict  = 'Correct' if correct else 'Wrong'
+                pred_lbl = GRADCAM_LABELS.get(pred_cn, pred_cn)
+                ax_h.imshow(heat_img)
+                ax_h.set_title(
+                    f'{verdict} | conf={conf:.2f}\\nPred: {pred_lbl}',
+                    fontsize=7, color=tc,
+                )
+                for sp in ax_h.spines.values():
+                    sp.set_edgecolor(tc)
+                    sp.set_linewidth(2)
+                ax_h.axis('off')
+                drawn += 1
+            except Exception:
+                pass
+
+        # Blank unused columns
+        for col in range(drawn * 2, fig_cols):
+            ax = axes[row][col] if fig_rows > 1 else axes[col]
+            ax.axis('off')
+
+    plt.tight_layout()
+    save_path = str(MODELS_OUT / f'gradcam_{body_part}.png')
+    plt.savefig(save_path, dpi=120, bbox_inches='tight')
+    plt.show()
+    print(f'  Saved: gradcam_{body_part}.png')
+
+    del model
+    tf.keras.backend.clear_session()
+    gc.collect()
+
+print('\\nGrad-CAM heatmaps complete!')
+""")
+
+# ── Cell 8b: Ensemble Weight Config ───────────────────────────────────────────
+C8b = cell_code("""\
+# ── Cell 8b: Ensemble Weight Configuration ───────────────────────────────────
+# Calculates AUC-weighted ensemble weights for each body part and saves them
+# to a JSON config that the app can use at inference time.
+import json
+from pathlib import Path
+
+print('Computing ensemble weights...')
+ensemble_config = {}
+
+for body_part, models_info in trained_models.items():
+    total_auc = sum(m['test_auc'] for m in models_info.values())
+    weights   = {}
+    for arch_name, info in models_info.items():
+        w = info['test_auc'] / total_auc if total_auc > 0 else 1.0 / len(models_info)
+        weights[arch_name] = {
+            'weight':         round(w, 6),
+            'test_accuracy':  info['test_accuracy'],
+            'test_auc':       info['test_auc'],
+            'input_size':     info['input_size'],
+            'h5_path':        info['path'],
+        }
+
+    ranked = sorted(weights.items(), key=lambda x: x[1]['test_auc'], reverse=True)
+    avg_auc = total_auc / max(len(models_info), 1)
+
+    ensemble_config[body_part] = {
+        'num_models': len(weights),
+        'avg_test_auc': round(avg_auc, 6),
+        'best_model': ranked[0][0],
+        'models': weights,
+    }
+
+    print(f'\\n  {body_part.upper()} ({len(weights)} models, avg AUC={avg_auc:.4f}):')
+    for name, data in ranked:
+        bar = '#' * int(data['weight'] * 50)
+        print(f'    {name}: weight={data["weight"]:.4f}  AUC={data["test_auc"]:.4f}  {bar}')
+
+# Save ensemble config
+config_path = MODELS_OUT / 'ensemble_config.json'
+config_path.write_text(json.dumps(ensemble_config, indent=2))
+print(f'\\nEnsemble config saved: {config_path}')
+
+# Save a simpler app-ready version
+app_config = {}
+for bp, cfg in ensemble_config.items():
+    app_config[bp] = {
+        'bestModel': cfg['best_model'],
+        'avgAuc':    cfg['avg_test_auc'],
+        'weights': {
+            name: data['weight']
+            for name, data in cfg['models'].items()
+        },
+    }
+app_config_path = MODELS_OUT / 'ensemble_app_config.json'
+app_config_path.write_text(json.dumps(app_config, indent=2))
+print(f'App config saved:      {app_config_path}')
+print('\\nCopy ensemble_app_config.json to src/lib/ensemble/ after training.')
+""")
+
 # ── Assemble Notebook ─────────────────────────────────────────────────────────
 NOTEBOOK = {
-    "cells": [C0, C1, C2, C3, C4, C5, C6, C7, C8, C9, C10],
+    "cells": [C0, C1, C2, C3, C4, C5, C6, C6b, C7, C7b, C7c, C8b, C8, C9, C10],
     "metadata": {
         "accelerator": "GPU",
         "colab": {
