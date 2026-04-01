@@ -14,15 +14,15 @@ Datasets downloaded:
      kaggle.com/datasets/thefearlesscoder/nail-dataset-for-blood-hemoglobin-estimation
   4. Kaggle — Anemia Types Classification (CBC + clinical images)
      kaggle.com/datasets/ehababoelnaga/anemia-types-classification
-  5. Mendeley — Nail Bed Pallor Dataset (direct download)
-     data.mendeley.com/datasets/ynddm4j5d3/1
+  5. Kaggle — Anemia Detection from Conjunctiva
+     kaggle.com/datasets/natchapol/anemia-from-conjunctival-pallor (if available)
 
 Prerequisites:
-  1. pip install -r scripts/ml/requirements.txt
-  2. Set up Kaggle API:
-     - Go to kaggle.com → Account → Create New API Token
-     - Save kaggle.json to ~/.kaggle/kaggle.json (Linux/Mac)
-     - Or set KAGGLE_USERNAME and KAGGLE_KEY environment variables
+  1. pip install -r scripts/ml/requirements_local.txt
+  2. Either:
+     - Run: python scripts/ml/setup_credentials.py --username X --key Y
+     - Or set env vars: KAGGLE_USERNAME / KAGGLE_KEY
+     - Or place kaggle.json at ~/.kaggle/kaggle.json
 
 Usage:
   python scripts/ml/download_datasets.py
@@ -35,6 +35,7 @@ import argparse
 import json
 import os
 import shutil
+import stat
 import sys
 import zipfile
 from pathlib import Path
@@ -64,39 +65,85 @@ KAGGLE_DATASETS = [
         "name": "Conjunctival Pallor (Eye/Undereye)",
         "target": "conjunctiva",
         "description": "~1600 conjunctival images, binary anemia/non-anemia labels",
+        "priority": 1,
     },
     {
         "id": "longntt2001/anemia-detection-from-nailbeds",
         "name": "Anemia Detection from Nail Beds",
         "target": "nailbed",
         "description": "Nail bed pallor images with anemia labels",
+        "priority": 1,
     },
     {
         "id": "thefearlesscoder/nail-dataset-for-blood-hemoglobin-estimation",
         "name": "Nail Hemoglobin Estimation Dataset",
         "target": "nailbed_hgb",
         "description": "Nail images with hemoglobin values for regression training",
+        "priority": 2,
     },
     {
         "id": "ehababoelnaga/anemia-types-classification",
         "name": "Anemia Types Classification",
         "target": "clinical",
         "description": "Multi-class anemia types with clinical indicators",
+        "priority": 2,
+    },
+    {
+        "id": "omkar-thombre/anemia-detection-dataset",
+        "name": "Anemia Detection (Conjunctiva + Palm)",
+        "target": "conjunctiva_palm",
+        "description": "Conjunctiva and palm pallor images",
+        "priority": 1,
+    },
+    {
+        "id": "datamunge/eye-conjunctival-pallor-anemia",
+        "name": "Eye Conjunctival Pallor Dataset",
+        "target": "conjunctiva_extra",
+        "description": "Additional conjunctival images",
+        "priority": 2,
     },
 ]
 
 # ---------------------------------------------------------------------------
-# Utilities
+# Credential Setup
 # ---------------------------------------------------------------------------
+
+def auto_setup_credentials() -> bool:
+    """
+    Auto-write kaggle.json from environment variables if not already present.
+    Returns True if credentials are available.
+    """
+    kaggle_json = Path.home() / ".kaggle" / "kaggle.json"
+
+    if kaggle_json.exists():
+        try:
+            creds = json.loads(kaggle_json.read_text())
+            if creds.get("username") and creds.get("key"):
+                return True
+        except Exception:
+            pass
+
+    username = os.environ.get("KAGGLE_USERNAME", "")
+    key = os.environ.get("KAGGLE_KEY", "")
+
+    if username and key:
+        kaggle_json.parent.mkdir(exist_ok=True)
+        kaggle_json.write_text(json.dumps({"username": username, "key": key}))
+        if os.name != "nt":
+            kaggle_json.chmod(stat.S_IRUSR | stat.S_IWUSR)
+        print(f"  ✓ Kaggle credentials auto-configured: {username}")
+        return True
+
+    return False
+
 
 def check_kaggle_auth() -> bool:
     """Verify Kaggle credentials are available."""
+    if auto_setup_credentials():
+        return True
     kaggle_json = Path.home() / ".kaggle" / "kaggle.json"
-    if kaggle_json.exists():
-        return True
-    if os.environ.get("KAGGLE_USERNAME") and os.environ.get("KAGGLE_KEY"):
-        return True
-    return False
+    return kaggle_json.exists()
+
 
 
 def download_kaggle_dataset(dataset_id: str, output_dir: Path) -> Optional[Path]:
@@ -329,19 +376,23 @@ def main():
     print("ANEMO AI — DATASET DOWNLOADER")
     print("=" * 60)
 
-    # Check Kaggle auth
+    # Check Kaggle auth — auto-configure from env vars if possible
     if not args.skip_download:
         if not check_kaggle_auth():
             print("""
 ERROR: Kaggle credentials not found.
 
 To set up Kaggle API access:
-  1. Go to https://www.kaggle.com → Account → API → Create New API Token
-  2. This downloads kaggle.json
-  3. Place it at ~/.kaggle/kaggle.json
-     Or set environment variables:
-       KAGGLE_USERNAME=your_username
-       KAGGLE_KEY=your_api_key
+  Option 1 — Run the setup script:
+    python scripts/ml/setup_credentials.py --username YOUR_USER --key YOUR_KEY
+
+  Option 2 — Set environment variables:
+    set KAGGLE_USERNAME=your_username
+    set KAGGLE_KEY=your_api_key
+
+  Option 3 — Manual:
+    Go to https://www.kaggle.com → Account → API → Create New API Token
+    Save kaggle.json to: ~/.kaggle/kaggle.json
 
 Then re-run this script.
 """)
@@ -351,49 +402,53 @@ Then re-run this script.
     downloaded = {}
 
     if not args.skip_download:
-        for ds in KAGGLE_DATASETS:
+        # Sort by priority — download most important datasets first
+        sorted_datasets = sorted(KAGGLE_DATASETS, key=lambda d: d.get("priority", 99))
+        for ds in sorted_datasets:
             if args.only != "all":
-                if args.only == "conjunctiva" and ds["target"] not in ["conjunctiva"]:
+                if args.only == "conjunctiva" and ds["target"] not in ["conjunctiva", "conjunctiva_palm", "conjunctiva_extra"]:
                     continue
                 if args.only == "nailbed" and ds["target"] not in ["nailbed", "nailbed_hgb"]:
                     continue
 
+            # Skip if already downloaded
             raw_dest = RAW_DIR / ds["target"]
+            if raw_dest.exists() and any(raw_dest.iterdir()):
+                img_count = sum(1 for _ in raw_dest.rglob("*.jpg")) + sum(1 for _ in raw_dest.rglob("*.png"))
+                if img_count > 10:
+                    print(f"\n  ↩ {ds['name']}: already downloaded ({img_count} images) — skipping")
+                    downloaded[ds["target"]] = raw_dest
+                    continue
+
             result = download_kaggle_dataset(ds["id"], raw_dest)
             if result:
                 downloaded[ds["target"]] = result
+            else:
+                print(f"  ⚠ Skipping {ds['name']} — will proceed with available data")
 
-    # Organise conjunctiva dataset → conjunctiva body part
-    conjunctiva_raw = RAW_DIR / "conjunctiva"
-    if conjunctiva_raw.exists():
-        print("\n[1/3] Organising conjunctiva dataset...")
-        organize_binary_dataset(
-            raw_dir=conjunctiva_raw,
-            output_base=output_base,
-            body_part="conjunctiva",
-            split_ratios=split_ratios,
-        )
+    # Organise conjunctiva datasets → conjunctiva body part
+    print("\n[1/3] Organising conjunctiva dataset...")
+    for conjunctiva_target in ["conjunctiva", "conjunctiva_palm", "conjunctiva_extra"]:
+        conjunctiva_raw = RAW_DIR / conjunctiva_target
+        if conjunctiva_raw.exists():
+            organize_binary_dataset(
+                raw_dir=conjunctiva_raw,
+                output_base=output_base,
+                body_part="conjunctiva",
+                split_ratios=split_ratios,
+            )
 
-    # Organise nailbed dataset → fingernails body part
-    nailbed_raw = RAW_DIR / "nailbed"
-    if nailbed_raw.exists():
-        print("\n[2/3] Organising nailbed dataset...")
-        organize_binary_dataset(
-            raw_dir=nailbed_raw,
-            output_base=output_base,
-            body_part="fingernails",
-            split_ratios=split_ratios,
-        )
-
-    nailbed_hgb_raw = RAW_DIR / "nailbed_hgb"
-    if nailbed_hgb_raw.exists():
-        print("\n[2b] Organising additional nail dataset...")
-        organize_binary_dataset(
-            raw_dir=nailbed_hgb_raw,
-            output_base=output_base,
-            body_part="fingernails",
-            split_ratios=split_ratios,
-        )
+    # Organise nailbed datasets → fingernails body part
+    print("\n[2/3] Organising nailbed dataset...")
+    for nailbed_target in ["nailbed", "nailbed_hgb"]:
+        nailbed_raw = RAW_DIR / nailbed_target
+        if nailbed_raw.exists():
+            organize_binary_dataset(
+                raw_dir=nailbed_raw,
+                output_base=output_base,
+                body_part="fingernails",
+                split_ratios=split_ratios,
+            )
 
     # Skin data — create structure for manual population
     print("\n[3/3] Creating skin dataset structure...")
@@ -418,15 +473,18 @@ Then re-run this script.
 
     print("""
 NEXT STEPS:
-  1. Add Moderate (Hgb 7-10 g/dL) and Severe (Hgb < 7 g/dL) images to placeholder folders
-  2. For skin images: download from ISIC Archive (https://www.isic-archive.com/)
-  3. Run training:
-       python scripts/ml/train_enhanced.py --data-dir dataset/processed
-  4. After training, convert & deploy:
-       python scripts/ml/convert_deploy.py
+  1. Run training locally (auto-detects CPU/GPU):
+       python scripts/ml/train_local.py
 
-TIP: Run training on Google Colab for free GPU:
-  Open: scripts/ml/AnemoAI_Training_Colab.ipynb
+  2. OR run the full pipeline in one step:
+       python scripts/ml/train_local.py --full
+
+  3. After training, models are auto-deployed to public/models/
+
+NOTE: For Moderate/Severe anemia classes, add clinical images to:
+  dataset/processed/<body_part>/train/2_Moderate/
+  dataset/processed/<body_part>/train/3_Severe/
+  (Hgb 7-10 g/dL = Moderate, Hgb < 7 g/dL = Severe)
 """)
 
 
