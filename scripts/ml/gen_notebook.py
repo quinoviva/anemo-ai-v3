@@ -239,8 +239,31 @@ print('='*60)
 print('SOURCE 1: Roboflow Universe — Non-Invasive Anemia Detection')
 print('='*60)
 
-ROBOFLOW_API_KEY = ''  # ← Paste your free Roboflow API key here
-#                          Get it FREE at: https://app.roboflow.com (sign up → Settings → API)
+# ── Auto-detect API key from environment / Kaggle Secrets / Colab Secrets ────
+ROBOFLOW_API_KEY = ''  # ← Optional: paste key here if not using Secrets
+
+# Auto-detect from Kaggle Secrets (recommended — never hardcodes key in notebook)
+if not ROBOFLOW_API_KEY:
+    try:
+        from kaggle_secrets import UserSecretsClient
+        ROBOFLOW_API_KEY = UserSecretsClient().get_secret('ROBOFLOW_API_KEY')
+        print('  API key loaded from Kaggle Secrets ✓')
+    except Exception:
+        pass
+
+# Auto-detect from Google Colab Secrets
+if not ROBOFLOW_API_KEY:
+    try:
+        from google.colab import userdata
+        ROBOFLOW_API_KEY = userdata.get('ROBOFLOW_API_KEY')
+        print('  API key loaded from Colab Secrets ✓')
+    except Exception:
+        pass
+
+# Auto-detect from environment variable (local / VS Code)
+if not ROBOFLOW_API_KEY:
+    import os
+    ROBOFLOW_API_KEY = os.environ.get('ROBOFLOW_API_KEY', '')
 
 rf_downloaded = {}
 rf_dest = DATASET_RAW / 'conjunctiva_roboflow'
@@ -268,11 +291,22 @@ elif ROBOFLOW_API_KEY:
         print(f'    FAIL: {e}')
         print('    → Get free API key at: https://app.roboflow.com')
 else:
-    print('  SKIPPED — no Roboflow API key set')
-    print('  To enable:')
-    print('  1. Sign up FREE at: https://app.roboflow.com')
-    print('  2. Go to Settings → API → Copy your key')
-    print('  3. Paste it into ROBOFLOW_API_KEY above and re-run this cell')
+    print('  SKIPPED — no Roboflow API key found')
+    print()
+    print('  HOW TO ADD YOUR KEY (choose one method):')
+    print()
+    print('  METHOD 1 — Kaggle Secrets (recommended, never exposed in code):')
+    print('    Notebook sidebar → Add-ons → Secrets → Add secret')
+    print('    Name: ROBOFLOW_API_KEY   Value: <your key>')
+    print()
+    print('  METHOD 2 — Colab Secrets:')
+    print('    Left sidebar 🔑 icon → Add secret')
+    print('    Name: ROBOFLOW_API_KEY   Value: <your key>')
+    print()
+    print('  METHOD 3 — Paste directly (least secure):')
+    print('    Set ROBOFLOW_API_KEY = "your_key_here" at the top of this cell')
+    print()
+    print('  Get your FREE key: https://app.roboflow.com → Settings → API')
 
 # ── 2. HuggingFace Hub (conjunctiva — 218 real images, zero auth) ─────────────
 print()
