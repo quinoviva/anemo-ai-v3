@@ -693,82 +693,174 @@ else:
 # ── Cell 6: Organise Dataset ──────────────────────────────────────────────────
 C6 = cell_code("""\
 # ── Cell 6: Organise Dataset ──────────────────────────────────────────────────
-import random
-import shutil
+# Maps Cell 5 output folders → train/val/test splits per body part.
+#
+# Cell 5 creates:
+#   conjunctiva_hf/            ← HuggingFace real (binary: 0_Normal, 1_Anemia)
+#   conjunctiva_hf_augmented/  ← 8× augmented real (same structure)
+#   conjunctiva_roboflow/      ← Roboflow real (if key was set)
+#   conjunctiva_roboflow_augmented/
+#   conjunctiva_synthetic/     ← 4-class synthetic (0_Normal…3_Severe)
+#   nailbed_synthetic/         ← 4-class synthetic
+#   palm_synthetic/            ← 4-class synthetic
+#
+# Output structure:
+#   DATASET_PROC/<body_part>/train/<class>/  (70%)
+#   DATASET_PROC/<body_part>/val/<class>/    (15%)
+#   DATASET_PROC/<body_part>/test/<class>/   (15%)
+import random, shutil
 from pathlib import Path
 
 random.seed(42)
 CLASS_NAMES = ['0_Normal', '1_Mild', '2_Moderate', '3_Severe']
 
+# Map body-part label → list of raw source folders (highest quality first)
+BODY_PART_SOURCES = {
+    'conjunctiva': [
+        'conjunctiva_roboflow_augmented',
+        'conjunctiva_roboflow',
+        'conjunctiva_hf_augmented',
+        'conjunctiva_hf',
+        'conjunctiva_synthetic',
+    ],
+    'fingernails': [
+        'nailbed_synthetic',
+    ],
+    'skin': [
+        'palm_synthetic',
+    ],
+}
 
-def organise_binary_dataset(raw_dir, output_base, body_part,
-                             positive_kw=None, negative_kw=None):
-    positive_kw = positive_kw or ['anemia', 'anemic', 'positive', '1']
-    negative_kw = negative_kw or ['normal', 'healthy', 'negative', '0', 'non']
 
+def copy_split(files, output_base, body_part, cls):
+    """Copy a list of image files into train/val/test splits."""
+    random.shuffle(files)
+    n  = len(files)
+    n1 = int(n * 0.70)   # 70% train
+    n2 = int(n * 0.15)   # 15% val
+    splits = {
+        'train': files[:n1],
+        'val':   files[n1:n1+n2],
+        'test':  files[n1+n2:],
+    }
+    total = 0
+    for split_name, split_files in splits.items():
+        dest = Path(output_base) / body_part / split_name / cls
+        dest.mkdir(parents=True, exist_ok=True)
+        for i, src in enumerate(split_files):
+            dst_name = f'{src.stem}_{i:05d}{src.suffix}'
+            try:
+                shutil.copy2(src, dest / dst_name)
+                total += 1
+            except Exception:
+                pass
+    return total
+
+
+def organise_source(raw_dir, output_base, body_part):
+    """
+    Organise images from a source directory.
+
+    Handles two layouts:
+      a) Already-classified subdirs matching CLASS_NAMES (synthetic output)
+         raw_dir/0_Normal/*.jpg, raw_dir/1_Mild/*.jpg, ...
+      b) Binary-classified subdirs (real data: 0_Normal, 1_Anemia, etc.)
+         → maps any anemia folder → 1_Mild  (conservative label for real data)
+         → maps normal folder → 0_Normal
+    """
     raw_dir = Path(raw_dir)
     if not raw_dir.exists():
-        print(f'  not found: {raw_dir}')
         return 0
 
     exts = {'.jpg', '.jpeg', '.png', '.bmp'}
-    imgs = [f for ext in exts for f in raw_dir.rglob(f'*{ext}')]
-    if not imgs:
-        print(f'  no images in {raw_dir}')
-        return 0
+    total = 0
 
-    anemic, normal, unclassified = [], [], []
-    for img in imgs:
-        check_str = str(img).lower() + ' ' + img.parent.name.lower()
-        is_pos = any(k in check_str for k in positive_kw)
-        is_neg = any(k in check_str for k in negative_kw)
-        if is_pos and not is_neg:
-            anemic.append(img)
-        elif is_neg and not is_pos:
-            normal.append(img)
-        else:
-            unclassified.append(img)
+    # Detect subdirectory layout
+    subdirs = [d for d in raw_dir.iterdir() if d.is_dir()]
+    known_classes = {d.name for d in subdirs}
 
-    normal.extend(unclassified)
-    print(f'  {body_part}: {len(anemic)} anemic, {len(normal)} normal')
+    # Layout A: 4-class synthetic (exact CLASS_NAMES match)
+    if known_classes & set(CLASS_NAMES):
+        print(f'    layout: 4-class ({raw_dir.name})')
+        for cls in CLASS_NAMES:
+            cls_dir = raw_dir / cls
+            if not cls_dir.exists():
+                continue
+            imgs = [f for ext in exts for f in cls_dir.glob(f'*{ext}')]
+            if not imgs:
+                continue
+            copied = copy_split(imgs, output_base, body_part, cls)
+            total += copied
+        return total
 
-    for label, files in [('1_Mild', anemic), ('0_Normal', normal)]:
-        random.shuffle(files)
-        n  = len(files)
-        n1 = int(n * 0.70)
-        n2 = int(n * 0.15)
-        splits = {
-            'train': files[:n1],
-            'val':   files[n1:n1 + n2],
-            'test':  files[n1 + n2:],
-        }
-        for split_name, split_files in splits.items():
-            dest = Path(output_base) / body_part / split_name / label
-            dest.mkdir(parents=True, exist_ok=True)
-            for src in split_files:
-                try:
-                    shutil.copy2(src, dest / src.name)
-                except Exception:
-                    pass
-    return len(imgs)
+    # Layout B: binary (real data — 0_Normal / 1_Anemia or similar)
+    anemia_kw  = {'anemia', 'anemic', 'positive', '1_anemia', '1_mild',
+                  '1_moderate', '1_severe', 'mild', 'moderate', 'severe'}
+    normal_kw  = {'normal', 'healthy', 'negative', '0_normal', '0', 'non'}
+    bucket = {'0_Normal': [], '1_Mild': []}
+
+    if subdirs:
+        print(f'    layout: binary subdirs ({raw_dir.name})')
+        for d in subdirs:
+            dname = d.name.lower()
+            imgs = [f for ext in exts for f in d.glob(f'*{ext}')]
+            if any(k in dname for k in anemia_kw):
+                bucket['1_Mild'].extend(imgs)
+            else:
+                bucket['0_Normal'].extend(imgs)
+    else:
+        # Flat directory — classify by filename
+        print(f'    layout: flat dir ({raw_dir.name})')
+        imgs_all = [f for ext in exts for f in raw_dir.glob(f'*{ext}')]
+        for f in imgs_all:
+            fname = f.stem.lower()
+            if any(k in fname for k in anemia_kw):
+                bucket['1_Mild'].append(f)
+            else:
+                bucket['0_Normal'].append(f)
+
+    for cls, imgs in bucket.items():
+        if imgs:
+            copied = copy_split(imgs, output_base, body_part, cls)
+            total += copied
+    return total
 
 
 print('Organising datasets...')
-total = 0
-for conjunctiva_src in ['conjunctiva', 'conjunctiva_palm']:
-    total += organise_binary_dataset(DATASET_RAW / conjunctiva_src, DATASET_PROC, 'conjunctiva')
-for nail_src in ['nailbed', 'nailbed_hgb']:
-    total += organise_binary_dataset(DATASET_RAW / nail_src, DATASET_PROC, 'fingernails')
+grand_total = 0
 
-print(f'\\nTotal images organised: {total}')
+for body_part, sources in BODY_PART_SOURCES.items():
+    part_total = 0
+    print(f'\\n  [{body_part}]')
+    for src_name in sources:
+        raw_dir = DATASET_RAW / src_name
+        if not raw_dir.exists():
+            print(f'    skip {src_name} (not present)')
+            continue
+        n = organise_source(raw_dir, DATASET_PROC, body_part)
+        print(f'    {src_name:45s} → {n:6d} images copied')
+        part_total += n
+    print(f'    subtotal: {part_total:,}')
+    grand_total += part_total
+
+print(f'\\nTotal images organised: {grand_total:,}')
 print('\\nDataset summary:')
 for bp in ['conjunctiva', 'fingernails', 'skin']:
     bp_dir = DATASET_PROC / bp
     if not bp_dir.exists():
         print(f'  {bp}: no data')
         continue
-    n = sum(1 for f in bp_dir.rglob('*.jpg')) + sum(1 for f in bp_dir.rglob('*.png'))
-    print(f'  {bp}: {n} images')\
+    n = (sum(1 for _ in bp_dir.rglob('*.jpg'))
+         + sum(1 for _ in bp_dir.rglob('*.png')))
+    class_counts = {}
+    for cls in CLASS_NAMES:
+        c = sum(1 for split in ['train','val','test']
+                for _ in (bp_dir/split/cls).rglob('*.jpg') if (bp_dir/split/cls).exists())
+        if c: class_counts[cls] = c
+    print(f'  {bp}: {n:,} images  {class_counts}')
+
+if grand_total == 0:
+    raise RuntimeError('No images organised — check Cell 5 ran successfully.')\
 """)
 
 # ── Cell 7: Multi-Model Ensemble Training ─────────────────────────────────────

@@ -341,167 +341,31 @@ _CELL5_CODE = textwrap.dedent('''
 NEW_CELL5_SOURCE = [line + '\n' for line in _CELL5_CODE.split('\n')]
 NEW_CELL5_SOURCE[-1] = NEW_CELL5_SOURCE[-1].rstrip('\n')  # last line has no trailing \n
 
-# ── New Cell 6 code ────────────────────────────────────────────────────────────
-_CELL6_CODE = textwrap.dedent('''
-    # ── Cell 6: Organise Dataset ──────────────────────────────────────────────────
-    # Maps Cell 5 output folders → train/val/test splits per body part.
-    #
-    # Cell 5 creates:
-    #   conjunctiva_hf/            (HuggingFace real — binary labels)
-    #   conjunctiva_hf_augmented/  (8x augmented real)
-    #   conjunctiva_roboflow/      (Roboflow real — if key was set)
-    #   conjunctiva_roboflow_augmented/
-    #   conjunctiva_synthetic/     (4-class synthetic: 0_Normal…3_Severe)
-    #   nailbed_synthetic/
-    #   palm_synthetic/
-    import random, shutil
-    from pathlib import Path
-
-    random.seed(42)
-    CLASS_NAMES = ["0_Normal", "1_Mild", "2_Moderate", "3_Severe"]
-
-    BODY_PART_SOURCES = {
-        "conjunctiva": [
-            "conjunctiva_roboflow_augmented",
-            "conjunctiva_roboflow",
-            "conjunctiva_hf_augmented",
-            "conjunctiva_hf",
-            "conjunctiva_synthetic",
-        ],
-        "fingernails": ["nailbed_synthetic"],
-        "skin":        ["palm_synthetic"],
-    }
-
-    def copy_split(files, output_base, body_part, cls):
-        random.shuffle(files)
-        n  = len(files)
-        n1 = int(n * 0.70)
-        n2 = int(n * 0.15)
-        splits = {"train": files[:n1], "val": files[n1:n1+n2], "test": files[n1+n2:]}
-        total = 0
-        for split_name, split_files in splits.items():
-            dest = Path(output_base) / body_part / split_name / cls
-            dest.mkdir(parents=True, exist_ok=True)
-            for i, src in enumerate(split_files):
-                try:
-                    shutil.copy2(src, dest / f"{src.stem}_{i:05d}{src.suffix}")
-                    total += 1
-                except Exception:
-                    pass
-        return total
-
-    def organise_source(raw_dir, output_base, body_part):
-        raw_dir = Path(raw_dir)
-        if not raw_dir.exists():
-            return 0
-        exts = {".jpg", ".jpeg", ".png", ".bmp"}
-        total = 0
-        subdirs = [d for d in raw_dir.iterdir() if d.is_dir()]
-        known = {d.name for d in subdirs}
-
-        # 4-class synthetic layout
-        if known & set(CLASS_NAMES):
-            print(f"    layout: 4-class ({raw_dir.name})")
-            for cls in CLASS_NAMES:
-                cls_dir = raw_dir / cls
-                if not cls_dir.exists():
-                    continue
-                imgs = [f for ext in exts for f in cls_dir.glob(f"*{ext}")]
-                total += copy_split(imgs, output_base, body_part, cls)
-            return total
-
-        # Binary layout (real data)
-        anemia_kw = {"anemia","anemic","positive","1_anemia","mild","moderate","severe"}
-        bucket = {"0_Normal": [], "1_Mild": []}
-        if subdirs:
-            print(f"    layout: binary subdirs ({raw_dir.name})")
-            for d in subdirs:
-                imgs = [f for ext in exts for f in d.glob(f"*{ext}")]
-                if any(k in d.name.lower() for k in anemia_kw):
-                    bucket["1_Mild"].extend(imgs)
-                else:
-                    bucket["0_Normal"].extend(imgs)
-        else:
-            print(f"    layout: flat dir ({raw_dir.name})")
-            for f in [f for ext in exts for f in raw_dir.glob(f"*{ext}")]:
-                if any(k in f.stem.lower() for k in anemia_kw):
-                    bucket["1_Mild"].append(f)
-                else:
-                    bucket["0_Normal"].append(f)
-        for cls, imgs in bucket.items():
-            total += copy_split(imgs, output_base, body_part, cls)
-        return total
-
-    print("Organising datasets...")
-    grand_total = 0
-    for body_part, sources in BODY_PART_SOURCES.items():
-        part_total = 0
-        print(f"\\n  [{body_part}]")
-        for src_name in sources:
-            raw_dir = DATASET_RAW / src_name
-            if not raw_dir.exists():
-                print(f"    skip {src_name} (not present)")
-                continue
-            n = organise_source(raw_dir, DATASET_PROC, body_part)
-            print(f"    {src_name:45s} → {n:6d} images copied")
-            part_total += n
-        print(f"    subtotal: {part_total:,}")
-        grand_total += part_total
-
-    print(f"\\nTotal images organised: {grand_total:,}")
-    print("\\nDataset summary:")
-    for bp in ["conjunctiva", "fingernails", "skin"]:
-        bp_dir = DATASET_PROC / bp
-        if not bp_dir.exists():
-            print(f"  {bp}: no data"); continue
-        n = sum(1 for _ in bp_dir.rglob("*.jpg")) + sum(1 for _ in bp_dir.rglob("*.png"))
-        cc = {cls: sum(1 for s in ["train","val","test"]
-                  for _ in (bp_dir/s/cls).rglob("*.jpg") if (bp_dir/s/cls).exists())
-              for cls in CLASS_NAMES}
-        cc = {k: v for k, v in cc.items() if v}
-        print(f"  {bp}: {n:,} images  {cc}")
-    if grand_total == 0:
-        raise RuntimeError("No images organised — check Cell 5 ran successfully.")
-''').strip()
-
-NEW_CELL6_SOURCE = [line + '\n' for line in _CELL6_CODE.split('\n')]
-NEW_CELL6_SOURCE[-1] = NEW_CELL6_SOURCE[-1].rstrip('\n')
-
 
 def update_notebook():
     print(f'Reading {NOTEBOOK}...')
     nb = json.loads(NOTEBOOK.read_text(encoding='utf-8'))
 
-    def find_cell(nb, *markers):
-        for i, cell in enumerate(nb['cells']):
-            if cell.get('cell_type') == 'code':
-                src = ''.join(cell.get('source', []))
-                if any(m in src for m in markers):
-                    return i
-        return None
+    cell5_idx = None
+    for i, cell in enumerate(nb['cells']):
+        if cell.get('cell_type') == 'code':
+            src = ''.join(cell.get('source', []))
+            if '# ── Cell 5:' in src or 'Download Datasets' in src or 'Multi-Source' in src:
+                cell5_idx = i
+                break
 
-    # Patch Cell 5
-    c5 = find_cell(nb, '# ── Cell 5:', 'Download Datasets', 'Multi-Source Dataset')
-    if c5 is None:
-        print('ERROR: Could not find Cell 5!'); return False
-    print(f'  Patching Cell 5 (index {c5}) — multi-source dataset acquisition')
-    nb['cells'][c5]['source'] = NEW_CELL5_SOURCE
+    if cell5_idx is None:
+        print('ERROR: Could not find Cell 5 in notebook!')
+        return False
 
-    # Patch Cell 6
-    c6 = find_cell(nb, '# ── Cell 6:', 'Organise Dataset', 'organise_binary_dataset')
-    if c6 is None:
-        print('WARNING: Could not find Cell 6 — inserting after Cell 5')
-        new_cell = {"cell_type":"code","execution_count":None,
-                    "metadata":{},"outputs":[],"source":NEW_CELL6_SOURCE}
-        nb['cells'].insert(c5 + 1, new_cell)
-    else:
-        print(f'  Patching Cell 6 (index {c6}) — dataset organise with correct folder mapping')
-        nb['cells'][c6]['source'] = NEW_CELL6_SOURCE
+    print(f'  Found Cell 5 at notebook cell index {cell5_idx}')
+    nb['cells'][cell5_idx]['source'] = NEW_CELL5_SOURCE
+    print(f'  Replaced with improved multi-source strategy ({len(NEW_CELL5_SOURCE)} lines)')
+    print(f'  Target: ~16 000 images (12 000 synthetic + ~3 768 augmented + ~471 real)')
 
     NOTEBOOK.write_text(json.dumps(nb, ensure_ascii=False, indent=1), encoding='utf-8')
     print(f'\n✓ Notebook updated: {NOTEBOOK}')
-    print('  Cell 5: Roboflow → HuggingFace → Synthetic (1000/class) → Augment (8×)')
-    print('  Cell 6: organise_source() handles both 4-class synthetic and binary real layouts')
+    print('  Sources: Roboflow → HuggingFace → Synthetic (1000/class) → Augment (8×)')
     return True
 
 
