@@ -94,9 +94,23 @@ for gpu in gpus:
 
 if not gpus:
     print('\\nWARNING: No GPU found. Training will be VERY slow on CPU.')
-    print('  -> Enable GPU: Runtime -> Change runtime type -> T4 GPU -> Save')
+    print('  -> Enable GPU: Accelerator -> GPU T4 x2 -> Save')
+
+# Set up distribution strategy (auto-scales to 1 or 2 GPUs)
+if len(gpus) >= 2:
+    strategy = tf.distribute.MirroredStrategy()
+    print(f'\\nUsing MirroredStrategy across {len(gpus)} GPUs ✓')
+    BATCH_SIZE_PER_GPU = 32
+    GLOBAL_BATCH_SIZE = BATCH_SIZE_PER_GPU * len(gpus)  # 64 for T4 x2
+elif len(gpus) == 1:
+    strategy = tf.distribute.OneDeviceStrategy('/gpu:0')
+    print('\\nUsing single GPU ✓')
+    GLOBAL_BATCH_SIZE = 32
 else:
-    print('\\nGPU ready!')\
+    strategy = tf.distribute.OneDeviceStrategy('/cpu:0')
+    GLOBAL_BATCH_SIZE = 16
+
+print(f'Global batch size: {GLOBAL_BATCH_SIZE}')\
 """)
 
 # ── Cell 2: Install Dependencies ──────────────────────────────────────────────
@@ -928,11 +942,13 @@ except Exception as e:
 
 # ── Configuration ─────────────────────────────────────────────────────────────
 LOAD_SIZE   = 224    # base load size (resized per-architecture as needed)
-BATCH_SIZE  = 16     # conservative for multi-model memory
+# BATCH_SIZE is set from Cell 1 (GLOBAL_BATCH_SIZE: 64 for T4x2, 32 for T4x1)
+BATCH_SIZE  = GLOBAL_BATCH_SIZE if 'GLOBAL_BATCH_SIZE' in dir() else 32
 NUM_CLASSES = 4
 CLASS_NAMES = ['0_Normal', '1_Mild', '2_Moderate', '3_Severe']
 SEED        = 42
 MAX_MODELS  = 10     # reduce to 3-5 for faster training
+print(f'Batch size: {BATCH_SIZE}  (GPUs: {len(tf.config.list_physical_devices("GPU"))})')
 
 np.random.seed(SEED)
 tf.random.set_seed(SEED)
@@ -1158,13 +1174,16 @@ for body_part in ['conjunctiva', 'fingernails', 'skin']:
         ]
 
         try:
-            model, base = build_arch_model(arch_name, arch_config)
+            # Build model inside strategy scope for multi-GPU support
+            with strategy.scope():
+                model, base = build_arch_model(arch_name, arch_config)
 
             # Phase 1: head only (frozen base)
-            model.compile(
-                optimizer=keras.optimizers.Adam(1e-3),
-                loss=ordinal_focal_loss(),
-                metrics=['accuracy', keras.metrics.AUC(name='auc')])
+            with strategy.scope():
+                model.compile(
+                    optimizer=keras.optimizers.Adam(1e-3),
+                    loss=ordinal_focal_loss(),
+                    metrics=['accuracy', keras.metrics.AUC(name='auc')])
             model.fit(X_tr, y_tr_ohe, validation_data=val_data,
                        epochs=15, batch_size=BATCH_SIZE,
                        class_weight=class_weights, callbacks=callbacks,
@@ -1178,10 +1197,11 @@ for body_part in ['conjunctiva', 'fingernails', 'skin']:
             n_unfrozen = sum(1 for lyr in base.layers if lyr.trainable)
             print(f'    fine-tune {n_unfrozen}/{len(base.layers)} layers')
 
-            model.compile(
-                optimizer=keras.optimizers.Adam(2e-6),
-                loss=ordinal_focal_loss(),
-                metrics=['accuracy', keras.metrics.AUC(name='auc')])
+            with strategy.scope():
+                model.compile(
+                    optimizer=keras.optimizers.Adam(2e-6),
+                    loss=ordinal_focal_loss(),
+                    metrics=['accuracy', keras.metrics.AUC(name='auc')])
             model.fit(X_tr, y_tr_ohe, validation_data=val_data,
                        epochs=30, batch_size=BATCH_SIZE,
                        class_weight=class_weights, callbacks=callbacks,
