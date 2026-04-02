@@ -220,23 +220,19 @@ print(f'  deploy  : {PUBLIC_MODELS}')\
 C5 = cell_code("""\
 # ── Cell 5: Multi-Source Dataset Acquisition ─────────────────────────────────
 #
-# CONFIRMED VERIFIED DATASETS (researched across all platforms):
+# REAL DATASETS:
+#   ✅ Conjunctiva (undereye): sneha-tndy8/non-invasive-anemia-detection v1/v2/v3
+#   ✅ Conjunctiva (eye):      Yahaira/anemia-eyes (HuggingFace, 218 images)
+#   ✅ Fingernails:            new-workspace-b7nuh/fingernail-cg9fv (Roboflow)
 #
-# CONJUNCTIVA (eye):
-#   ✅ Roboflow: sneha-tndy8/non-invasive-anemia-detection — 253 images, CC BY 4.0
-#   ✅ HuggingFace: Yahaira/anemia-eyes — 218 images, free
-#   ✅ Harvard Dataverse: doi:10.7910/DVN/L4MDKC — conjunctival pallor study
-#
-# NAILBED / PALM:
-#   ⚠ No public image datasets found on any platform (Google DS, Kaggle,
-#     HuggingFace, Zenodo, Mendeley, Harvard Dataverse, Figshare, GitHub)
-#   → Using physiologically-accurate synthetic data for nailbed and palm
-#   → Synthetic uses clinical HSV ranges from published medical literature
+# SYNTHETIC (for palm + augmentation fallback):
+#   → Physiologically-accurate HSV ranges from published medical literature
 #
 # STRATEGY:
-#   1. Roboflow API    — 253 conjunctiva images (CC BY 4.0, free download)
+#   1. Roboflow API    — conjunctiva v1+v2+v3 + fingernails
 #   2. HuggingFace Hub — 218 conjunctiva images (free, no auth)
-#   3. Synthetic       — 400 images per body part × 3 body parts (always runs)
+#   3. Synthetic       — 1 000/class × 4 classes × 3 body parts
+#   4. Augmentation    — real images × 8
 #
 # --------------------------------------------------------------------------
 
@@ -245,18 +241,14 @@ from pathlib import Path
 import numpy as np
 import cv2
 
-# ── 1. Roboflow Universe (PRIMARY — confirmed working, CC BY 4.0) ─────────────
-# Dataset: Non Invasive Anemia Detection (sneha-tndy8)
-# URL: https://universe.roboflow.com/sneha-tndy8/non-invasive-anemia-detection/dataset/2
-# 253 eye conjunctiva images labeled for anemia detection
+# ── 1. Roboflow Datasets (conjunctiva v1+v2+v3 + fingernails) ────────────────
 print('='*60)
-print('SOURCE 1: Roboflow Universe — Non-Invasive Anemia Detection')
+print('SOURCE 1: Roboflow — Conjunctiva (v1+v2+v3) + Fingernails')
 print('='*60)
 
 # ── Auto-detect API key from environment / Kaggle Secrets / Colab Secrets ────
 ROBOFLOW_API_KEY = ''  # ← Optional: paste key here if not using Secrets
 
-# Auto-detect from Kaggle Secrets (recommended — never hardcodes key in notebook)
 if not ROBOFLOW_API_KEY:
     try:
         from kaggle_secrets import UserSecretsClient
@@ -265,7 +257,6 @@ if not ROBOFLOW_API_KEY:
     except Exception:
         pass
 
-# Auto-detect from Google Colab Secrets
 if not ROBOFLOW_API_KEY:
     try:
         from google.colab import userdata
@@ -274,37 +265,23 @@ if not ROBOFLOW_API_KEY:
     except Exception:
         pass
 
-# Auto-detect from environment variable (local / VS Code)
 if not ROBOFLOW_API_KEY:
     import os
     ROBOFLOW_API_KEY = os.environ.get('ROBOFLOW_API_KEY', '')
 
 rf_downloaded = {}
-rf_dest = DATASET_RAW / 'conjunctiva_roboflow'
 
-if list(rf_dest.rglob('*.jpg')) or list(rf_dest.rglob('*.png')):
-    existing = list(rf_dest.rglob('*.jpg')) + list(rf_dest.rglob('*.png'))
-    print(f'  skip: {len(existing)} images already present')
-    rf_downloaded['conjunctiva_roboflow'] = rf_dest
-elif ROBOFLOW_API_KEY:
-    print('  downloading from Roboflow...')
-    rf_dest.mkdir(parents=True, exist_ok=True)
-    try:
-        import subprocess
-        subprocess.run([sys.executable, '-m', 'pip', 'install', '-q', 'roboflow'], check=True)
-        from roboflow import Roboflow
-        rf = Roboflow(api_key=ROBOFLOW_API_KEY)
-        project = rf.workspace('sneha-tndy8').project('non-invasive-anemia-detection')
-        version = project.version(2)
-        dataset = version.download('folder', location=str(rf_dest))
-        imgs = list(rf_dest.rglob('*.jpg')) + list(rf_dest.rglob('*.png'))
-        print(f'    OK: {len(imgs)} images downloaded')
-        if len(imgs) > 0:
-            rf_downloaded['conjunctiva_roboflow'] = rf_dest
-    except Exception as e:
-        print(f'    FAIL: {e}')
-        print('    → Get free API key at: https://app.roboflow.com')
-else:
+# Datasets: (workspace, project, version, local_folder_name)
+RF_DATASETS = [
+    # Conjunctiva (undereye/palpebral) — all 3 versions for maximum coverage
+    ('sneha-tndy8', 'non-invasive-anemia-detection', 1, 'conjunctiva_roboflow_v1'),
+    ('sneha-tndy8', 'non-invasive-anemia-detection', 2, 'conjunctiva_roboflow_v2'),
+    ('sneha-tndy8', 'non-invasive-anemia-detection', 3, 'conjunctiva_roboflow_v3'),
+    # Fingernails — real nailbed images
+    ('new-workspace-b7nuh', 'fingernail-cg9fv', 1, 'nailbed_roboflow'),
+]
+
+if not ROBOFLOW_API_KEY:
     print('  SKIPPED — no Roboflow API key found')
     print()
     print('  HOW TO ADD YOUR KEY (choose one method):')
@@ -321,6 +298,31 @@ else:
     print('    Set ROBOFLOW_API_KEY = "your_key_here" at the top of this cell')
     print()
     print('  Get your FREE key: https://app.roboflow.com → Settings → API')
+else:
+    import subprocess
+    subprocess.run([sys.executable, '-m', 'pip', 'install', '-q', 'roboflow'], check=True)
+    from roboflow import Roboflow
+    rf_client = Roboflow(api_key=ROBOFLOW_API_KEY)
+
+    for ws, proj, ver, folder_name in RF_DATASETS:
+        dest = DATASET_RAW / folder_name
+        existing = list(dest.rglob('*.jpg')) + list(dest.rglob('*.png'))
+        if len(existing) > 10:
+            print(f'  skip {folder_name}: {len(existing)} images already present')
+            rf_downloaded[folder_name] = dest
+            continue
+        print(f'  downloading {ws}/{proj} v{ver} → {folder_name}...')
+        dest.mkdir(parents=True, exist_ok=True)
+        try:
+            project = rf_client.workspace(ws).project(proj)
+            version = project.version(ver)
+            version.download('folder', location=str(dest))
+            imgs = list(dest.rglob('*.jpg')) + list(dest.rglob('*.png'))
+            print(f'    OK: {len(imgs)} images')
+            if imgs:
+                rf_downloaded[folder_name] = dest
+        except Exception as e:
+            print(f'    FAIL ({folder_name}): {e}')
 
 # ── 2. HuggingFace Hub (conjunctiva — 218 real images, zero auth) ─────────────
 print()
@@ -849,10 +851,12 @@ C6 = cell_code("""\
 # Maps Cell 5 output folders → train/val/test splits per body part.
 #
 # Cell 5 creates:
-#   conjunctiva_hf/            ← HuggingFace real (binary: 0_Normal, 1_Anemia)
-#   conjunctiva_hf_augmented/  ← 8× augmented real (same structure)
-#   conjunctiva_roboflow/      ← Roboflow real (if key was set)
-#   conjunctiva_roboflow_augmented/
+#   conjunctiva_roboflow_v1/   ← Roboflow conjunctiva v1 (undereye)
+#   conjunctiva_roboflow_v2/   ← Roboflow conjunctiva v2
+#   conjunctiva_roboflow_v3/   ← Roboflow conjunctiva v3
+#   conjunctiva_hf/            ← HuggingFace real (218 images)
+#   nailbed_roboflow/          ← Roboflow fingernail-cg9fv (real nailbeds)
+#   *_augmented/               ← 8× augmented versions of each real source
 #   conjunctiva_synthetic/     ← 4-class synthetic (0_Normal…3_Severe)
 #   nailbed_synthetic/         ← 4-class synthetic
 #   palm_synthetic/            ← 4-class synthetic
@@ -869,14 +873,17 @@ CLASS_NAMES = ['0_Normal', '1_Mild', '2_Moderate', '3_Severe']
 
 # Map body-part label → list of raw source folders (highest quality first)
 BODY_PART_SOURCES = {
+    # Conjunctiva (palpebral/undereye): 3 Roboflow versions + HuggingFace + synthetic
     'conjunctiva': [
-        'conjunctiva_roboflow_augmented',
-        'conjunctiva_roboflow',
-        'conjunctiva_hf_augmented',
-        'conjunctiva_hf',
+        'conjunctiva_roboflow_v3_augmented', 'conjunctiva_roboflow_v3',
+        'conjunctiva_roboflow_v2_augmented', 'conjunctiva_roboflow_v2',
+        'conjunctiva_roboflow_v1_augmented', 'conjunctiva_roboflow_v1',
+        'conjunctiva_hf_augmented', 'conjunctiva_hf',
         'conjunctiva_synthetic',
     ],
+    # Fingernails: real Roboflow images + augmented + synthetic
     'fingernails': [
+        'nailbed_roboflow_augmented', 'nailbed_roboflow',
         'nailbed_synthetic',
     ],
     'skin': [
