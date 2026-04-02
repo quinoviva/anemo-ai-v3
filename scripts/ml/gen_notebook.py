@@ -650,10 +650,11 @@ print('='*60)
 def generate_synthetic_images(dest_dir, body_part, n_per_class=100):
     """
     Generate physiologically-accurate synthetic anemia training images.
-    Uses clinical haemoglobin-pallor colour ranges per body part.
-    Produces CLAHE-enhanced BGR images ready for CNN input.
+    Each body part has distinct visual features:
+      conjunctiva → horizontal blood vessels + lower-lid fold
+      nailbed     → oval nail plate + lunula + horizontal striations
+      palm        → palm crease lines (heart/head/life) + thenar eminence
     """
-    # HSV colour ranges validated against clinical literature
     RANGES = {
         'conjunctiva': {
             '0_Normal':   {'h': (0,15),  's': (90,170), 'v': (180,240)},
@@ -674,31 +675,135 @@ def generate_synthetic_images(dest_dir, body_part, n_per_class=100):
             '3_Severe':   {'h': (2,12),  's': (8, 40),  'v': (105,165)},
         },
     }
+    SKIN_TONE_V = [0, -15, -30, -50]
     ranges = RANGES.get(body_part, RANGES['conjunctiva'])
     rng = np.random.default_rng(42)
     Path(dest_dir).mkdir(parents=True, exist_ok=True)
+    IH, IW = 224, 224
     total = 0
+
+    def _add_conjunctiva_features(rgb, rng):
+        out = rgb.astype(np.float32)
+        fold_y = int(rng.uniform(IH * 0.60, IH * 0.78))
+        fold_col = [max(0, int(rgb[fold_y, IW//2, c]) - 30) for c in range(3)]
+        cv2.line(out.astype(np.uint8), (0, fold_y), (IW, fold_y + int(rng.uniform(-8, 8))), fold_col, int(rng.integers(2, 4)))
+        n_vessels = int(rng.integers(4, 10))
+        for _ in range(n_vessels):
+            y_start = int(rng.uniform(20, IH - 40))
+            x_start = int(rng.uniform(0, 30))
+            pts = [(x_start, y_start)]
+            xc = x_start
+            for _ in range(int(rng.integers(8, 18))):
+                xc += int(rng.uniform(8, 18))
+                yc = int(np.clip(pts[-1][1] + rng.uniform(-6, 6), 5, IH - 5))
+                pts.append((xc, yc))
+                if xc >= IW - 5:
+                    break
+            arr = np.array(pts, dtype=np.int32)
+            vc = [max(0, int(rgb[y_start, min(x_start, IW-1), c]) - int(rng.uniform(35, 70))) for c in range(3)]
+            cv2.polylines(out.astype(np.uint8), [arr], False, vc, int(rng.integers(1, 3)))
+            if len(pts) > 3 and rng.random() > 0.4:
+                bp_idx = int(rng.integers(1, len(pts) - 1))
+                bx, by = pts[bp_idx]
+                ex = int(np.clip(bx + rng.uniform(-20, 20), 0, IW - 1))
+                ey = int(np.clip(by + rng.uniform(-25, -5), 0, IH - 1))
+                cv2.line(out.astype(np.uint8), (bx, by), (ex, ey), vc, 1)
+        return np.clip(out, 0, 255).astype(np.uint8)
+
+    def _add_nailbed_features(rgb, rng):
+        out = rgb.astype(np.float32)
+        cx, cy = IW // 2, IH // 2
+        ax = int(rng.uniform(78, 100))
+        ay = int(rng.uniform(60, 88))
+        Y, X = np.ogrid[:IH, :IW]
+        nail_mask = ((X - cx)**2 / ax**2 + (Y - cy)**2 / ay**2) <= 1.0
+        out[~nail_mask] = np.clip(out[~nail_mask] * 0.75, 0, 255)
+        lun_cy = cy + int(rng.uniform(ay * 0.5, ay * 0.75))
+        lun_ax = int(rng.uniform(28, 45))
+        lun_ay = int(rng.uniform(16, 26))
+        lun_mask = nail_mask & (((X - cx)**2 / lun_ax**2 + (Y - lun_cy)**2 / lun_ay**2) <= 1.0)
+        out[lun_mask] = np.clip(out[lun_mask] + rng.uniform(18, 35), 0, 255)
+        border_mask = (((X - cx)**2 / ax**2 + (Y - cy)**2 / ay**2) > 0.85) & nail_mask
+        out[border_mask] = np.clip(out[border_mask] * 0.88, 0, 255)
+        step = int(rng.integers(12, 22))
+        for yi in range(cy - ay, cy + ay, step):
+            if 0 <= yi < IH:
+                row_xs = [xi for xi in range(IW) if nail_mask[yi, xi]]
+                if len(row_xs) >= 2:
+                    x0, x1_ = row_xs[0], row_xs[-1]
+                    sc = [max(0, int(out[yi, (x0+x1_)//2, c]) - int(rng.uniform(6, 16))) for c in range(3)]
+                    cv2.line(out.astype(np.uint8), (x0, yi), (x1_, yi), sc, 1)
+        return np.clip(out, 0, 255).astype(np.uint8)
+
+    def _add_palm_features(rgb, rng):
+        out = rgb.astype(np.float32)
+        cx_th, cy_th = int(IW * 0.30), int(IH * 0.65)
+        Y, X = np.ogrid[:IH, :IW]
+        th_mask = ((X - cx_th)**2 / 55**2 + (Y - cy_th)**2 / 70**2) <= 1.0
+        out[th_mask] = np.clip(out[th_mask] + rng.uniform(6, 16), 0, 255)
+        lc = [max(0, int(out[IH//3, IW//2, c]) - int(rng.uniform(30, 55))) for c in range(3)]
+        heart_pts = []
+        y0 = int(rng.uniform(55, 80))
+        for xi in range(0, IW, 8):
+            yi = int(y0 + 20 * np.sin(xi / IW * np.pi) + rng.uniform(-5, 5))
+            heart_pts.append((xi, int(np.clip(yi, 10, IH - 10))))
+        cv2.polylines(out.astype(np.uint8), [np.array(heart_pts, dtype=np.int32)], False, lc, int(rng.integers(1, 3)))
+        head_pts = []
+        y1_ = int(rng.uniform(95, 125))
+        for xi in range(0, IW, 8):
+            yi = int(y1_ + rng.uniform(-8, 8))
+            head_pts.append((xi, int(np.clip(yi, 10, IH - 10))))
+        cv2.polylines(out.astype(np.uint8), [np.array(head_pts, dtype=np.int32)], False, lc, int(rng.integers(1, 3)))
+        life_pts = []
+        for step in range(15):
+            t = step / 14
+            xi = int(IW * 0.15 + IW * 0.20 * np.sin(t * np.pi * 0.8))
+            yi = int(IH * 0.20 + IH * 0.65 * t + rng.uniform(-6, 6))
+            life_pts.append((int(np.clip(xi, 0, IW-1)), int(np.clip(yi, 0, IH-1))))
+        cv2.polylines(out.astype(np.uint8), [np.array(life_pts, dtype=np.int32)], False, lc, int(rng.integers(1, 3)))
+        return np.clip(out, 0, 255).astype(np.uint8)
+
     for cls, r in ranges.items():
         out_dir = Path(dest_dir) / cls
         out_dir.mkdir(parents=True, exist_ok=True)
         for i in range(n_per_class):
-            # Base colour patch
+            tone_off = SKIN_TONE_V[i % len(SKIN_TONE_V)]
             h = int(rng.uniform(*r['h']))
             s = int(rng.uniform(*r['s']))
-            v = int(rng.uniform(*r['v']))
-            hsv = np.full((224, 224, 3), [h, s, v], dtype=np.uint8)
-            # Add structured noise for texture realism
-            noise = rng.integers(-30, 30, (224, 224, 3), dtype=np.int16)
-            rgb = cv2.cvtColor(hsv, cv2.COLOR_HSV2RGB).astype(np.int16)
-            rgb = np.clip(rgb + noise, 0, 255).astype(np.uint8)
-            # Blur + CLAHE enhancement
-            rgb = cv2.GaussianBlur(rgb, (5,5), 0)
+            v = int(np.clip(rng.uniform(*r['v']) + tone_off, 0, 255))
+            base = np.full((IH, IW, 3), [h, s, v], dtype=np.float32)
+            gt = i % 4
+            if gt == 0:
+                base[:,:,2] += np.linspace(-18, 18, IW, dtype=np.float32)[np.newaxis,:]
+            elif gt == 1:
+                base[:,:,2] += np.linspace(-18, 18, IH, dtype=np.float32)[:,np.newaxis]
+            elif gt == 2:
+                cx2, cy2 = IW//2, IH//2
+                Y2, X2 = np.ogrid[:IH, :IW]
+                dist = np.sqrt((X2-cx2)**2+(Y2-cy2)**2)/max(cx2,cy2)
+                base[:,:,2] -= (dist*float(rng.uniform(10,28))).astype(np.float32)
+            base[:,:,0] = np.clip(base[:,:,0], 0, 179)
+            base[:,:,1] = np.clip(base[:,:,1], 0, 255)
+            base[:,:,2] = np.clip(base[:,:,2], 0, 255)
+            rgb = cv2.cvtColor(base.astype(np.uint8), cv2.COLOR_HSV2RGB)
+            if body_part == 'conjunctiva':
+                rgb = _add_conjunctiva_features(rgb, rng)
+            elif body_part == 'nailbed':
+                rgb = _add_nailbed_features(rgb, rng)
+            else:
+                rgb = _add_palm_features(rgb, rng)
+            noise = rng.integers(-28, 28, (IH,IW,3), dtype=np.int16)
+            rgb = np.clip(rgb.astype(np.int16)+noise, 0, 255).astype(np.uint8)
+            bk = i % 3
+            if bk == 0: rgb = cv2.GaussianBlur(rgb,(5,5),0)
+            elif bk == 1: rgb = cv2.GaussianBlur(rgb,(3,3),0)
             bgr = cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR)
             lab = cv2.cvtColor(bgr, cv2.COLOR_BGR2LAB)
-            l, a, b = cv2.split(lab)
-            clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
-            l = clahe.apply(l)
-            bgr = cv2.cvtColor(cv2.merge([l, a, b]), cv2.COLOR_LAB2BGR)
+            lc2, a, b = cv2.split(lab)
+            clahe = cv2.createCLAHE(clipLimit=float(rng.uniform(1.5,3.5)), tileGridSize=(8,8))
+            lc2 = clahe.apply(lc2)
+            bgr = cv2.cvtColor(cv2.merge([lc2, a, b]), cv2.COLOR_LAB2BGR)
+            bgr = np.clip(bgr.astype(np.float32)*float(rng.uniform(.88,1.14))+float(rng.uniform(-12,12)),0,255).astype(np.uint8)
             cv2.imwrite(str(out_dir / f'synth_{i:04d}.jpg'), bgr)
             total += 1
     return total
