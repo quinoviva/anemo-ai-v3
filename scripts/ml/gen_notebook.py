@@ -299,10 +299,43 @@ if not ROBOFLOW_API_KEY:
     print()
     print('  Get your FREE key: https://app.roboflow.com → Settings → API')
 else:
-    import subprocess
+    import subprocess, shutil as _shutil
     subprocess.run([sys.executable, '-m', 'pip', 'install', '-q', 'roboflow'], check=True)
     from roboflow import Roboflow
     rf_client = Roboflow(api_key=ROBOFLOW_API_KEY)
+
+    def _rf_download_od(rf_client, ws, proj, ver, dest):
+        """
+        Download an object-detection Roboflow dataset in yolov8 format,
+        then sort images into 0_Normal / 1_Mild class subdirs based on
+        whether the label file has any annotation rows (object detected = anemia sign).
+        Returns number of images saved.
+        """
+        tmp = dest.parent / f'_tmp_{dest.name}'
+        _shutil.rmtree(str(tmp), ignore_errors=True)
+        tmp.mkdir(parents=True, exist_ok=True)
+        try:
+            project = rf_client.workspace(ws).project(proj)
+            version = project.version(ver)
+            version.download('yolov8', location=str(tmp))
+        except Exception as e:
+            raise RuntimeError(f'Roboflow download failed: {e}') from e
+        total = 0
+        for split in ['train', 'valid', 'test']:
+            img_dir = tmp / split / 'images'
+            lbl_dir = tmp / split / 'labels'
+            if not img_dir.exists():
+                continue
+            for img_path in list(img_dir.glob('*.jpg')) + list(img_dir.glob('*.png')):
+                lbl_path = lbl_dir / (img_path.stem + '.txt')
+                has_label = lbl_path.exists() and bool(lbl_path.read_text().strip())
+                cls = '1_Mild' if has_label else '0_Normal'
+                out_dir = dest / cls
+                out_dir.mkdir(parents=True, exist_ok=True)
+                _shutil.copy2(img_path, out_dir / img_path.name)
+                total += 1
+        _shutil.rmtree(str(tmp), ignore_errors=True)
+        return total
 
     for ws, proj, ver, folder_name in RF_DATASETS:
         dest = DATASET_RAW / folder_name
@@ -314,12 +347,9 @@ else:
         print(f'  downloading {ws}/{proj} v{ver} → {folder_name}...')
         dest.mkdir(parents=True, exist_ok=True)
         try:
-            project = rf_client.workspace(ws).project(proj)
-            version = project.version(ver)
-            version.download('folder', location=str(dest))
-            imgs = list(dest.rglob('*.jpg')) + list(dest.rglob('*.png'))
-            print(f'    OK: {len(imgs)} images')
-            if imgs:
+            n = _rf_download_od(rf_client, ws, proj, ver, dest)
+            print(f'    OK: {n} images (sorted into 0_Normal / 1_Mild by label)')
+            if n > 0:
                 rf_downloaded[folder_name] = dest
         except Exception as e:
             print(f'    FAIL ({folder_name}): {e}')
