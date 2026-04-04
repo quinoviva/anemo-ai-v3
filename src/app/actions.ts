@@ -125,8 +125,9 @@ export async function cacheAnalysisResult(dataUri: string, bodyPart: string, res
 export async function runGenerateImageDescription(
   input: GenerateImageDescriptionInput & { userId?: string }
 ): Promise<GenerateImageDescriptionOutput> {
-  if (input.userId) checkRateLimit(`imgDesc:${input.userId}`);
   try {
+    if (input.userId) checkRateLimit(`imgDesc:${input.userId}`);
+
     // 1. Check for consistency
     const consistency = await checkImageConsistency(input.photoDataUri, input.bodyPart);
     if (consistency.isConsistent && consistency.result) {
@@ -148,7 +149,18 @@ export async function runGenerateImageDescription(
       console.error("Error Message:", error.message);
       console.error("Stack Trace:", error.stack);
     }
-    throw error;
+    // Return a structured error instead of throwing — Next.js production
+    // strips thrown error messages, causing the generic "server components render" error.
+    const msg = error instanceof Error ? error.message : 'Analysis failed';
+    return {
+      description: msg.includes('429')
+        ? 'AI service is at capacity. Please wait a moment and try again.'
+        : 'Analysis temporarily unavailable. Please try again shortly.',
+      isValid: false,
+      analysisResult: 'INCONCLUSIVE (Server Error)',
+      confidenceScore: 0,
+      recommendations: 'Please retry the analysis in a few seconds.',
+    };
   }
 }
 
