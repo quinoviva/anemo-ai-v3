@@ -152,10 +152,18 @@ export async function runGenerateImageDescription(
     // Return a structured error instead of throwing — Next.js production
     // strips thrown error messages, causing the generic "server components render" error.
     const msg = error instanceof Error ? error.message : 'Analysis failed';
+    let userMessage = 'Analysis temporarily unavailable. Please try again shortly.';
+    if (msg.includes('429') || msg.includes('RESOURCE_EXHAUSTED')) {
+      userMessage = 'AI service is at capacity. Please wait a moment and try again.';
+    } else if (msg.includes('API_KEY') || msg.includes('API key') || msg.includes('PERMISSION_DENIED')) {
+      userMessage = 'AI service configuration error. Please contact support.';
+    } else if (msg.includes('SAFETY') || msg.includes('blocked')) {
+      userMessage = 'Image was blocked by safety filters. Please try a different image.';
+    } else if (msg.includes('DEADLINE_EXCEEDED') || msg.includes('timeout')) {
+      userMessage = 'Analysis timed out. Please try again.';
+    }
     return {
-      description: msg.includes('429')
-        ? 'AI service is at capacity. Please wait a moment and try again.'
-        : 'Analysis temporarily unavailable. Please try again shortly.',
+      description: `${userMessage} [${msg.substring(0, 120)}]`,
       isValid: false,
       analysisResult: 'INCONCLUSIVE (Server Error)',
       confidenceScore: 0,
