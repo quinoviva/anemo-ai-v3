@@ -62,7 +62,7 @@ function calculateHash(data: string): string {
   return crypto.createHash('sha256').update(data).digest('hex');
 }
 
-const ALLOWED_BODY_PARTS = new Set(['skin', 'fingernails', 'undereye', 'lab_reports']);
+const ALLOWED_BODY_PARTS = new Set(['skin', 'fingernails', 'under-eye', 'undereye', 'lab_reports']);
 
 function safeBodyPart(bodyPart: string): string {
   const lower = bodyPart.toLowerCase().trim();
