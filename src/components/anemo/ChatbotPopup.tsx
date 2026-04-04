@@ -78,8 +78,8 @@ export function ChatbotPopup() {
                             transition={{ duration: 0.2 }}
                             className="relative"
                         >
-                            <div className="absolute inset-0 bg-white blur-md opacity-20 animate-pulse" />
-                            <Bot className="h-6 w-6 sm:h-8 sm:w-8 text-white relative z-10" />
+                            <div className="absolute inset-0 bg-primary-foreground blur-md opacity-20 animate-pulse" />
+                            <Bot className="h-6 w-6 sm:h-8 sm:w-8 text-primary-foreground relative z-10" />
                         </motion.div>
                     )}
                 </AnimatePresence>

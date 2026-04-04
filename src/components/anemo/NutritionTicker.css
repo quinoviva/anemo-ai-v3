@@ -32,8 +32,8 @@
   /* Premium Glass Card */
   & .nt-card {
     position: relative;
-    background: rgba(255, 255, 255, 0.01);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(0, 0, 0, 0.02);
+    border: 1px solid rgba(0, 0, 0, 0.06);
     transition: all 0.7s cubic-bezier(0.2, 1, 0.3, 1.2);
     /* Bouncy physics */
     transform-style: preserve-3d;
@@ -44,7 +44,7 @@
   & .nt-glass-bg {
     position: absolute;
     inset: 0;
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(0, 0, 0, 0.02);
     backdrop-filter: blur(24px) saturate(1.8);
     -webkit-backdrop-filter: blur(24px) saturate(1.8);
     border-radius: inherit;
@@ -59,7 +59,7 @@
     inset: 0;
     border-radius: inherit;
     padding: 1px;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent);
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.1), transparent);
     mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     mask-composite: exclude;
@@ -72,10 +72,10 @@
   /* HOVER: 3D Lift & Physical Elevation */
   & .nt-card:hover {
     transform: translateY(-30px) rotateX(8deg) scale(1.03);
-    border-color: rgba(255, 255, 255, 0.2);
+    border-color: rgba(0, 0, 0, 0.15);
     box-shadow:
-      0 30px 60px -15px rgba(0, 0, 0, 0.7),
-      0 0 1px 1px rgba(255, 255, 255, 0.1);
+      0 30px 60px -15px rgba(0, 0, 0, 0.15),
+      0 0 1px 1px rgba(0, 0, 0, 0.05);
   }
 
   /* THE ICON POP: Moves out of the box boundaries */
@@ -112,15 +112,15 @@
 
   /* Typography */
   & .nt-text-glow {
-    text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+    text-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
   }
 
   /* Glassmorphic Badge */
   & .nt-badge-glass {
-    background: rgba(255, 255, 255, 0.05) !important;
+    background: rgba(0, 0, 0, 0.04) !important;
     backdrop-filter: blur(10px);
-    border-color: rgba(255, 255, 255, 0.1) !important;
-    color: #fff !important;
+    border-color: rgba(0, 0, 0, 0.08) !important;
+    color: hsl(var(--foreground)) !important;
     transition: all 0.3s ease;
   }
 
@@ -133,9 +133,30 @@
 
 /* Scoped Dark Mode */
 .dark .nt-card {
-  background: rgba(10, 10, 10, 0.5);
+  background: rgba(255, 255, 255, 0.01);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.dark .nt-card::before {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent);
+}
+
+.dark .nt-card:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow:
+    0 30px 60px -15px rgba(0, 0, 0, 0.7),
+    0 0 1px 1px rgba(255, 255, 255, 0.1);
 }
 
 .dark .nt-glass-bg {
-  background: rgba(10, 10, 10, 0.3);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.dark .nt-text-glow {
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+}
+
+.dark .nt-badge-glass {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
 }

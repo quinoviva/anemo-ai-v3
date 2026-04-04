@@ -248,7 +248,7 @@ export function Chatbot({ isPopup = false, onClose, onMinimize }: ChatbotProps) 
         <div className={cn(
           "max-w-[88%] md:max-w-[75%] rounded-[1.25rem] px-4 py-3 md:px-5 md:py-3.5 text-sm leading-relaxed shadow-sm transition-all duration-300",
           msg.role === 'assistant' 
-              ? "bg-white/5 hover:bg-white/10 border border-white/5 text-foreground rounded-tl-sm" 
+              ? "bg-foreground/5 hover:bg-foreground/10 border border-foreground/5 text-foreground rounded-tl-sm" 
               : "bg-gradient-to-br from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-600/10 rounded-tr-sm border border-indigo-500/50"
         )}>
           <div className="whitespace-pre-wrap tracking-wide font-light">
@@ -265,12 +265,12 @@ export function Chatbot({ isPopup = false, onClose, onMinimize }: ChatbotProps) 
   )), [history]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const ChatHeader = () => (
-    <div className="relative border-b border-white/5 px-6 py-4 flex flex-row items-center justify-between z-20 bg-background/50 backdrop-blur-2xl shrink-0">
+    <div className="relative border-b border-border/50 px-6 py-4 flex flex-row items-center justify-between z-20 bg-background/50 backdrop-blur-2xl shrink-0">
       <div className='flex items-center gap-4 relative'>
         {/* Tricolor Identity Element - Blue Theme */}
         <div className="relative w-10 h-10 flex items-center justify-center">
             <div className="absolute inset-0 bg-gradient-to-tr from-blue-600 via-cyan-400 to-indigo-600 rounded-full blur-[8px] opacity-60 animate-pulse" />
-            <div className="relative z-10 w-full h-full bg-background/80 rounded-full border border-white/10 flex items-center justify-center backdrop-blur-md shadow-xl">
+            <div className="relative z-10 w-full h-full bg-background/80 rounded-full border border-border flex items-center justify-center backdrop-blur-md shadow-xl">
                 <Bot className="h-5 w-5 text-cyan-400" />
             </div>
             {/* Status Dot */}
@@ -287,7 +287,7 @@ export function Chatbot({ isPopup = false, onClose, onMinimize }: ChatbotProps) 
       <div className="flex items-center gap-2">
         {isPopup && (
             <>
-                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-white/5" onClick={onMinimize}>
+                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-foreground/5" onClick={onMinimize}>
                     <Minus className="h-4 w-4" />
                 </Button>
                 <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-red-500/20 hover:text-red-500 transition-colors" onClick={onClose}>
@@ -296,7 +296,7 @@ export function Chatbot({ isPopup = false, onClose, onMinimize }: ChatbotProps) 
             </>
         )}
         {!isPopup && (
-             <Button variant="ghost" size="sm" onClick={handleClearChat} className="text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 rounded-full px-4 border border-transparent hover:border-white/10 transition-all">
+             <Button variant="ghost" size="sm" onClick={handleClearChat} className="text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-foreground/5 rounded-full px-4 border border-transparent hover:border-border transition-all">
                 <Trash2 className="h-3.5 w-3.5 mr-2" />
                 Clear
              </Button>
@@ -347,7 +347,7 @@ export function Chatbot({ isPopup = false, onClose, onMinimize }: ChatbotProps) 
                       whileHover={{ scale: 1.02, backgroundColor: "rgba(255, 255, 255, 0.08)" }}
                       whileTap={{ scale: 0.98 }}
                       key={i} 
-                      className="text-left px-5 py-4 bg-white/5 border border-white/5 hover:border-cyan-500/30 transition-all rounded-2xl group flex flex-col gap-2 min-h-[44px]"
+                      className="text-left px-5 py-4 bg-foreground/5 border border-foreground/5 hover:border-cyan-500/30 transition-all rounded-2xl group flex flex-col gap-2 min-h-[44px]"
                       onClick={() => handleSampleQuestionClick(q)}
                     >
                       <Zap className="h-4 w-4 text-cyan-400 group-hover:drop-shadow-[0_0_8px_rgba(34,211,238,0.5)] transition-all" />
@@ -366,7 +366,7 @@ export function Chatbot({ isPopup = false, onClose, onMinimize }: ChatbotProps) 
                  <div className="h-8 w-8 md:h-9 md:w-9 rounded-full bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border border-cyan-500/20 flex items-center justify-center backdrop-blur-md">
                     <Bot size={14} className="md:size-[16px] text-cyan-400"/>
                 </div>
-                <div className="rounded-[1.25rem] rounded-tl-sm bg-white/5 border border-white/5 px-5 py-3 md:px-6 md:py-4 shadow-lg backdrop-blur-md">
+                <div className="rounded-[1.25rem] rounded-tl-sm bg-foreground/5 border border-foreground/5 px-5 py-3 md:px-6 md:py-4 shadow-lg backdrop-blur-md">
                   <div className="flex items-center gap-1.5">
                      <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 1.2 }} className="w-2 h-2 bg-cyan-400 rounded-full" />
                      <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 1.2, delay: 0.2 }} className="w-2 h-2 bg-blue-500 rounded-full" />
@@ -389,7 +389,7 @@ export function Chatbot({ isPopup = false, onClose, onMinimize }: ChatbotProps) 
                         value={userInput} 
                         onChange={(e) => setUserInput(e.target.value)} 
                         disabled={isLoading}
-                        className="relative bg-background/50 border-white/10 hover:border-white/20 focus-visible:border-white/20 focus-visible:ring-0 rounded-full h-12 md:h-14 pl-5 md:pl-6 pr-12 transition-all shadow-inner text-base backdrop-blur-xl"
+                        className="relative bg-background/50 border-border hover:border-border focus-visible:border-border focus-visible:ring-0 rounded-full h-12 md:h-14 pl-5 md:pl-6 pr-12 transition-all shadow-inner text-base backdrop-blur-xl"
                     />
                      <div className="absolute right-2 top-1/2 -translate-y-1/2">
                         {userInput && (
@@ -397,7 +397,7 @@ export function Chatbot({ isPopup = false, onClose, onMinimize }: ChatbotProps) 
                                 type="button" 
                                 variant="ghost" 
                                 size="icon" 
-                                className="h-8 w-8 rounded-full hover:bg-white/10 text-muted-foreground"
+                                className="h-8 w-8 rounded-full hover:bg-foreground/10 text-muted-foreground"
                                 onClick={() => setUserInput('')}
                             >
                                 <X className="h-4 w-4" />
@@ -424,7 +424,7 @@ export function Chatbot({ isPopup = false, onClose, onMinimize }: ChatbotProps) 
                     size="icon" 
                     disabled={!userInput.trim() || isLoading} 
                     className={cn(
-                        "shrink-0 rounded-full w-12 h-12 md:w-14 md:h-14 shadow-xl transition-all duration-300 bg-gradient-to-br from-cyan-500 to-blue-600 hover:scale-105 hover:shadow-cyan-500/25 border border-white/10",
+                        "shrink-0 rounded-full w-12 h-12 md:w-14 md:h-14 shadow-xl transition-all duration-300 bg-gradient-to-br from-cyan-500 to-blue-600 hover:scale-105 hover:shadow-cyan-500/25 border border-foreground/10",
                         !userInput.trim() && "opacity-50 grayscale cursor-not-allowed"
                     )}
                 >

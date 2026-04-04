@@ -4,7 +4,6 @@
   "private": true,
   "scripts": {
     "dev": "concurrently \"next dev -p 4100\" \"npm run genkit:dev\"",
-    "predev": "node scripts/predev.js",
     "genkit:dev": "echo '' | genkit start -- tsx src/ai/dev.ts",
     "genkit:watch": "genkit start -- tsx --watch src/ai/dev.ts",
     "build": "next build",
@@ -21,7 +20,7 @@
     "@genkit-ai/flow": "^0.5.17",
     "@genkit-ai/google-genai": "^1.27.0",
     "@genkit-ai/googleai": "^1.28.0",
-    "@genkit-ai/next": "^1.27.0",
+    "@genkit-ai/next": "^1.30.1",
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-accordion": "^1.2.3",
     "@radix-ui/react-alert-dialog": "^1.1.6",

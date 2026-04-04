@@ -180,7 +180,7 @@ function CalendarView({ records, onViewReport }: { records: any[]; onViewReport:
       </div>
 
       {/* Legend */}
-      <div className="flex items-center gap-4 pt-2 border-t border-white/5">
+      <div className="flex items-center gap-4 pt-2 border-t border-border/50">
         {[['bg-emerald-500', 'Normal/Mild'], ['bg-amber-500', 'Moderate'], ['bg-red-500', 'Severe']].map(([color, label]) => (
           <div key={label} className="flex items-center gap-1.5">
             <span className={`w-2 h-2 rounded-full ${color}`} />
@@ -599,19 +599,19 @@ export function AnalysisHistory() {
                 <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
                 <div className="relative">
                     <div className="absolute inset-0 bg-primary/20 blur-[100px] rounded-full animate-pulse" />
-                    <div className="relative w-32 h-32 rounded-[2.5rem] bg-zinc-900/50 border border-white/10 flex items-center justify-center backdrop-blur-xl shadow-2xl">
+                    <div className="relative w-32 h-32 rounded-[2.5rem] bg-muted border border-border flex items-center justify-center backdrop-blur-xl shadow-2xl">
                         <LogIn className="h-12 w-12 text-primary" />
                     </div>
                 </div>
                 <div className="space-y-6 max-w-md relative z-10">
-                    <h3 className="text-4xl font-light tracking-tighter text-white">
+                    <h3 className="text-4xl font-light tracking-tighter text-foreground">
                         Guest <span className="font-serif italic text-primary">Protocol</span> Active
                     </h3>
-                    <p className="text-white/40 text-lg font-light leading-relaxed">
+                    <p className="text-muted-foreground text-lg font-light leading-relaxed">
                         Historical diagnostic data is only persistent for authenticated sessions. Create an account to track your health intelligence over time with our neural diagnostic suite.
                     </p>
                 </div>
-                <Button asChild className="h-16 px-12 rounded-full bg-primary text-black font-black uppercase tracking-[0.3em] text-[11px] shadow-[0_20px_40px_rgba(var(--primary),0.3)] hover:scale-105 transition-all">
+                <Button asChild className="h-16 px-12 rounded-full bg-primary text-primary-foreground font-black uppercase tracking-[0.3em] text-[11px] shadow-[0_20px_40px_rgba(var(--primary),0.3)] hover:scale-105 transition-all">
                     <Link href="/signup">
                         INITIALIZE ACCOUNT
                     </Link>
@@ -629,7 +629,7 @@ export function AnalysisHistory() {
                 </div>
                 <div className="text-center space-y-2">
                     <p className="text-[11px] font-black uppercase tracking-[0.5em] text-primary animate-pulse">Synchronizing</p>
-                    <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-white/20">Diagnostic Cloud Interface</p>
+                    <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-muted-foreground/50">Diagnostic Cloud Interface</p>
                 </div>
             </div>
         );
@@ -640,21 +640,21 @@ export function AnalysisHistory() {
             <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="flex flex-col items-center justify-center min-h-[500px] text-center space-y-12 p-12 rounded-[3rem] glass-panel border-white/5 relative overflow-hidden"
+                className="flex flex-col items-center justify-center min-h-[500px] text-center space-y-12 p-12 rounded-[3rem] glass-panel border-border/50 relative overflow-hidden"
             >
-                <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent pointer-events-none" />
-                <div className="w-32 h-32 rounded-[2.5rem] bg-zinc-900/50 border border-white/10 flex items-center justify-center text-white/10 backdrop-blur-xl shadow-2xl">
+                <div className="absolute inset-0 bg-gradient-to-b from-foreground/5 to-transparent pointer-events-none" />
+                <div className="w-32 h-32 rounded-[2.5rem] bg-muted border border-border flex items-center justify-center text-muted-foreground/30 backdrop-blur-xl shadow-2xl">
                     <Search className="h-12 w-12" />
                 </div>
                 <div className="space-y-6 max-w-md relative z-10">
-                    <h3 className="text-4xl font-light tracking-tighter text-white">
+                    <h3 className="text-4xl font-light tracking-tighter text-foreground">
                         Archive <span className="font-serif italic text-muted-foreground">Empty</span>
                     </h3>
-                    <p className="text-white/40 text-lg font-light leading-relaxed">
+                    <p className="text-muted-foreground text-lg font-light leading-relaxed">
                         No diagnostic records found in your profile. Initiate a scan to start building your health history and unlock longitudinal insights.
                     </p>
                 </div>
-                <Button asChild className="h-16 px-12 rounded-full bg-white text-black font-black uppercase tracking-[0.3em] text-[11px] shadow-[0_20px_40px_rgba(255,255,255,0.1)] hover:scale-105 transition-all">
+                <Button asChild className="h-16 px-12 rounded-full bg-foreground text-background font-black uppercase tracking-[0.3em] text-[11px] shadow-lg hover:scale-105 transition-all">
                     <Link href="/dashboard/analysis">
                         START NEW SCAN
                     </Link>
@@ -679,13 +679,13 @@ export function AnalysisHistory() {
                 initial={{ opacity: 0, y: 12 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                className="glass-panel rounded-3xl p-5 flex flex-col gap-4 relative overflow-hidden group border border-white/5 hover:border-primary/20 transition-all duration-300"
+                className="glass-panel rounded-3xl p-5 flex flex-col gap-4 relative overflow-hidden group border border-border/50 hover:border-primary/20 transition-all duration-300"
             >
                 {/* Top row: date + type badge */}
                 <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:border-primary/30 transition-colors flex-shrink-0">
-                            <Calendar className="w-4 h-4 text-white/40" />
+                        <div className="w-9 h-9 rounded-xl bg-foreground/5 border border-border flex items-center justify-center group-hover:border-primary/30 transition-colors flex-shrink-0">
+                            <Calendar className="w-4 h-4 text-muted-foreground" />
                         </div>
                         <div>
                             <p className="text-sm font-bold text-foreground leading-tight">
@@ -743,17 +743,17 @@ export function AnalysisHistory() {
 
                 {/* Notes preview */}
                 {(item as any).notes && (
-                    <p className="text-[10px] text-muted-foreground/60 italic px-3 py-2 rounded-xl bg-white/[0.02] border border-white/5 truncate">
+                    <p className="text-[10px] text-muted-foreground/60 italic px-3 py-2 rounded-xl bg-foreground/[0.02] border border-border/50 truncate">
                         &ldquo;{(item as any).notes}&rdquo;
                     </p>
                 )}
 
                 {/* Action buttons */}
-                <div className="flex items-center gap-2 pt-2 border-t border-white/5">
+                <div className="flex items-center gap-2 pt-2 border-t border-border/50">
                     {/* View */}
                     <Button
                         variant="ghost"
-                        className="flex-1 h-9 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:text-white transition-all flex items-center justify-center gap-1.5 text-[10px] font-black uppercase tracking-widest"
+                        className="flex-1 h-9 rounded-2xl bg-foreground/5 border border-border hover:bg-foreground/10 hover:text-foreground transition-all flex items-center justify-center gap-1.5 text-[10px] font-black uppercase tracking-widest"
                         onClick={() => setReportToView(item)}
                     >
                         <Eye className="h-3.5 w-3.5 flex-shrink-0" />
@@ -798,7 +798,7 @@ export function AnalysisHistory() {
                                     if (e.key === 'Escape') { setEditingNoteId(null); setNoteValue(''); }
                                 }}
                                 placeholder="Add note…"
-                                className="h-9 w-28 px-3 rounded-2xl bg-white/5 border border-white/10 text-xs text-white/80 placeholder-white/20 outline-none focus:border-primary/40"
+                                className="h-9 w-28 px-3 rounded-2xl bg-foreground/5 border border-border text-xs text-foreground/80 placeholder-muted-foreground outline-none focus:border-primary/40"
                                 maxLength={120}
                             />
                             <Button
@@ -815,7 +815,7 @@ export function AnalysisHistory() {
                             variant="ghost"
                             size="icon"
                             title={(item as any).notes || 'Add note'}
-                            className="h-9 w-9 rounded-2xl glass-button border border-white/10 hover:border-primary/30 hover:text-primary transition-all"
+                            className="h-9 w-9 rounded-2xl glass-button border border-border hover:border-primary/30 hover:text-primary transition-all"
                             onClick={() => { setEditingNoteId(item.id); setNoteValue((item as any).notes || ''); }}
                         >
                             <StickyNote className="h-3.5 w-3.5" />
@@ -834,17 +834,17 @@ export function AnalysisHistory() {
                                 <span className="sr-only">Delete</span>
                             </Button>
                         </AlertDialogTrigger>
-                        <AlertDialogContent className="bg-[#0a0a0a] border-white/10 rounded-[3rem] p-12">
+                        <AlertDialogContent className="bg-card border-border rounded-[3rem] p-12">
                             <AlertDialogHeader className="space-y-4">
-                                <AlertDialogTitle className="text-4xl font-light tracking-tighter text-white uppercase">
+                                <AlertDialogTitle className="text-4xl font-light tracking-tighter text-foreground uppercase">
                                     Purge <span className="font-serif italic text-red-500">Record</span>?
                                 </AlertDialogTitle>
-                                <AlertDialogDescription className="text-white/40 text-lg font-light leading-relaxed">
+                                <AlertDialogDescription className="text-muted-foreground text-lg font-light leading-relaxed">
                                     This action is irreversible. The selected diagnostic intelligence will be permanently removed from your profile&apos;s historical evolution.
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter className="mt-12 gap-4">
-                                <AlertDialogCancel className="h-14 px-8 rounded-2xl border-white/10 bg-white/5 hover:bg-white/10 text-white font-bold text-xs uppercase tracking-widest transition-all">CANCEL</AlertDialogCancel>
+                                <AlertDialogCancel className="h-14 px-8 rounded-2xl border-border bg-foreground/5 hover:bg-foreground/10 text-foreground font-bold text-xs uppercase tracking-widest transition-all">CANCEL</AlertDialogCancel>
                                 <AlertDialogAction
                                     onClick={() => handleDelete(item.id, isImage ? 'image' : 'cbc')}
                                     className="h-14 px-10 bg-red-600 hover:bg-red-500 text-white font-black text-xs uppercase tracking-widest rounded-2xl shadow-xl shadow-red-600/20 transition-all"
@@ -865,7 +865,7 @@ export function AnalysisHistory() {
             const report = reportToView as ImageReport;
             return (
                 <Dialog open={true} onOpenChange={(open) => !open && setReportToView(null)}>
-                    <DialogContent className="sm:max-w-2xl bg-[#080808] border-white/10 rounded-[3rem] p-0 overflow-hidden shadow-[0_0_100px_rgba(0,0,0,1)]">
+                    <DialogContent className="sm:max-w-2xl bg-card border-border rounded-[3rem] p-0 overflow-hidden shadow-2xl">
                         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[140px] -mr-64 -mt-64 pointer-events-none" />
 
                         <div className="p-12 space-y-12 relative z-10">
@@ -876,33 +876,33 @@ export function AnalysisHistory() {
                                     </div>
                                     <div>
                                         <span className="text-[10px] font-black uppercase tracking-[0.5em] text-primary">Neural Diagnostic Analysis</span>
-                                        <DialogDescription className="text-white/20 font-bold uppercase tracking-[0.3em] text-[10px] mt-1">
+                                        <DialogDescription className="text-muted-foreground/50 font-bold uppercase tracking-[0.3em] text-[10px] mt-1">
                                             Archive ID: {report.id.substring(0, 12)}
                                         </DialogDescription>
                                     </div>
                                 </div>
-                                <DialogTitle className="text-5xl font-light tracking-tighter text-white uppercase leading-none">
+                                <DialogTitle className="text-5xl font-light tracking-tighter text-foreground uppercase leading-none">
                                     Historical <span className="font-serif italic text-primary/80">Result</span>
                                 </DialogTitle>
-                                <p className="text-white/40 font-medium uppercase tracking-[0.2em] text-[11px]">
+                                <p className="text-muted-foreground font-medium uppercase tracking-[0.2em] text-[11px]">
                                     Calibration: {toDate(report.createdAt) ? format(toDate(report.createdAt)!, 'PPP, p') : ''}
                                 </p>
                             </DialogHeader>
 
                             <div className="grid gap-10">
                                 <div className="grid grid-cols-2 gap-6">
-                                    <div className="p-8 rounded-[2rem] bg-white/[0.03] border border-white/5 backdrop-blur-3xl relative overflow-hidden group">
+                                    <div className="p-8 rounded-[2rem] bg-foreground/[0.03] border border-border/50 backdrop-blur-3xl relative overflow-hidden group">
                                         <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                                            <TrendingUp className="w-12 h-12 text-white" />
+                                            <TrendingUp className="w-12 h-12 text-foreground" />
                                         </div>
                                         <div className="flex justify-between items-end mb-6 relative z-10">
                                             <div className="space-y-1">
-                                                <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em]">Risk Score</span>
-                                                <p className="text-6xl font-light text-white tracking-tighter leading-none">{report.riskScore}<span className="text-xl text-white/20 ml-1">/100</span></p>
+                                                <span className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.3em]">Risk Score</span>
+                                                <p className="text-6xl font-light text-foreground tracking-tighter leading-none">{report.riskScore}<span className="text-xl text-muted-foreground/50 ml-1">/100</span></p>
                                             </div>
                                         </div>
                                         <div className="space-y-3 relative z-10">
-                                            <Progress value={report.riskScore} className="h-1.5 bg-white/5" />
+                                            <Progress value={report.riskScore} className="h-1.5 bg-foreground/5" />
                                             <div className="flex justify-between">
                                                 <Badge variant={getBadgeVariant(report.riskScore)} className="rounded-lg px-3 py-1 font-black text-[9px] uppercase tracking-widest">
                                                     {report.riskScore > 75 ? 'Critical' : report.riskScore > 50 ? 'Moderate' : 'Optimal'}
@@ -911,13 +911,13 @@ export function AnalysisHistory() {
                                         </div>
                                     </div>
 
-                                    <div className="p-8 rounded-[2rem] bg-white/[0.03] border border-white/5 backdrop-blur-3xl flex flex-col justify-center relative overflow-hidden group">
+                                    <div className="p-8 rounded-[2rem] bg-foreground/[0.03] border border-border/50 backdrop-blur-3xl flex flex-col justify-center relative overflow-hidden group">
                                         <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                                            <ShieldCheck className="w-12 h-12 text-white" />
+                                            <ShieldCheck className="w-12 h-12 text-foreground" />
                                         </div>
                                         <div className="space-y-4 relative z-10">
-                                            <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em]">Verdict</span>
-                                            <p className="text-3xl font-light text-white tracking-tight uppercase leading-tight">{report.anemiaType || 'N/A'}</p>
+                                            <span className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.3em]">Verdict</span>
+                                            <p className="text-3xl font-light text-foreground tracking-tight uppercase leading-tight">{report.anemiaType || 'N/A'}</p>
                                             <div className="flex items-center gap-3 mt-4">
                                                 <div className="p-2 bg-primary/20 rounded-lg">
                                                     <Sparkles className="w-4 h-4 text-primary" />
@@ -929,36 +929,36 @@ export function AnalysisHistory() {
                                 </div>
 
                                 <div className="space-y-4">
-                                    <h4 className="text-[11px] font-black text-white/40 uppercase tracking-[0.4em] ml-4 flex items-center gap-3">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-white/20" />
+                                    <h4 className="text-[11px] font-black text-muted-foreground uppercase tracking-[0.4em] ml-4 flex items-center gap-3">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50" />
                                         Image Observations
                                     </h4>
-                                    <div className="p-8 rounded-[2rem] bg-black/40 border border-white/5 text-lg font-light text-white/70 leading-relaxed italic backdrop-blur-xl">
+                                    <div className="p-8 rounded-[2rem] bg-foreground/[0.04] border border-border/50 text-lg font-light text-muted-foreground leading-relaxed italic backdrop-blur-xl">
                                         "{report.imageAnalysisSummary}"
                                     </div>
                                 </div>
 
                                 <div className="space-y-4">
-                                    <h4 className="text-[11px] font-black text-white/40 uppercase tracking-[0.4em] ml-4 flex items-center gap-3">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-white/20" />
+                                    <h4 className="text-[11px] font-black text-muted-foreground uppercase tracking-[0.4em] ml-4 flex items-center gap-3">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50" />
                                         Clinical Insights
                                     </h4>
-                                    <ScrollArea className="h-64 rounded-[2rem] border border-white/5 bg-white/[0.01] p-8 backdrop-blur-xl">
-                                        <p className="text-lg text-white/50 leading-relaxed font-light whitespace-pre-wrap">{report.recommendations}</p>
+                                    <ScrollArea className="h-64 rounded-[2rem] border border-border/50 bg-foreground/[0.01] p-8 backdrop-blur-xl">
+                                        <p className="text-lg text-muted-foreground leading-relaxed font-light whitespace-pre-wrap">{report.recommendations}</p>
                                     </ScrollArea>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="p-10 bg-zinc-950/80 border-t border-white/5 flex justify-end gap-4 backdrop-blur-2xl flex-wrap">
-                            <Button variant="ghost" onClick={() => setReportToView(null)} className="h-14 px-10 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-white/5 text-white/60 hover:text-white transition-all">CLOSE</Button>
+                        <div className="p-10 bg-card/80 border-t border-border/50 flex justify-end gap-4 backdrop-blur-2xl flex-wrap">
+                            <Button variant="ghost" onClick={() => setReportToView(null)} className="h-14 px-10 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-foreground/5 text-muted-foreground hover:text-foreground transition-all">CLOSE</Button>
                             <Button
                                 onClick={() => handleDownloadPDF(report)}
                                 className="h-14 px-8 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-widest shadow-xl shadow-emerald-600/20 hover:scale-105 transition-all flex items-center gap-2"
                             >
                                 <Download className="w-4 h-4" /> DOWNLOAD PDF
                             </Button>
-                            <Button asChild className="h-14 px-12 rounded-2xl bg-primary text-black font-black text-xs uppercase tracking-widest shadow-xl shadow-primary/20 hover:scale-105 transition-all">
+                            <Button asChild className="h-14 px-12 rounded-2xl bg-primary text-primary-foreground font-black text-xs uppercase tracking-widest shadow-xl shadow-primary/20 hover:scale-105 transition-all">
                                 <Link href="/dashboard/analysis" className="flex items-center gap-2">
                                     RE-SCAN <ChevronRight className="w-4 h-4" />
                                 </Link>
@@ -984,7 +984,7 @@ export function AnalysisHistory() {
     const renderValidationDialog = () => {
         return (
             <Dialog open={isValidationDialogOpen} onOpenChange={setIsValidationDialogOpen}>
-                <DialogContent className="bg-[#080808] border-white/10 rounded-[3rem] p-0 overflow-hidden shadow-[0_0_100px_rgba(0,0,0,1)] max-w-xl">
+                <DialogContent className="bg-card border-border rounded-[3rem] p-0 overflow-hidden shadow-2xl max-w-xl">
                     <div className="p-12 space-y-10 relative z-10">
                         <DialogHeader className="space-y-4">
                             <div className="flex items-center gap-4 mb-2">
@@ -993,15 +993,15 @@ export function AnalysisHistory() {
                                 </div>
                                 <span className="text-[10px] font-black uppercase tracking-[0.5em] text-blue-400">Clinical Validation</span>
                             </div>
-                            <DialogTitle className="text-4xl font-light tracking-tighter text-white uppercase leading-tight">
+                            <DialogTitle className="text-4xl font-light tracking-tighter text-foreground uppercase leading-tight">
                                 Cross-Reference <span className="font-serif italic text-blue-400">Sync</span>
                             </DialogTitle>
-                            <DialogDescription className="text-white/40 font-light text-base leading-relaxed">
+                            <DialogDescription className="text-muted-foreground font-light text-base leading-relaxed">
                                 Select an AI image analysis to correlate with the clinical CBC report.
                             </DialogDescription>
                         </DialogHeader>
 
-                        <ScrollArea className="h-[400px] rounded-[2rem] border border-white/5 bg-white/[0.02] p-4">
+                        <ScrollArea className="h-[400px] rounded-[2rem] border border-border/50 bg-foreground/[0.02] p-4">
                             <div className="space-y-3">
                                 {imageHistory && imageHistory.map((item: ImageReport) => (
                                     <button
@@ -1011,19 +1011,19 @@ export function AnalysisHistory() {
                                             "w-full flex items-center justify-between p-6 rounded-2xl transition-all border group/item",
                                             validationImageReport?.id === item.id
                                                 ? "bg-primary/10 border-primary/40 shadow-lg shadow-primary/5"
-                                                : "bg-transparent border-transparent hover:bg-white/5"
+                                                : "bg-transparent border-transparent hover:bg-foreground/5"
                                         )}
                                     >
                                         <div className="flex items-center gap-5">
                                             <div className={cn(
                                                 "w-10 h-10 rounded-xl flex items-center justify-center transition-colors",
-                                                validationImageReport?.id === item.id ? "bg-primary/20" : "bg-white/5"
+                                                validationImageReport?.id === item.id ? "bg-primary/20" : "bg-foreground/5"
                                             )}>
-                                                <Calendar className={cn("w-4 h-4", validationImageReport?.id === item.id ? "text-primary" : "text-white/20")} />
+                                                <Calendar className={cn("w-4 h-4", validationImageReport?.id === item.id ? "text-primary" : "text-muted-foreground/50")} />
                                             </div>
                                             <div className="flex flex-col items-start space-y-1">
-                                                <span className="text-sm font-bold text-white">{toDate(item.createdAt) ? format(toDate(item.createdAt)!, 'MMMM d, yyyy') : 'N/A'}</span>
-                                                <span className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em]">{toDate(item.createdAt) ? format(toDate(item.createdAt)!, 'h:mm a') : ''}</span>
+                                                <span className="text-sm font-bold text-foreground">{toDate(item.createdAt) ? format(toDate(item.createdAt)!, 'MMMM d, yyyy') : 'N/A'}</span>
+                                                <span className="text-[10px] font-black text-muted-foreground/50 uppercase tracking-[0.2em]">{toDate(item.createdAt) ? format(toDate(item.createdAt)!, 'h:mm a') : ''}</span>
                                             </div>
                                         </div>
                                         <Badge variant={getBadgeVariant(item.riskScore)} className="font-black text-[10px] tracking-widest uppercase px-3 py-1 rounded-lg border-none">
@@ -1035,8 +1035,8 @@ export function AnalysisHistory() {
                         </ScrollArea>
                     </div>
 
-                    <div className="p-10 bg-zinc-950/80 border-t border-white/5 flex justify-end gap-6 backdrop-blur-2xl">
-                        <Button variant="ghost" onClick={() => setIsValidationDialogOpen(false)} className="h-14 px-10 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-white/5 text-white/60 hover:text-white transition-all">CANCEL</Button>
+                    <div className="p-10 bg-card/80 border-t border-border/50 flex justify-end gap-6 backdrop-blur-2xl">
+                        <Button variant="ghost" onClick={() => setIsValidationDialogOpen(false)} className="h-14 px-10 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-foreground/5 text-muted-foreground hover:text-foreground transition-all">CANCEL</Button>
                         <Button
                             onClick={handleValidation}
                             disabled={!validationImageReport}
@@ -1081,30 +1081,30 @@ export function AnalysisHistory() {
                     <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[160px] opacity-40 pointer-events-none group-hover:opacity-60 transition-opacity duration-1000" />
                     <div className="absolute -bottom-40 -right-40 w-[600px] h-[600px] bg-blue-500/5 rounded-full blur-[160px] opacity-40 pointer-events-none group-hover:opacity-60 transition-opacity duration-1000" />
 
-                    <div className="rounded-[3rem] glass-panel border-white/5 overflow-hidden shadow-[0_40px_100px_-20px_rgba(0,0,0,0.5)] relative z-10">
-                        <div className="p-6 md:p-12 border-b border-white/5 bg-white/[0.02] flex flex-col md:flex-row md:items-center justify-between gap-8">
+                    <div className="rounded-[3rem] glass-panel border-border/50 overflow-hidden shadow-2xl relative z-10">
+                        <div className="p-6 md:p-12 border-b border-border/50 bg-foreground/[0.02] flex flex-col md:flex-row md:items-center justify-between gap-8">
                             <div className="flex items-center gap-6">
-                                <div className="w-16 h-16 bg-gradient-to-br from-zinc-800 to-zinc-900 rounded-[2rem] border border-white/10 flex items-center justify-center shadow-2xl">
+                                <div className="w-16 h-16 bg-gradient-to-br from-muted to-muted/80 rounded-[2rem] border border-border flex items-center justify-center shadow-2xl">
                                     <History className="w-8 h-8 text-primary" />
                                 </div>
                                 <div className="space-y-1">
-                                    <h3 className="text-2xl font-light tracking-tight text-white">Diagnostic <span className="italic text-primary/80 font-bold">Archive</span></h3>
-                                    <p className="text-[11px] font-bold text-white/20 uppercase tracking-[0.4em]">Database of past diagnostics</p>
+                                    <h3 className="text-2xl font-light tracking-tight text-foreground">Diagnostic <span className="italic text-primary/80 font-bold">Archive</span></h3>
+                                    <p className="text-[11px] font-bold text-muted-foreground/50 uppercase tracking-[0.4em]">Database of past diagnostics</p>
                                 </div>
                             </div>
                             <div className="flex items-center gap-6">
                                 <div className="hidden lg:flex flex-col items-end mr-4">
-                                    <span className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em]">ACTIVE</span>
+                                    <span className="text-[10px] font-black text-muted-foreground/50 uppercase tracking-[0.3em]">ACTIVE</span>
                                     <span className="text-xs font-bold text-emerald-500 flex items-center gap-2 mt-1">
                                         <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_100px_theme(colors.emerald.500)]" />
                                         Sync
                                     </span>
                                 </div>
-                                <div className="h-12 w-px bg-white/5 hidden md:block" />
-                                <div className="px-6 py-3 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-3">
+                                <div className="h-12 w-px bg-border/50 hidden md:block" />
+                                <div className="px-6 py-3 rounded-2xl bg-foreground/5 border border-border flex items-center gap-3">
                                     <Activity className="w-4 h-4 text-primary/60" />
-                                    <span className="text-[11px] font-black text-white/60 uppercase tracking-widest">
-                                        {history.length} <span className="text-white/30 ml-1">Records</span>
+                                    <span className="text-[11px] font-black text-muted-foreground uppercase tracking-widest">
+                                        {history.length} <span className="text-muted-foreground/50 ml-1">Records</span>
                                     </span>
                                 </div>
                                 <button
@@ -1114,7 +1114,7 @@ export function AnalysisHistory() {
                                     <FileDown className="w-3.5 h-3.5" /> Export CSV
                                 </button>
                                 {/* View Mode Toggle */}
-                                <div className="flex items-center gap-1 p-1 rounded-xl bg-muted/30 border border-white/5">
+                                <div className="flex items-center gap-1 p-1 rounded-xl bg-muted/30 border border-border/50">
                                   <button
                                     onClick={() => setViewMode('table')}
                                     className={`p-2 rounded-lg transition-colors ${viewMode === 'table' ? 'bg-primary/20 text-primary' : 'text-muted-foreground hover:text-foreground'}`}
@@ -1134,26 +1134,26 @@ export function AnalysisHistory() {
                         </div>
 
                         {/* Filter Bar */}
-                        <div className="px-4 py-4 md:px-12 md:py-6 border-b border-white/5">
+                        <div className="px-4 py-4 md:px-12 md:py-6 border-b border-border/50">
                             <div className="glass-panel rounded-[2rem] p-4 flex flex-wrap gap-3 items-center">
                                 {/* Search */}
-                                <div className="flex items-center gap-2 flex-1 min-w-[160px] bg-white/5 border border-white/10 rounded-full px-4 py-2">
-                                    <Search className="w-3.5 h-3.5 text-white/30 flex-shrink-0" />
+                                <div className="flex items-center gap-2 flex-1 min-w-[160px] bg-foreground/5 border border-border rounded-full px-4 py-2">
+                                    <Search className="w-3.5 h-3.5 text-muted-foreground/60 flex-shrink-0" />
                                     <input
                                         type="text"
                                         value={search}
                                         onChange={(e) => setSearch(e.target.value)}
                                         placeholder="Search by date or risk…"
-                                        className="bg-transparent text-[11px] font-bold text-white/70 placeholder-white/20 outline-none w-full uppercase tracking-widest"
+                                        className="bg-transparent text-[11px] font-bold text-foreground/70 placeholder-muted-foreground outline-none w-full uppercase tracking-widest"
                                     />
                                 </div>
 
                                 {/* Divider */}
-                                <div className="h-6 w-px bg-white/10 hidden sm:block" />
+                                <div className="h-6 w-px bg-border hidden sm:block" />
 
                                 {/* Type filter */}
                                 <div className="flex items-center gap-1.5">
-                                    <Filter className="w-3 h-3 text-white/20 flex-shrink-0" />
+                                    <Filter className="w-3 h-3 text-muted-foreground/50 flex-shrink-0" />
                                     {(['all', 'image', 'cbc'] as const).map((t) => (
                                         <button
                                             key={t}
@@ -1162,7 +1162,7 @@ export function AnalysisHistory() {
                                                 'glass-button rounded-full px-4 py-1.5 text-[10px] font-black uppercase tracking-widest transition-all',
                                                 typeFilter === t
                                                     ? 'bg-primary/15 border-primary/40 text-primary'
-                                                    : 'text-white/40 hover:text-white/70'
+                                                    : 'text-muted-foreground hover:text-foreground/70'
                                             )}
                                         >
                                             {t === 'all' ? 'All' : t === 'image' ? 'Image Scan' : 'CBC Report'}
@@ -1171,7 +1171,7 @@ export function AnalysisHistory() {
                                 </div>
 
                                 {/* Divider */}
-                                <div className="h-6 w-px bg-white/10 hidden sm:block" />
+                                <div className="h-6 w-px bg-border hidden sm:block" />
 
                                 {/* Risk filter */}
                                 <div className="flex items-center gap-1.5">
@@ -1183,7 +1183,7 @@ export function AnalysisHistory() {
                                                 'glass-button rounded-full px-4 py-1.5 text-[10px] font-black uppercase tracking-widest transition-all',
                                                 riskFilter === r
                                                     ? 'bg-primary/15 border-primary/40 text-primary'
-                                                    : 'text-white/40 hover:text-white/70'
+                                                    : 'text-muted-foreground hover:text-foreground/70'
                                             )}
                                         >
                                             {r === 'all' ? 'All' : r === 'high' ? 'High Risk' : r === 'moderate' ? 'Moderate' : 'Low Risk'}
@@ -1205,8 +1205,8 @@ export function AnalysisHistory() {
                           </div>
                         )}
 
-                        <div className="p-12 bg-zinc-950/40 border-t border-white/5 text-center relative overflow-hidden">
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
+                        <div className="p-12 bg-card/40 border-t border-border/50 text-center relative overflow-hidden">
+                            <div className="absolute inset-0 bg-gradient-to-t from-foreground/[0.04] to-transparent pointer-events-none" />
                             {history.length >= pageLimit ? (
                               <button
                                 onClick={() => setPageLimit(prev => prev + 20)}
@@ -1215,7 +1215,7 @@ export function AnalysisHistory() {
                                 Load More Records
                               </button>
                             ) : (
-                              <p className="text-[11px] font-black text-white/10 uppercase tracking-[1em] relative z-10">
+                              <p className="text-[11px] font-black text-muted-foreground/30 uppercase tracking-[1em] relative z-10">
                                 {filteredHistory.length} of {history.length} Records
                               </p>
                             )}
@@ -1241,7 +1241,7 @@ export function AnalysisHistory() {
                 )}
                 <button
                   onClick={() => setSelectedIds([])}
-                  className="w-8 h-8 rounded-full glass-button border border-white/10 text-white/40 hover:text-white flex items-center justify-center"
+                  className="w-8 h-8 rounded-full glass-button border border-border text-muted-foreground hover:text-foreground flex items-center justify-center"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -1275,32 +1275,32 @@ export function AnalysisHistory() {
                 ];
                 return (
                     <Dialog open={true} onOpenChange={(open) => !open && setIsCompareOpen(false)}>
-                        <DialogContent className="sm:max-w-3xl bg-[#080808] border-white/10 rounded-[3rem] p-0 overflow-hidden">
+                        <DialogContent className="sm:max-w-3xl bg-card border-border rounded-[3rem] p-0 overflow-hidden">
                             <div className="p-10 space-y-8">
                                 <DialogHeader>
-                                    <DialogTitle className="text-3xl font-light tracking-tighter text-white">
+                                    <DialogTitle className="text-3xl font-light tracking-tighter text-foreground">
                                         Side-by-Side <span className="italic text-primary">Comparison</span>
                                     </DialogTitle>
-                                    <DialogDescription className="text-white/40 text-xs uppercase tracking-widest">
+                                    <DialogDescription className="text-muted-foreground text-xs uppercase tracking-widest">
                                         Comparing 2 selected records
                                     </DialogDescription>
                                 </DialogHeader>
                                 <div className="space-y-3">
                                     {fields.map(({ label, aVal, bVal, highlight }) => (
-                                        <div key={label} className="grid grid-cols-[120px_1fr_1fr] gap-4 items-center py-3 border-b border-white/5">
-                                            <span className="text-[10px] font-black uppercase tracking-widest text-white/30">{label}</span>
-                                            <span className={`text-sm font-bold text-center py-2 px-4 rounded-2xl ${highlight && getRiskNum(itemA) > getRiskNum(itemB) ? 'text-red-400 bg-red-500/10' : 'text-white/80 bg-white/5'}`}>{aVal}</span>
-                                            <span className={`text-sm font-bold text-center py-2 px-4 rounded-2xl ${highlight && getRiskNum(itemB) > getRiskNum(itemA) ? 'text-red-400 bg-red-500/10' : 'text-white/80 bg-white/5'}`}>{bVal}</span>
+                                        <div key={label} className="grid grid-cols-[120px_1fr_1fr] gap-4 items-center py-3 border-b border-border/50">
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">{label}</span>
+                                            <span className={`text-sm font-bold text-center py-2 px-4 rounded-2xl ${highlight && getRiskNum(itemA) > getRiskNum(itemB) ? 'text-red-400 bg-red-500/10' : 'text-foreground/80 bg-foreground/5'}`}>{aVal}</span>
+                                            <span className={`text-sm font-bold text-center py-2 px-4 rounded-2xl ${highlight && getRiskNum(itemB) > getRiskNum(itemA) ? 'text-red-400 bg-red-500/10' : 'text-foreground/80 bg-foreground/5'}`}>{bVal}</span>
                                         </div>
                                     ))}
                                 </div>
                                 {(cbcA || cbcB) && (
-                                    <div className="text-xs text-white/30 text-center">
+                                    <div className="text-xs text-muted-foreground/60 text-center">
                                         CBC reports show summary text. Image scans show full numeric comparison.
                                     </div>
                                 )}
                                 <div className="flex justify-end">
-                                    <Button variant="ghost" onClick={() => setIsCompareOpen(false)} className="rounded-2xl text-white/40 hover:text-white">Close</Button>
+                                    <Button variant="ghost" onClick={() => setIsCompareOpen(false)} className="rounded-2xl text-muted-foreground hover:text-foreground">Close</Button>
                                 </div>
                             </div>
                         </DialogContent>

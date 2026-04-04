@@ -238,14 +238,14 @@ export default function FindDoctorPage() {
                         transition={{ duration: 0.4, delay: index * 0.05 }}
                         className="group relative rounded-[2.5rem] glass-panel overflow-hidden hover:border-primary/20 hover:shadow-primary/5 transition-all duration-500 hover:-translate-y-1"
                       >
-                         <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                         <div className="absolute inset-0 bg-gradient-to-br from-foreground/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
                          
                          <div className="p-8 h-full flex flex-col justify-between relative z-10">
                             <div>
                                <div className="flex justify-between items-start mb-6">
                                   <div className="flex items-center gap-4">
-                                     <Avatar className="h-12 w-12 border border-white/10 bg-background shadow-lg group-hover:scale-110 transition-transform duration-500">
-                                        <AvatarFallback className="bg-white/5">
+                                     <Avatar className="h-12 w-12 border border-border bg-background shadow-lg group-hover:scale-110 transition-transform duration-500">
+                                        <AvatarFallback className="bg-foreground/5">
                                           {iconMap[clinic.type]}
                                         </AvatarFallback>
                                      </Avatar>
@@ -259,7 +259,7 @@ export default function FindDoctorPage() {
                                         </span>
                                      </div>
                                   </div>
-                                  <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full hover:bg-white/10 text-muted-foreground hover:text-foreground" asChild>
+                                  <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full hover:bg-foreground/10 text-muted-foreground hover:text-foreground" asChild>
                                      <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(clinic.name + ' ' + clinic.address)}`} target="_blank" rel="noopener noreferrer">
                                         <ArrowUpRight className="h-5 w-5" />
                                      </a>
@@ -290,8 +290,8 @@ export default function FindDoctorPage() {
                             </div>
                             
                             {/* Hover Actions Overlay */}
-                            <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 bg-background/90 backdrop-blur-xl border-t border-white/10 flex gap-2">
-                                <Button className="flex-1 rounded-xl bg-primary hover:bg-primary/90 text-white shadow-lg" asChild>
+                            <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 bg-background/90 backdrop-blur-xl border-t border-border flex gap-2">
+                                <Button className="flex-1 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg" asChild>
                                     <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(clinic.name + ' ' + clinic.address)}`} target="_blank" rel="noopener noreferrer">
                                         <Navigation className="mr-2 h-4 w-4" /> Navigate
                                     </a>
@@ -313,7 +313,7 @@ export default function FindDoctorPage() {
                         animate={{ opacity: 1 }}
                         className="col-span-full py-20 text-center space-y-6"
                     >
-                        <div className="w-24 h-24 rounded-full bg-white/5 border border-dashed border-primary/20 flex items-center justify-center mx-auto">
+                        <div className="w-24 h-24 rounded-full bg-foreground/5 border border-dashed border-primary/20 flex items-center justify-center mx-auto">
                             <Search className="h-8 w-8 text-muted-foreground/50" />
                         </div>
                         <div>
@@ -333,7 +333,7 @@ export default function FindDoctorPage() {
                         animate={{ opacity: 1 }}
                         className="col-span-full flex flex-col items-center justify-center h-[400px] text-center space-y-4 opacity-50"
                     >
-                        <div className="p-6 rounded-full bg-white/5">
+                        <div className="p-6 rounded-full bg-foreground/5">
                             <MapPin className="h-12 w-12 text-muted-foreground" />
                         </div>
                         <p className="text-sm uppercase tracking-[0.2em]">Enter a location to begin</p>
