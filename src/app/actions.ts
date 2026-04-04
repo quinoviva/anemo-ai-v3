@@ -125,51 +125,74 @@ export async function cacheAnalysisResult(dataUri: string, bodyPart: string, res
 export async function runGenerateImageDescription(
   input: GenerateImageDescriptionInput & { userId?: string }
 ): Promise<GenerateImageDescriptionOutput> {
-  try {
-    if (input.userId) checkRateLimit(`imgDesc:${input.userId}`);
+  const MAX_RETRIES = 3;
+  const BASE_DELAY_MS = 2000; // 2s, 4s, 8s backoff
 
-    // 1. Check for consistency
-    const consistency = await checkImageConsistency(input.photoDataUri, input.bodyPart);
-    if (consistency.isConsistent && consistency.result) {
-      return consistency.result;
-    }
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      if (input.userId) checkRateLimit(`imgDesc:${input.userId}`);
 
-    // 2. Run fresh analysis
-    const result = await generateImageDescription(input);
+      // 1. Check for consistency
+      const consistency = await checkImageConsistency(input.photoDataUri, input.bodyPart);
+      if (consistency.isConsistent && consistency.result) {
+        return consistency.result;
+      }
 
-    // 3. Cache the result for next time
-    if (result.isValid) {
-      await cacheAnalysisResult(input.photoDataUri, input.bodyPart, result);
-    }
+      // 2. Run fresh analysis
+      const result = await generateImageDescription(input);
 
-    return result;
-  } catch (error) {
-    console.error("CRITICAL ERROR in runGenerateImageDescription:", error);
-    if (error instanceof Error) {
-      console.error("Error Message:", error.message);
-      console.error("Stack Trace:", error.stack);
+      // 3. Cache the result for next time
+      if (result.isValid) {
+        await cacheAnalysisResult(input.photoDataUri, input.bodyPart, result);
+      }
+
+      return result;
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : '';
+      const isRateLimit = msg.includes('429') || msg.includes('RESOURCE_EXHAUSTED') || msg.includes('rate');
+
+      if (isRateLimit && attempt < MAX_RETRIES) {
+        const delay = BASE_DELAY_MS * Math.pow(2, attempt);
+        console.warn(`[AI] Rate limited on attempt ${attempt + 1}, retrying in ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        continue;
+      }
+
+      console.error("CRITICAL ERROR in runGenerateImageDescription:", error);
+      if (error instanceof Error) {
+        console.error("Error Message:", error.message);
+        console.error("Stack Trace:", error.stack);
+      }
+      // Return a structured error instead of throwing — Next.js production
+      // strips thrown error messages, causing the generic "server components render" error.
+      let userMessage = 'Analysis temporarily unavailable. Please try again shortly.';
+      if (isRateLimit) {
+        userMessage = 'AI service is at capacity. Please wait a moment and try again.';
+      } else if (msg.includes('API_KEY') || msg.includes('API key') || msg.includes('PERMISSION_DENIED')) {
+        userMessage = 'AI service configuration error. Please contact support.';
+      } else if (msg.includes('SAFETY') || msg.includes('blocked')) {
+        userMessage = 'Image was blocked by safety filters. Please try a different image.';
+      } else if (msg.includes('DEADLINE_EXCEEDED') || msg.includes('timeout')) {
+        userMessage = 'Analysis timed out. Please try again.';
+      }
+      return {
+        description: `${userMessage} [${msg.substring(0, 120)}]`,
+        isValid: false,
+        analysisResult: 'INCONCLUSIVE (Server Error)',
+        confidenceScore: 0,
+        recommendations: 'Please retry the analysis in a few seconds.',
+      };
     }
-    // Return a structured error instead of throwing — Next.js production
-    // strips thrown error messages, causing the generic "server components render" error.
-    const msg = error instanceof Error ? error.message : 'Analysis failed';
-    let userMessage = 'Analysis temporarily unavailable. Please try again shortly.';
-    if (msg.includes('429') || msg.includes('RESOURCE_EXHAUSTED')) {
-      userMessage = 'AI service is at capacity. Please wait a moment and try again.';
-    } else if (msg.includes('API_KEY') || msg.includes('API key') || msg.includes('PERMISSION_DENIED')) {
-      userMessage = 'AI service configuration error. Please contact support.';
-    } else if (msg.includes('SAFETY') || msg.includes('blocked')) {
-      userMessage = 'Image was blocked by safety filters. Please try a different image.';
-    } else if (msg.includes('DEADLINE_EXCEEDED') || msg.includes('timeout')) {
-      userMessage = 'Analysis timed out. Please try again.';
-    }
-    return {
-      description: `${userMessage} [${msg.substring(0, 120)}]`,
-      isValid: false,
-      analysisResult: 'INCONCLUSIVE (Server Error)',
-      confidenceScore: 0,
-      recommendations: 'Please retry the analysis in a few seconds.',
-    };
   }
+
+  // Should never reach here, but TypeScript needs it
+  return {
+    description: 'Analysis failed after multiple retries.',
+    isValid: false,
+    analysisResult: 'INCONCLUSIVE (Server Error)',
+    confidenceScore: 0,
+    recommendations: 'Please retry the analysis in a few seconds.',
+  };
 }
 
 /**
