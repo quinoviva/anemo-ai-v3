@@ -176,6 +176,7 @@ export async function runGenerateImageDescription(
         userMessage = 'Analysis timed out. Please try again.';
       }
       return {
+        imageDescription: 'Unable to describe — analysis failed due to a server error.',
         description: `${userMessage} [${msg.substring(0, 120)}]`,
         isValid: false,
         analysisResult: 'INCONCLUSIVE (Server Error)',
@@ -187,6 +188,7 @@ export async function runGenerateImageDescription(
 
   // Should never reach here, but TypeScript needs it
   return {
+    imageDescription: 'Unable to describe — analysis failed after multiple retries.',
     description: 'Analysis failed after multiple retries.',
     isValid: false,
     analysisResult: 'INCONCLUSIVE (Server Error)',

@@ -23,6 +23,7 @@ export type AnalysisState = {
   imageUrl: string | null;
   dataUri: string | null;
   calibrationMetadata: CalibrationMetadata | null;
+  imageDescription: string | null;
   description: string | null;
   isValid: boolean;
   analysisResult: string | null;
@@ -36,6 +37,7 @@ const initialAnalysisState: AnalysisState = {
   imageUrl: null,
   dataUri: null,
   calibrationMetadata: null,
+  imageDescription: null,
   description: null,
   isValid: false,
   analysisResult: null,
@@ -149,6 +151,7 @@ export function ImageAnalyzer({ initialCapture }: ImageAnalyzerProps) {
         ...prev,
         [bodyPart]: {
           ...prev[bodyPart],
+          imageDescription: result.imageDescription,
           description: result.description,
           isValid: result.isValid,
           analysisResult: result.analysisResult,
@@ -330,6 +333,11 @@ function AnalysisCard({
                 </Button>
               </div>
             </div>
+            {analysisState.imageDescription && (
+              <div className="rounded-md bg-muted px-3 py-2 text-xs text-muted-foreground">
+                <span className="font-semibold text-foreground">AI sees:</span> {analysisState.imageDescription}
+              </div>
+            )}
             <Alert>
               <CheckCircle className="h-4 w-4" />
               <AlertTitle>Analysis Complete</AlertTitle>
@@ -348,6 +356,11 @@ function AnalysisCard({
                     </Button>
                 </div>
             </div>
+            {analysisState.imageDescription && (
+              <div className="rounded-md bg-muted px-3 py-2 text-xs text-muted-foreground">
+                <span className="font-semibold text-foreground">AI sees:</span> {analysisState.imageDescription}
+              </div>
+            )}
             <Alert variant="destructive">
               <XCircle className="h-4 w-4" />
               <AlertTitle>Analysis Failed</AlertTitle>

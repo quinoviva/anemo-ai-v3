@@ -53,7 +53,7 @@ export default function TermsOfServicePage() {
             <h1 className="text-5xl md:text-7xl font-bold tracking-tighter mb-4 bg-clip-text text-transparent bg-gradient-to-b from-white to-white/50">
               Terms of Service
             </h1>
-            <p className="text-white/40 text-sm tracking-[0.3em] uppercase">Last updated: February 2025</p>
+            <p className="text-white/40 text-sm tracking-[0.3em]"><b>ANEMO</b> by WVSUPC SOICT</p>
           </header>
 
           <div className="space-y-12 text-lg font-light leading-relaxed text-white/70">
@@ -124,7 +124,7 @@ export default function TermsOfServicePage() {
             <footer className="pt-16 border-t border-white/10">
               <p className="text-sm text-white/40">
                 If you have questions or concerns about these Terms, please contact us at:<br />
-                <span className="text-white">support@anemocheck.app</span>
+                <span className="text-white">support@anemo.app</span>
               </p>
             </footer>
           </div>

@@ -57,7 +57,7 @@ export default function ContactPage() {
                     Get in Touch
                   </h1>
                   <p className="text-white/40 text-xl font-light leading-relaxed">
-                    Have questions about our AI analysis? Need technical support? 
+                    Have questions about our analysis? Need technical support? 
                     Our team is here to help you.
                   </p>
                 </div>
@@ -70,7 +70,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <p className="text-xs font-bold uppercase tracking-widest text-white/20 mb-1">Email</p>
-                    <p className="text-lg font-medium">support@anemocheck.app</p>
+                    <p className="text-lg font-medium">support@anemo.app</p>
                   </div>
                 </div>
 

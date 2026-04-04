@@ -22,7 +22,8 @@ const GenerateImageDescriptionInputSchema = z.object({
 export type GenerateImageDescriptionInput = z.infer<typeof GenerateImageDescriptionInputSchema>;
 
 const GenerateImageDescriptionOutputSchema = z.object({
-  description: z.string().describe('A description of the image, including any warnings about makeup or other obstructions.'),
+  imageDescription: z.string().describe('A plain 10-15 word factual description of exactly what the uploaded image shows, regardless of validity. Example: "The image shows a woman with face makeup under bright lighting."'),
+  description: z.string().describe('A clinical observation of the image, including any warnings about makeup or other obstructions.'),
   isValid: z.boolean().describe('Whether the image is valid for anemia detection (a clear photo of the specified body part).'),
   analysisResult: z.string().describe('Clinical severity assessment. One of: "ANEMIA POSITIVE (Significant Pallor Detected)", "ANEMIA SUSPECTED (Mild Pallor Detected)", "ANEMIA NEGATIVE (Healthy Vascular Presentation)", or "INCONCLUSIVE (Ambiguous or Insufficient Data)"'),
   confidenceScore: z.number().min(0).max(100).optional().describe('Confidence level of the AI analysis from 0-100.'),
@@ -117,6 +118,7 @@ IF isValid=false:
 - Severe pallor → Hgb likely < 7 g/dL → Severe
 
 ━━━ OUTPUT ━━━
+- imageDescription: A plain 10-15 word factual description of exactly what the uploaded image shows. Always describe the actual visible content (e.g. "The image shows an open palm of a hand under natural indoor lighting." or "The image shows a plate of spaghetti on a wooden table." or "The image shows a woman with face makeup and red lipstick."). Always fill this regardless of validity.
 - isValid: boolean (false ONLY for wrong body part or completely unusable image)
 - description: 1 sentence clinical observation. If invalid: "[QUALITY_FAIL] <reason>"
 - analysisResult: EXACTLY ONE of:
