@@ -557,8 +557,8 @@ function CaptureStep({
                   <ShieldAlert className="w-8 h-8 text-red-400" />
                 </div>
                 <div className="text-center space-y-3">
-                  <p className="text-sm font-bold text-red-300 uppercase tracking-widest">Image Not Accepted</p>
-                  <p className="text-xs text-red-400/90 leading-relaxed max-w-xs">{error}</p>
+                  <p className="text-2xl font-bold text-red-300 uppercase tracking-widest">Image Not Accepted</p>
+                  <p className="text-lg text-red-300/90 leading-relaxed max-w-xs">{error}</p>
                 </div>
               </div>
             </div>

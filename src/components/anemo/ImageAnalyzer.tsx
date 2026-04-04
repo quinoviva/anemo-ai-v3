@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { useUser } from '@/firebase';
 import { useToast } from '@/hooks/use-toast';
-import { UploadCloud, XCircle, CheckCircle, RefreshCw, Hand, Eye, User, Camera } from 'lucide-react';
+import { UploadCloud, CheckCircle, RefreshCw, Hand, Eye, User, Camera, ShieldAlert, RotateCcw } from 'lucide-react';
 import HeartLoader from '@/components/ui/HeartLoader';
 import { ImageAnalysisReport } from './ImageAnalysisReport';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -324,48 +324,72 @@ function AnalysisCard({
         );
       case 'success':
         return (
-          <div className="space-y-2">
-            <div className="relative aspect-video rounded-md overflow-hidden border">
+          <div className="space-y-3">
+            <div className="relative aspect-video rounded-2xl overflow-hidden border border-emerald-500/20 shadow-lg shadow-emerald-500/5">
               {analysisState.imageUrl && <img src={analysisState.imageUrl} alt={title} className="object-cover w-full h-full" />}
-              <div className="absolute top-1 right-1">
-                <Button variant="destructive" size="icon" className="h-7 w-7" onClick={onReset}>
-                  <RefreshCw className="h-4 w-4" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+              <div className="absolute bottom-0 inset-x-0 p-3 flex items-center gap-2">
+                <div className="flex items-center gap-1.5 bg-emerald-500/15 border border-emerald-500/30 rounded-full px-2.5 py-1">
+                  <div className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400">Verified</span>
+                </div>
+              </div>
+              <div className="absolute top-2 right-2">
+                <Button variant="secondary" size="icon" className="h-7 w-7 rounded-xl bg-black/40 hover:bg-black/60 border-0 backdrop-blur-sm" onClick={onReset}>
+                  <RefreshCw className="h-3.5 w-3.5 text-white" />
                 </Button>
               </div>
             </div>
             {analysisState.imageDescription && (
-              <div className="rounded-md bg-muted px-3 py-2 text-xs text-muted-foreground">
-                <span className="font-semibold text-foreground">AI sees:</span> {analysisState.imageDescription}
+              <div className="rounded-xl bg-foreground/[0.03] border border-border/50 px-3.5 py-2.5">
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-1">AI Detection</p>
+                <p className="text-sm text-foreground/80 leading-relaxed">{analysisState.imageDescription}</p>
               </div>
             )}
-            <Alert>
-              <CheckCircle className="h-4 w-4" />
-              <AlertTitle>Analysis Complete</AlertTitle>
-              <AlertDescription>{analysisState.analysisResult}</AlertDescription>
-            </Alert>
+            <div className="rounded-xl bg-emerald-500/[0.06] border border-emerald-500/20 px-3.5 py-2.5 flex items-start gap-2.5">
+              <CheckCircle className="h-4 w-4 text-emerald-500 mt-0.5 shrink-0" />
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-500 mb-0.5">Analysis Complete</p>
+                <p className="text-sm font-medium text-foreground/90 leading-snug">{analysisState.analysisResult}</p>
+              </div>
+            </div>
           </div>
         );
       case 'error':
         return (
-          <div className="space-y-2">
-             <div className="relative aspect-video rounded-md overflow-hidden border">
-                {analysisState.imageUrl && <img src={analysisState.imageUrl} alt={title} className="object-cover w-full h-full opacity-50" />}
-                 <div className="absolute top-1 right-1">
-                    <Button variant="destructive" size="icon" className="h-7 w-7" onClick={onReset}>
-                        <RefreshCw className="h-4 w-4" />
+          <div className="space-y-3">
+             <div className="relative aspect-video rounded-2xl overflow-hidden border border-red-500/20 shadow-lg shadow-red-500/5">
+                {analysisState.imageUrl && <img src={analysisState.imageUrl} alt={title} className="object-cover w-full h-full opacity-40 blur-[2px] scale-105" />}
+                <div className="absolute inset-0 bg-gradient-to-t from-red-950/60 via-red-950/20 to-black/30" />
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+                  <div className="p-4 bg-red-600/10 rounded-2xl border border-red-600/20">
+                    <ShieldAlert className="h-8 w-8 text-red-500" />
+                  </div>
+                  <div className="text-center space-y-1">
+                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-red-500">Not Accepted</p>
+                  </div>
+                </div>
+                <div className="absolute top-2 right-2">
+                    <Button variant="secondary" size="icon" className="h-7 w-7 rounded-xl bg-black/40 hover:bg-black/60 border-0 backdrop-blur-sm" onClick={onReset}>
+                        <RefreshCw className="h-3.5 w-3.5 text-white" />
                     </Button>
                 </div>
             </div>
             {analysisState.imageDescription && (
-              <div className="rounded-md bg-muted px-3 py-2 text-xs text-muted-foreground">
-                <span className="font-semibold text-foreground">AI sees:</span> {analysisState.imageDescription}
+              <div className="rounded-xl bg-red-500/[0.04] border border-red-500/15 px-3.5 py-3">
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-red-500 mb-1.5">What AI Detected</p>
+                <p className="text-sm font-medium text-foreground/80 leading-relaxed">{analysisState.imageDescription}</p>
               </div>
             )}
-            <Alert variant="destructive">
-              <XCircle className="h-4 w-4" />
-              <AlertTitle>Analysis Failed</AlertTitle>
-              <AlertDescription>{analysisState.error}</AlertDescription>
-            </Alert>
+            {analysisState.error && (
+              <div className="rounded-xl bg-foreground/[0.03] border border-border/50 px-3.5 py-2.5">
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-1">Reason</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">{analysisState.error}</p>
+              </div>
+            )}
+            <Button variant="outline" className="w-full h-10 gap-2 rounded-xl border-border text-xs font-bold uppercase tracking-widest hover:bg-foreground/5" onClick={onReset}>
+              <RotateCcw className="h-3.5 w-3.5" /> Upload Different Image
+            </Button>
           </div>
         );
     }
