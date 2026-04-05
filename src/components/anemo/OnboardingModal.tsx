@@ -75,7 +75,7 @@ export function OnboardingModal() {
 
           <motion.div
             key="onboarding-card"
-            className="relative w-full max-w-lg glass-panel rounded-[2.5rem] p-8 md:p-10 flex flex-col items-center text-center shadow-2xl"
+            className="relative w-full max-w-lg glass-panel rounded-[2.5rem] p-5 md:p-8 lg:p-10 flex flex-col items-center text-center shadow-2xl"
             initial={{ opacity: 0, scale: 0.94, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.94, y: 20 }}

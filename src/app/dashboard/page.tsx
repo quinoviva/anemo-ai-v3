@@ -331,7 +331,7 @@ export default function DashboardPage() {
         {/* --- Info Section (Ultra Premium Redesign) --- */}
         <motion.div
           variants={itemVariants}
-          className="relative group rounded-[2.5rem] p-10 md:p-14 overflow-hidden isolate"
+          className="relative group rounded-[2.5rem] p-5 md:p-10 lg:p-14 overflow-hidden isolate"
         >
           {/* Dynamic Background Mesh */}
           <div className="absolute inset-0 bg-gradient-to-br from-red-950/80 via-background to-background z-0" />
@@ -360,7 +360,7 @@ export default function DashboardPage() {
               </div>
 
               <div className="space-y-4">
-                <h2 className="text-5xl md:text-6xl font-light tracking-tighter text-foreground leading-[0.95]">
+                <h2 className="text-3xl md:text-5xl lg:text-6xl font-light tracking-tighter text-foreground leading-[0.95]">
                   Understanding Anemia <br />
                   <span className="font-serif italic text-red-500/90">& Your Health.</span>
                 </h2>
@@ -426,7 +426,7 @@ export default function DashboardPage() {
             <div className="absolute -top-40 -right-40 w-[300px] h-[300px] md:w-[600px] md:h-[600px] bg-red-600/40 rounded-full blur-[160px] group-hover:bg-red-600/50 transition-colors duration-1000 mix-blend-multiply dark:mix-blend-screen" />
             <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-red-600/20 rounded-full blur-[140px]" />
 
-            <div className="relative z-10 h-full p-12 flex flex-col justify-between">
+            <div className="relative z-10 h-full p-5 md:p-8 lg:p-12 flex flex-col justify-between">
               <div className="flex justify-between items-start">
                 <div className="p-5 bg-red-600/10 rounded-3xl backdrop-blur-xl border border-red-500/20 shadow-2xl shadow-red-500/20 group-hover:scale-110 transition-transform duration-700">
                   <Camera className="h-10 w-10 text-red-500" />
@@ -448,7 +448,7 @@ export default function DashboardPage() {
                   <Button className="rounded-full px-8 py-5 md:px-14 md:py-9 bg-red-600 hover:bg-red-500 text-white shadow-[0_20px_50px_-10px_rgba(220,38,38,0.5)] transition-all duration-500 hover:scale-105 active:scale-95 text-sm font-bold tracking-[0.2em] uppercase border-none ring-offset-2 ring-red-600/20">
                     Launch Analysis
                   </Button>
-                  <div className="h-px w-40 bg-gradient-to-r from-red-500/60 to-transparent" />
+                  <div className="h-px w-40 bg-gradient-to-r from-red-500/60 to-transparent hidden md:block" />
                 </div>
               </div>
             </div>
@@ -533,7 +533,7 @@ export default function DashboardPage() {
           {/* 3. AI Assistant (Deep Indigo/Blue Theme) */}
           <BentoCard
             colSpan="col-span-1 md:col-span-2 lg:col-span-3"
-            className="p-12 justify-between bg-gradient-to-br from-blue-600/30 via-background to-background border-blue-500/30 hover:border-blue-500/50 transition-all duration-700 group overflow-hidden shadow-[0_20px_60px_-15px_rgba(37,99,235,0.15)]"
+            className="p-5 md:p-8 lg:p-12 justify-between bg-gradient-to-br from-blue-600/30 via-background to-background border-blue-500/30 hover:border-blue-500/50 transition-all duration-700 group overflow-hidden shadow-[0_20px_60px_-15px_rgba(37,99,235,0.15)]"
           >
             <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] bg-blue-600/25 rounded-full blur-[140px] group-hover:bg-blue-600/35 transition-colors duration-700 mix-blend-screen" />
 
@@ -542,7 +542,7 @@ export default function DashboardPage() {
                 <MessageSquare className="h-10 w-10" />
               </div>
               <div className="space-y-2">
-                <h3 className="text-4xl md:text-3xl font-light tracking-tighter text-foreground leading-none drop-shadow-sm">
+                <h3 className="text-2xl md:text-3xl font-light tracking-tighter text-foreground leading-none drop-shadow-sm">
                   Anemo <span className="font-medium text-red-600 italic">Bot</span>
                 </h3>
                 <p className="text-sm text-muted-foreground font-light tracking-widest uppercase">AI Health Intelligence</p>
@@ -555,7 +555,7 @@ export default function DashboardPage() {
                   <div key={i} className="w-10 h-10 rounded-full border-4 border-background bg-blue-500/20 backdrop-blur-md shadow-lg" />
                 ))}
               </div>
-              <Button variant="outline" className="rounded-full border-blue-500/20 bg-blue-500/5 hover:bg-blue-600 text-blue-500 hover:text-white transition-all duration-500 px-12 py-8 text-xs font-bold uppercase tracking-widest shadow-xl shadow-blue-500/5 hover:shadow-blue-500/30" asChild>
+              <Button variant="outline" className="rounded-full border-blue-500/20 bg-blue-500/5 hover:bg-blue-600 text-blue-500 hover:text-white transition-all duration-500 px-6 py-4 md:px-12 md:py-8 text-xs font-bold uppercase tracking-widest shadow-xl shadow-blue-500/5 hover:shadow-blue-500/30" asChild>
                 <Link href="/dashboard/chatbot" className="flex items-center gap-3">
                   Start Session <Sparkles className="h-4 w-4" />
                 </Link>
@@ -566,7 +566,7 @@ export default function DashboardPage() {
           {/* 4. Find Care (Deep Emerald/Teal Theme) */}
           <BentoCard
             colSpan="col-span-1 md:col-span-2 lg:col-span-3"
-            className="p-12 justify-between bg-gradient-to-br from-emerald-600/30 via-background to-background border-emerald-500/30 hover:border-emerald-500/50 transition-all duration-700 group shadow-[0_20px_60px_-15px_rgba(16,185,129,0.15)]"
+            className="p-5 md:p-8 lg:p-12 justify-between bg-gradient-to-br from-emerald-600/30 via-background to-background border-emerald-500/30 hover:border-emerald-500/50 transition-all duration-700 group shadow-[0_20px_60px_-15px_rgba(16,185,129,0.15)]"
           >
             <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/15 rounded-full blur-[100px] -mr-32 -mt-32 mix-blend-screen" />
 
@@ -576,7 +576,7 @@ export default function DashboardPage() {
                   <MapPin className="h-10 w-10" />
                 </div>
                 <div className="space-y-2">
-                  <h3 className="text-4xl md:text-3xl font-light tracking-tighter text-foreground leading-none drop-shadow-sm">
+                  <h3 className="text-2xl md:text-3xl font-light tracking-tighter text-foreground leading-none drop-shadow-sm">
                     Nearby <span className="font-medium text-red-600 italic">Clinics</span>
                   </h3>
                   <p className="text-sm text-muted-foreground font-light tracking-wide flex items-center gap-3">
@@ -601,7 +601,7 @@ export default function DashboardPage() {
                   </div>
                 )}
               </div>
-              <Button variant="outline" className="rounded-full border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-600 text-emerald-500 hover:text-white transition-all duration-500 px-12 py-8 text-xs font-bold uppercase tracking-widest shadow-xl shadow-emerald-500/5 hover:shadow-emerald-500/30" asChild>
+              <Button variant="outline" className="rounded-full border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-600 text-emerald-500 hover:text-white transition-all duration-500 px-6 py-4 md:px-12 md:py-8 text-xs font-bold uppercase tracking-widest shadow-xl shadow-emerald-500/5 hover:shadow-emerald-500/30" asChild>
                 <Link href="/dashboard/find-doctor">Locate Care</Link>
               </Button>
             </div>
@@ -646,7 +646,7 @@ export default function DashboardPage() {
           {!isUserDataLoading && userSex === 'Female' && (
             <BentoCard
               colSpan="col-span-1 md:col-span-4 lg:col-span-6"
-              className="p-12 bg-gradient-to-r from-rose-500/20 via-transparent to-transparent border border-rose-500/20 shadow-[0_20px_60px_-15px_rgba(244,63,94,0.1)]"
+              className="p-5 md:p-8 lg:p-12 bg-gradient-to-r from-rose-500/20 via-transparent to-transparent border border-rose-500/20 shadow-[0_20px_60px_-15px_rgba(244,63,94,0.1)]"
             >
               <div className="flex flex-col md:flex-row gap-12 items-center h-full">
                 <div className="md:w-1/3 space-y-6">

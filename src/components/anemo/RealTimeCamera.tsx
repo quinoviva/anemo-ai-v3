@@ -240,15 +240,16 @@ export function RealTimeCamera({ bodyPart, onCapture, onClose, accentColor }: Re
                     initial={{ opacity: 0, scale: 0.97 }}
                     animate={{ opacity: permStatus === 'granted' ? 1 : 0, scale: permStatus === 'granted' ? 1 : 0.97 }}
                     transition={{ duration: 0.5 }}
-                    className="relative w-full max-w-2xl mx-4 sm:mx-auto"
-                    style={{ aspectRatio: '4/3' }}
+                    className="relative w-full max-w-3xl mx-2 sm:mx-auto"
+                    style={{ aspectRatio: '16/9' }}
                 >
                     {/* viewport */}
-                    <div className="relative w-full h-full rounded-[2.5rem] overflow-hidden border shadow-2xl"
+                    <div className="relative w-full h-full rounded-[3rem] overflow-hidden border shadow-2xl"
                         style={{ borderColor: `${color}30` }}>
 
                         <video ref={videoRef} autoPlay playsInline muted
-                            className="w-full h-full object-cover" />
+                            className="w-full h-full object-cover"
+                            style={{ transform: 'scaleX(-1)' }} />
 
                         {/* body-part overlay */}
                         {isCameraReady && (

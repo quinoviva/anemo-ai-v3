@@ -594,24 +594,24 @@ export function AnalysisHistory() {
             <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="flex flex-col items-center justify-center min-h-[500px] text-center space-y-12 p-12 rounded-[3rem] glass-panel border-primary/10 relative overflow-hidden"
+                className="flex flex-col items-center justify-center min-h-[500px] text-center space-y-8 md:space-y-12 p-6 md:p-12 rounded-[2rem] md:rounded-[3rem] glass-panel border-primary/10 relative overflow-hidden"
             >
                 <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
                 <div className="relative">
                     <div className="absolute inset-0 bg-primary/20 blur-[100px] rounded-full animate-pulse" />
-                    <div className="relative w-32 h-32 rounded-[2.5rem] bg-muted border border-border flex items-center justify-center backdrop-blur-xl shadow-2xl">
-                        <LogIn className="h-12 w-12 text-primary" />
+                    <div className="relative w-20 h-20 md:w-32 md:h-32 rounded-[1.5rem] md:rounded-[2.5rem] bg-muted border border-border flex items-center justify-center backdrop-blur-xl shadow-2xl">
+                        <LogIn className="h-8 w-8 md:h-12 md:w-12 text-primary" />
                     </div>
                 </div>
                 <div className="space-y-6 max-w-md relative z-10">
-                    <h3 className="text-4xl font-light tracking-tighter text-foreground">
+                    <h3 className="text-2xl md:text-4xl font-light tracking-tighter text-foreground">
                         Guest <span className="font-serif italic text-primary">Protocol</span> Active
                     </h3>
                     <p className="text-muted-foreground text-lg font-light leading-relaxed">
                         Historical diagnostic data is only persistent for authenticated sessions. Create an account to track your health intelligence over time with our neural diagnostic suite.
                     </p>
                 </div>
-                <Button asChild className="h-16 px-12 rounded-full bg-primary text-primary-foreground font-black uppercase tracking-[0.3em] text-[11px] shadow-[0_20px_40px_rgba(var(--primary),0.3)] hover:scale-105 transition-all">
+                <Button asChild className="h-12 px-8 md:h-16 md:px-12 rounded-full bg-primary text-primary-foreground font-black uppercase tracking-[0.3em] text-[11px] shadow-[0_20px_40px_rgba(var(--primary),0.3)] hover:scale-105 transition-all">
                     <Link href="/signup">
                         INITIALIZE ACCOUNT
                     </Link>
@@ -640,21 +640,21 @@ export function AnalysisHistory() {
             <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="flex flex-col items-center justify-center min-h-[500px] text-center space-y-12 p-12 rounded-[3rem] glass-panel border-border/50 relative overflow-hidden"
+                className="flex flex-col items-center justify-center min-h-[500px] text-center space-y-8 md:space-y-12 p-6 md:p-12 rounded-[2rem] md:rounded-[3rem] glass-panel border-border/50 relative overflow-hidden"
             >
                 <div className="absolute inset-0 bg-gradient-to-b from-foreground/5 to-transparent pointer-events-none" />
-                <div className="w-32 h-32 rounded-[2.5rem] bg-muted border border-border flex items-center justify-center text-muted-foreground/30 backdrop-blur-xl shadow-2xl">
-                    <Search className="h-12 w-12" />
+                <div className="w-20 h-20 md:w-32 md:h-32 rounded-[1.5rem] md:rounded-[2.5rem] bg-muted border border-border flex items-center justify-center text-muted-foreground/30 backdrop-blur-xl shadow-2xl">
+                    <Search className="h-8 w-8 md:h-12 md:w-12" />
                 </div>
                 <div className="space-y-6 max-w-md relative z-10">
-                    <h3 className="text-4xl font-light tracking-tighter text-foreground">
+                    <h3 className="text-2xl md:text-4xl font-light tracking-tighter text-foreground">
                         Archive <span className="font-serif italic text-muted-foreground">Empty</span>
                     </h3>
                     <p className="text-muted-foreground text-lg font-light leading-relaxed">
                         No diagnostic records found in your profile. Initiate a scan to start building your health history and unlock longitudinal insights.
                     </p>
                 </div>
-                <Button asChild className="h-16 px-12 rounded-full bg-foreground text-background font-black uppercase tracking-[0.3em] text-[11px] shadow-lg hover:scale-105 transition-all">
+                <Button asChild className="h-12 px-8 md:h-16 md:px-12 rounded-full bg-foreground text-background font-black uppercase tracking-[0.3em] text-[11px] shadow-lg hover:scale-105 transition-all">
                     <Link href="/dashboard/analysis">
                         START NEW SCAN
                     </Link>
@@ -834,20 +834,20 @@ export function AnalysisHistory() {
                                 <span className="sr-only">Delete</span>
                             </Button>
                         </AlertDialogTrigger>
-                        <AlertDialogContent className="bg-card border-border rounded-[3rem] p-12">
+                        <AlertDialogContent className="bg-card border-border rounded-[2rem] md:rounded-[3rem] p-6 md:p-12">
                             <AlertDialogHeader className="space-y-4">
-                                <AlertDialogTitle className="text-4xl font-light tracking-tighter text-foreground uppercase">
+                                <AlertDialogTitle className="text-2xl md:text-4xl font-light tracking-tighter text-foreground uppercase">
                                     Purge <span className="font-serif italic text-red-500">Record</span>?
                                 </AlertDialogTitle>
                                 <AlertDialogDescription className="text-muted-foreground text-lg font-light leading-relaxed">
                                     This action is irreversible. The selected diagnostic intelligence will be permanently removed from your profile&apos;s historical evolution.
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
-                            <AlertDialogFooter className="mt-12 gap-4">
-                                <AlertDialogCancel className="h-14 px-8 rounded-2xl border-border bg-foreground/5 hover:bg-foreground/10 text-foreground font-bold text-xs uppercase tracking-widest transition-all">CANCEL</AlertDialogCancel>
+                            <AlertDialogFooter className="mt-6 md:mt-12 gap-4">
+                                <AlertDialogCancel className="h-10 px-5 md:h-14 md:px-8 rounded-2xl border-border bg-foreground/5 hover:bg-foreground/10 text-foreground font-bold text-xs uppercase tracking-widest transition-all">CANCEL</AlertDialogCancel>
                                 <AlertDialogAction
                                     onClick={() => handleDelete(item.id, isImage ? 'image' : 'cbc')}
-                                    className="h-14 px-10 bg-red-600 hover:bg-red-500 text-white font-black text-xs uppercase tracking-widest rounded-2xl shadow-xl shadow-red-600/20 transition-all"
+                                    className="h-10 px-6 md:h-14 md:px-10 bg-red-600 hover:bg-red-500 text-white font-black text-xs uppercase tracking-widest rounded-2xl shadow-xl shadow-red-600/20 transition-all"
                                 >
                                     PURGE INTELLIGENCE
                                 </AlertDialogAction>
@@ -868,7 +868,7 @@ export function AnalysisHistory() {
                     <DialogContent className="sm:max-w-2xl bg-card border-border rounded-[3rem] p-0 overflow-hidden shadow-2xl">
                         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[140px] -mr-64 -mt-64 pointer-events-none" />
 
-                        <div className="p-12 space-y-12 relative z-10">
+                        <div className="p-5 md:p-12 space-y-6 md:space-y-12 relative z-10">
                             <DialogHeader className="space-y-4">
                                 <div className="flex items-center gap-4 mb-2">
                                     <div className="p-3 bg-primary/10 rounded-2xl border border-primary/20">
@@ -881,7 +881,7 @@ export function AnalysisHistory() {
                                         </DialogDescription>
                                     </div>
                                 </div>
-                                <DialogTitle className="text-5xl font-light tracking-tighter text-foreground uppercase leading-none">
+                                <DialogTitle className="text-2xl md:text-5xl font-light tracking-tighter text-foreground uppercase leading-none">
                                     Historical <span className="font-serif italic text-primary/80">Result</span>
                                 </DialogTitle>
                                 <p className="text-muted-foreground font-medium uppercase tracking-[0.2em] text-[11px]">
@@ -890,15 +890,15 @@ export function AnalysisHistory() {
                             </DialogHeader>
 
                             <div className="grid gap-10">
-                                <div className="grid grid-cols-2 gap-6">
-                                    <div className="p-8 rounded-[2rem] bg-foreground/[0.03] border border-border/50 backdrop-blur-3xl relative overflow-hidden group">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
+                                    <div className="p-4 md:p-8 rounded-[1.5rem] md:rounded-[2rem] bg-foreground/[0.03] border border-border/50 backdrop-blur-3xl relative overflow-hidden group">
                                         <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                                             <TrendingUp className="w-12 h-12 text-foreground" />
                                         </div>
                                         <div className="flex justify-between items-end mb-6 relative z-10">
                                             <div className="space-y-1">
                                                 <span className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.3em]">Risk Score</span>
-                                                <p className="text-6xl font-light text-foreground tracking-tighter leading-none">{report.riskScore}<span className="text-xl text-muted-foreground/50 ml-1">/100</span></p>
+                                                <p className="text-4xl md:text-6xl font-light text-foreground tracking-tighter leading-none">{report.riskScore}<span className="text-xl text-muted-foreground/50 ml-1">/100</span></p>
                                             </div>
                                         </div>
                                         <div className="space-y-3 relative z-10">
@@ -911,13 +911,13 @@ export function AnalysisHistory() {
                                         </div>
                                     </div>
 
-                                    <div className="p-8 rounded-[2rem] bg-foreground/[0.03] border border-border/50 backdrop-blur-3xl flex flex-col justify-center relative overflow-hidden group">
+                                    <div className="p-4 md:p-8 rounded-[1.5rem] md:rounded-[2rem] bg-foreground/[0.03] border border-border/50 backdrop-blur-3xl flex flex-col justify-center relative overflow-hidden group">
                                         <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                                             <ShieldCheck className="w-12 h-12 text-foreground" />
                                         </div>
                                         <div className="space-y-4 relative z-10">
                                             <span className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.3em]">Verdict</span>
-                                            <p className="text-3xl font-light text-foreground tracking-tight uppercase leading-tight">{report.anemiaType || 'N/A'}</p>
+                                            <p className="text-xl md:text-3xl font-light text-foreground tracking-tight uppercase leading-tight">{report.anemiaType || 'N/A'}</p>
                                             <div className="flex items-center gap-3 mt-4">
                                                 <div className="p-2 bg-primary/20 rounded-lg">
                                                     <Sparkles className="w-4 h-4 text-primary" />
@@ -933,7 +933,7 @@ export function AnalysisHistory() {
                                         <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50" />
                                         Image Observations
                                     </h4>
-                                    <div className="p-8 rounded-[2rem] bg-foreground/[0.04] border border-border/50 text-lg font-light text-muted-foreground leading-relaxed italic backdrop-blur-xl">
+                                    <div className="p-4 md:p-8 rounded-[1.5rem] md:rounded-[2rem] bg-foreground/[0.04] border border-border/50 text-sm md:text-lg font-light text-muted-foreground leading-relaxed italic backdrop-blur-xl">
                                         "{report.imageAnalysisSummary}"
                                     </div>
                                 </div>
@@ -943,22 +943,22 @@ export function AnalysisHistory() {
                                         <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50" />
                                         Clinical Insights
                                     </h4>
-                                    <ScrollArea className="h-64 rounded-[2rem] border border-border/50 bg-foreground/[0.01] p-8 backdrop-blur-xl">
-                                        <p className="text-lg text-muted-foreground leading-relaxed font-light whitespace-pre-wrap">{report.recommendations}</p>
+                                    <ScrollArea className="h-64 rounded-[1.5rem] md:rounded-[2rem] border border-border/50 bg-foreground/[0.01] p-4 md:p-8 backdrop-blur-xl">
+                                        <p className="text-sm md:text-lg text-muted-foreground leading-relaxed font-light whitespace-pre-wrap">{report.recommendations}</p>
                                     </ScrollArea>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="p-10 bg-card/80 border-t border-border/50 flex justify-end gap-4 backdrop-blur-2xl flex-wrap">
-                            <Button variant="ghost" onClick={() => setReportToView(null)} className="h-14 px-10 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-foreground/5 text-muted-foreground hover:text-foreground transition-all">CLOSE</Button>
+                        <div className="p-4 md:p-10 bg-card/80 border-t border-border/50 flex justify-end gap-3 md:gap-4 backdrop-blur-2xl flex-wrap">
+                            <Button variant="ghost" onClick={() => setReportToView(null)} className="h-10 px-6 md:h-14 md:px-10 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-foreground/5 text-muted-foreground hover:text-foreground transition-all">CLOSE</Button>
                             <Button
                                 onClick={() => handleDownloadPDF(report)}
-                                className="h-14 px-8 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-widest shadow-xl shadow-emerald-600/20 hover:scale-105 transition-all flex items-center gap-2"
+                                className="h-10 px-4 md:h-14 md:px-8 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-widest shadow-xl shadow-emerald-600/20 hover:scale-105 transition-all flex items-center gap-2"
                             >
                                 <Download className="w-4 h-4" /> DOWNLOAD PDF
                             </Button>
-                            <Button asChild className="h-14 px-12 rounded-2xl bg-primary text-primary-foreground font-black text-xs uppercase tracking-widest shadow-xl shadow-primary/20 hover:scale-105 transition-all">
+                            <Button asChild className="h-10 px-6 md:h-14 md:px-12 rounded-2xl bg-primary text-primary-foreground font-black text-xs uppercase tracking-widest shadow-xl shadow-primary/20 hover:scale-105 transition-all">
                                 <Link href="/dashboard/analysis" className="flex items-center gap-2">
                                     RE-SCAN <ChevronRight className="w-4 h-4" />
                                 </Link>
@@ -985,7 +985,7 @@ export function AnalysisHistory() {
         return (
             <Dialog open={isValidationDialogOpen} onOpenChange={setIsValidationDialogOpen}>
                 <DialogContent className="bg-card border-border rounded-[3rem] p-0 overflow-hidden shadow-2xl max-w-xl">
-                    <div className="p-12 space-y-10 relative z-10">
+                    <div className="p-5 md:p-12 space-y-6 md:space-y-10 relative z-10">
                         <DialogHeader className="space-y-4">
                             <div className="flex items-center gap-4 mb-2">
                                 <div className="p-3 bg-blue-500/10 rounded-2xl border border-blue-500/20">
@@ -993,7 +993,7 @@ export function AnalysisHistory() {
                                 </div>
                                 <span className="text-[10px] font-black uppercase tracking-[0.5em] text-blue-400">Clinical Validation</span>
                             </div>
-                            <DialogTitle className="text-4xl font-light tracking-tighter text-foreground uppercase leading-tight">
+                            <DialogTitle className="text-2xl md:text-4xl font-light tracking-tighter text-foreground uppercase leading-tight">
                                 Cross-Reference <span className="font-serif italic text-blue-400">Sync</span>
                             </DialogTitle>
                             <DialogDescription className="text-muted-foreground font-light text-base leading-relaxed">
@@ -1035,12 +1035,12 @@ export function AnalysisHistory() {
                         </ScrollArea>
                     </div>
 
-                    <div className="p-10 bg-card/80 border-t border-border/50 flex justify-end gap-6 backdrop-blur-2xl">
-                        <Button variant="ghost" onClick={() => setIsValidationDialogOpen(false)} className="h-14 px-10 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-foreground/5 text-muted-foreground hover:text-foreground transition-all">CANCEL</Button>
+                    <div className="p-4 md:p-10 bg-card/80 border-t border-border/50 flex justify-end gap-3 md:gap-6 backdrop-blur-2xl">
+                        <Button variant="ghost" onClick={() => setIsValidationDialogOpen(false)} className="h-10 px-6 md:h-14 md:px-10 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-foreground/5 text-muted-foreground hover:text-foreground transition-all">CANCEL</Button>
                         <Button
                             onClick={handleValidation}
                             disabled={!validationImageReport}
-                            className="h-14 px-12 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-black text-xs uppercase tracking-widest shadow-xl shadow-blue-600/20 hover:scale-105 transition-all disabled:opacity-50 disabled:hover:scale-100"
+                            className="h-10 px-6 md:h-14 md:px-12 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-black text-xs uppercase tracking-widest shadow-xl shadow-blue-600/20 hover:scale-105 transition-all disabled:opacity-50 disabled:hover:scale-100"
                         >
                             RUN VALIDATION
                         </Button>
@@ -1276,9 +1276,9 @@ export function AnalysisHistory() {
                 return (
                     <Dialog open={true} onOpenChange={(open) => !open && setIsCompareOpen(false)}>
                         <DialogContent className="sm:max-w-3xl bg-card border-border rounded-[3rem] p-0 overflow-hidden">
-                            <div className="p-10 space-y-8">
+                            <div className="p-5 md:p-10 space-y-6 md:space-y-8">
                                 <DialogHeader>
-                                    <DialogTitle className="text-3xl font-light tracking-tighter text-foreground">
+                                    <DialogTitle className="text-xl md:text-3xl font-light tracking-tighter text-foreground">
                                         Side-by-Side <span className="italic text-primary">Comparison</span>
                                     </DialogTitle>
                                     <DialogDescription className="text-muted-foreground text-xs uppercase tracking-widest">
@@ -1287,7 +1287,7 @@ export function AnalysisHistory() {
                                 </DialogHeader>
                                 <div className="space-y-3">
                                     {fields.map(({ label, aVal, bVal, highlight }) => (
-                                        <div key={label} className="grid grid-cols-[120px_1fr_1fr] gap-4 items-center py-3 border-b border-border/50">
+                                        <div key={label} className="grid grid-cols-[80px_1fr_1fr] md:grid-cols-[120px_1fr_1fr] gap-2 md:gap-4 items-center py-3 border-b border-border/50">
                                             <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">{label}</span>
                                             <span className={`text-sm font-bold text-center py-2 px-4 rounded-2xl ${highlight && getRiskNum(itemA) > getRiskNum(itemB) ? 'text-red-400 bg-red-500/10' : 'text-foreground/80 bg-foreground/5'}`}>{aVal}</span>
                                             <span className={`text-sm font-bold text-center py-2 px-4 rounded-2xl ${highlight && getRiskNum(itemB) > getRiskNum(itemA) ? 'text-red-400 bg-red-500/10' : 'text-foreground/80 bg-foreground/5'}`}>{bVal}</span>

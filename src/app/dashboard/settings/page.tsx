@@ -255,7 +255,7 @@ export default function SettingsPage() {
                 <p className="text-xs text-muted-foreground mt-0.5">Select how Anemo looks on your screen.</p>
               </div>
               <Select value={theme ?? 'system'} onValueChange={setTheme}>
-                <SelectTrigger className="w-[170px] rounded-full">
+                <SelectTrigger className="w-[140px] sm:w-[170px] rounded-full">
                   <SelectValue placeholder="Select theme" />
                 </SelectTrigger>
                 <SelectContent>
@@ -275,7 +275,7 @@ export default function SettingsPage() {
                 <p className="text-xs text-muted-foreground mt-0.5">Used for all reports and AI interactions.</p>
               </div>
               <Select defaultValue="en">
-                <SelectTrigger className="w-[170px] rounded-full">
+                <SelectTrigger className="w-[140px] sm:w-[170px] rounded-full">
                   <SelectValue placeholder="Select language" />
                 </SelectTrigger>
                 <SelectContent>

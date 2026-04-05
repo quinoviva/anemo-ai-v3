@@ -122,7 +122,7 @@ export default function RemediesPage() {
             <Leaf className="h-3 w-3" />
             Natural Healing
           </span>
-          <h1 className="text-6xl md:text-8xl font-light tracking-tighter text-foreground leading-[0.9]">
+          <h1 className="text-4xl sm:text-6xl md:text-8xl font-light tracking-tighter text-foreground leading-[0.9]">
             Combat{' '}
             <span className="font-black text-transparent bg-clip-text bg-gradient-to-r from-primary via-red-500 to-rose-400">
               Anemia
@@ -170,18 +170,18 @@ export default function RemediesPage() {
 
         {/* Tab Switcher */}
         <motion.div variants={itemVariants} className="space-y-8">
-          <div className="flex justify-center gap-3">
+          <div className="flex justify-center gap-3 flex-wrap">
             <Button
               variant={activeTab === 'foods' ? 'default' : 'outline'}
               onClick={() => setActiveTab('foods')}
-              className="rounded-full px-8"
+              className="rounded-full px-4 sm:px-8"
             >
               Iron Powerhouses
             </Button>
             <Button
               variant={activeTab === 'habits' ? 'default' : 'outline'}
               onClick={() => setActiveTab('habits')}
-              className="rounded-full px-8"
+              className="rounded-full px-4 sm:px-8"
             >
               Lifestyle Habits
             </Button>

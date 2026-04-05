@@ -52,7 +52,7 @@ const mainNavLinks = [
 
 const otherLinks = [
   { href: '/dashboard/chatbot', label: 'AI Assistant', icon: Bot },
-  { href: '/dashboard/live-analysis', label: 'Live Scan', icon: Video },
+  // { href: '/dashboard/live-analysis', label: 'Live Scan', icon: Video },
   { href: '/dashboard/find-doctor', label: 'Find Care', icon: Search },
   { href: '/dashboard/remedies', label: 'Remedies', icon: Leaf },
 ];
@@ -67,6 +67,8 @@ export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [otherMenuOpen, setOtherMenuOpen] = useState(false);
   const otherMenuRef = useRef<HTMLDivElement>(null);
+  const openTimeout = useRef<NodeJS.Timeout | null>(null);
+  const closeTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const isGuest = auth.currentUser?.isAnonymous;
 
@@ -152,32 +154,43 @@ export function Header() {
             <DropdownMenu open={otherMenuOpen} onOpenChange={setOtherMenuOpen}>
               <div
                 ref={otherMenuRef}
-                onMouseLeave={() => setOtherMenuOpen(false)}
+                onMouseEnter={() => {
+                  if (closeTimeout.current) clearTimeout(closeTimeout.current);
+                  openTimeout.current = setTimeout(() => setOtherMenuOpen(true), 250);
+                }}
+                onMouseLeave={() => {
+                  if (openTimeout.current) clearTimeout(openTimeout.current);
+                  closeTimeout.current = setTimeout(() => setOtherMenuOpen(false), 250);
+                }}
                 className="relative"
+                style={{ width: 140, minWidth: 140, maxWidth: 140 }}
               >
-              <DropdownMenuTrigger asChild>
-                <button
-                  onMouseEnter={() => setOtherMenuOpen(true)}
-                  className={cn(
-                  'flex items-center gap-1 px-4 py-2 text-xs font-bold tracking-widest rounded-full transition-all duration-300 outline-none h-10',
-                  otherLinks.some(l => l.href === pathname)
-                    ? 'text-primary bg-primary/5'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-primary/5'
-                )}>
-                  MORE
-                  <ChevronDown className={cn("h-3 w-3 opacity-50 transition-transform duration-200", otherMenuOpen && "rotate-180")} />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="center" sideOffset={10} className="w-56 p-2 bg-background/90 backdrop-blur-xl border border-primary/10 rounded-2xl shadow-xl">
-                {otherLinks.map(({ href, label, icon: Icon }) => (
-                  <DropdownMenuItem key={href} asChild className="p-3 cursor-pointer focus:bg-primary/5 rounded-xl text-muted-foreground focus:text-primary transition-colors">
-                    <Link href={href} className="flex items-center gap-3">
-                      <Icon className="h-4 w-4 opacity-70" />
-                      <span className="text-sm font-medium">{label}</span>
-                    </Link>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    className={cn(
+                      'flex items-center justify-center gap-1 px-4 py-2 text-xs font-bold tracking-widest rounded-full transition-all duration-300 outline-none h-10 w-full',
+                      otherLinks.some(l => l.href === pathname)
+                        ? 'text-primary bg-primary/5'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-primary/5'
+                    )}
+                    style={{ width: '100%' }}
+                  >
+                    MORE
+                    <ChevronDown className={cn("h-3 w-3 opacity-50 transition-transform duration-200", otherMenuOpen && "rotate-180")} />
+                  </button>
+                </DropdownMenuTrigger>
+                <div style={{ position: 'absolute', left: 0, top: '100%', width: '100%', zIndex: 50 }}>
+                  <DropdownMenuContent align="center" sideOffset={10} className="w-56 p-2 bg-background/90 backdrop-blur-xl border border-primary/10 rounded-2xl shadow-xl">
+                    {otherLinks.map(({ href, label, icon: Icon }) => (
+                      <DropdownMenuItem key={href} asChild className="p-3 cursor-pointer focus:bg-primary/5 rounded-xl text-muted-foreground focus:text-primary transition-colors">
+                        <Link href={href} className="flex items-center gap-3">
+                          <Icon className="h-4 w-4 opacity-70" />
+                          <span className="text-sm font-medium">{label}</span>
+                        </Link>
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </div>
               </div>
             </DropdownMenu>
           </nav>

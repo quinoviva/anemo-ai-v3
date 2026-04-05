@@ -103,7 +103,7 @@ export default function AboutAnemiaPage() {
             <Droplet className="h-3 w-3" />
             Hematological Intelligence
           </span>
-          <h1 className="text-6xl md:text-8xl font-light tracking-tighter text-foreground leading-[0.9]">
+          <h1 className="text-4xl sm:text-6xl md:text-8xl font-light tracking-tighter text-foreground leading-[0.9]">
             Understanding{' '}
             <span className="font-black text-transparent bg-clip-text bg-gradient-to-r from-primary via-red-500 to-rose-400">
               Anemia

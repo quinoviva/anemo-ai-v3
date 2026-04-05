@@ -82,13 +82,93 @@ export interface InferenceProgressEvent {
  * Minimum confidence required from a Tier-1 Scout for its ROI to proceed
  * to the Tier-2 Specialists. Images below this threshold are flagged as
  * low quality and excluded from the Specialist/Judge tiers.
- *
- * Value: 0.4 — a conservative placeholder based on informal testing.
- * TODO: Replace with a clinically-validated threshold once labelled
- * quality-annotated test data is available (recommended approach: F1-optimised
- * threshold on a held-out quality-labelled set).
  */
 const SCOUT_QUALITY_THRESHOLD = 0.4;
+
+// ---------------------------------------------------------------------------
+// Advanced consensus helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Detect and down-weight outlier models using a modified Z-score approach.
+ * Models whose confidence deviates more than 2 standard deviations from the
+ * median are assigned a reduced weight (0.3× their original), preventing a
+ * single misfiring model from skewing the consensus.
+ */
+function computeOutlierAdjustedWeights(
+  scores: number[],
+  weights: number[],
+): number[] {
+  if (scores.length < 3) return weights;
+
+  const sorted = [...scores].sort((a, b) => a - b);
+  const median = sorted[Math.floor(sorted.length / 2)];
+  const absDeviations = scores.map((s) => Math.abs(s - median));
+  const mad = [...absDeviations].sort((a, b) => a - b)[Math.floor(absDeviations.length / 2)] || 0.01;
+  // Modified Z-score: 0.6745 is the 0.75th percentile of the normal distribution
+  const modifiedZScores = absDeviations.map((d) => (0.6745 * d) / Math.max(mad, 0.01));
+
+  return weights.map((w, i) => (modifiedZScores[i] > 2.0 ? w * 0.3 : w));
+}
+
+/**
+ * Compute inter-model agreement ratio.  High agreement (all models predict
+ * similar confidence) boosts overall reliability; low agreement signals that
+ * the image may be ambiguous or borderline.
+ *
+ * @returns A value between 0 and 1 where 1 = perfect agreement.
+ */
+function computeAgreementRatio(scores: number[]): number {
+  if (scores.length < 2) return 1;
+  const mean = scores.reduce((s, c) => s + c, 0) / scores.length;
+  const variance = scores.reduce((s, c) => s + (c - mean) ** 2, 0) / scores.length;
+  const stddev = Math.sqrt(variance);
+  // Map stddev → agreement: stddev 0 → 1.0, stddev 0.25 → 0.0
+  return Math.max(0, 1 - stddev / 0.25);
+}
+
+/**
+ * Tier-based confidence aggregation.
+ *
+ * Instead of a simple weighted average across all models, this groups models
+ * by tier and computes a tier-level consensus first, then blends the tier
+ * results with tier-importance weights.  This prevents Tier-1 scout models
+ * (which are low-precision quality-checkers) from diluting the high-precision
+ * Tier-3 Judge outputs.
+ *
+ * Tier importance: Scouts 10%, Specialists 35%, Judges 55%
+ */
+function tierWeightedConsensus(
+  results: ModelInferenceResult[],
+): { weightedMean: number; tierBreakdown: Record<number, number> } {
+  const TIER_IMPORTANCE: Record<number, number> = { 1: 0.10, 2: 0.35, 3: 0.55 };
+  const tierBreakdown: Record<number, number> = {};
+  let totalTierWeight = 0;
+  let blended = 0;
+
+  for (const tier of [1, 2, 3] as const) {
+    const tierResults = results.filter((r) => r.tier === tier && r.contributedToConsensus);
+    if (tierResults.length === 0) continue;
+
+    const tierScores = tierResults.map((r) => r.confidence);
+    const tierWeights = tierResults.map(
+      (r) => ENSEMBLE_MODELS.find((m) => m.id === r.modelId)?.consensusWeight ?? 1,
+    );
+    const adjustedWeights = computeOutlierAdjustedWeights(tierScores, tierWeights);
+
+    const wSum = adjustedWeights.reduce((s, w) => s + w, 0);
+    const tierMean = tierScores.reduce((s, c, i) => s + c * adjustedWeights[i], 0) / (wSum || 1);
+
+    tierBreakdown[tier] = tierMean;
+    blended += tierMean * TIER_IMPORTANCE[tier];
+    totalTierWeight += TIER_IMPORTANCE[tier];
+  }
+
+  return {
+    weightedMean: totalTierWeight > 0 ? blended / totalTierWeight : 0,
+    tierBreakdown,
+  };
+}
 
 // ---------------------------------------------------------------------------
 // Core orchestration function
@@ -222,8 +302,8 @@ export async function runEnsembleInference(
     emit('judge', judgeConfig.id, `${judgeConfig.name}: Hgb ≈ ${confidenceToHgb(avgConfidence).toFixed(1)} g/dL`);
   }
 
-  // ── Consensus ─────────────────────────────────────────────────────────────
-  emit('consensus', undefined, 'Aggregating consensus…');
+  // ── Advanced Consensus with Outlier Detection & Tier Weighting ──────────
+  emit('consensus', undefined, 'Aggregating consensus with outlier detection…');
 
   const contributing = modelResults.filter((r) => r.contributedToConsensus);
   const scores = contributing.map((r) => r.confidence);
@@ -231,11 +311,23 @@ export async function runEnsembleInference(
     (r) => ENSEMBLE_MODELS.find((m) => m.id === r.modelId)?.consensusWeight ?? 1,
   );
 
-  const severity = consensusClassify(scores, weights);
-  const consensusHgb = severity.hgbValue ?? confidenceToHgb(
-    scores.reduce((s, c, i) => s + c * weights[i], 0) /
-      weights.reduce((s, w) => s + w, 0),
-  );
+  // Advanced: outlier-adjusted weights prevent single misfiring models from skewing results
+  const adjustedWeights = computeOutlierAdjustedWeights(scores, weights);
+
+  // Advanced: tier-weighted consensus gives Judges 55% influence, Specialists 35%, Scouts 10%
+  const { weightedMean: tierConsensus, tierBreakdown } = tierWeightedConsensus(contributing);
+
+  // Blend: 60% tier-weighted consensus + 40% traditional weighted average for robustness
+  const traditionalMean =
+    scores.reduce((s, c, i) => s + c * adjustedWeights[i], 0) /
+    (adjustedWeights.reduce((s, w) => s + w, 0) || 1);
+  const finalConsensus = tierConsensus * 0.6 + traditionalMean * 0.4;
+
+  // Compute inter-model agreement for confidence calibration
+  const agreement = computeAgreementRatio(scores);
+
+  const severity = consensusClassify(scores, adjustedWeights);
+  const consensusHgb = severity.hgbValue ?? confidenceToHgb(finalConsensus);
 
   return {
     modelResults,

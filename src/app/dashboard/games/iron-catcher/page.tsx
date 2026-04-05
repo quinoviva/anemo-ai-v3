@@ -56,7 +56,7 @@ export default function IronCatcherPage() {
               Arcade
             </span>
           </div>
-          <h1 className="text-6xl md:text-8xl font-light tracking-tighter text-foreground leading-[0.9]">
+          <h1 className="text-4xl sm:text-6xl md:text-8xl font-light tracking-tighter text-foreground leading-[0.9]">
             Iron{' '}
             <span className="font-black text-transparent bg-clip-text bg-gradient-to-r from-primary via-red-500 to-rose-400">
               Catcher

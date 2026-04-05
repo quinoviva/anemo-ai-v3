@@ -25,7 +25,7 @@ export default function HistoryPage() {
         {/* Header Section */}
         <div className="flex flex-col md:flex-row justify-between items-end gap-6">
           <motion.div variants={itemVariants} className="space-y-4">
-            <h1 className="text-6xl md:text-8xl font-light tracking-tighter text-foreground leading-[0.9] flex flex-wrap items-baseline gap-x-4">
+            <h1 className="text-4xl sm:text-6xl md:text-8xl font-light tracking-tighter text-foreground leading-[0.9] flex flex-wrap items-baseline gap-x-4">
               <span className="opacity-80">Health</span>
               <span className="font-black text-transparent bg-clip-text bg-gradient-to-r from-primary via-red-500 to-rose-400 drop-shadow-sm">
                 Track

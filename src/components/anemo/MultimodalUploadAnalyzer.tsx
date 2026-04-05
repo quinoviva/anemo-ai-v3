@@ -539,45 +539,115 @@ function CaptureStep({
         {status === 'error' && (
           <motion.div
             key="error"
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -12 }}
+            initial={{ opacity: 0, y: 16, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -12, scale: 0.97 }}
+            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
             className="space-y-4"
           >
             {/* Error preview */}
-            <div className="relative w-full rounded-[2rem] overflow-hidden border-2 border-red-500/30"
+            <div className="relative w-full rounded-[2rem] overflow-hidden border border-red-500/20 shadow-[0_0_60px_-15px_rgba(239,68,68,0.15)]"
               style={{ aspectRatio: '4/3' }}>
               {imageUrl
                 ? /* eslint-disable-next-line @next/next/no-img-element */
-                  <img src={imageUrl} alt="rejected" className="w-full h-full object-cover opacity-25" />
+                  <img src={imageUrl} alt="rejected" className="w-full h-full object-cover blur-[6px] scale-110 saturate-50" />
                 : <div className="w-full h-full bg-red-950/30" />
               }
-              <div className="absolute inset-0 bg-red-950/50 backdrop-blur-sm flex flex-col items-center justify-center gap-4 p-6">
-                <div className="p-4 rounded-2xl bg-red-500/20 border border-red-500/30">
-                  <ShieldAlert className="w-8 h-8 text-red-400" />
+
+              {/* Multi-layer overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-red-950/60 to-black/50" />
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(239,68,68,0.08)_0%,transparent_70%)]" />
+
+              {/* Animated scan line */}
+              <motion.div
+                className="absolute inset-x-0 h-px pointer-events-none"
+                style={{ background: 'linear-gradient(90deg, transparent, rgba(239,68,68,0.5), transparent)' }}
+                animate={{ top: ['20%', '80%', '20%'] }}
+                transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+              />
+
+              {/* Centre content */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 sm:gap-4 p-4 sm:p-6">
+                {/* Animated icon with pulse ring */}
+                <div className="relative">
+                  <motion.div
+                    className="absolute inset-0 rounded-2xl"
+                    animate={{
+                      boxShadow: [
+                        '0 0 0 0px rgba(239,68,68,0.3)',
+                        '0 0 0 12px rgba(239,68,68,0)',
+                      ],
+                    }}
+                    transition={{ duration: 1.5, repeat: Infinity, ease: 'easeOut' }}
+                  />
+                  <motion.div
+                    initial={{ scale: 0, rotate: -12 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ delay: 0.15, duration: 0.5, type: 'spring', stiffness: 200 }}
+                    className="relative p-3 sm:p-4 rounded-2xl bg-red-500/10 border border-red-500/20 backdrop-blur-2xl"
+                  >
+                    <ShieldAlert className="w-6 h-6 sm:w-7 sm:h-7 text-red-400" />
+                  </motion.div>
                 </div>
-                <div className="text-center space-y-3">
-                  <p className="text-2xl font-bold text-red-300 uppercase tracking-widest">Image Not Accepted</p>
-                  <p className="text-lg text-red-300/90 leading-relaxed max-w-xs">{error}</p>
-                </div>
+
+                {/* Text content with stagger */}
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.25, duration: 0.4 }}
+                  className="text-center space-y-1.5"
+                >
+                  <p className="text-[9px] font-black uppercase tracking-[0.4em] text-red-400/90">Not Accepted</p>
+                  <p className="text-sm sm:text-base font-light text-white/75 leading-relaxed max-w-[260px] mx-auto">{error}</p>
+                </motion.div>
               </div>
+
+              {/* Corner accents */}
+              <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
+                {['M6,18 L6,6 L18,6', 'M82,6 L94,6 L94,18', 'M6,82 L6,94 L18,94', 'M94,82 L94,94 L82,94'].map((d, i) => (
+                  <motion.path
+                    key={i}
+                    d={d}
+                    fill="none"
+                    stroke="rgba(239,68,68,0.35)"
+                    strokeWidth="1"
+                    strokeLinecap="round"
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: 1 }}
+                    transition={{ delay: 0.3 + i * 0.08, duration: 0.5, ease: 'easeOut' }}
+                  />
+                ))}
+              </svg>
             </div>
 
             {/* Contextual guidance */}
-            <div className="glass-panel rounded-2xl p-4 space-y-2 border border-amber-500/20">
-              <div className="flex items-center gap-2">
-                <Info className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.35, duration: 0.4 }}
+              className="glass-panel rounded-2xl p-4 space-y-2 border border-amber-500/15 relative overflow-hidden"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-amber-500/[0.03] to-transparent pointer-events-none" />
+              <div className="flex items-center gap-2 relative z-10">
+                <div className="p-1 rounded-md bg-amber-500/10">
+                  <Info className="w-3 h-3 text-amber-400 shrink-0" />
+                </div>
                 <span className="text-[9px] font-black uppercase tracking-[0.3em] text-amber-400">What We Need Instead</span>
               </div>
-              <p className="text-xs text-muted-foreground leading-relaxed">{part.instruction}</p>
-            </div>
+              <p className="text-xs text-muted-foreground leading-relaxed relative z-10">{part.instruction}</p>
+            </motion.div>
 
             {/* Retry actions */}
-            <div className="flex gap-3">
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.45, duration: 0.4 }}
+              className="flex gap-3"
+            >
               <Button
                 onClick={onCameraOpen}
-                className="flex-1 h-11 rounded-full text-[11px] font-black uppercase tracking-[0.2em] gap-2 text-white"
-                style={{ backgroundColor: part.color }}
+                className="flex-1 h-11 rounded-full text-[11px] font-black uppercase tracking-[0.2em] gap-2 text-white transition-all hover:scale-[1.02] active:scale-[0.98]"
+                style={{ backgroundColor: part.color, boxShadow: `0 10px 30px -8px ${part.color}50` }}
               >
                 <Camera className="w-4 h-4" />
                 Retry Camera
@@ -585,12 +655,12 @@ function CaptureStep({
               <Button
                 variant="ghost"
                 onClick={() => fileRef.current?.click()}
-                className="flex-1 h-11 rounded-full glass-button text-[10px] font-black uppercase tracking-[0.2em] gap-2"
+                className="flex-1 h-11 rounded-full glass-button text-[10px] font-black uppercase tracking-[0.2em] gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all"
               >
                 <UploadCloud className="w-3.5 h-3.5" />
                 Upload
               </Button>
-            </div>
+            </motion.div>
 
             <input ref={fileRef} type="file" accept="image/*" className="sr-only"
               onChange={(e) => { const f = e.target.files?.[0]; if (f) { onRetry(); setTimeout(() => onFile(f), 50); } e.target.value = ''; }} />
@@ -1310,7 +1380,7 @@ export function MultimodalUploadAnalyzer({ onClose }: MultimodalUploadAnalyzerPr
           {/* Global title */}
           <div className="text-right">
             <p className="text-[8px] font-black uppercase tracking-[0.5em] text-muted-foreground/60">
-              Anemo AI · Multimodal
+              Anemo · Multimodal
             </p>
           </div>
         </div>

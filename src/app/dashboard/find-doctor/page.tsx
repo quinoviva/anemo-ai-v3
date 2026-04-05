@@ -156,7 +156,7 @@ export default function FindDoctorPage() {
           className="lg:col-span-4 space-y-6"
         >
            {/* Header Card */}
-           <div className="glass-panel rounded-[2.5rem] p-8 relative overflow-hidden">
+           <div className="glass-panel rounded-[2.5rem] p-5 md:p-8 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 rounded-full blur-[60px] -mr-20 -mt-20 pointer-events-none" />
               <div className="relative z-10">
                  <div className="flex items-center gap-3 mb-6">
@@ -166,7 +166,7 @@ export default function FindDoctorPage() {
                     <span className="text-[10px] font-bold uppercase tracking-widest text-blue-500">Global Network</span>
                  </div>
                  
-                 <h1 className="text-5xl md:text-6xl font-light tracking-tighter leading-[0.9] mb-4">
+                 <h1 className="text-3xl sm:text-5xl md:text-6xl font-light tracking-tighter leading-[0.9] mb-4">
                    <span className="opacity-80">Find</span>{' '}
                    <span className="font-black text-transparent bg-clip-text bg-gradient-to-r from-primary via-red-500 to-rose-400">Care</span>
                    <span className="text-primary animate-pulse">.</span>
@@ -208,7 +208,7 @@ export default function FindDoctorPage() {
               {!userData?.address && (
                 <Button onClick={handleSeedDatabase} variant="ghost" size="sm" className="text-xs text-muted-foreground hover:text-foreground gap-2">
                     <Database className="h-3 w-3" />
-                    Initialize DB
+                    Show all
                 </Button>
               )}
            </div>

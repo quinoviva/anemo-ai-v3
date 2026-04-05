@@ -49,7 +49,7 @@ export default function ContactPage() {
             Back
           </Button>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-20">
             <div>
               <header className="mb-16 flex flex-col md:flex-row md:items-end justify-between gap-8">
                 <div className="max-w-2xl">
@@ -101,10 +101,10 @@ export default function ContactPage() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.3, duration: 0.8 }}
-              className="p-10 rounded-[2.5rem] bg-white/5 border border-white/10 backdrop-blur-2xl"
+              className="p-6 sm:p-10 rounded-[2.5rem] bg-white/5 border border-white/10 backdrop-blur-2xl"
             >
               <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <label className="text-xs font-bold uppercase tracking-widest text-white/40 ml-1">First Name</label>
                     <input type="text" className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 outline-none focus:border-white/20 transition-colors" placeholder="John" />

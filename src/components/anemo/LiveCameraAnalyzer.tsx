@@ -455,9 +455,18 @@ export function LiveCameraAnalyzer({ onCapture, onFileUpload, bodyPart }: LiveCa
                 <CardDescription>Position your camera over your skin, under-eye, or fingernails and capture an image for analysis.</CardDescription>
             </CardHeader>
             <CardContent className="flex-1 flex flex-col items-center justify-center gap-4">
-                 <div className="relative w-full max-w-2xl mx-auto aspect-video rounded-lg overflow-hidden border bg-black">
-                     <video ref={videoRef} className="w-full h-full object-cover transform scale-x-[-1]" autoPlay muted playsInline />
-                     {renderOverlay()}
+                 <div
+                   className="relative w-full max-w-xs sm:max-w-3xl mx-auto"
+                   style={{ aspectRatio: typeof window !== 'undefined' && window.innerWidth < 640 ? '9/16' : '16/9' }}
+                 >
+                   <video
+                     ref={videoRef}
+                     className="w-full h-full object-cover"
+                     style={{ transform: 'scaleX(-1)' }}
+                     autoPlay
+                     muted
+                     playsInline
+                   />
                  </div>
 
                 {lowLightCondition && (

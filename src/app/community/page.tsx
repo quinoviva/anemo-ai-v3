@@ -115,14 +115,14 @@ export default function CommunityPage() {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-16 max-w-6xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-10 sm:gap-x-8 sm:gap-y-16 max-w-6xl mx-auto">
             {teamMembers.map((member, i) => (
               <motion.div
                 key={i}
                 variants={itemVariants}
                 className="group team-card-premium flex flex-col items-center text-center cursor-pointer"
               >
-                <div className="relative team-image-container w-40 h-40 md:w-56 md:h-56 mb-8 overflow-hidden grayscale group-hover:grayscale-0">
+                <div className="relative team-image-container w-28 h-28 sm:w-40 sm:h-40 md:w-56 md:h-56 mb-4 sm:mb-8 overflow-hidden grayscale group-hover:grayscale-0">
                   <div className="glow-ring" />
                   <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -134,7 +134,7 @@ export default function CommunityPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <h3 className="team-name text-2xl md:text-3xl font-light tracking-wide">{member.name}</h3>
+                  <h3 className="team-name text-base sm:text-2xl md:text-3xl font-light tracking-wide">{member.name}</h3>
                   <div className="h-px w-0 bg-white/30 group-hover:w-full transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] mx-auto" />
                   <p className="team-role pt-2">{member.role}</p>
                 </div>

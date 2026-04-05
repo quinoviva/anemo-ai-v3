@@ -225,7 +225,7 @@ export function ImageAnalysisReport({ analyses, labReport, onReset }: ImageAnaly
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center p-12 md:p-24 space-y-12 min-h-[600px] relative overflow-hidden">
+      <div className="flex flex-col items-center justify-center p-6 md:p-12 lg:p-24 space-y-12 min-h-[600px] relative overflow-hidden">
         <div className="absolute inset-0 bg-radial-gradient(circle_at_center,rgba(var(--primary-rgb),0.05)_0%,transparent_70%) animate-pulse" />
         <HeartLoader size={120} strokeWidth={1} />
         <div className="text-center space-y-4 relative z-10">
@@ -242,7 +242,7 @@ export function ImageAnalysisReport({ analyses, labReport, onReset }: ImageAnaly
   if (!report) return null;
 
   return (
-    <div className="space-y-16 md:space-y-20 animate-in fade-in zoom-in duration-1000 w-full overflow-hidden">
+    <div className="space-y-8 md:space-y-16 lg:space-y-20 animate-in fade-in zoom-in duration-1000 w-full overflow-hidden">
       
       {/* Functional Header Banner */}
       <div className="flex flex-col sm:flex-row justify-between items-center gap-8 glass-panel p-6 md:p-10 rounded-[2.5rem] border border-white/10 shadow-xl relative overflow-hidden isolate">
@@ -272,7 +272,7 @@ export function ImageAnalysisReport({ analyses, labReport, onReset }: ImageAnaly
       </div>
 
       {/* Main Print/Report Container */}
-      <div ref={reportRef} data-print-report className="bg-card border border-border shadow-2xl rounded-[3rem] md:rounded-[4.5rem] relative isolate w-full py-16 px-8 sm:p-20 md:p-24 lg:p-32 space-y-24 overflow-hidden">
+      <div ref={reportRef} data-print-report className="bg-card border border-border shadow-2xl rounded-[3rem] md:rounded-[4.5rem] relative isolate w-full py-16 px-8 sm:p-20 md:p-24 lg:p-32 space-y-12 md:space-y-24 overflow-hidden">
           
           <div className="absolute inset-0 bg-grid-white/[0.01] bg-[size:60px_60px] z-0 pointer-events-none" />
           <div className="absolute top-0 right-0 w-[300px] h-[300px] md:w-[600px] md:h-[600px] bg-primary/5 rounded-full blur-[150px] -mr-40 -mt-40 pointer-events-none opacity-50" />
@@ -399,7 +399,7 @@ export function ImageAnalysisReport({ analyses, labReport, onReset }: ImageAnaly
           </div>
 
           {/* Multimodal Telemetry Breakdown */}
-          <div className="space-y-16 relative z-10">
+          <div className="space-y-8 md:space-y-16 relative z-10">
                <div className="flex items-center gap-6">
                     <div className="p-4 bg-white/5 rounded-2xl border border-white/10 shrink-0"><LayoutGrid className="w-6 h-6 text-foreground" /></div>
                     <div className="flex-1 h-px bg-border/50" />
