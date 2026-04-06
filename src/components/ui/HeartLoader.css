@@ -13,9 +13,9 @@
   z-index: 9999;
 }
 
-.heart-loader-container.with-bg {
-  background-color: #0d0d0d;
-}
+/* .heart-loader-container.with-bg {
+  background: hsl(var(--background));
+} */
 
 .heart-loader-container.inline {
   height: auto;
@@ -28,7 +28,8 @@
   overflow: visible;
   /* Ultra-smooth organic breathing effect */
   animation: svgBreathing 4s ease-in-out infinite;
-  filter: drop-shadow(0 0 15px rgba(255, 71, 112, 0.3));
+  /* Use system primary color for drop-shadow */
+  filter: drop-shadow(0 0 15px hsl(var(--primary) / 0.3));
 }
 
 .heart-path {
@@ -82,10 +83,10 @@
 @keyframes svgBreathing {
   0%, 100% {
     transform: scale(1);
-    filter: drop-shadow(0 0 15px rgba(255, 71, 112, 0.3));
+    filter: drop-shadow(0 0 15px hsl(var(--primary) / 0.3));
   }
   50% {
     transform: scale(1.05);
-    filter: drop-shadow(0 0 30px rgba(255, 71, 112, 0.6));
+    filter: drop-shadow(0 0 30px hsl(var(--primary) / 0.6));
   }
 }

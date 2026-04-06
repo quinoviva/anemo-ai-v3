@@ -13,23 +13,26 @@ interface HeartLoaderProps {
 const HeartLoader: React.FC<HeartLoaderProps> = ({ 
   size = 200, 
   fullPage = false, 
-  withBackground = false,
+  /* withBackground = false, */
   className,
   strokeWidth = 8 // Slightly thinner for a more premium look
 }) => {
   return (
-    <div className={cn(
-      "heart-loader-container", 
-      fullPage && "full-page", 
-      withBackground && "with-bg",
-      !fullPage && !withBackground && "inline",
-      className
-    )}>
-      <svg 
-        className="heart-svg" 
-        width={size} 
-        height={size} 
-        viewBox="0 0 200 200" 
+    <div
+      className={cn(
+        "heart-loader-container",
+        fullPage && "full-page",
+        /* withBackground && "with-bg", */
+        /*!fullPage && !withBackground && "inline",*/
+        className
+      )}
+      /* style={withBackground ? { background: 'hsl(var(--background))' } : undefined} */
+    >
+      <svg
+        className="heart-svg"
+        width={size}
+        height={size}
+        viewBox="0 0 200 200"
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
@@ -38,17 +41,17 @@ const HeartLoader: React.FC<HeartLoaderProps> = ({
             <feGaussianBlur stdDeviation="4" result="blur" />
             <feComposite in="SourceGraphic" in2="blur" operator="over" />
           </filter>
-          
-          {/* Linear Gradient for the stroke */}
+
+          {/* Linear Gradient for the stroke, using system primary color */}
           <linearGradient id="heartGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#ff4770" />
-            <stop offset="100%" stopColor="#ff7096" />
+            <stop offset="0%" stopColor="hsl(var(--primary))" />
+            <stop offset="100%" stopColor="hsl(var(--primary) / 0.7)" />
           </linearGradient>
         </defs>
 
         {/* Refined Heart Path: Smoother curves and balanced proportions */}
-        <path 
-          className="heart-path" 
+        <path
+          className="heart-path"
           strokeWidth={strokeWidth}
           stroke="url(#heartGradient)"
           filter="url(#glow)"
@@ -58,14 +61,14 @@ const HeartLoader: React.FC<HeartLoaderProps> = ({
              C85,50 100,65 100,65 
              C100,65 115,50 120,45 
              C145,25 175,40 175,70 
-             C175,120 100,175 100,175 Z" 
+             C175,120 100,175 100,175 Z"
         />
 
         {/* Improved Pulse Path: More technically precise EKG rhythm */}
-        <path 
-          className="pulse-path" 
+        <path
+          className="pulse-path"
           strokeWidth={strokeWidth}
-          stroke="#ffffff"
+          stroke="hsl(var(--foreground))"
           filter="url(#glow)"
           d="M40,105 
              L75,105 
@@ -73,7 +76,7 @@ const HeartLoader: React.FC<HeartLoaderProps> = ({
              L95,135 
              L105,70 
              L115,105 
-             L160,105" 
+             L160,105"
         />
       </svg>
     </div>
