@@ -159,7 +159,60 @@ const providePersonalizedRecommendationsFlow = ai.defineFlow(
     outputSchema: PersonalizedRecommendationsOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input, { config: { temperature: 0.2 } });
-    return output!;
+    try {
+      const {output} = await prompt(input, { config: { temperature: 0.2 } });
+      if (!output) throw new Error("Gemini output was null");
+      return output;
+    } catch (err: any) {
+      console.warn("⚠️ [Silent Fallback] Gemini API Failed (Likely 429). Routing to Llama 3.2 Vision via Groq...", err.message);
+      
+      const groqApiKey = process.env.GROQ_API_KEY;
+      if (!groqApiKey) {
+          throw new Error("Gemini quota exceeded and GROQ_API_KEY is not defined in your environment variables for fallback!");
+      }
+
+      const fallbackPrompt = `You are an advanced AI hematology assistant specializing in iron-deficiency anemia screening for the Filipino population. You combine clinical intelligence with culturally-appropriate dietary science to produce PRECISE, ACTIONABLE assessments.
+
+**Input Data:**
+- Image Analysis Summary: ${input.imageAnalysis}
+- Lab Report Summary: ${input.labReport || "N/A"}
+- User Profile: ${input.userProfile}
+
+Determine the Anemia type, confidence score, calculate a risk index (0-100), and provide personalized health recommendations following the rules for a Filipino diet plan (include meals like malunggay, champorado, etc.).
+
+CRITICAL RULE: Revolve your response ONLY with valid JSON exactly matching this structure. Do not include markdown code fences or conversational text:
+{
+  "recommendations": "Provide formatting with simple points",
+  "riskScore": 85,
+  "anemiaType": "Iron Deficiency Anemia",
+  "confidenceScore": 90
+}`;
+
+      const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+          method: "POST",
+          headers: {
+              "Authorization": `Bearer ${groqApiKey}`,
+              "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+              model: "llama-3.3-70b-versatile",
+              messages: [{ role: "user", content: fallbackPrompt }],
+              temperature: 0.2,
+              response_format: { type: "json_object" }
+          })
+      });
+
+      if (!res.ok) {
+          const errText = await res.text();
+          console.error("Groq fallback error:", errText);
+          throw new Error(`Both Gemini and Groq fallback failed. Groq error: ${errText}`);
+      }
+
+      const data = await res.json();
+      const content = data.choices?.[0]?.message?.content || "{}";
+      const parsed = JSON.parse(content);
+      
+      return parsed as PersonalizedRecommendationsOutput;
+    }
   }
 );
