@@ -22,10 +22,13 @@ export type PersonalizedRecommendationsInput = z.infer<
 >;
 
 const PersonalizedRecommendationsOutputSchema = z.object({
-  recommendations: z.string().describe('Personalized health recommendations for the user, including advice on diet, home remedies, and lifestyle.'),
+  recommendations: z.union([z.string(), z.array(z.string())])
+    .transform((val) => Array.isArray(val) ? val.map((v) => '- ' + v).join('\n') : val)
+    .describe('Personalized health recommendations for the user, including advice on diet, home remedies, and lifestyle.'),
   riskScore: z.number().describe('Composite anemia risk score (0-100) based on the image analysis and lab report.'),
   anemiaType: z.string().describe('The likely type of anemia or "Negative" if not detected.'),
   confidenceScore: z.number().describe('A score from 0-100 representing the certainty of the assessment.'),
+  confidenceReasoning: z.string().describe('Mathematical breakdown of the confidence score. MUST use bullet points and a formula. Format exactly like:\n- Parameter 1 Weight: X%\n- Parameter 2 Weight: Y%\n- Formula: X + Y = Z%\nDO NOT use paragraph form.'),
 });
 export type PersonalizedRecommendationsOutput = z.infer<
   typeof PersonalizedRecommendationsOutputSchema
@@ -144,10 +147,20 @@ Generate a comprehensive, structured recommendation using these sections:
   - Additional iron needs during menstruation
   - When heavy flow warrants gynecological consultation
 
+### CALCULATION LOGIC FOR CONFIDENCE REASONING:
+Your \`confidenceReasoning\` MUST follow this EXACT mathematical schema and layout based on the visual markers provided. Assign a Redness Score (0.0 to 1.0) internally for Conjunctiva, Nails, and Palm/Skin based on the image analysis summaries.
+Show these exact lines:
+- Conjunctiva Density: [0.0 - 1.0]
+- Nail Bed Density: [0.0 - 1.0]
+- Palm Skin Density: [0.0 - 1.0]
+- Confidence Logic: (Conjunctiva * 0.5) + (Nails * 0.3) + (Palm * 0.2)
+- Hgb Synthesis: 5.0 + (Calculated Confidence * 11.0)
+
 **CRITICAL INSTRUCTIONS:**
 -   Your entire response MUST be a valid JSON object that conforms to the output schema.
 -   Do NOT include any text, explanations, or markdown outside of the JSON structure.
 -   The 'recommendations' field must be a single string containing formatted bullet points (using '*' or '-').
+-   The \`confidenceScore\` generated must exactly match your mathematical calculation multiplied by 100.
 -   Respond ONLY with a valid JSON object matching the schema. Do not include markdown code fences, explanations, or extra text outside the JSON.
 `,
 });
@@ -185,7 +198,8 @@ CRITICAL RULE: Revolve your response ONLY with valid JSON exactly matching this 
   "recommendations": "Provide formatting with simple points",
   "riskScore": 85,
   "anemiaType": "Iron Deficiency Anemia",
-  "confidenceScore": 90
+  "confidenceScore": 90,
+  "confidenceReasoning": "- Conjunctiva Density: 0.85\n- Nail Bed Density: 0.90\n- Palm Skin Density: 1.00\n- Confidence Logic: (0.85 * 0.5) + (0.90 * 0.3) + (1.00 * 0.2) = 0.90\n- Hgb Synthesis: 5.0 + (0.90 * 11.0) = 14.90"
 }`;
 
       const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -211,6 +225,11 @@ CRITICAL RULE: Revolve your response ONLY with valid JSON exactly matching this 
       const data = await res.json();
       const content = data.choices?.[0]?.message?.content || "{}";
       const parsed = JSON.parse(content);
+      
+      // Auto-correct LLMs returning an array of bullet points instead of a single formatted string
+      if (Array.isArray(parsed.recommendations)) {
+          parsed.recommendations = parsed.recommendations.map((r: string) => '- ' + r).join('\n');
+      }
       
       return parsed as PersonalizedRecommendationsOutput;
     }

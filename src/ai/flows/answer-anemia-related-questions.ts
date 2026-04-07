@@ -63,7 +63,60 @@ const answerAnemiaQuestionFlow = ai.defineFlow(
     outputSchema: AnswerAnemiaQuestionOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
-    return output!;
+    try {
+      const {output} = await prompt(input);
+      if (!output) throw new Error("Gemini output was null");
+      return output;
+    } catch (err: any) {
+      console.warn("⚠️ [Silent Fallback] ChatBot Gemini API Failed. Routing to Groq...", err.message);
+      
+      const groqApiKey = process.env.GROQ_API_KEY;
+      if (!groqApiKey) {
+          throw new Error("Gemini quota exceeded and GROQ_API_KEY is not defined in your environment variables for fallback!");
+      }
+
+      const fallbackPrompt = `You are a helpful, empathetic, and knowledgeable AI health assistant named ANEMO BOT. You specialize in anemia awareness, detection, and management. Your goal is to provide clear, accurate, and supportive information.
+
+${input.language ? `You MUST respond in ${input.language}.` : "Detect the language of the user's input (English, Tagalog, or Hiligaynon) and respond in the SAME language."}
+
+**Response Guidelines:**
+1. Be Empathetic: Use a supportive and kind tone.
+2. Be Concise: Keep answers short and easy to read. Avoid long walls of text.
+3. Use Formatting: Use **bold** for key terms. Use bullet points ( - ) for lists.
+4. Disclaimer: If asked for a diagnosis, gently remind them you are an AI and to consult a doctor.
+
+Question: ${input.question}
+
+CRITICAL: Return ONLY valid JSON exactly matching this schema. Do not enclose it in markdown blocks.
+{
+  "answer": "your fully formatted answer here"
+}`;
+
+      const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+          method: "POST",
+          headers: {
+              "Authorization": `Bearer ${groqApiKey}`,
+              "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+              model: "llama-3.3-70b-versatile",
+              messages: [{ role: "user", content: fallbackPrompt }],
+              temperature: 0.5,
+              response_format: { type: "json_object" }
+          })
+      });
+
+      if (!res.ok) {
+          const errText = await res.text();
+          console.error("Groq Chatbot fallback error:", errText);
+          throw new Error(`Both Gemini and Groq ChatBot fallback failed. Groq error: ${errText}`);
+      }
+
+      const data = await res.json();
+      const content = data.choices?.[0]?.message?.content || "{}";
+      const parsed = JSON.parse(content);
+      
+      return parsed as AnswerAnemiaQuestionOutput;
+    }
   }
 );

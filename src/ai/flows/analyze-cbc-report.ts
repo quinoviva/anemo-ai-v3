@@ -55,14 +55,11 @@ export const analyzeCbcReport = ai.defineFlow(
       contentType = 'image/webp';
     }
 
+    try {
         const {output} = await ai.generate({
-
           model: gemini15Flash,
-
           config: {
-
             temperature: 0.0,
-
           },
       prompt: [
         {
@@ -160,5 +157,62 @@ CRITICAL RULES:
         'An unexpected error occurred while analyzing the CBC report.',
       parameters: output?.parameters ?? [],
     };
+    } catch (err: any) {
+        console.warn("⚠️ [Silent Fallback] CBC Analysis Gemini API Failed. Routing to Groq Llama 3.2 Vision...", err.message);
+        
+        const groqApiKey = process.env.GROQ_API_KEY;
+        if (!groqApiKey) {
+            throw new Error("Gemini quota exceeded and GROQ_API_KEY is not defined in your environment variables for fallback!");
+        }
+
+        const fallbackPrompt = `Extract CBC parameters from this lab report. Return ONLY a valid JSON object matching this schema:
+{
+  "summary": "Clinical interpretation string following Anemo AI standards",
+  "parameters": [
+    { "parameter": "Hemoglobin", "value": "10.2", "unit": "g/dL", "range": "12.0-16.0", "isNormal": false }
+  ]
+}
+
+Classification Criteria:
+- Hgb ≥ 12.0 g/dL: Normal
+- Hgb 11.0-11.9 g/dL: Borderline
+- Hgb < 11.0 g/dL: Anemia
+
+If the image is not a report, return an empty parameters array and an error message in summary. Respond ONLY with JSON.`;
+
+        const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${groqApiKey}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                model: "llama-3.2-11b-vision-preview",
+                messages: [
+                    {
+                        role: "user",
+                        content: [
+                            { type: "text", text: fallbackPrompt },
+                            { type: "image_url", image_url: { url: validatedInput.photoDataUri } }
+                        ]
+                    }
+                ],
+                temperature: 0.1,
+                response_format: { type: "json_object" }
+            })
+        });
+
+        if (!res.ok) {
+            const errText = await res.text();
+            console.error("Groq CBC fallback error:", errText);
+            throw new Error(`Both Gemini and Groq fallback failed for CBC analysis. Groq error: ${errText}`);
+        }
+
+        const data = await res.json();
+        const content = data.choices?.[0]?.message?.content || "{}";
+        const parsed = JSON.parse(content);
+        
+        return parsed as AnalyzeCbcReportOutput;
+    }
   }
 );
