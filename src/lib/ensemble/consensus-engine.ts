@@ -41,6 +41,8 @@ export interface ModelInferenceResult {
   modelId: string;
   modelName: string;
   tier: 1 | 2 | 3;
+  /** The body part this model processed. */
+  parameter?: ModelParameter;
   /** Primary confidence score (0–1, 1 = normal/non-anaemic). */
   confidence: number;
   /** Estimated Hgb derived from confidence. */
@@ -83,7 +85,7 @@ export interface InferenceProgressEvent {
  * to the Tier-2 Specialists. Images below this threshold are flagged as
  * low quality and excluded from the Specialist/Judge tiers.
  */
-const SCOUT_QUALITY_THRESHOLD = 0.4;
+const SCOUT_QUALITY_THRESHOLD = 0.45;
 
 // ---------------------------------------------------------------------------
 // Advanced consensus helpers
@@ -222,7 +224,14 @@ export async function runEnsembleInference(
 
     emit('loading', scoutConfig.id, `Loading ${scoutConfig.name}…`);
     const result = await runSingleModel(scoutConfig, source);
+    result.parameter = scoutConfig.parameter;
     result.qualityApproved = result.confidence >= SCOUT_QUALITY_THRESHOLD;
+    
+    // STRICT: If scout rejects the image, it MUST NOT contribute to consensus
+    if (!result.qualityApproved) {
+      result.contributedToConsensus = false;
+    }
+    
     qualityApproved[bodyPart] = result.qualityApproved;
     modelResults.push(result);
     processedModels++;
@@ -342,7 +351,10 @@ export async function runEnsembleInference(
 // Helpers
 // ---------------------------------------------------------------------------
 
-async function runSingleModel(
+/**
+ * Run a single model from the registry against an image source.
+ */
+export async function runSingleModel(
   config: EnsembleModelConfig,
   source: HTMLImageElement | HTMLVideoElement | HTMLCanvasElement | ImageData,
 ): Promise<ModelInferenceResult> {
@@ -360,6 +372,7 @@ async function runSingleModel(
       modelId: config.id,
       modelName: config.name,
       tier: config.tier,
+      parameter: config.parameter,
       confidence,
       estimatedHgb: confidenceToHgb(confidence),
       contributedToConsensus: true,
@@ -371,12 +384,78 @@ async function runSingleModel(
       modelId: config.id,
       modelName: config.name,
       tier: config.tier,
+      parameter: config.parameter,
       confidence: 0,
       estimatedHgb: 0,
       contributedToConsensus: false,
       error,
     };
   }
+}
+
+/**
+ * STRICT LOCAL VALIDATION:
+ * Runs all Tier-1 Scout models against an image to determine if it matches 
+ * the expected body part.
+ * 
+ * Logic:
+ * 1. If the expected part is the best match, we allow it (even with low confidence), 
+ *    leaving the final strict validation to the server-side Gemini/Groq AI.
+ * 2. We ONLY hard-reject locally if we are CONFIDENT that the image is a 
+ *    DIFFERENT body part (Mismatch).
+ */
+export async function runScoutValidation(
+  expectedPart: BodyPart,
+  source: HTMLImageElement | HTMLVideoElement | HTMLCanvasElement | ImageData
+): Promise<{ isValid: boolean; confidence: number; detectedPart?: BodyPart; message: string }> {
+  const scoutResults: { part: BodyPart; confidence: number }[] = [];
+  
+  // Run all scouts in parallel
+  const scouts = MODELS_BY_TIER[1];
+  const results = await Promise.all(scouts.map(s => runSingleModel(s, source)));
+  
+  for (const res of results) {
+    scoutResults.push({
+      part: res.parameter as BodyPart,
+      confidence: res.confidence
+    });
+  }
+
+  console.log('[ScoutValidation] Scores:', scoutResults.map(r => `${r.part}: ${(r.confidence * 100).toFixed(1)}%`).join(' | '));
+  
+  // Find the scout with highest confidence
+  const bestMatch = [...scoutResults].sort((a, b) => b.confidence - a.confidence)[0];
+  const expectedResult = scoutResults.find(r => r.part === expectedPart);
+  
+  // 1. SUCCESS: Expected part is the strongest candidate
+  if (bestMatch.part === expectedPart && bestMatch.confidence > 0.1) {
+    return {
+      isValid: true,
+      confidence: bestMatch.confidence,
+      message: "Image passed local candidate check."
+    };
+  }
+  
+  // 2. REJECTION: We are confident this is a DIFFERENT part (Mismatch)
+  // Use a higher threshold for hard-rejection to avoid false negatives
+  const HARD_MISMATCH_THRESHOLD = 0.65;
+  if (bestMatch.confidence >= HARD_MISMATCH_THRESHOLD && bestMatch.part !== expectedPart) {
+    return {
+      isValid: false,
+      confidence: bestMatch.confidence,
+      detectedPart: bestMatch.part,
+      message: `Parameter Mismatch: This looks like ${bestMatch.part}, but you selected "${expectedPart}". Please provide the correct image.`
+    };
+  }
+  
+  // 3. AMBIGUOUS: Local models are unsure. 
+  // We allow it to proceed to the server-side AI (Gemini) which has much higher 
+  // reasoning capability for the final "ruthless" validation.
+  return {
+    isValid: true,
+    confidence: expectedResult?.confidence ?? 0,
+    message: "Local check ambiguous; proceeding to AI validation."
+  };
 }
 
 function makeSkippedResult(

@@ -172,6 +172,18 @@ export function useEnsembleModel(): UseEnsembleModelReturn {
 
         if (abortRef.current) return;
 
+        // ── STRICT QUALITY GATE ───────────────────────────────────────────
+        // If any provided image failed its quality scout, we reject the 
+        // entire analysis to maintain high clinical integrity.
+        const failedScouts = consensusResult.modelResults.filter(
+          (r) => r.tier === 1 && r.qualityApproved === false && inputs[r.parameter as BodyPart]
+        );
+
+        if (failedScouts.length > 0) {
+          const partNames = failedScouts.map(s => s.parameter).join(', ');
+          throw new Error(`Quality check failed for ${partNames}. Please ensure you are uploading the correct body part and the image is clear.`);
+        }
+
         setEnsembleReport(consensusResult);
         setSeverity(consensusResult.severity.severity);
         setConsensusHgb(consensusResult.consensusHgb);

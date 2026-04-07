@@ -622,6 +622,11 @@ export function CameraAnalysis({ onBack }: CameraAnalysisProps) {
       .then(() => setStep('results'))
       .catch((err) => {
         console.error('Ensemble analysis failed:', err);
+        toast({
+          title: 'Analysis Rejected',
+          description: err instanceof Error ? err.message : 'Quality check failed. Please retake the photos.',
+          variant: 'destructive',
+        });
         setStep('skin'); // reset to first step on error
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps

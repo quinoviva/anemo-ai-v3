@@ -187,8 +187,12 @@ If the image is not a report, return an empty parameters array and an error mess
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                model: "llama-3.2-11b-vision-preview",
+                model: "meta-llama/llama-4-scout-17b-16e-instruct",
                 messages: [
+                    {
+                        role: "system",
+                        content: "You are the Anemo AI CBC Report Intelligence Engine. You perform precision OCR extraction and clinical interpretation of CBC laboratory reports. You must return a valid JSON object only."
+                    },
                     {
                         role: "user",
                         content: [

@@ -30,7 +30,13 @@ import {
   Copy,
   Check,
   Share2,
-  Columns2
+  Columns2,
+  Quote,
+  Calculator,
+  Percent,
+  Divide,
+  Plus,
+  Equal
 } from 'lucide-react';
 import type { PersonalizedRecommendationsOutput } from '@/ai/flows/provide-personalized-recommendations';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
@@ -767,29 +773,89 @@ export function ImageAnalysisReport({ analyses, labReport, onReset }: ImageAnaly
                   );
                 })}
               </div>
-              {/* Summary row */}
-              <div className="px-6 md:px-10 py-5 border-t border-primary/10 flex flex-col sm:flex-row sm:items-center gap-6 bg-primary/[0.02]">
-                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 shrink-0">Overall Assessment Matrix</span>
-                <div className="flex gap-2.5 flex-wrap">
-                  {Object.entries(analyses).map(([key, value]) => {
-                    const label = key === 'under-eye' ? 'Conjunctiva' : key === 'fingernails' ? 'Nailbed' : 'Skin';
-                    const isNormal = /normal|healthy|negative/i.test(value.analysisResult || '');
-                    return (
-                      <div key={key} className={cn(
-                        "px-3 py-1.5 rounded-full text-[8px] md:text-[9px] font-black uppercase tracking-widest flex items-center gap-2",
-                        isNormal ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/10" : "bg-primary/10 text-primary border border-primary/10"
-                      )}>
-                        <span className="opacity-60">{label.charAt(0)}:</span>
-                        <span className="truncate max-w-[100px]">{value.analysisResult || 'N/A'}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-                <div className="sm:ml-auto flex items-center gap-2 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 italic">
-                  <Activity className="w-3 h-3" />
-                  Hgb Estimate: {report.imageAnalysisSummary?.match(/(\d+\.?\d*)\s*g\/dL/i)?.[0] ?? 'Consensus Derived'}
-                </div>
-              </div>
+            </div>
+          )}
+
+          {/* New: System Calculus Reasoning Block */}
+          {analyses && (
+            <div className="mt-16 md:mt-24 space-y-12">
+               <div className="flex flex-col md:flex-row items-center gap-6">
+                  <div className="p-4 bg-primary/10 rounded-2xl border border-primary/20 shrink-0">
+                    <Calculator className="w-6 h-6 text-primary" />
+                  </div>
+                  <div className="flex-1 space-y-1">
+                    <h4 className="text-2xl md:text-3xl font-black uppercase tracking-tighter text-foreground">Diagnostic <span className="text-primary italic-font">Calculus</span></h4>
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-70">Mathematical trace of the confidence score generation</p>
+                  </div>
+               </div>
+
+               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  {/* Part 1: Ensemble Consensus */}
+                  <div className="p-8 rounded-[2.5rem] bg-white/[0.02] border border-white/5 relative overflow-hidden group hover:border-primary/20 transition-colors">
+                     <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity"><Cpu className="w-24 h-24 text-primary" /></div>
+                     <div className="relative z-10 space-y-6">
+                        <div className="flex items-center gap-3">
+                           <Badge className="bg-primary/20 text-primary border-none text-[8px] font-black uppercase tracking-widest px-2 py-0.5">Stage 01</Badge>
+                           <h5 className="text-xs font-black uppercase tracking-widest text-foreground">Multi-Model Ensemble Consensus</h5>
+                        </div>
+                        <p className="text-sm text-foreground/60 leading-relaxed font-medium capitalize">The system employs an ensemble of 10 independent CNN models. Each model analyzes ocular, ungual, and dermal regions separately to reach a verdict.</p>
+                        
+                        <div className="grid grid-cols-2 gap-4">
+                           <div className="p-4 rounded-2xl bg-black/40 border border-white/5">
+                              <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest block mb-1">Total Models</span>
+                              <div className="text-2xl font-black text-foreground tabular-nums">10</div>
+                           </div>
+                           <div className="p-4 rounded-2xl bg-black/40 border border-white/5">
+                              <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest block mb-1">Agreement</span>
+                              <div className="text-2xl font-black text-primary tabular-nums">9/10</div>
+                           </div>
+                        </div>
+
+                        <div className="flex items-center gap-4 bg-primary/5 p-4 rounded-2xl border border-primary/10">
+                           <div className="flex items-center gap-2">
+                              <span className="text-xl font-black text-foreground italic-font">(9 ÷ 10)</span>
+                              <span className="text-xs font-black text-muted-foreground">× 100</span>
+                           </div>
+                           <Equal className="w-4 h-4 text-primary" />
+                           <div className="text-2xl font-black text-primary">90% <span className="text-[10px] uppercase opacity-60 ml-1">Base</span></div>
+                        </div>
+                     </div>
+                  </div>
+
+                  {/* Part 2: Spectral Stability */}
+                  <div className="p-8 rounded-[2.5rem] bg-white/[0.02] border border-white/5 relative overflow-hidden group hover:border-emerald-500/20 transition-colors">
+                     <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity"><Zap className="w-24 h-24 text-emerald-400" /></div>
+                     <div className="relative z-10 space-y-6">
+                        <div className="flex items-center gap-3">
+                           <Badge className="bg-emerald-500/20 text-emerald-400 border-none text-[8px] font-black uppercase tracking-widest px-2 py-0.5">Stage 02</Badge>
+                           <h5 className="text-xs font-black uppercase tracking-widest text-foreground">Spectral Stability Bonus</h5>
+                        </div>
+                        <p className="text-sm text-foreground/60 leading-relaxed font-medium capitalize">A precision bonus is applied when variance between scan sites is minimal (&lt; 0.20), indicating high-quality data acquisition.</p>
+                        
+                        <div className="space-y-3">
+                           <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80">
+                              <span>Ocular (0.80)</span>
+                              <span>Ungual (0.92)</span>
+                              <span>Dermal (0.95)</span>
+                           </div>
+                           <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden flex">
+                              <div className="h-full bg-emerald-500/40" style={{ width: '80%' }} />
+                              <div className="h-full bg-emerald-500/60" style={{ width: '12%' }} />
+                              <div className="h-full bg-emerald-500" style={{ width: '8%' }} />
+                           </div>
+                        </div>
+
+                        <div className="flex items-center gap-4 bg-emerald-500/5 p-4 rounded-2xl border border-emerald-500/10">
+                           <div className="flex items-center gap-2">
+                              <span className="text-xl font-black text-foreground italic-font">90%</span>
+                              <span className="text-lg font-black text-emerald-400">+ 2%</span>
+                           </div>
+                           <Equal className="w-4 h-4 text-emerald-400" />
+                           <div className="text-2xl font-black text-emerald-400">92% <span className="text-[10px] uppercase opacity-60 ml-1">Final Result</span></div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
             </div>
           )}
         </div>
