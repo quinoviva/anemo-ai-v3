@@ -73,9 +73,12 @@ type ImageReport = PersonalizedRecommendationsOutput & {
     type: 'image';
     createdAt: { toDate: () => Date } | Date | null;
     imageAnalysisSummary: string;
+    fullAnalysis?: string;
     hemoglobin?: number;
     notes?: string;
     thumbnails?: { part: string; data: string }[];
+    riskIndex?: number;
+    modelResults?: any[];
 };
 
 export type CbcReport = AnalyzeCbcReportOutput & {
@@ -297,7 +300,8 @@ export function AnalysisHistory() {
 
             if (riskFilter !== 'all') {
                 if (item.type === 'image') {
-                    const score = (item as ImageReport).riskScore;
+                    const img = item as ImageReport;
+                    const score = img.riskIndex ?? img.riskScore;
                     if (riskFilter === 'high' && score <= 75) return false;
                     if (riskFilter === 'moderate' && (score <= 50 || score > 75)) return false;
                     if (riskFilter === 'low' && score > 50) return false;
@@ -317,7 +321,8 @@ export function AnalysisHistory() {
                     const d = toDate(item.createdAt);
                     return d ? format(d, 'MMMM d, yyyy').toLowerCase() : '';
                 })();
-                const riskStr = item.type === 'image' ? String((item as ImageReport).riskScore) : ((item as CbcReport).summary ?? '').toLowerCase();
+                const img = item.type === 'image' ? (item as ImageReport) : null;
+                const riskStr = img ? String(img.riskIndex ?? img.riskScore) : ((item as CbcReport).summary ?? '').toLowerCase();
                 if (!dateStr.includes(q) && !riskStr.includes(q)) return false;
             }
 
@@ -409,6 +414,7 @@ export function AnalysisHistory() {
 
         if (item.type === 'image') {
             const img = item as ImageReport;
+            const rScore = img.riskIndex ?? img.riskScore;
 
             // Risk score box
             pdf.setFillColor(255, 245, 245);
@@ -418,11 +424,11 @@ export function AnalysisHistory() {
             pdf.setFont('helvetica', 'bold');
             pdf.text('ANEMIA RISK INDEX', margin + 6, y + 8);
             pdf.setFontSize(28);
-            pdf.text(String(img.riskScore), margin + 6, y + 22);
+            pdf.text(String(rScore), margin + 6, y + 22);
             pdf.setFontSize(9);
             pdf.setFont('helvetica', 'normal');
             pdf.setTextColor(80, 80, 80);
-            const verdict = img.riskScore > 75 ? 'Critical' : img.riskScore > 50 ? 'Moderate Risk' : 'Normal Range';
+            const verdict = rScore > 75 ? 'Critical' : rScore > 50 ? 'Moderate Risk' : 'Normal Range';
             pdf.text(verdict, margin + 40, y + 22);
             pdf.text(`Confidence: ${img.confidenceScore || 0}%`, pageW - margin - 40, y + 22, { align: 'right' });
             y += 38;
@@ -460,7 +466,7 @@ export function AnalysisHistory() {
             pdf.setFontSize(9);
             pdf.setFont('helvetica', 'normal');
             pdf.setTextColor(70, 70, 70);
-            const summaryLines = pdf.splitTextToSize(img.imageAnalysisSummary || '', pageW - margin * 2);
+            const summaryLines = pdf.splitTextToSize(img.fullAnalysis || img.imageAnalysisSummary || '', pageW - margin * 2);
             pdf.text(summaryLines, margin, y);
             y += summaryLines.length * 5 + 8;
 
@@ -548,11 +554,11 @@ export function AnalysisHistory() {
                 const img = item as ImageReport;
                 rows.push([
                     date, time, 'Image Scan',
-                    String(img.riskScore),
+                    String(img.riskIndex ?? img.riskScore),
                     img.anemiaType || '',
                     String(img.confidenceScore || 0) + '%',
                     img.hemoglobin ? String(img.hemoglobin.toFixed(1)) : '',
-                    (img.imageAnalysisSummary || '').replace(/,/g, ';').replace(/\n/g, ' '),
+                    (img.fullAnalysis || img.imageAnalysisSummary || '').replace(/,/g, ';').replace(/\n/g, ' '),
                 ]);
             } else {
                 const cbc = item as CbcReport;
@@ -754,13 +760,23 @@ export function AnalysisHistory() {
                                     Hgb {hgbMatch[0]}
                                 </span>
                             )}
-                            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-auto">
-                                Risk {(item as ImageReport).riskScore}/100
+                            <span className="text-[10px] font-black uppercase tracking-widest text-primary ml-auto flex items-center gap-1.5">
+                                <Sparkles className="w-3 h-3" />
+                                Conf. {(item as ImageReport).confidenceScore || 0}%
                             </span>
                         </div>
                     ) : (
                         <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
                             {(item as CbcReport).summary}
+                        </p>
+                    )}
+                </div>
+
+                {/* Middle: Confidence score (image) or summary (cbc) */}
+                <div className="flex flex-col gap-2">
+                    {isImage && (
+                        <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3 italic">
+                            {(item as ImageReport).fullAnalysis || (item as ImageReport).imageAnalysisSummary}
                         </p>
                     )}
                 </div>
@@ -887,158 +903,240 @@ export function AnalysisHistory() {
         if (!reportToView) return null;
         if (reportToView.type === 'image') {
             const report = reportToView as ImageReport;
+            const hgb = report.hemoglobin || 12.0;
+            const hgbPercent = Math.min(100, Math.max(0, ((hgb - 5) / 11) * 100));
+            const severityColor = getSeverityColors(report.anemiaType || 'Normal');
+            
             return (
                 <Dialog open={true} onOpenChange={(open) => !open && setReportToView(null)}>
-                    <DialogContent className="sm:max-w-4xl bg-card border-border rounded-[3rem] p-0 overflow-hidden shadow-2xl">
+                    <DialogContent className="w-[95vw] sm:max-w-4xl bg-card border-border rounded-[2rem] md:rounded-[3rem] p-0 overflow-hidden shadow-2xl">
                         {/* Decorative Backgrounds */}
-                        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[140px] -mr-64 -mt-64 pointer-events-none" />
-                        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-rose-500/10 rounded-full blur-[140px] -ml-64 -mb-64 pointer-events-none" />
+                        <div className="absolute top-0 right-0 w-[300px] h-[300px] md:w-[500px] md:h-[500px] bg-primary/10 rounded-full blur-[100px] md:blur-[140px] -mr-32 -mt-32 md:-mr-64 md:-mt-64 pointer-events-none" />
+                        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] md:w-[500px] md:h-[500px] bg-rose-500/10 rounded-full blur-[100px] md:blur-[140px] -ml-32 -mb-32 md:-ml-64 md:-mb-64 pointer-events-none" />
 
-                        <div className="p-5 md:p-12 space-y-6 md:space-y-10 relative z-10 flex flex-col h-[90vh] md:h-auto max-h-[90vh]">
-                            <DialogHeader className="space-y-4 shrink-0">
-                                <div className="flex items-center gap-4 mb-2">
-                                    <div className="p-3 bg-primary/10 rounded-2xl border border-primary/20">
-                                        <Activity className="w-6 h-6 text-primary" />
+                        <div className="p-4 md:p-12 space-y-4 md:space-y-10 relative z-10 flex flex-col h-[90vh] md:h-auto max-h-[90vh]">
+                            <DialogHeader className="space-y-3 md:space-y-4 shrink-0">
+                                <div className="flex items-center gap-3 md:gap-4 mb-1 md:mb-2">
+                                    <div className="p-2 md:p-3 bg-primary/10 rounded-xl md:rounded-2xl border border-primary/20">
+                                        <Activity className="w-5 h-5 md:w-6 md:h-6 text-primary" />
                                     </div>
                                     <div>
-                                        <span className="text-[10px] font-black uppercase tracking-[0.5em] text-primary">Neural Diagnostic Analysis</span>
-                                        <DialogDescription className="text-muted-foreground/50 font-bold uppercase tracking-[0.3em] text-[10px] mt-1">
+                                        <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.4em] md:tracking-[0.5em] text-primary">Neural Diagnostic Analysis</span>
+                                        <DialogDescription className="text-muted-foreground/50 font-bold uppercase tracking-[0.3em] text-[9px] md:text-[10px] mt-1">
                                             Archive ID: {report.id.substring(0, 12)}
                                         </DialogDescription>
                                     </div>
                                 </div>
-                                <DialogTitle className="text-2xl md:text-5xl font-light tracking-tighter text-foreground leading-none">
-                                    Historical <span className="font-black text-primary/80">Result</span>
+                                <DialogTitle className="text-xl md:text-5xl font-light tracking-tighter text-foreground leading-none">
+                                    Analysis <span className="font-serif italic text-primary">Result</span>
                                 </DialogTitle>
-                                <p className="text-muted-foreground font-medium uppercase tracking-[0.2em] text-[11px]">
-                                    Calibration: {toDate(report.createdAt) ? format(toDate(report.createdAt)!, 'PPP, p') : ''}
+                                <p className="text-muted-foreground font-medium uppercase tracking-[0.2em] text-[9px] md:text-[11px]">
+                                    Documented: {toDate(report.createdAt) ? format(toDate(report.createdAt)!, 'PPP, p') : ''}
                                 </p>
                             </DialogHeader>
 
-                            <ScrollArea className="flex-1 -mx-5 px-5 md:-mx-12 md:px-12 pr-4 md:pr-10">
-                                <div className="space-y-6 md:space-y-10 pb-8">
-                                    {report.thumbnails && report.thumbnails.length > 0 && (
-                                        <div className="flex gap-4 overflow-x-auto pb-4 snap-x">
-                                            {report.thumbnails.map((thumb, idx) => (
-                                                <div key={idx} className="relative shrink-0 snap-start">
-                                                    <img src={thumb.data} alt={thumb.part} className="h-32 md:h-40 w-auto rounded-3xl object-cover border border-primary/20 shadow-xl mix-blend-screen bg-black" />
-                                                    <Badge variant="outline" className="absolute bottom-3 left-3 bg-black/60 border border-primary/30 backdrop-blur-md text-[9px] font-black uppercase text-primary tracking-widest shadow-lg">
-                                                        {thumb.part}
-                                                    </Badge>
+                            <ScrollArea className="flex-1 -mx-4 px-4 md:-mx-12 md:px-12 pr-4 md:pr-10">
+                                <div className="space-y-5 md:space-y-10 pb-8">
+                                    
+                                    {/* ── Hemoglobin card ──────────────────────────────────────────────── */}
+                                    <div className="glass-panel rounded-[2rem] p-6 md:p-8 space-y-6 md:space-y-8 relative overflow-hidden group">
+                                        <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                                            <TrendingUp className="w-16 h-16 text-primary" />
+                                        </div>
+                                        
+                                        <div className="flex items-center justify-between flex-wrap gap-6 relative z-10">
+                                            <div className="space-y-2">
+                                                <p className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-[0.3em] font-black">
+                                                    Estimated Hemoglobin
+                                                </p>
+                                                <div className="flex items-baseline gap-2">
+                                                    <span className="text-5xl md:text-7xl font-light text-primary tracking-tighter leading-none">
+                                                        {hgb.toFixed(1)}
+                                                    </span>
+                                                    <span className="text-lg md:text-2xl text-muted-foreground font-light">g/dL</span>
                                                 </div>
-                                            ))}
+                                            </div>
+                                            <div className="text-right space-y-3">
+                                                <p className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-[0.3em] font-black">
+                                                    Severity Status
+                                                </p>
+                                                <Badge className={cn('text-xs md:text-sm px-5 py-2 border rounded-full font-black uppercase tracking-widest shadow-lg', severityColor.badge)}>
+                                                    {report.anemiaType || 'Normal'}
+                                                </Badge>
+                                            </div>
+                                        </div>
+
+                                        {/* Hgb scale bar */}
+                                        <div className="space-y-3">
+                                            <div className="h-2 bg-foreground/5 rounded-full overflow-hidden">
+                                                <motion.div
+                                                    className="h-full rounded-full bg-primary shadow-[0_0_15px_rgba(var(--primary),0.5)]"
+                                                    initial={{ width: 0 }}
+                                                    animate={{ width: `${hgbPercent}%` }}
+                                                    transition={{ duration: 1, ease: "easeOut" }}
+                                                />
+                                            </div>
+                                            <div className="flex justify-between text-[9px] md:text-[10px] text-muted-foreground font-mono uppercase tracking-widest font-bold">
+                                                <span>5 g/dL</span>
+                                                <span className="text-primary/60">Target ≥ 12</span>
+                                                <span>16 g/dL</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* HUD Stats Row */}
+                                    <div className="grid grid-cols-2 gap-3 md:gap-6">
+                                        <div className="p-5 md:p-6 rounded-[1.5rem] md:rounded-[2rem] bg-foreground/[0.03] border border-border/50 backdrop-blur-3xl flex items-center justify-between group">
+                                            <div className="space-y-1">
+                                                <span className="text-[9px] md:text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.3em]">Confidence</span>
+                                                <div className="text-2xl md:text-4xl font-light text-foreground tracking-tighter leading-none flex items-baseline gap-1">
+                                                    {report.confidenceScore || 0}<span className="text-base md:text-lg text-muted-foreground/50">%</span>
+                                                </div>
+                                            </div>
+                                            <Sparkles className="w-5 h-5 md:w-8 md:h-8 text-primary/30 group-hover:text-primary transition-colors" />
+                                        </div>
+                                        <div className="p-5 md:p-6 rounded-[1.5rem] md:rounded-[2rem] bg-foreground/[0.03] border border-border/50 backdrop-blur-3xl flex items-center justify-between group">
+                                            <div className="space-y-1">
+                                                <span className="text-[9px] md:text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.3em]">Risk Index</span>
+                                                <div className="text-2xl md:text-4xl font-light text-foreground tracking-tighter leading-none flex items-baseline gap-1">
+                                                    {report.riskIndex ?? report.riskScore}<span className="text-base md:text-lg text-muted-foreground/50">/100</span>
+                                                </div>
+                                            </div>
+                                            <TrendingUp className="w-5 h-5 md:w-8 md:h-8 text-rose-500/30 group-hover:text-rose-500 transition-colors" />
+                                        </div>
+                                    </div>
+
+                                    {/* Visual Markers */}
+                                    {report.thumbnails && report.thumbnails.length > 0 && (
+                                        <div className="space-y-4 md:space-y-6">
+                                            <h4 className="text-[9px] md:text-[11px] font-black text-muted-foreground uppercase tracking-[0.4em] ml-2 md:ml-4 flex items-center gap-3">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                                                Visual Neural Markers
+                                            </h4>
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
+                                                {report.thumbnails.map((thumb, idx) => (
+                                                    <div key={idx} className="glass-panel glass-panel-hover rounded-2xl md:rounded-[1.5rem] p-3 md:p-4 flex items-center gap-4 group">
+                                                        <div className="relative shrink-0 w-24 h-24 md:w-32 md:h-32 rounded-xl md:rounded-2xl overflow-hidden border border-border bg-black shadow-lg">
+                                                            <img src={thumb.data} alt={thumb.part} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="text-[10px] md:text-xs font-black uppercase tracking-widest text-primary mb-1">{thumb.part}</p>
+                                                            <p className="text-[9px] md:text-[10px] text-muted-foreground leading-tight uppercase font-bold tracking-tighter">Verified Scan Area</p>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
                                         </div>
                                     )}
 
-                                    {/* HUD Metrics Grid */}
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                                        {/* Risk Score Bento */}
-                                        <div className="p-6 md:p-8 rounded-[2rem] bg-foreground/[0.03] border border-border/50 backdrop-blur-3xl relative overflow-hidden group">
-                                            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                                                <TrendingUp className="w-16 h-16 text-foreground" />
-                                            </div>
-                                            <div className="absolute top-0 left-0 w-32 h-32 bg-primary/10 blur-[50px] mix-blend-screen pointer-events-none" />
-
-                                            <div className="flex flex-col h-full justify-between relative z-10 space-y-8">
-                                                <div className="space-y-2">
-                                                    <span className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.3em]">Risk Index</span>
-                                                    <div className="flex items-baseline gap-1">
-                                                        <p className="text-5xl md:text-7xl font-light text-foreground tracking-tighter leading-none">{report.riskScore}</p>
-                                                        <span className="text-2xl text-muted-foreground/50">/100</span>
-                                                    </div>
-                                                </div>
-
-                                                <div className="space-y-4">
-                                                    <div className="relative h-2 w-full bg-foreground/5 rounded-full overflow-hidden">
-                                                        <div
-                                                            className={cn("absolute top-0 left-0 h-full rounded-full transition-all duration-1000", report.riskScore > 75 ? "bg-red-500" : report.riskScore > 50 ? "bg-amber-500" : "bg-emerald-500")}
-                                                            style={{ width: `${report.riskScore}%` }}
-                                                        />
-                                                    </div>
-                                                    <div className="flex justify-between items-center">
-                                                        <Badge variant={getBadgeVariant(report.riskScore)} className="rounded-lg px-4 py-1.5 font-black text-[10px] uppercase tracking-widest shadow-lg">
-                                                            {report.riskScore > 75 ? 'Critical Risk' : report.riskScore > 50 ? 'Moderate Risk' : 'Optimal Range'}
-                                                        </Badge>
-                                                        <span className="text-[10px] uppercase tracking-[0.3em] font-bold text-muted-foreground/50">Severity</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Verdict Bento */}
-                                        <div className="p-6 md:p-8 rounded-[2rem] bg-foreground/[0.03] border border-border/50 backdrop-blur-3xl relative overflow-hidden group">
-                                            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                                                <ShieldCheck className="w-16 h-16 text-foreground" />
-                                            </div>
-
-                                            <div className="flex flex-col h-full justify-between relative z-10 space-y-8">
-                                                <div className="space-y-4">
-                                                    <span className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.3em]">Diagnostic Verdict</span>
-                                                    <p className="text-2xl md:text-3xl font-light text-foreground tracking-tight uppercase leading-tight">
-                                                        {report.anemiaType || 'Indeterminate'}
-                                                    </p>
-                                                </div>
-
-                                                <div className="flex items-center justify-between">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="p-2.5 bg-primary/20 rounded-xl border border-primary/20">
-                                                            <Sparkles className="w-5 h-5 text-primary" />
-                                                        </div>
-                                                        <div className="space-y-0.5">
-                                                            <p className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">Confidence</p>
-                                                            <p className="text-lg font-bold text-foreground">{report.confidenceScore || 0}%</p>
-                                                        </div>
-                                                    </div>
-                                                    {report.hemoglobin && (
-                                                        <div className="text-right">
-                                                            <p className="text-[10px] font-black text-amber-500 uppercase tracking-[0.3em]">Est. Hgb</p>
-                                                            <p className="text-lg font-bold text-foreground">{report.hemoglobin.toFixed(1)} <span className="text-[10px] text-muted-foreground">g/dL</span></p>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Image Observations */}
-                                    <div className="space-y-4 pt-4">
-                                        <h4 className="text-[11px] font-black text-muted-foreground uppercase tracking-[0.4em] ml-4 flex items-center gap-3">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50" />
-                                            Neural Observations
+                                    {/* AI Interpretation */}
+                                    <div className="space-y-4 pt-2 md:pt-4">
+                                        <h4 className="text-[9px] md:text-[11px] font-black text-muted-foreground uppercase tracking-[0.3em] md:tracking-[0.4em] ml-2 md:ml-4 flex items-center gap-2 md:gap-3">
+                                            <div className="w-1 md:w-1.5 h-1 md:h-1.5 rounded-full bg-muted-foreground/50" />
+                                            Clinical Interpretation
                                         </h4>
-                                        <div className="p-6 md:p-8 rounded-[2rem] bg-foreground/[0.02] border border-border/50 text-sm md:text-lg font-light text-muted-foreground leading-relaxed italic backdrop-blur-xl relative overflow-hidden">
-                                            <div className="absolute top-0 left-0 w-1 h-full bg-primary/50" />
-                                            "{report.imageAnalysisSummary}"
+                                        <div className="p-6 md:p-8 rounded-[1.5rem] md:rounded-[2rem] bg-foreground/[0.02] border border-border/50 text-xs md:text-lg font-light text-muted-foreground leading-relaxed italic backdrop-blur-xl relative overflow-hidden">
+                                            <div className="absolute top-0 left-0 w-1.5 h-full bg-primary" />
+                                            "{report.fullAnalysis || report.imageAnalysisSummary}"
                                         </div>
                                     </div>
 
-                                    {/* Clinical Insights */}
-                                    <div className="space-y-4 pt-4">
-                                        <h4 className="text-[11px] font-black text-muted-foreground uppercase tracking-[0.4em] ml-4 flex items-center gap-3">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50" />
+                                    {/* Ensemble breakdown */}
+                                    {report.modelResults && report.modelResults.length > 0 && (
+                                        <div className="space-y-4 pt-2 md:pt-4">
+                                            <h4 className="text-[9px] md:text-[11px] font-black text-muted-foreground uppercase tracking-[0.3em] md:tracking-[0.4em] ml-2 md:ml-4 flex items-center gap-2 md:gap-3">
+                                                <div className="w-1 md:w-1.5 h-1 md:h-1.5 rounded-full bg-muted-foreground/50" />
+                                                10-Model Ensemble Performance
+                                            </h4>
+                                            <div className="p-5 md:p-8 rounded-[1.5rem] md:rounded-[2rem] bg-foreground/[0.01] border border-border/50 backdrop-blur-xl">
+                                                <div className="grid grid-cols-1 gap-3">
+                                                    {report.modelResults
+                                                        .filter((r: any) => r.contributedToConsensus)
+                                                        .map((r: any) => (
+                                                            <div key={r.modelId} className="flex items-center gap-4">
+                                                                <span className="text-[9px] font-mono text-muted-foreground w-6 text-right shrink-0">T{r.tier}</span>
+                                                                <span className="text-[10px] md:text-xs flex-1 truncate font-bold text-foreground/80">{r.modelName}</span>
+                                                                <div className="w-20 md:w-32 h-1 rounded-full bg-muted/30 overflow-hidden shrink-0">
+                                                                    <div className="h-full bg-primary/40 rounded-full" style={{ width: `${Math.round(r.confidence * 100)}%` }} />
+                                                                </div>
+                                                                <span className="text-[9px] md:text-[10px] font-mono font-black text-primary w-10 text-right">{r.estimatedHgb.toFixed(1)}</span>
+                                                            </div>
+                                                        ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Confidence & Math sections grouped */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        {/* Confidence Reasoning */}
+                                        {report.confidenceReasoning && (
+                                            <div className="space-y-4">
+                                                <h4 className="text-[9px] md:text-[11px] font-black text-muted-foreground uppercase tracking-[0.3em] md:tracking-[0.4em] ml-4 flex items-center gap-2">
+                                                    <div className="w-1 h-1 rounded-full bg-muted-foreground/50" />
+                                                    Neural Reasoning
+                                                </h4>
+                                                <div className="p-5 rounded-[1.5rem] bg-foreground/[0.01] border border-border/50 h-full backdrop-blur-xl">
+                                                    <p className="text-[10px] md:text-xs text-muted-foreground/80 leading-relaxed font-mono whitespace-pre-wrap">{report.confidenceReasoning}</p>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Diagnostic Mathematics */}
+                                        <div className="space-y-4">
+                                            <h4 className="text-[9px] md:text-[11px] font-black text-muted-foreground uppercase tracking-[0.3em] md:tracking-[0.4em] ml-4 flex items-center gap-2">
+                                                <div className="w-1 h-1 rounded-full bg-muted-foreground/50" />
+                                                Diagnostic Math
+                                            </h4>
+                                            <div className="p-5 rounded-[1.5rem] bg-foreground/[0.01] border border-border/50 h-full backdrop-blur-xl space-y-4">
+                                                <div className="space-y-1">
+                                                    <p className="text-[8px] font-black text-muted-foreground/40 uppercase tracking-widest">Risk Calculation</p>
+                                                    <p className="text-[10px] font-mono text-foreground/70">((16 - Hgb) / 11) × 100</p>
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <p className="text-[8px] font-black text-muted-foreground/40 uppercase tracking-widest">Ensemble Mean</p>
+                                                    <p className="text-[10px] font-mono text-foreground/70">Σ(Specialist Est.) / N</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Clinical Protocols */}
+                                    <div className="space-y-3 md:space-y-4 pt-2 md:pt-4">
+                                        <h4 className="text-[9px] md:text-[11px] font-black text-muted-foreground uppercase tracking-[0.3em] md:tracking-[0.4em] ml-2 md:ml-4 flex items-center gap-2 md:gap-3">
+                                            <div className="w-1 md:w-1.5 h-1 md:h-1.5 rounded-full bg-primary" />
                                             Clinical Protocols
                                         </h4>
-                                        <div className="rounded-[2rem] border border-border/50 bg-foreground/[0.01] p-6 md:p-8 backdrop-blur-xl">
-                                            <p className="text-sm md:text-lg text-foreground/80 leading-relaxed font-light whitespace-pre-wrap">{report.recommendations}</p>
+                                        <div className="rounded-[1.5rem] md:rounded-[2rem] border border-primary/20 bg-primary/5 p-6 md:p-8 backdrop-blur-xl relative overflow-hidden">
+                                            <div className="absolute top-0 right-0 p-4 opacity-10">
+                                                <ShieldCheck className="w-12 h-12 text-primary" />
+                                            </div>
+                                            <p className="text-xs md:text-lg text-foreground/90 leading-relaxed font-medium whitespace-pre-wrap relative z-10">{report.recommendations}</p>
                                         </div>
                                     </div>
+
+                                    {/* Disclaimer */}
+                                    <p className="text-[9px] md:text-[10px] text-muted-foreground/50 text-center leading-relaxed px-4 pt-4 border-t border-border/50">
+                                        This screen is generated by Anemo AI for non-invasive screening only and does not
+                                        constitute a medical diagnosis. Consult a licensed healthcare professional.
+                                    </p>
                                 </div>
                             </ScrollArea>
 
                             {/* Footer Buttons */}
-                            <div className="pt-4 md:pt-6 border-t border-border/50 shrink-0 flex justify-end gap-3 md:gap-4 flex-wrap">
-                                <Button variant="ghost" onClick={() => setReportToView(null)} className="h-10 px-6 md:h-14 md:px-10 rounded-[1.2rem] font-bold text-xs uppercase tracking-widest hover:bg-foreground/5 text-muted-foreground hover:text-foreground transition-all">
+                            <div className="pt-3 md:pt-6 border-t border-border/50 shrink-0 flex justify-end gap-2 md:gap-4 flex-wrap sm:flex-nowrap">
+                                <Button variant="ghost" onClick={() => setReportToView(null)} className="h-10 px-4 md:h-14 md:px-10 rounded-[1rem] md:rounded-[1.2rem] font-bold text-[10px] md:text-xs uppercase tracking-widest hover:bg-foreground/5 text-muted-foreground hover:text-foreground transition-all flex-1 sm:flex-none">
                                     CLOSE
                                 </Button>
                                 <Button
                                     onClick={() => handleDownloadPDF(report)}
-                                    className="h-10 px-4 md:h-14 md:px-8 rounded-[1.2rem] bg-emerald-600 hover:bg-emerald-500 text-white text-xs uppercase tracking-widest shadow-xl shadow-emerald-600/20 hover:scale-105 transition-all flex items-center gap-2"
+                                    className="h-10 px-3 md:h-14 md:px-8 rounded-[1rem] md:rounded-[1.2rem] bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] md:text-xs uppercase tracking-widest shadow-xl shadow-emerald-600/20 hover:scale-105 transition-all flex items-center gap-2 flex-1 sm:flex-none"
                                 >
-                                    <Download className="w-4 h-4" /> <span className="hidden sm:inline">DOWNLOAD PDF</span>
+                                    <Download className="w-3.5 h-3.5 md:w-4 md:h-4" /> <span className="inline">PDF</span>
                                 </Button>
-                                <Button asChild className="h-10 px-6 md:h-14 md:px-10 rounded-[1.2rem] bg-primary text-primary-foreground font-black text-xs uppercase tracking-widest shadow-xl shadow-primary/20 hover:scale-105 transition-all">
-                                    <Link href="/dashboard/analysis" className="flex items-center gap-2">
-                                        RE-SCAN <ChevronRight className="w-4 h-4" />
+                                <Button asChild className="h-10 px-4 md:h-14 md:px-10 rounded-[1rem] md:rounded-[1.2rem] bg-primary text-primary-foreground font-black text-[10px] md:text-xs uppercase tracking-widest shadow-xl shadow-primary/20 hover:scale-105 transition-all flex-1 sm:flex-none">
+                                    <Link href="/dashboard/analysis" className="flex items-center gap-2 justify-center">
+                                        RE-SCAN <ChevronRight className="w-3.5 h-3.5 md:w-4 md:h-4" />
                                     </Link>
                                 </Button>
                             </div>

@@ -691,14 +691,14 @@ export function CameraAnalysis({ onBack }: CameraAnalysisProps) {
         });
     }
 
-    const riskScore = Math.round(
+    const riskIndex = Math.round(
       Math.max(0, Math.min(100, ((16 - consensusHgb) / 11) * 100)),
     );
 
     const saveData = {
       type: 'image',
       mode: 'live-camera',
-      riskScore,
+      riskIndex,
       anemiaType: severity,
       confidenceScore: Math.round(
         (ensembleReport.allConfidenceScores.length > 0
@@ -711,6 +711,8 @@ export function CameraAnalysis({ onBack }: CameraAnalysisProps) {
         `${severity} anemia indicators detected. Est. Hgb: ${consensusHgb.toFixed(1)} g/dL`,
       recommendations: dietaryRecommendations.join('\n') || '',
       hemoglobin: consensusHgb,
+      fullAnalysis: report, // Explicitly store the full analysis report
+      modelResults: ensembleReport.modelResults, // Store individual model scores
     };
 
     addDoc(collection(firestore, `users/${user.uid}/imageAnalyses`), {
