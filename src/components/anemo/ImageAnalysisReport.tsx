@@ -137,6 +137,30 @@ export function ImageAnalysisReport({ analyses, labReport, onReset }: ImageAnaly
       if (user && !user.isAnonymous && firestore && reportResult && !hasSavedRef.current) {
         hasSavedRef.current = true;
         const reportCollection = collection(firestore, `users/${user.uid}/imageAnalyses`);
+        // generate low-res thumbnails to save securely in Firestore for history timeline
+        const thumbnails = await Promise.all(
+          Object.values(analyses).map(v => new Promise<{part: string, data: string}>((resolve) => {
+            const dataUri = v.dataUri || v.imageUrl;
+            if (!dataUri) return resolve({ part: 'unknown', data: '' });
+            
+            // Just use the original dataUri but scaled down to save space
+            const img = new Image();
+            img.onload = () => {
+              const canvas = document.createElement('canvas');
+              const maxSize = 300;
+              let { width: w, height: h } = img;
+              if (w > h) { h = Math.round(h * maxSize / w); w = maxSize; }
+              else { w = Math.round(w * maxSize / h); h = maxSize; }
+              canvas.width = w; canvas.height = h;
+              canvas.getContext('2d')?.drawImage(img, 0, 0, w, h);
+              // Find part name
+              const part = Object.entries(analyses).find(([, val]) => val === v)?.[0] || 'unknown';
+              resolve({ part, data: canvas.toDataURL('image/jpeg', 0.6) });
+            };
+            img.src = dataUri;
+          }))
+        );
+
         await addDoc(reportCollection, {
           userId: user.uid,
           createdAt: serverTimestamp(),
@@ -146,6 +170,7 @@ export function ImageAnalysisReport({ analyses, labReport, onReset }: ImageAnaly
           recommendations: reportResult.recommendations,
           imageAnalysisSummary: allImageDescriptions,
           labReportSummary: labReportSummary,
+          thumbnails: thumbnails.filter(t => t.data),
         });
       }
     } catch (err) {

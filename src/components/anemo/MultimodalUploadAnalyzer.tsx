@@ -494,7 +494,7 @@ function CaptureStep({
               >
                 <div className="flex items-center gap-2">
                   <Sparkles className="w-3.5 h-3.5 text-primary" />
-                  <span className="text-[9px] font-black uppercase tracking-[0.3em] text-primary">AI Observation</span>
+                  <span className="text-[9px] font-black uppercase tracking-[0.3em] text-primary">Observations</span>
                 </div>
                 <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
               </motion.div>

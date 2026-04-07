@@ -75,6 +75,7 @@ type ImageReport = PersonalizedRecommendationsOutput & {
     imageAnalysisSummary: string;
     hemoglobin?: number;
     notes?: string;
+    thumbnails?: { part: string; data: string }[];
 };
 
 export type CbcReport = AnalyzeCbcReportOutput & {
@@ -89,107 +90,106 @@ export type HistoryItem = ImageReport | CbcReport;
 
 /** Safely converts Firestore Timestamp or Date to a JS Date */
 function toDate(ts: { toDate: () => Date } | Date | null | undefined): Date | null {
-  if (!ts) return null;
-  if (ts instanceof Date) return ts;
-  if (typeof (ts as any).toDate === 'function') return (ts as any).toDate();
-  return null;
+    if (!ts) return null;
+    if (ts instanceof Date) return ts;
+    if (typeof (ts as any).toDate === 'function') return (ts as any).toDate();
+    return null;
 }
 
 function CalendarView({ records, onViewReport }: { records: any[]; onViewReport: (r: any) => void }) {
-  const [calMonth, setCalMonth] = useState(() => {
-    const d = new Date();
-    return { year: d.getFullYear(), month: d.getMonth() };
-  });
-
-  const recordsByDate = useMemo(() => {
-    const map: Record<string, any[]> = {};
-    records.forEach(r => {
-      if (!r.createdAt) return;
-      const d = toDate(r.createdAt);
-      if (!d) return;
-      const key = d.toISOString().slice(0, 10);
-      if (!map[key]) map[key] = [];
-      map[key].push(r);
+    const [calMonth, setCalMonth] = useState(() => {
+        const d = new Date();
+        return { year: d.getFullYear(), month: d.getMonth() };
     });
-    return map;
-  }, [records]);
 
-  const { year, month } = calMonth;
-  const firstDay = new Date(year, month, 1).getDay();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const prevMonth = () => setCalMonth(prev => prev.month === 0 ? { year: prev.year - 1, month: 11 } : { ...prev, month: prev.month - 1 });
-  const nextMonth = () => setCalMonth(prev => prev.month === 11 ? { year: prev.year + 1, month: 0 } : { ...prev, month: prev.month + 1 });
+    const recordsByDate = useMemo(() => {
+        const map: Record<string, any[]> = {};
+        records.forEach(r => {
+            if (!r.createdAt) return;
+            const d = toDate(r.createdAt);
+            if (!d) return;
+            const key = d.toISOString().slice(0, 10);
+            if (!map[key]) map[key] = [];
+            map[key].push(r);
+        });
+        return map;
+    }, [records]);
 
-  const monthName = new Date(year, month, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  const today = new Date().toISOString().slice(0, 10);
+    const { year, month } = calMonth;
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const prevMonth = () => setCalMonth(prev => prev.month === 0 ? { year: prev.year - 1, month: 11 } : { ...prev, month: prev.month - 1 });
+    const nextMonth = () => setCalMonth(prev => prev.month === 11 ? { year: prev.year + 1, month: 0 } : { ...prev, month: prev.month + 1 });
 
-  const getSeverityDot = (dayRecords: any[]) => {
-    if (!dayRecords?.length) return null;
-    const hasSevere = dayRecords.some(r => r.anemiaType?.toLowerCase().includes('severe'));
-    const hasModerate = dayRecords.some(r => r.anemiaType?.toLowerCase().includes('moderate'));
-    if (hasSevere) return 'bg-red-500';
-    if (hasModerate) return 'bg-amber-500';
-    return 'bg-emerald-500';
-  };
+    const monthName = new Date(year, month, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const today = new Date().toISOString().slice(0, 10);
 
-  return (
-    <div className="rounded-[2.5rem] glass-panel border-primary/10 p-6 md:p-8 space-y-6">
-      {/* Month navigation */}
-      <div className="flex items-center justify-between">
-        <button onClick={prevMonth} className="p-2 rounded-xl glass-button border-primary/10 hover:border-primary/30 transition-colors">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-        </button>
-        <h3 className="text-sm font-black uppercase tracking-widest text-foreground">{monthName}</h3>
-        <button onClick={nextMonth} className="p-2 rounded-xl glass-button border-primary/10 hover:border-primary/30 transition-colors">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-        </button>
-      </div>
+    const getSeverityDot = (dayRecords: any[]) => {
+        if (!dayRecords?.length) return null;
+        const hasSevere = dayRecords.some(r => r.anemiaType?.toLowerCase().includes('severe'));
+        const hasModerate = dayRecords.some(r => r.anemiaType?.toLowerCase().includes('moderate'));
+        if (hasSevere) return 'bg-red-500';
+        if (hasModerate) return 'bg-amber-500';
+        return 'bg-emerald-500';
+    };
 
-      {/* Day headers */}
-      <div className="grid grid-cols-7 gap-1">
-        {days.map(d => (
-          <div key={d} className="text-center text-[9px] font-black uppercase tracking-widest text-muted-foreground py-2">{d}</div>
-        ))}
-      </div>
+    return (
+        <div className="rounded-[2.5rem] glass-panel border-primary/10 p-6 md:p-8 space-y-6">
+            {/* Month navigation */}
+            <div className="flex items-center justify-between">
+                <button onClick={prevMonth} className="p-2 rounded-xl glass-button border-primary/10 hover:border-primary/30 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+                </button>
+                <h3 className="text-sm font-black uppercase tracking-widest text-foreground">{monthName}</h3>
+                <button onClick={nextMonth} className="p-2 rounded-xl glass-button border-primary/10 hover:border-primary/30 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
+                </button>
+            </div>
 
-      {/* Calendar grid */}
-      <div className="grid grid-cols-7 gap-1">
-        {Array.from({ length: firstDay }).map((_, i) => <div key={`empty-${i}`} />)}
-        {Array.from({ length: daysInMonth }).map((_, i) => {
-          const day = i + 1;
-          const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-          const dayRecords = recordsByDate[dateKey];
-          const dotColor = getSeverityDot(dayRecords);
-          const isToday = dateKey === today;
-          return (
-            <button
-              key={day}
-              onClick={() => dayRecords?.length && onViewReport(dayRecords[0])}
-              className={`aspect-square flex flex-col items-center justify-center gap-0.5 rounded-xl text-xs font-bold transition-all ${
-                dayRecords?.length
-                  ? 'glass-button border border-primary/20 hover:border-primary/40 cursor-pointer'
-                  : 'text-muted-foreground/40 cursor-default'
-              } ${isToday ? 'ring-1 ring-primary/50' : ''}`}
-            >
-              <span className={isToday ? 'text-primary font-black' : ''}>{day}</span>
-              {dotColor && <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`} />}
-            </button>
-          );
-        })}
-      </div>
+            {/* Day headers */}
+            <div className="grid grid-cols-7 gap-1">
+                {days.map(d => (
+                    <div key={d} className="text-center text-[9px] font-black uppercase tracking-widest text-muted-foreground py-2">{d}</div>
+                ))}
+            </div>
 
-      {/* Legend */}
-      <div className="flex items-center gap-4 pt-2 border-t border-border/50">
-        {[['bg-emerald-500', 'Normal/Mild'], ['bg-amber-500', 'Moderate'], ['bg-red-500', 'Severe']].map(([color, label]) => (
-          <div key={label} className="flex items-center gap-1.5">
-            <span className={`w-2 h-2 rounded-full ${color}`} />
-            <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">{label}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+            {/* Calendar grid */}
+            <div className="grid grid-cols-7 gap-1">
+                {Array.from({ length: firstDay }).map((_, i) => <div key={`empty-${i}`} />)}
+                {Array.from({ length: daysInMonth }).map((_, i) => {
+                    const day = i + 1;
+                    const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    const dayRecords = recordsByDate[dateKey];
+                    const dotColor = getSeverityDot(dayRecords);
+                    const isToday = dateKey === today;
+                    return (
+                        <button
+                            key={day}
+                            onClick={() => dayRecords?.length && onViewReport(dayRecords[0])}
+                            className={`aspect-square flex flex-col items-center justify-center gap-0.5 rounded-xl text-xs font-bold transition-all ${dayRecords?.length
+                                ? 'glass-button border border-primary/20 hover:border-primary/40 cursor-pointer'
+                                : 'text-muted-foreground/40 cursor-default'
+                                } ${isToday ? 'ring-1 ring-primary/50' : ''}`}
+                        >
+                            <span className={isToday ? 'text-primary font-black' : ''}>{day}</span>
+                            {dotColor && <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`} />}
+                        </button>
+                    );
+                })}
+            </div>
+
+            {/* Legend */}
+            <div className="flex items-center gap-4 pt-2 border-t border-border/50">
+                {[['bg-emerald-500', 'Normal/Mild'], ['bg-amber-500', 'Moderate'], ['bg-red-500', 'Severe']].map(([color, label]) => (
+                    <div key={label} className="flex items-center gap-1.5">
+                        <span className={`w-2 h-2 rounded-full ${color}`} />
+                        <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">{label}</span>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
 }
 
 export function AnalysisHistory() {
@@ -427,11 +427,35 @@ export function AnalysisHistory() {
             pdf.text(`Confidence: ${img.confidenceScore || 0}%`, pageW - margin - 40, y + 22, { align: 'right' });
             y += 38;
 
+            if (img.thumbnails && img.thumbnails.length > 0) {
+                pdf.setFontSize(10);
+                pdf.setFont('helvetica', 'bold');
+                pdf.setTextColor(30, 30, 30);
+                pdf.text('Uploaded Scans', margin, y);
+                y += 6;
+                const thumbW = 35;
+                const thumbH = 35;
+                let currentX = margin;
+                img.thumbnails.forEach((thumb) => {
+                    if (thumb.data) {
+                        try {
+                            pdf.addImage(thumb.data, 'JPEG', currentX, y, thumbW, thumbH);
+                            pdf.setFontSize(7);
+                            pdf.text(thumb.part.toUpperCase(), currentX, y + thumbH + 4);
+                            currentX += thumbW + 10;
+                        } catch (e) {
+                            console.warn('Failed to attach thumbnail to PDF', e);
+                        }
+                    }
+                });
+                y += thumbH + 12;
+            }
+
             // Analysis summary
             pdf.setFontSize(10);
             pdf.setFont('helvetica', 'bold');
             pdf.setTextColor(30, 30, 30);
-            pdf.text('AI Observation', margin, y);
+            pdf.text('Observations', margin, y);
             y += 6;
             pdf.setFontSize(9);
             pdf.setFont('helvetica', 'normal');
@@ -510,7 +534,7 @@ export function AnalysisHistory() {
         pdf.text(`anemo.ai · ${format(new Date(), 'yyyy')}`, pageW / 2, pageH - 6, { align: 'center' });
 
         pdf.save(`anemo-report-${item.id.substring(0, 8)}-${format(toDate(item.createdAt) ?? new Date(), 'yyyyMMdd')}.pdf`);
-        toast({ title: 'Report Downloaded', description: 'Your Anemo AI report has been saved as PDF.' });
+        toast({ title: 'Report Downloaded', description: 'Your Anemo report has been saved as PDF.' });
     }, [toast]);
 
     const handleExportCSV = useCallback(() => {
@@ -865,11 +889,13 @@ export function AnalysisHistory() {
             const report = reportToView as ImageReport;
             return (
                 <Dialog open={true} onOpenChange={(open) => !open && setReportToView(null)}>
-                    <DialogContent className="sm:max-w-2xl bg-card border-border rounded-[3rem] p-0 overflow-hidden shadow-2xl">
+                    <DialogContent className="sm:max-w-4xl bg-card border-border rounded-[3rem] p-0 overflow-hidden shadow-2xl">
+                        {/* Decorative Backgrounds */}
                         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[140px] -mr-64 -mt-64 pointer-events-none" />
+                        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-rose-500/10 rounded-full blur-[140px] -ml-64 -mb-64 pointer-events-none" />
 
-                        <div className="p-5 md:p-12 space-y-6 md:space-y-12 relative z-10">
-                            <DialogHeader className="space-y-4">
+                        <div className="p-5 md:p-12 space-y-6 md:space-y-10 relative z-10 flex flex-col h-[90vh] md:h-auto max-h-[90vh]">
+                            <DialogHeader className="space-y-4 shrink-0">
                                 <div className="flex items-center gap-4 mb-2">
                                     <div className="p-3 bg-primary/10 rounded-2xl border border-primary/20">
                                         <Activity className="w-6 h-6 text-primary" />
@@ -881,92 +907,145 @@ export function AnalysisHistory() {
                                         </DialogDescription>
                                     </div>
                                 </div>
-                                <DialogTitle className="text-2xl md:text-5xl font-light tracking-tighter text-foreground uppercase leading-none">
-                                    Historical <span className="font-serif italic text-primary/80">Result</span>
+                                <DialogTitle className="text-2xl md:text-5xl font-light tracking-tighter text-foreground leading-none">
+                                    Historical <span className="font-black text-primary/80">Result</span>
                                 </DialogTitle>
                                 <p className="text-muted-foreground font-medium uppercase tracking-[0.2em] text-[11px]">
                                     Calibration: {toDate(report.createdAt) ? format(toDate(report.createdAt)!, 'PPP, p') : ''}
                                 </p>
                             </DialogHeader>
 
-                            <div className="grid gap-10">
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
-                                    <div className="p-4 md:p-8 rounded-[1.5rem] md:rounded-[2rem] bg-foreground/[0.03] border border-border/50 backdrop-blur-3xl relative overflow-hidden group">
-                                        <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                                            <TrendingUp className="w-12 h-12 text-foreground" />
-                                        </div>
-                                        <div className="flex justify-between items-end mb-6 relative z-10">
-                                            <div className="space-y-1">
-                                                <span className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.3em]">Risk Score</span>
-                                                <p className="text-4xl md:text-6xl font-light text-foreground tracking-tighter leading-none">{report.riskScore}<span className="text-xl text-muted-foreground/50 ml-1">/100</span></p>
-                                            </div>
-                                        </div>
-                                        <div className="space-y-3 relative z-10">
-                                            <Progress value={report.riskScore} className="h-1.5 bg-foreground/5" />
-                                            <div className="flex justify-between">
-                                                <Badge variant={getBadgeVariant(report.riskScore)} className="rounded-lg px-3 py-1 font-black text-[9px] uppercase tracking-widest">
-                                                    {report.riskScore > 75 ? 'Critical' : report.riskScore > 50 ? 'Moderate' : 'Optimal'}
-                                                </Badge>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="p-4 md:p-8 rounded-[1.5rem] md:rounded-[2rem] bg-foreground/[0.03] border border-border/50 backdrop-blur-3xl flex flex-col justify-center relative overflow-hidden group">
-                                        <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                                            <ShieldCheck className="w-12 h-12 text-foreground" />
-                                        </div>
-                                        <div className="space-y-4 relative z-10">
-                                            <span className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.3em]">Verdict</span>
-                                            <p className="text-xl md:text-3xl font-light text-foreground tracking-tight uppercase leading-tight">{report.anemiaType || 'N/A'}</p>
-                                            <div className="flex items-center gap-3 mt-4">
-                                                <div className="p-2 bg-primary/20 rounded-lg">
-                                                    <Sparkles className="w-4 h-4 text-primary" />
+                            <ScrollArea className="flex-1 -mx-5 px-5 md:-mx-12 md:px-12 pr-4 md:pr-10">
+                                <div className="space-y-6 md:space-y-10 pb-8">
+                                    {report.thumbnails && report.thumbnails.length > 0 && (
+                                        <div className="flex gap-4 overflow-x-auto pb-4 snap-x">
+                                            {report.thumbnails.map((thumb, idx) => (
+                                                <div key={idx} className="relative shrink-0 snap-start">
+                                                    <img src={thumb.data} alt={thumb.part} className="h-32 md:h-40 w-auto rounded-3xl object-cover border border-primary/20 shadow-xl mix-blend-screen bg-black" />
+                                                    <Badge variant="outline" className="absolute bottom-3 left-3 bg-black/60 border border-primary/30 backdrop-blur-md text-[9px] font-black uppercase text-primary tracking-widest shadow-lg">
+                                                        {thumb.part}
+                                                    </Badge>
                                                 </div>
-                                                <span className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">Confidence: {report.confidenceScore || 0}%</span>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {/* HUD Metrics Grid */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                                        {/* Risk Score Bento */}
+                                        <div className="p-6 md:p-8 rounded-[2rem] bg-foreground/[0.03] border border-border/50 backdrop-blur-3xl relative overflow-hidden group">
+                                            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                                                <TrendingUp className="w-16 h-16 text-foreground" />
+                                            </div>
+                                            <div className="absolute top-0 left-0 w-32 h-32 bg-primary/10 blur-[50px] mix-blend-screen pointer-events-none" />
+
+                                            <div className="flex flex-col h-full justify-between relative z-10 space-y-8">
+                                                <div className="space-y-2">
+                                                    <span className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.3em]">Risk Index</span>
+                                                    <div className="flex items-baseline gap-1">
+                                                        <p className="text-5xl md:text-7xl font-light text-foreground tracking-tighter leading-none">{report.riskScore}</p>
+                                                        <span className="text-2xl text-muted-foreground/50">/100</span>
+                                                    </div>
+                                                </div>
+
+                                                <div className="space-y-4">
+                                                    <div className="relative h-2 w-full bg-foreground/5 rounded-full overflow-hidden">
+                                                        <div
+                                                            className={cn("absolute top-0 left-0 h-full rounded-full transition-all duration-1000", report.riskScore > 75 ? "bg-red-500" : report.riskScore > 50 ? "bg-amber-500" : "bg-emerald-500")}
+                                                            style={{ width: `${report.riskScore}%` }}
+                                                        />
+                                                    </div>
+                                                    <div className="flex justify-between items-center">
+                                                        <Badge variant={getBadgeVariant(report.riskScore)} className="rounded-lg px-4 py-1.5 font-black text-[10px] uppercase tracking-widest shadow-lg">
+                                                            {report.riskScore > 75 ? 'Critical Risk' : report.riskScore > 50 ? 'Moderate Risk' : 'Optimal Range'}
+                                                        </Badge>
+                                                        <span className="text-[10px] uppercase tracking-[0.3em] font-bold text-muted-foreground/50">Severity</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Verdict Bento */}
+                                        <div className="p-6 md:p-8 rounded-[2rem] bg-foreground/[0.03] border border-border/50 backdrop-blur-3xl relative overflow-hidden group">
+                                            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                                                <ShieldCheck className="w-16 h-16 text-foreground" />
+                                            </div>
+
+                                            <div className="flex flex-col h-full justify-between relative z-10 space-y-8">
+                                                <div className="space-y-4">
+                                                    <span className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.3em]">Diagnostic Verdict</span>
+                                                    <p className="text-2xl md:text-3xl font-light text-foreground tracking-tight uppercase leading-tight">
+                                                        {report.anemiaType || 'Indeterminate'}
+                                                    </p>
+                                                </div>
+
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="p-2.5 bg-primary/20 rounded-xl border border-primary/20">
+                                                            <Sparkles className="w-5 h-5 text-primary" />
+                                                        </div>
+                                                        <div className="space-y-0.5">
+                                                            <p className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">Confidence</p>
+                                                            <p className="text-lg font-bold text-foreground">{report.confidenceScore || 0}%</p>
+                                                        </div>
+                                                    </div>
+                                                    {report.hemoglobin && (
+                                                        <div className="text-right">
+                                                            <p className="text-[10px] font-black text-amber-500 uppercase tracking-[0.3em]">Est. Hgb</p>
+                                                            <p className="text-lg font-bold text-foreground">{report.hemoglobin.toFixed(1)} <span className="text-[10px] text-muted-foreground">g/dL</span></p>
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                <div className="space-y-4">
-                                    <h4 className="text-[11px] font-black text-muted-foreground uppercase tracking-[0.4em] ml-4 flex items-center gap-3">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50" />
-                                        Image Observations
-                                    </h4>
-                                    <div className="p-4 md:p-8 rounded-[1.5rem] md:rounded-[2rem] bg-foreground/[0.04] border border-border/50 text-sm md:text-lg font-light text-muted-foreground leading-relaxed italic backdrop-blur-xl">
-                                        "{report.imageAnalysisSummary}"
+                                    {/* Image Observations */}
+                                    <div className="space-y-4 pt-4">
+                                        <h4 className="text-[11px] font-black text-muted-foreground uppercase tracking-[0.4em] ml-4 flex items-center gap-3">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50" />
+                                            Neural Observations
+                                        </h4>
+                                        <div className="p-6 md:p-8 rounded-[2rem] bg-foreground/[0.02] border border-border/50 text-sm md:text-lg font-light text-muted-foreground leading-relaxed italic backdrop-blur-xl relative overflow-hidden">
+                                            <div className="absolute top-0 left-0 w-1 h-full bg-primary/50" />
+                                            "{report.imageAnalysisSummary}"
+                                        </div>
+                                    </div>
+
+                                    {/* Clinical Insights */}
+                                    <div className="space-y-4 pt-4">
+                                        <h4 className="text-[11px] font-black text-muted-foreground uppercase tracking-[0.4em] ml-4 flex items-center gap-3">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50" />
+                                            Clinical Protocols
+                                        </h4>
+                                        <div className="rounded-[2rem] border border-border/50 bg-foreground/[0.01] p-6 md:p-8 backdrop-blur-xl">
+                                            <p className="text-sm md:text-lg text-foreground/80 leading-relaxed font-light whitespace-pre-wrap">{report.recommendations}</p>
+                                        </div>
                                     </div>
                                 </div>
+                            </ScrollArea>
 
-                                <div className="space-y-4">
-                                    <h4 className="text-[11px] font-black text-muted-foreground uppercase tracking-[0.4em] ml-4 flex items-center gap-3">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50" />
-                                        Clinical Insights
-                                    </h4>
-                                    <ScrollArea className="h-64 rounded-[1.5rem] md:rounded-[2rem] border border-border/50 bg-foreground/[0.01] p-4 md:p-8 backdrop-blur-xl">
-                                        <p className="text-sm md:text-lg text-muted-foreground leading-relaxed font-light whitespace-pre-wrap">{report.recommendations}</p>
-                                    </ScrollArea>
-                                </div>
+                            {/* Footer Buttons */}
+                            <div className="pt-4 md:pt-6 border-t border-border/50 shrink-0 flex justify-end gap-3 md:gap-4 flex-wrap">
+                                <Button variant="ghost" onClick={() => setReportToView(null)} className="h-10 px-6 md:h-14 md:px-10 rounded-[1.2rem] font-bold text-xs uppercase tracking-widest hover:bg-foreground/5 text-muted-foreground hover:text-foreground transition-all">
+                                    CLOSE
+                                </Button>
+                                <Button
+                                    onClick={() => handleDownloadPDF(report)}
+                                    className="h-10 px-4 md:h-14 md:px-8 rounded-[1.2rem] bg-emerald-600 hover:bg-emerald-500 text-white text-xs uppercase tracking-widest shadow-xl shadow-emerald-600/20 hover:scale-105 transition-all flex items-center gap-2"
+                                >
+                                    <Download className="w-4 h-4" /> <span className="hidden sm:inline">DOWNLOAD PDF</span>
+                                </Button>
+                                <Button asChild className="h-10 px-6 md:h-14 md:px-10 rounded-[1.2rem] bg-primary text-primary-foreground font-black text-xs uppercase tracking-widest shadow-xl shadow-primary/20 hover:scale-105 transition-all">
+                                    <Link href="/dashboard/analysis" className="flex items-center gap-2">
+                                        RE-SCAN <ChevronRight className="w-4 h-4" />
+                                    </Link>
+                                </Button>
                             </div>
-                        </div>
-
-                        <div className="p-4 md:p-10 bg-card/80 border-t border-border/50 flex justify-end gap-3 md:gap-4 backdrop-blur-2xl flex-wrap">
-                            <Button variant="ghost" onClick={() => setReportToView(null)} className="h-10 px-6 md:h-14 md:px-10 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-foreground/5 text-muted-foreground hover:text-foreground transition-all">CLOSE</Button>
-                            <Button
-                                onClick={() => handleDownloadPDF(report)}
-                                className="h-10 px-4 md:h-14 md:px-8 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-widest shadow-xl shadow-emerald-600/20 hover:scale-105 transition-all flex items-center gap-2"
-                            >
-                                <Download className="w-4 h-4" /> DOWNLOAD PDF
-                            </Button>
-                            <Button asChild className="h-10 px-6 md:h-14 md:px-12 rounded-2xl bg-primary text-primary-foreground font-black text-xs uppercase tracking-widest shadow-xl shadow-primary/20 hover:scale-105 transition-all">
-                                <Link href="/dashboard/analysis" className="flex items-center gap-2">
-                                    RE-SCAN <ChevronRight className="w-4 h-4" />
-                                </Link>
-                            </Button>
                         </div>
                     </DialogContent>
                 </Dialog>
-            )
+            );
         } else {
             const report = reportToView as CbcReport;
             return (
@@ -977,7 +1056,7 @@ export function AnalysisHistory() {
                     reliabilityScore={validationResult?.reliabilityScore}
                     discrepancyAlert={validationResult?.discrepancyAlert}
                 />
-            )
+            );
         }
     }
 
@@ -1115,20 +1194,20 @@ export function AnalysisHistory() {
                                 </button>
                                 {/* View Mode Toggle */}
                                 <div className="flex items-center gap-1 p-1 rounded-xl bg-muted/30 border border-border/50">
-                                  <button
-                                    onClick={() => setViewMode('table')}
-                                    className={`p-2 rounded-lg transition-colors ${viewMode === 'table' ? 'bg-primary/20 text-primary' : 'text-muted-foreground hover:text-foreground'}`}
-                                    title="List view"
-                                  >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-                                  </button>
-                                  <button
-                                    onClick={() => setViewMode('calendar')}
-                                    className={`p-2 rounded-lg transition-colors ${viewMode === 'calendar' ? 'bg-primary/20 text-primary' : 'text-muted-foreground hover:text-foreground'}`}
-                                    title="Calendar view"
-                                  >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                                  </button>
+                                    <button
+                                        onClick={() => setViewMode('table')}
+                                        className={`p-2 rounded-lg transition-colors ${viewMode === 'table' ? 'bg-primary/20 text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+                                        title="List view"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" /><line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" /></svg>
+                                    </button>
+                                    <button
+                                        onClick={() => setViewMode('calendar')}
+                                        className={`p-2 rounded-lg transition-colors ${viewMode === 'calendar' ? 'bg-primary/20 text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+                                        title="Calendar view"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -1194,30 +1273,30 @@ export function AnalysisHistory() {
                         </div>
 
                         {viewMode === 'table' ? (
-                        <div className="p-4 md:p-6">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {filteredHistory.map(item => renderHistoryCard(item))}
+                            <div className="p-4 md:p-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {filteredHistory.map(item => renderHistoryCard(item))}
+                                </div>
                             </div>
-                        </div>
                         ) : (
-                          <div className="p-6 md:p-8">
-                            <CalendarView records={filteredHistory} onViewReport={setReportToView} />
-                          </div>
+                            <div className="p-6 md:p-8">
+                                <CalendarView records={filteredHistory} onViewReport={setReportToView} />
+                            </div>
                         )}
 
                         <div className="p-12 bg-card/40 border-t border-border/50 text-center relative overflow-hidden">
                             <div className="absolute inset-0 bg-gradient-to-t from-foreground/[0.04] to-transparent pointer-events-none" />
                             {history.length >= pageLimit ? (
-                              <button
-                                onClick={() => setPageLimit(prev => prev + 20)}
-                                className="relative z-10 h-12 px-10 rounded-full glass-button border border-primary/20 text-[10px] font-black uppercase tracking-widest text-primary hover:bg-primary/10 transition-all"
-                              >
-                                Load More Records
-                              </button>
+                                <button
+                                    onClick={() => setPageLimit(prev => prev + 20)}
+                                    className="relative z-10 h-12 px-10 rounded-full glass-button border border-primary/20 text-[10px] font-black uppercase tracking-widest text-primary hover:bg-primary/10 transition-all"
+                                >
+                                    Load More Records
+                                </button>
                             ) : (
-                              <p className="text-[11px] font-black text-muted-foreground/30 uppercase tracking-[1em] relative z-10">
-                                {filteredHistory.length} of {history.length} Records
-                              </p>
+                                <p className="text-[11px] font-black text-muted-foreground/30 uppercase tracking-[1em] relative z-10">
+                                    {filteredHistory.length} of {history.length} Records
+                                </p>
                             )}
                         </div>
                     </div>
@@ -1229,23 +1308,23 @@ export function AnalysisHistory() {
 
             {/* Compare floating bar */}
             {selectedIds.length > 0 && (
-              <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 px-6 py-4 rounded-full glass-panel border border-primary/30 shadow-2xl backdrop-blur-xl">
-                <span className="text-[11px] font-black uppercase tracking-widest text-primary">{selectedIds.length}/2 Selected</span>
-                {selectedIds.length === 2 && (
-                  <button
-                    onClick={() => setIsCompareOpen(true)}
-                    className="px-5 py-2 rounded-full bg-primary text-white text-[10px] font-black uppercase tracking-widest hover:opacity-90 transition-all"
-                  >
-                    Compare
-                  </button>
-                )}
-                <button
-                  onClick={() => setSelectedIds([])}
-                  className="w-8 h-8 rounded-full glass-button border border-border text-muted-foreground hover:text-foreground flex items-center justify-center"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              </div>
+                <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 px-6 py-4 rounded-full glass-panel border border-primary/30 shadow-2xl backdrop-blur-xl">
+                    <span className="text-[11px] font-black uppercase tracking-widest text-primary">{selectedIds.length}/2 Selected</span>
+                    {selectedIds.length === 2 && (
+                        <button
+                            onClick={() => setIsCompareOpen(true)}
+                            className="px-5 py-2 rounded-full bg-primary text-white text-[10px] font-black uppercase tracking-widest hover:opacity-90 transition-all"
+                        >
+                            Compare
+                        </button>
+                    )}
+                    <button
+                        onClick={() => setSelectedIds([])}
+                        className="w-8 h-8 rounded-full glass-button border border-border text-muted-foreground hover:text-foreground flex items-center justify-center"
+                    >
+                        <X className="w-3.5 h-3.5" />
+                    </button>
+                </div>
             )}
 
             {/* Side-by-side comparison dialog */}
