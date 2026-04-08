@@ -1,5 +1,5 @@
 {
-  "name": "Anemo AI – Health Intelligence",
+  "name": "ANEMO",
   "short_name": "Anemo",
   "description": "CNN-powered non-invasive anemia screening. Scan your palm, conjunctiva, and nailbed to detect anemia risk in seconds.",
   "start_url": "/dashboard",
@@ -8,7 +8,11 @@
   "orientation": "portrait",
   "theme_color": "#ff0044",
   "background_color": "#0a0a0a",
-  "categories": ["health", "medical", "lifestyle"],
+  "categories": [
+    "health",
+    "medical",
+    "lifestyle"
+  ],
   "lang": "en",
   "icons": [
     {
@@ -37,14 +41,24 @@
       "short_name": "Scan",
       "description": "Start a new multimodal anemia scan",
       "url": "/dashboard/analysis/multimodal",
-      "icons": [{ "src": "/anemo.png", "sizes": "96x96" }]
+      "icons": [
+        {
+          "src": "/anemo.png",
+          "sizes": "96x96"
+        }
+      ]
     },
     {
       "name": "History",
       "short_name": "Track",
       "description": "View your analysis history",
       "url": "/dashboard/history",
-      "icons": [{ "src": "/anemo.png", "sizes": "96x96" }]
+      "icons": [
+        {
+          "src": "/anemo.png",
+          "sizes": "96x96"
+        }
+      ]
     }
   ]
 }
