@@ -1,30 +1,30 @@
 'use client';
+
 import { LoginForm } from '@/components/auth/LoginForm';
-import dynamic from 'next/dynamic';
-import { HeartPulse } from 'lucide-react';
-const ClinicBackground = dynamic(() => import('@/components/ui/ClinicBackground').then(m => m.ClinicBackground), { ssr: false });
+import { Logo } from '@/components/layout/Logo';
+import { motion } from 'framer-motion';
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen w-full flex items-center justify-center relative overflow-hidden p-4">
-      <ClinicBackground />
-      <div className="fixed inset-0 bg-[url('/noise.png')] opacity-[0.03] pointer-events-none mix-blend-overlay z-[2]" />
-      <div className="relative z-10 w-full max-w-md">
-        {/* Logo mark */}
-        <div className="flex items-center gap-3 mb-8 justify-center">
-          <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">
-            <HeartPulse className="w-6 h-6 text-primary animate-pulse" />
-          </div>
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">Anemo</p>
-            <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground">AI Health System</p>
-          </div>
+    <div className="w-full">
+      {/* Big Branding Header (Outside) */}
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex flex-col items-center mb-8"
+      >
+        <div className="flex items-center gap-4 mb-2">
+          <h1 className="text-5xl font-light text-white uppercase">ANEMO</h1>
         </div>
-        {/* Card */}
-        <div className="glass-panel rounded-[2.5rem] p-8 md:p-10 border-primary/10 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.5)]">
+      </motion.div>
+
+      {/* Clean Login Card */}
+      <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }}>
+        <div className="bg-[#080808]/40 backdrop-blur-3xl rounded-[2rem] p-6 sm:p-10 border border-white/[0.08] relative">
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
           <LoginForm />
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
