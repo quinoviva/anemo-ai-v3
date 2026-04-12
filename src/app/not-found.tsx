@@ -53,7 +53,7 @@ export default function NotFound() {
 
         {/* Brand */}
         <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground/40 font-bold">
-          Anemo
+          Anemo AI — Health Intelligence
         </p>
       </div>
     </div>

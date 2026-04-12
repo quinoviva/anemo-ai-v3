@@ -1262,7 +1262,7 @@ The final cells produce:
 ### Manifest Configuration
 ```json
 {
-  "name": "ANEMO",
+  "name": "Anemo AI – Health Intelligence",
   "short_name": "Anemo",
   "description": "CNN-powered non-invasive anemia screening",
   "start_url": "/dashboard",
