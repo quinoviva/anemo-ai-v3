@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anemo - Under Maintenance</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: radial-gradient(circle at top right, #fff1f2, #f8fafc);
+        }
+
+        .anemo-wind {
+            animation: drift 6s ease-in-out infinite;
+        }
+
+        @keyframes drift {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(10px, -15px) rotate(3deg); }
+            66% { transform: translate(-10px, 5px) rotate(-2deg); }
+        }
+
+        .blur-dot {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: -1;
+        }
+
+        .shimmer {
+            background: linear-gradient(90deg, #f43f5e 0%, #fb7185 50%, #f43f5e 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shine 3s linear infinite;
+        }
+
+        @keyframes shine {
+            to { background-position: 200% center; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-6 overflow-hidden">
+
+    <!-- Dekorasyon a Likud -->
+    <div class="blur-dot bg-rose-100 w-96 h-96 -top-20 -left-20 opacity-60"></div>
+    <div class="blur-dot bg-blue-100 w-80 h-80 bottom-0 right-0 opacity-40"></div>
+
+    <div class="max-w-lg w-full text-center relative">
+        
+        <!-- Icon -->
+        <div class="mb-10 flex justify-center">
+            <div class="relative group">
+                <div class="absolute -inset-4 bg-rose-400 rounded-full opacity-20 group-hover:opacity-30 blur transition duration-1000"></div>
+                <div class="relative p-6 bg-white rounded-3xl shadow-2xl shadow-rose-100 anemo-wind">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Kangrunaan a Mensahe -->
+        <h1 class="text-4xl md:text-5xl font-extrabold text-slate-900 mb-6 tracking-tight">
+            wAit lhung <span class="shimmer">powhs.</span>
+        </h1>
+        
+        <div class="space-y-4 mb-10">
+            <p class="text-xl font-semibold text-slate-700">
+                Under Maintenance pa ang ANEMO...
+            </p>
+            <p class="text-lg text-slate-500 leading-relaxed max-w-sm mx-auto italic">
+                "Kay nadulan animo"
+            </p>
+        </div>
+
+        <!-- Status Card -->
+        <div class="inline-flex items-center gap-4 bg-white/80 backdrop-blur-md px-8 py-4 rounded-2xl border border-rose-50 shadow-xl shadow-rose-200/30">
+            <div class="flex space-x-1">
+                <div class="w-2 h-2 bg-rose-500 rounded-full animate-pulse"></div>
+                <div class="w-2 h-2 bg-rose-400 rounded-full animate-pulse" style="animation-delay: 0.2s"></div>
+                <div class="w-2 h-2 bg-rose-300 rounded-full animate-pulse" style="animation-delay: 0.4s"></div>
+            </div>
+            <span class="text-xs font-bold text-slate-600 uppercase tracking-[0.2em]">hulathualt lang gamay</span>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-16 flex flex-col items-center gap-2">
+            <div class="h-px w-12 bg-slate-200"></div>
+            <p class="text-[10px] text-slate-400 uppercase tracking-[0.3em] font-bold">
+                &copy; ANEMO
+            </p>
+        </div>
+    </div>
+
+</body>
+</html>
