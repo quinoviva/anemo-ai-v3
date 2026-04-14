@@ -15,6 +15,7 @@
 // ---------------------------------------------------------------------------
 
 export type SeverityClass = 'Normal' | 'Mild' | 'Moderate' | 'Severe';
+export type UserSex = 'Male' | 'Female' | 'Other' | string;
 
 export interface SeverityResult {
   /** The classified severity class label. */
@@ -29,22 +30,26 @@ export interface SeverityResult {
   description: string;
   /** Recommended urgency level for the user. */
   urgency: 'none' | 'low' | 'moderate' | 'high';
+  /** Thresholds used for this calculation. */
+  thresholds: {
+    normal: number;
+    mild: number;
+    moderate: number;
+  };
 }
 
 // ---------------------------------------------------------------------------
-// Thresholds (g/dL)
+// Thresholds (g/dL) - Reference: WHO
 // ---------------------------------------------------------------------------
 
-/** Hgb > NORMAL_THRESHOLD  → Normal (non-anaemic) */
-export const HGB_NORMAL_THRESHOLD = 12.0;
-
-/** MILD_THRESHOLD ≤ Hgb ≤ NORMAL_THRESHOLD → Mild anaemia */
-export const HGB_MILD_THRESHOLD = 10.0;
-
-/** MODERATE_THRESHOLD ≤ Hgb < MILD_THRESHOLD → Moderate anaemia */
-export const HGB_MODERATE_THRESHOLD = 7.0;
-
-/** Hgb < MODERATE_THRESHOLD → Severe anaemia */
+export const GET_THRESHOLDS = (sex?: UserSex) => {
+  const isMale = sex?.toLowerCase() === 'male';
+  return {
+    normal: isMale ? 13.0 : 12.0,
+    mild: isMale ? 11.0 : 10.0,
+    moderate: 7.0,
+  };
+};
 
 // ---------------------------------------------------------------------------
 // Classification helpers
@@ -54,37 +59,44 @@ export const HGB_MODERATE_THRESHOLD = 7.0;
  * Classifies an Hgb measurement into a severity level with enriched clinical detail.
  *
  * @param hgbValue - Hemoglobin value in g/dL.
+ * @param sex      - Optional user sex for gender-specific thresholds.
  * @returns A fully populated {@link SeverityResult} object.
  */
-export function classifyHgb(hgbValue: number): SeverityResult {
-  if (hgbValue > HGB_NORMAL_THRESHOLD) {
+export function classifyHgb(hgbValue: number, sex?: UserSex): SeverityResult {
+  const T = GET_THRESHOLDS(sex);
+  const sexLabel = sex?.toLowerCase() === 'male' ? 'adult males' : 'adult females';
+
+  if (hgbValue > T.normal) {
     return {
       severity: 'Normal',
       severityIndex: 0,
       folderLabel: '0_Normal',
       hgbValue,
-      description: `Hemoglobin level (${hgbValue.toFixed(1)} g/dL) is within the normal range for Filipino adult females (>12 g/dL). Vascular coloration of conjunctiva, nail beds, and palmar creases appears consistent with adequate erythrocyte oxygen-carrying capacity. No clinical indicators of anemia detected.`,
+      thresholds: T,
+      description: `Hemoglobin level (${hgbValue.toFixed(1)} g/dL) is within the normal range for Filipino ${sexLabel} (>${T.normal} g/dL). Vascular coloration of conjunctiva, nail beds, and palmar creases appears consistent with adequate erythrocyte oxygen-carrying capacity. No clinical indicators of anemia detected.`,
       urgency: 'none',
     };
   }
-  if (hgbValue >= HGB_MILD_THRESHOLD) {
-    const proximity = ((hgbValue - HGB_MILD_THRESHOLD) / (HGB_NORMAL_THRESHOLD - HGB_MILD_THRESHOLD) * 100).toFixed(0);
+  if (hgbValue >= T.mild) {
+    const proximity = ((hgbValue - T.mild) / (T.normal - T.mild) * 100).toFixed(0);
     return {
       severity: 'Mild',
       severityIndex: 1,
       folderLabel: '1_Mild',
       hgbValue,
-      description: `Hemoglobin level (${hgbValue.toFixed(1)} g/dL) indicates mild anemia (10–12 g/dL), placing the patient at the ${proximity}% mark within this band. Subtle pallor may be visible in palmar creases and conjunctiva. Iron-rich dietary intervention and follow-up CBC within 4–6 weeks are recommended.`,
+      thresholds: T,
+      description: `Hemoglobin level (${hgbValue.toFixed(1)} g/dL) indicates mild anemia (${T.mild}–${T.normal} g/dL), placing the patient at the ${proximity}% mark within this band. Subtle pallor may be visible in palmar creases and conjunctiva. Iron-rich dietary intervention and follow-up CBC within 4–6 weeks are recommended.`,
       urgency: 'low',
     };
   }
-  if (hgbValue >= HGB_MODERATE_THRESHOLD) {
+  if (hgbValue >= T.moderate) {
     return {
       severity: 'Moderate',
       severityIndex: 2,
       folderLabel: '2_Moderate',
       hgbValue,
-      description: `Hemoglobin level (${hgbValue.toFixed(1)} g/dL) indicates moderate anemia (7–10 g/dL). Noticeable pallor is expected across conjunctiva, nail beds, and palmar creases. The patient may experience fatigue, dyspnea on exertion, and tachycardia. Prompt medical consultation and potential iron supplementation are strongly recommended.`,
+      thresholds: T,
+      description: `Hemoglobin level (${hgbValue.toFixed(1)} g/dL) indicates moderate anemia (${T.moderate}–${T.mild} g/dL). Noticeable pallor is expected across conjunctiva, nail beds, and palmar creases. The patient may experience fatigue, dyspnea on exertion, and tachycardia. Prompt medical consultation and potential iron supplementation are strongly recommended.`,
       urgency: 'moderate',
     };
   }
@@ -93,66 +105,33 @@ export function classifyHgb(hgbValue: number): SeverityResult {
     severityIndex: 3,
     folderLabel: '3_Severe',
     hgbValue,
-    description: `Hemoglobin level (${hgbValue.toFixed(1)} g/dL) indicates severe anemia (<7 g/dL). Profound pallor is expected across all examined areas. The patient is at risk for cardiac decompensation, syncope, and organ hypoperfusion. Immediate medical attention — including possible IV iron therapy or transfusion — is urgently required.`,
+    thresholds: T,
+    description: `Hemoglobin level (${hgbValue.toFixed(1)} g/dL) indicates severe anemia (<${T.moderate} g/dL). Profound pallor is expected across all examined areas. The patient is at risk for cardiac decompensation, syncope, and organ hypoperfusion. Immediate medical attention — including possible IV iron therapy or transfusion — is urgently required.`,
     urgency: 'high',
   };
 }
 
 /**
- * Converts a raw model confidence score (0–1) to an estimated Hgb value
- * using a **sigmoid-shaped mapping** calibrated for the Filipino population.
+ * Converts a raw model confidence score (0–1) to an estimated Hgb value.
  *
- * Why sigmoid instead of linear?
- * A linear mapping (old: 5.0 + conf × 11.0) distributes prediction error
- * uniformly across the entire Hgb range, but in practice:
- *   - The clinical action threshold is at Hgb ≈ 10–12 g/dL (mild/normal
- *     boundary), so we want the HIGHEST resolution near the centre.
- *   - Very low / very high confidence values map to extreme Hgb values where
- *     precision matters less (patient is either clearly healthy or critically
- *     ill).
- *
- * The sigmoid centres resolution at the decision boundary (~11 g/dL) while
- * compressing the extremes.
- *
- * Calibration constants:
- *   - HGB_MIN (4.0 g/dL): life-threatening severe anemia (expanded from 5.0
- *     to capture critical range more precisely).
- *   - HGB_MAX (16.5 g/dL): healthy upper-bound reference for Filipino adult
- *     females.
- *   - MIDPOINT (0.55): confidence value that maps to ~10.25 g/dL (mild cutoff zone).
- *   - STEEPNESS (6.0): controls the S-curve sharpness.
+ * New Standard Calculation:
+ * Hgb (g/dL) = 5.0 + confidence × 11.0
  *
  * @param confidence - Model output in [0, 1] where 1 = most "normal".
  * @returns Estimated Hgb in g/dL.
  */
 export function confidenceToHgb(confidence: number): number {
-  const HGB_MIN = 4.0;
-  const HGB_MAX = 16.5;
-  const MIDPOINT = 0.55;
-  const STEEPNESS = 6.0;
-
-  // Sigmoid: maps [0,1] → (0,1) with centre at MIDPOINT
-  const sigmoid = 1 / (1 + Math.exp(-STEEPNESS * (confidence - MIDPOINT)));
-  return HGB_MIN + sigmoid * (HGB_MAX - HGB_MIN);
+  return 5.0 + (confidence * 11.0);
 }
 
 /**
  * Combines an array of per-model confidence scores into a single weighted
  * consensus Hgb estimate, then classifies it.
- *
- * Enhanced with:
- *   - IQR-based outlier soft-rejection (outliers receive 0.25× weight)
- *   - Confidence-calibrated uncertainty — when model agreement is low,
- *     the function biases toward a MORE cautious (lower Hgb) estimate to
- *     reduce the risk of missing true anemia cases.
- *
- * @param scores   - Per-model confidence values (0–1, 1 = normal).
- * @param weights  - Optional per-model weight (defaults to equal weights).
- * @returns Final {@link SeverityResult}.
  */
 export function consensusClassify(
   scores: number[],
   weights?: number[],
+  sex?: UserSex
 ): SeverityResult {
   if (scores.length === 0) {
     return {
@@ -160,40 +139,18 @@ export function consensusClassify(
       severityIndex: 0,
       folderLabel: '0_Normal',
       hgbValue: null,
+      thresholds: GET_THRESHOLDS(sex),
       description: 'No model scores provided.',
       urgency: 'none',
     };
   }
 
   const w = weights ?? scores.map(() => 1 / scores.length);
+  const totalWeight = w.reduce((s, v) => s + v, 0);
+  const weightedMean = scores.reduce((sum, score, i) => sum + score * w[i], 0) / (totalWeight || 1);
 
-  // IQR-based outlier detection: down-weight scores outside 1.5×IQR
-  const sorted = [...scores].sort((a, b) => a - b);
-  const q1 = sorted[Math.floor(sorted.length * 0.25)];
-  const q3 = sorted[Math.floor(sorted.length * 0.75)];
-  const iqr = q3 - q1;
-  const lowerFence = q1 - 1.5 * iqr;
-  const upperFence = q3 + 1.5 * iqr;
-  const adjustedW = w.map((wi, i) =>
-    scores[i] < lowerFence || scores[i] > upperFence ? wi * 0.25 : wi,
-  );
-
-  const totalWeight = adjustedW.reduce((s, v) => s + v, 0);
-  const weightedMean =
-    scores.reduce((sum, score, i) => sum + score * adjustedW[i], 0) / totalWeight;
-
-  // Confidence-calibrated uncertainty bias
-  // If model disagreement is high (stddev > 0.15), shift down by up to 5%
-  // to favor detection (reduce false negatives — it's safer to flag potential
-  // anemia than to miss it).
-  const mean = scores.reduce((s, c) => s + c, 0) / scores.length;
-  const variance = scores.reduce((s, c) => s + (c - mean) ** 2, 0) / scores.length;
-  const stddev = Math.sqrt(variance);
-  const uncertaintyPenalty = stddev > 0.15 ? Math.min(0.05, (stddev - 0.15) * 0.5) : 0;
-  const calibratedMean = Math.max(0, weightedMean - uncertaintyPenalty);
-
-  const hgb = confidenceToHgb(calibratedMean);
-  return classifyHgb(hgb);
+  const hgb = confidenceToHgb(weightedMean);
+  return classifyHgb(hgb, sex);
 }
 
 // ---------------------------------------------------------------------------

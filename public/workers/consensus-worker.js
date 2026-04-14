@@ -70,38 +70,41 @@ async function loadTransformers() {
 // Duplicated here so the worker has no build-time TS dependency.
 // ---------------------------------------------------------------------------
 
-const HGB_NORMAL = 12.0;
-const HGB_MILD = 10.0;
-const HGB_MODERATE = 7.0;
+function GET_THRESHOLDS(sex) {
+  const isMale = sex?.toLowerCase() === 'male';
+  return {
+    normal: isMale ? 13.0 : 12.0,
+    mild: isMale ? 11.0 : 10.0,
+    moderate: 7.0,
+  };
+}
 
-function classifyHgb(hgb) {
-  if (hgb > HGB_NORMAL) return 'Normal';
-  if (hgb >= HGB_MILD)  return 'Mild';
-  if (hgb >= HGB_MODERATE) return 'Moderate';
+function classifyHgb(hgb, sex) {
+  const T = GET_THRESHOLDS(sex);
+  if (hgb > T.normal) return 'Normal';
+  if (hgb >= T.mild)  return 'Mild';
+  if (hgb >= T.moderate) return 'Moderate';
   return 'Severe';
 }
 
-function hgbToSeverityDescription(hgb, severity) {
+function hgbToSeverityDescription(hgb, severity, sex) {
+  const T = GET_THRESHOLDS(sex);
+  const sexLabel = sex?.toLowerCase() === 'male' ? 'adult males' : 'adult females';
+  
   const map = {
-    Normal:   `Hemoglobin level (~${hgb.toFixed(1)} g/dL) is within the normal range for Filipino adult females (>12 g/dL). Vascular coloration of examined body parts appears consistent with adequate erythrocyte oxygen-carrying capacity.`,
-    Mild:     `Hemoglobin level (~${hgb.toFixed(1)} g/dL) indicates mild anemia (10–12 g/dL). Subtle pallor may be visible in palmar creases and conjunctiva. Dietary intervention with iron-rich Filipino foods and follow-up monitoring is recommended.`,
-    Moderate: `Hemoglobin level (~${hgb.toFixed(1)} g/dL) indicates moderate anemia (7–10 g/dL). Noticeable pallor expected across conjunctiva, nail beds, and palmar creases. The patient may experience fatigue, dyspnea on exertion, and tachycardia. Medical consultation and iron supplementation are strongly recommended.`,
-    Severe:   `Hemoglobin level (~${hgb.toFixed(1)} g/dL) indicates severe anemia (<7 g/dL). Profound pallor is expected. The patient is at risk for cardiac decompensation, syncope, and organ hypoperfusion. Immediate medical attention — including possible IV iron therapy or transfusion — is urgently required.`,
+    Normal:   `Hemoglobin level (~${hgb.toFixed(1)} g/dL) is within the normal range for Filipino ${sexLabel} (>${T.normal} g/dL). Vascular coloration of examined body parts appears consistent with adequate erythrocyte oxygen-carrying capacity.`,
+    Mild:     `Hemoglobin level (~${hgb.toFixed(1)} g/dL) indicates mild anemia (${T.mild}–${T.normal} g/dL). Subtle pallor may be visible in palmar creases and conjunctiva. Dietary intervention with iron-rich Filipino foods and follow-up monitoring is recommended.`,
+    Moderate: `Hemoglobin level (~${hgb.toFixed(1)} g/dL) indicates moderate anemia (${T.moderate}–${T.mild} g/dL). Noticeable pallor expected across conjunctiva, nail beds, and palmar creases. The patient may experience fatigue, dyspnea on exertion, and tachycardia. Medical consultation and iron supplementation are strongly recommended.`,
+    Severe:   `Hemoglobin level (~${hgb.toFixed(1)} g/dL) indicates severe anemia (<${T.moderate} g/dL). Profound pallor is expected. The patient is at risk for cardiac decompensation, syncope, and organ hypoperfusion. Immediate medical attention — including possible IV iron therapy or transfusion — is urgently required.`,
   };
   return map[severity] ?? map.Normal;
 }
 
 /**
- * Enhanced sigmoid-based confidence → Hgb mapping (mirrors severity.ts).
- * Centres resolution at the mild/normal decision boundary (~11 g/dL).
+ * Enhanced linear confidence → Hgb mapping.
  */
 function confidenceToHgb(confidence) {
-  const HGB_MIN = 4.0;
-  const HGB_MAX = 16.5;
-  const MIDPOINT = 0.55;
-  const STEEPNESS = 6.0;
-  const sigmoid = 1 / (1 + Math.exp(-STEEPNESS * (confidence - MIDPOINT)));
-  return HGB_MIN + sigmoid * (HGB_MAX - HGB_MIN);
+  return 5.0 + (confidence * 11.0);
 }
 
 // ---------------------------------------------------------------------------

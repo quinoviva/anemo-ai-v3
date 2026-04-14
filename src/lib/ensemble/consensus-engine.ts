@@ -131,45 +131,40 @@ function computeAgreementRatio(scores: number[]): number {
 
 /**
  * Tier-based confidence aggregation.
- *
- * Instead of a simple weighted average across all models, this groups models
- * by tier and computes a tier-level consensus first, then blends the tier
- * results with tier-importance weights.  This prevents Tier-1 scout models
- * (which are low-precision quality-checkers) from diluting the high-precision
- * Tier-3 Judge outputs.
- *
- * Tier importance: Scouts 10%, Specialists 35%, Judges 55%
+ * 
+ * New Standard Calculation:
+ * 1. Collects all model predictions with tier-based weights:
+ *    - Scouts: 0.5
+ *    - Specialists: 1.0
+ *    - Judges: 1.5–2.0
+ * 2. Computes weighted average: consensus = Σ(wᵢ × pᵢ) / Σ(wᵢ)
  */
-function tierWeightedConsensus(
+function computeStandardConsensus(
   results: ModelInferenceResult[],
-): { weightedMean: number; tierBreakdown: Record<number, number> } {
-  const TIER_IMPORTANCE: Record<number, number> = { 1: 0.10, 2: 0.35, 3: 0.55 };
-  const tierBreakdown: Record<number, number> = {};
-  let totalTierWeight = 0;
-  let blended = 0;
+): number {
+  let weightedSum = 0;
+  let weightTotal = 0;
 
-  for (const tier of [1, 2, 3] as const) {
-    const tierResults = results.filter((r) => r.tier === tier && r.contributedToConsensus);
-    if (tierResults.length === 0) continue;
+  for (const r of results) {
+    if (!r.contributedToConsensus) continue;
+    
+    // Assign weight based on tier/group
+    const config = ENSEMBLE_MODELS.find(m => m.id === r.modelId);
+    let weight = config?.consensusWeight ?? 1.0;
+    
+    // Ensure weights match the new standard
+    if (r.tier === 1) weight = 0.5;
+    else if (r.tier === 2) weight = 1.0;
+    else if (r.tier === 3) {
+       // Judges are 1.5 by default, MLP meta-learner is 2.0
+       weight = r.modelId.includes('mlp') ? 2.0 : 1.5;
+    }
 
-    const tierScores = tierResults.map((r) => r.confidence);
-    const tierWeights = tierResults.map(
-      (r) => ENSEMBLE_MODELS.find((m) => m.id === r.modelId)?.consensusWeight ?? 1,
-    );
-    const adjustedWeights = computeOutlierAdjustedWeights(tierScores, tierWeights);
-
-    const wSum = adjustedWeights.reduce((s, w) => s + w, 0);
-    const tierMean = tierScores.reduce((s, c, i) => s + c * adjustedWeights[i], 0) / (wSum || 1);
-
-    tierBreakdown[tier] = tierMean;
-    blended += tierMean * TIER_IMPORTANCE[tier];
-    totalTierWeight += TIER_IMPORTANCE[tier];
+    weightedSum += r.confidence * weight;
+    weightTotal += weight;
   }
 
-  return {
-    weightedMean: totalTierWeight > 0 ? blended / totalTierWeight : 0,
-    tierBreakdown,
-  };
+  return weightTotal > 0 ? weightedSum / weightTotal : 0;
 }
 
 // ---------------------------------------------------------------------------
@@ -182,12 +177,14 @@ function tierWeightedConsensus(
  *
  * @param inputs      - Map from body part to its image source element.
  * @param onProgress  - Optional callback for granular UI progress updates.
+ * @param userSex     - Optional user sex for gender-specific thresholds.
  * @returns           Full {@link ConsensusReport} with per-model results and
  *                    the final severity classification.
  */
 export async function runEnsembleInference(
   inputs: Partial<Record<BodyPart, HTMLImageElement | HTMLVideoElement | HTMLCanvasElement | ImageData>>,
   onProgress?: (event: InferenceProgressEvent) => void,
+  userSex?: string
 ): Promise<ConsensusReport> {
   const modelResults: ModelInferenceResult[] = [];
   const totalModels = ENSEMBLE_MODELS.length;
@@ -242,8 +239,6 @@ export async function runEnsembleInference(
   for (const specialistConfig of MODELS_BY_TIER[2]) {
     emit('specialist', specialistConfig.id, `Loading ${specialistConfig.name}…`);
 
-    // Specialists accept all ROIs; we pass whichever images are available
-    // and average over them.
     const bodyParts = (Object.keys(inputs) as BodyPart[]).filter(
       (bp) => inputs[bp] && qualityApproved[bp] !== false,
     );
@@ -254,7 +249,6 @@ export async function runEnsembleInference(
       continue;
     }
 
-    // Run the specialist on each approved ROI and average the confidences
     const perRoiConfidences: number[] = [];
     for (const bp of bodyParts) {
       const source = inputs[bp]!;
@@ -311,31 +305,22 @@ export async function runEnsembleInference(
     emit('judge', judgeConfig.id, `${judgeConfig.name}: Hgb ≈ ${confidenceToHgb(avgConfidence).toFixed(1)} g/dL`);
   }
 
-  // ── Advanced Consensus with Outlier Detection & Tier Weighting ──────────
-  emit('consensus', undefined, 'Aggregating consensus with outlier detection…');
+  // ── Final Consensus ──────────────────────────────────────────────────────
+  emit('consensus', undefined, 'Aggregating consensus…');
 
-  const contributing = modelResults.filter((r) => r.contributedToConsensus);
-  const scores = contributing.map((r) => r.confidence);
-  const weights = contributing.map(
-    (r) => ENSEMBLE_MODELS.find((m) => m.id === r.modelId)?.consensusWeight ?? 1,
-  );
+  const finalConsensus = computeStandardConsensus(modelResults);
+  const scores = modelResults.filter(r => r.contributedToConsensus).map(r => r.confidence);
+  
+  // Weights for classify helper
+  const weights = modelResults
+    .filter(r => r.contributedToConsensus)
+    .map(r => {
+      if (r.tier === 1) return 0.5;
+      if (r.tier === 2) return 1.0;
+      return r.modelId.includes('mlp') ? 2.0 : 1.5;
+    });
 
-  // Advanced: outlier-adjusted weights prevent single misfiring models from skewing results
-  const adjustedWeights = computeOutlierAdjustedWeights(scores, weights);
-
-  // Advanced: tier-weighted consensus gives Judges 55% influence, Specialists 35%, Scouts 10%
-  const { weightedMean: tierConsensus, tierBreakdown } = tierWeightedConsensus(contributing);
-
-  // Blend: 60% tier-weighted consensus + 40% traditional weighted average for robustness
-  const traditionalMean =
-    scores.reduce((s, c, i) => s + c * adjustedWeights[i], 0) /
-    (adjustedWeights.reduce((s, w) => s + w, 0) || 1);
-  const finalConsensus = tierConsensus * 0.6 + traditionalMean * 0.4;
-
-  // Compute inter-model agreement for confidence calibration
-  const agreement = computeAgreementRatio(scores);
-
-  const severity = consensusClassify(scores, adjustedWeights);
+  const severity = consensusClassify(scores, weights, userSex);
   const consensusHgb = severity.hgbValue ?? confidenceToHgb(finalConsensus);
 
   return {

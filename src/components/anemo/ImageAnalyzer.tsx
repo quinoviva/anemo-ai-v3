@@ -1,132 +1,149 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+
+import React, { useState } from 'react';
+import { Hand, Eye, Fingerprint, UploadCloud, RefreshCw, CheckCircle, ShieldAlert, RotateCcw } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import HeartLoader from '@/components/ui/HeartLoader';
+import { useToast } from '@/hooks/use-toast';
+import { useUser } from '@/firebase';
 import { runGenerateImageDescription, saveImageForTraining } from '@/app/actions';
 import { CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { GlassSurface } from '@/components/ui/glass-surface';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { useUser } from '@/firebase';
-import { useToast } from '@/hooks/use-toast';
-import { UploadCloud, CheckCircle, RefreshCw, Hand, Eye, User, Camera, ShieldAlert, RotateCcw } from 'lucide-react';
-import HeartLoader from '@/components/ui/HeartLoader';
-import { ImageAnalysisReport } from './ImageAnalysisReport';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { LiveCameraAnalyzer, CalibrationMetadata } from './LiveCameraAnalyzer';
 
-type BodyPart = 'skin' | 'under-eye' | 'fingernails';
+// --- Types ---
 
-export type AnalysisState = {
-  file: File | null;
-  imageUrl: string | null;
-  dataUri: string | null;
-  calibrationMetadata: CalibrationMetadata | null;
-  imageDescription: string | null;
-  description: string | null;
-  isValid: boolean;
-  analysisResult: string | null;
-  confidenceScore?: number;
-  error: string | null;
-  status: 'idle' | 'analyzing' | 'success' | 'error' | 'queued';
-};
-
+interface AnalysisState {
+  status: 'idle' | 'analyzing' | 'queued' | 'success' | 'error';
+  file?: File | null;
+  imageUrl?: string | null;
+  dataUri?: string | null;
+  imageDescription?: string | null;
+  description?: string | null;
+  isValid?: boolean;
+  analysisResult?: string | null;
+  error?: string | null;
+}
+interface ImageAnalyzerProps {
+  initialCapture?: any;
+}
 const initialAnalysisState: AnalysisState = {
+  status: 'idle',
   file: null,
   imageUrl: null,
   dataUri: null,
-  calibrationMetadata: null,
   imageDescription: null,
   description: null,
   isValid: false,
   analysisResult: null,
   error: null,
-  status: 'idle',
 };
 
-const analysisPoints: { id: BodyPart; title: string; description: string, icon: React.ReactNode }[] = [
-  { id: 'skin', title: 'Skin', description: 'A clear photo of your skin, like the palm of your hand.', icon: <User /> },
-  { id: 'under-eye', title: 'Under-eye', description: 'A clear photo of the lower under-eye area.', icon: <Eye /> },
-  { id: 'fingernails', title: 'Fingernails', description: 'A clear photo of your bare fingernails.', icon: <Hand /> },
+// --- Analysis Points (Body Parts) ---
+const analysisPoints = [
+  {
+    id: 'skin',
+    title: 'Palm Skin',
+    description: 'Palmar Analysis',
+    icon: <Hand strokeWidth={1.5} />,
+  },
+  {
+    id: 'under-eye',
+    title: 'Conjunctiva',
+    description: 'Palpebral Analysis',
+    icon: <Eye strokeWidth={1.5} />,
+  },
+  {
+    id: 'fingernails',
+    title: 'Nailbed',
+    description: 'Capillary Analysis',
+    icon: <Fingerprint strokeWidth={1.5} />,
+  },
 ];
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+// --- Types ---
+type BodyPart = 'skin' | 'under-eye' | 'fingernails';
 
-interface ImageAnalyzerProps {
-    initialCapture?: {
-        file: File;
-        dataUri: string;
-        bodyPart?: BodyPart;
-    };
+
+function runGenerateImageDescriptionCached({ photoDataUri, bodyPart }: { photoDataUri: string, bodyPart: BodyPart }) {
+  const cacheKey = `anemo_analysis_${bodyPart}_${photoDataUri.slice(0, 32)}`;
+  const cached = typeof globalThis.window === 'object' ? localStorage.getItem(cacheKey) : null;
+  if (cached) {
+    try {
+      return Promise.resolve(JSON.parse(cached));
+    } catch {}
+  }
+  return runGenerateImageDescription({ photoDataUri, bodyPart }).then(result => {
+    if (result && result.isValid && globalThis.window !== undefined) {
+      localStorage.setItem(cacheKey, JSON.stringify(result));
+    }
+    return result;
+  });
 }
 
-export function ImageAnalyzer({ initialCapture }: ImageAnalyzerProps) {
-  const { user } = useUser();
-  const [analyses, setAnalyses] = useState<Record<BodyPart, AnalysisState>>({
-    'skin': initialAnalysisState,
-    'under-eye': initialAnalysisState,
-    'fingernails': initialAnalysisState,
-  });
-  const [activeCameraBodyPart, setActiveCameraBodyPart] = useState<BodyPart | null>(null);
-  const isMobile = useIsMobile();
-  const { toast } = useToast();
+export function ImageAnalyzer({ initialCapture }: Readonly<ImageAnalyzerProps>) {
+    const [analyses, setAnalyses] = useState<Record<BodyPart, AnalysisState>>({
+      'skin': { ...initialAnalysisState },
+      'under-eye': { ...initialAnalysisState },
+      'fingernails': { ...initialAnalysisState },
+    });
+    const { user } = useUser();
+    const { toast } = useToast();
 
-  useEffect(() => {
-      if (initialCapture) {
-          const { file, dataUri, bodyPart } = initialCapture;
-          if (bodyPart) {
-              handleImageChange(bodyPart, file);
-          } else {
-              toast({
-                  title: "Image Captured",
-                  description: "Please select which body part this image represents.",
-              });
-          }
-      }
-  }, [initialCapture]);
-
-  React.useEffect(() => {
-    return () => {
-      Object.values(analyses).forEach(analysis => {
-        if (analysis.imageUrl) {
-          URL.revokeObjectURL(analysis.imageUrl);
+    // Utility: run analysis and update state
+    const startAnalysis = async (bodyPart: BodyPart, dataUri: string) => {
+      try {
+        const result = await runGenerateImageDescriptionCached({ photoDataUri: dataUri, bodyPart });
+        setAnalyses(prev => ({
+          ...prev,
+          [bodyPart]: {
+            ...prev[bodyPart],
+            imageDescription: result.imageDescription,
+            description: result.description,
+            isValid: result.isValid,
+            analysisResult: result.analysisResult,
+            status: result.isValid ? 'success' : 'error',
+            error: result.isValid ? null : result.description,
+          },
+        }));
+        if (result.isValid) {
+          saveImageForTraining(
+            dataUri,
+            bodyPart,
+            result.analysisResult,
+            user?.displayName || 'Anonymous'
+          );
         }
-      });
-    };
-  }, [analyses]);
-
-  const handleImageChange = (bodyPart: BodyPart, file: File | null) => {
-    if (!file) {
-        return;
-    }
-    if (!file.type.startsWith('image/')) {
-      toast({
-        title: 'Invalid File Type',
-        description: 'Please upload an image file (e.g., PNG, JPG).',
-        variant: 'destructive',
-      });
-      return;
-    }
-    if (file.size > MAX_FILE_SIZE) {
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
+        setAnalyses(prev => ({
+          ...prev,
+          [bodyPart]: {
+            ...prev[bodyPart],
+            status: 'error',
+            error: `Failed to analyze image. ${errorMessage}`,
+          },
+        }));
         toast({
-            title: 'File Too Large',
-            description: `The selected file exceeds the ${MAX_FILE_SIZE / 1024 / 1024}MB size limit.`,
-            variant: 'destructive',
+          title: 'Analysis Error',
+          description: errorMessage,
+          variant: 'destructive',
         });
-        return;
-    }
+      }
+    };
 
-    setAnalyses(prev => ({
-      ...prev,
-      [bodyPart]: { ...initialAnalysisState, status: 'analyzing' },
-    }));
-
-    const imageUrl = URL.createObjectURL(file);
-    const reader = new FileReader();
-
-    reader.onload = async (e) => {
-      const dataUri = e.target?.result as string;
+    // Handle image upload/change
+    const handleImageChange = async (bodyPart: BodyPart, file: File | null) => {
+      if (!file) return;
+      const imageUrl = URL.createObjectURL(file);
+      // Convert file to dataUri
+      const dataUri = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target?.result as string);
+        reader.readAsDataURL(file);
+      });
       setAnalyses(prev => ({
         ...prev,
         [bodyPart]: {
@@ -134,111 +151,72 @@ export function ImageAnalyzer({ initialCapture }: ImageAnalyzerProps) {
           file,
           imageUrl,
           dataUri,
+          status: 'analyzing',
         },
       }));
-
       await startAnalysis(bodyPart, dataUri);
     };
 
-    reader.readAsDataURL(file);
-  };
-
-  const startAnalysis = async (bodyPart: BodyPart, dataUri: string) => {
-    try {
-      const result = await runGenerateImageDescription({ photoDataUri: dataUri, bodyPart });
-      
-      setAnalyses(prev => ({
-        ...prev,
-        [bodyPart]: {
-          ...prev[bodyPart],
-          imageDescription: result.imageDescription,
-          description: result.description,
-          isValid: result.isValid,
-          analysisResult: result.analysisResult,
-          status: result.isValid ? 'success' : 'error',
-          error: result.isValid ? null : result.description,
-        }
-      }));
-
-      // --- NEW: AUTO-SAVE FOR Retraining ---
-      if (result.isValid) {
-        saveImageForTraining(
-            dataUri, 
-            bodyPart, 
-            result.analysisResult, 
-            user?.displayName || 'Anonymous'
-        );
-      }
-
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
-      setAnalyses(prev => ({
-        ...prev,
-        [bodyPart]: {
-          ...prev[bodyPart],
-          status: 'error',
-          error: `Failed to analyze image. ${errorMessage}`,
-        }
-      }));
-      toast({
-        title: 'Analysis Error',
-        description: errorMessage,
-        variant: 'destructive',
-      });
-    }
-  };
-  
-  const resetAllAnalyses = () => {
-    Object.keys(analyses).forEach(key => {
+    // Reset all analyses
+    function resetAllAnalyses() {
+      Object.keys(analyses).forEach(key => {
         const bodyPart = key as BodyPart;
         const currentAnalysis = analyses[bodyPart];
         if (currentAnalysis.imageUrl) {
-            URL.revokeObjectURL(currentAnalysis.imageUrl);
+          URL.revokeObjectURL(currentAnalysis.imageUrl);
         }
-    });
-    setAnalyses({
-        'skin': initialAnalysisState,
-        'under-eye': initialAnalysisState,
-        'fingernails': initialAnalysisState,
-    });
-  };
-
-  const resetSingleAnalysis = (bodyPart: BodyPart) => {
-    const currentAnalysis = analyses[bodyPart];
-    if (currentAnalysis.imageUrl) {
-        URL.revokeObjectURL(currentAnalysis.imageUrl);
+      });
+      setAnalyses({
+        'skin': { ...initialAnalysisState },
+        'under-eye': { ...initialAnalysisState },
+        'fingernails': { ...initialAnalysisState },
+      });
     }
-    setAnalyses(prev => ({
-        ...prev,
-        [bodyPart]: initialAnalysisState
-    }));
-  };
 
-  const allAnalysesComplete = Object.values(analyses).every(a => a.status === 'success' || a.status === 'queued');
-  
-  if (allAnalysesComplete) {
-    return <ImageAnalysisReport analyses={analyses} onReset={resetAllAnalyses} labReport={null} />
+    // Reset a single analysis
+    const resetSingleAnalysis = (bodyPart: BodyPart) => {
+      const currentAnalysis = analyses[bodyPart];
+      if (currentAnalysis.imageUrl) {
+        URL.revokeObjectURL(currentAnalysis.imageUrl);
+      }
+      setAnalyses(prev => ({
+        ...prev,
+        [bodyPart]: { ...initialAnalysisState },
+      }));
+    };
+
+    // --- Redesigned Layout ---
+    const allAnalysesComplete = Object.values(analyses).every(a => a.status === 'success' || a.status === 'queued');
+    if (allAnalysesComplete) {
+      return <div className="p-8 text-center">Report view coming soon.</div>;
+    }
+    return (
+      <div className="min-h-[70vh] flex flex-col items-center justify-center py-12 px-4 md:px-12 lg:px-24 bg-background rounded-3xl shadow-2xl border border-white/10 relative overflow-hidden">
+        <div className="absolute inset-0 bg-grid-white/[0.01] bg-[size:40px_40px] z-0 pointer-events-none" />
+        <div className="absolute inset-0 bg-[url('/noise.png')] opacity-10 mix-blend-overlay z-0 pointer-events-none" />
+        <div className="w-full max-w-5xl mx-auto z-10 relative">
+          <h2 className="text-3xl md:text-5xl font-black tracking-tight text-foreground mb-10 text-center">
+            <span className="italic-font text-primary">Anemo</span> Image Analyzer
+          </h2>
+          <div className="grid gap-8 md:grid-cols-3">
+            {analysisPoints.map(({ id, title, description, icon }) => (
+              <AnalysisCard
+                key={id}
+                bodyPart={id as BodyPart}
+                title={title}
+                description={description}
+                analysisState={analyses[id as BodyPart]}
+                icon={icon}
+                onImageChange={(file) => handleImageChange(id as BodyPart, file)}
+                onReset={() => resetSingleAnalysis(id as BodyPart)}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
   }
 
-  return (
-    <div className="space-y-6">
-      <div className="grid gap-6 md:grid-cols-3">
-        {analysisPoints.map(({ id, title, description, icon }) => (
-          <AnalysisCard
-            key={id}
-            bodyPart={id}
-            title={title}
-            description={description}
-            analysisState={analyses[id]}
-            icon={icon}
-            onImageChange={(file) => handleImageChange(id, file)}
-            onReset={() => resetSingleAnalysis(id)}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
 
 // --- AnalysisCard Component ---
 type AnalysisCardProps = {
@@ -259,7 +237,7 @@ function AnalysisCard({
   analysisState,
   onImageChange,
   onReset,
-}: AnalysisCardProps) {
+}: Readonly<AnalysisCardProps>) {
   const inputRef = React.useRef<HTMLInputElement>(null);
 
   const handleDrop = (e: React.DragEvent) => {

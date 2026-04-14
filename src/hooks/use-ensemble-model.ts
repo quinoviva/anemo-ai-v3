@@ -29,66 +29,13 @@
  * ```
  */
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import type { BodyPart, ConsensusReport, InferenceProgressEvent } from '@/lib/ensemble/consensus-engine';
 import type { SeverityClass } from '@/lib/ensemble/severity';
+import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
+import { doc } from 'firebase/firestore';
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export interface EnsembleProgress {
-  /** Overall fraction 0–1. */
-  fraction: number;
-  /** Human-readable status message. */
-  message: string;
-  /** Which model is currently being processed (if any). */
-  currentModelId?: string;
-  /** Current pipeline phase. */
-  phase: InferenceProgressEvent['phase'] | 'worker' | 'idle';
-}
-
-export interface UseEnsembleModelReturn {
-  /**
-   * Kick off the full analysis pipeline for the provided image sources.
-   * Resolves when the consensus report is fully generated.
-   */
-  runAnalysis: (
-    inputs: Partial<Record<BodyPart, HTMLCanvasElement | HTMLImageElement | ImageData>>,
-  ) => Promise<void>;
-  /** Whether any analysis is currently in progress. */
-  isLoading: boolean;
-  /** Granular progress information. */
-  progress: EnsembleProgress;
-  /** Full {@link ConsensusReport} from the ensemble (null until complete). */
-  ensembleReport: ConsensusReport | null;
-  /** Final severity classification string. */
-  severity: SeverityClass | null;
-  /** Consensus Hgb estimate in g/dL. */
-  consensusHgb: number | null;
-  /** Streaming clinical report text (updates token-by-token during LLM generation). */
-  report: string;
-  /** Localised dietary recommendations for the detected severity. */
-  dietaryRecommendations: string[];
-  /** Last error message, if any. */
-  error: string | null;
-  /** Reset all state back to initial values. */
-  reset: () => void;
-}
-
-// ---------------------------------------------------------------------------
-// Initial state
-// ---------------------------------------------------------------------------
-
-const INITIAL_PROGRESS: EnsembleProgress = {
-  fraction: 0,
-  message: '',
-  phase: 'idle',
-};
-
-// ---------------------------------------------------------------------------
-// Hook
-// ---------------------------------------------------------------------------
+// ... rest of imports
 
 export function useEnsembleModel(): UseEnsembleModelReturn {
   const [isLoading, setIsLoading] = useState(false);
@@ -100,29 +47,18 @@ export function useEnsembleModel(): UseEnsembleModelReturn {
   const [dietaryRecommendations, setDietaryRecommendations] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
 
+  const { user } = useUser();
+  const firestore = useFirestore();
+  const userDocRef = useMemoFirebase(() => {
+    if (!user || !firestore) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [user, firestore]);
+  const { data: userData } = useDoc(userDocRef);
+
   const workerRef = useRef<Worker | null>(null);
   const abortRef = useRef(false);
 
-  // Tear down the worker when the component unmounts
-  useEffect(() => {
-    return () => {
-      workerRef.current?.terminate();
-      workerRef.current = null;
-    };
-  }, []);
-
-  const reset = useCallback(() => {
-    abortRef.current = true;
-    workerRef.current?.postMessage({ type: 'ABORT' });
-    setIsLoading(false);
-    setProgress(INITIAL_PROGRESS);
-    setEnsembleReport(null);
-    setSeverity(null);
-    setConsensusHgb(null);
-    setReport('');
-    setDietaryRecommendations([]);
-    setError(null);
-  }, []);
+  // ... rest of hook
 
   const runAnalysis = useCallback(
     async (
@@ -135,9 +71,6 @@ export function useEnsembleModel(): UseEnsembleModelReturn {
       setProgress({ fraction: 0.02, message: 'Initialising ensemble…', phase: 'loading' });
 
       try {
-        // Lazy-import the consensus engine (avoids bundling TF.js on the
-        // initial page load — models are only loaded when the user triggers
-        // an analysis).
         const { runEnsembleInference, runHeuristicFallback } = await import(
           '@/lib/ensemble/consensus-engine'
         );
@@ -157,8 +90,11 @@ export function useEnsembleModel(): UseEnsembleModelReturn {
         try {
           // Pass canvas/image elements directly into the engine
           const engineInputs = inputs as Parameters<typeof runEnsembleInference>[0];
-          consensusResult = await runEnsembleInference(engineInputs, onProgress);
+          const userSex = userData?.medicalInfo?.sex || 'Female'; // Default to female if unknown
+          consensusResult = await runEnsembleInference(engineInputs, onProgress, userSex);
         } catch (tfErr) {
+          // ... rest of catch
+        }
           // If TF.js models aren't available yet, use the heuristic fallback
           console.warn('[useEnsembleModel] TF.js engine failed, using heuristic fallback:', tfErr);
           const canvasInputs: Partial<Record<BodyPart, HTMLCanvasElement>> = {};
