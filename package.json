@@ -9,7 +9,7 @@
     "dev": "concurrently \"next dev -p 4100\" \"npm run genkit:dev\"",
     "genkit:dev": "echo '' | genkit start -- tsx src/ai/dev.ts",
     "genkit:watch": "genkit start -- tsx --watch src/ai/dev.ts",
-    "build": "next build --webpack",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
