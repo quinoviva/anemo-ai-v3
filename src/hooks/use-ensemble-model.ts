@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * Anemo AI — useEnsembleModel React Hook
+ * Anemo AI - useEnsembleModel React Hook
  *
  * Provides a single entry point for the UI to:
  *   1. Run the 10-model ensemble inference pipeline on captured images.
@@ -68,7 +68,7 @@ export function useEnsembleModel(): UseEnsembleModelReturn {
       setIsLoading(true);
       setError(null);
       setReport('');
-      setProgress({ fraction: 0.02, message: 'Initialising ensemble…', phase: 'loading' });
+      setProgress({ fraction: 0.02, message: 'Initialising ensemble...', phase: 'loading' });
 
       try {
         const { runEnsembleInference, runHeuristicFallback } = await import(
@@ -106,7 +106,7 @@ export function useEnsembleModel(): UseEnsembleModelReturn {
 
         if (abortRef.current) return;
 
-        // ── STRICT QUALITY GATE ───────────────────────────────────────────
+        // -- STRICT QUALITY GATE -------------------------------------------
         // If any provided image failed its quality scout, we reject the 
         // entire analysis to maintain high clinical integrity.
         const failedScouts = consensusResult.modelResults.filter(
@@ -122,10 +122,10 @@ export function useEnsembleModel(): UseEnsembleModelReturn {
         setSeverity(consensusResult.severity.severity);
         setConsensusHgb(consensusResult.consensusHgb);
 
-        // ── Spawn the Edge-AI Web Worker ─────────────────────────────────
+        // -- Spawn the Edge-AI Web Worker ---------------------------------
         setProgress({
           fraction: 0.85,
-          message: 'Starting Edge-AI reasoning engine…',
+          message: 'Starting Edge-AI reasoning engine...',
           phase: 'worker',
         });
 
