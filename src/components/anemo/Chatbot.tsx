@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
+import { useIsMounted } from '@/hooks/use-is-mounted';
 import { runAnswerAnemiaQuestion } from '@/app/actions';
 import { CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -28,6 +29,7 @@ const sampleQuestions = [
 ];
 
 export function Chatbot({ isPopup = false, onClose, onMinimize }: ChatbotProps) {
+  const isMounted = useIsMounted();
   const { user } = useUser();
   const firestore = useFirestore();
   const [userInput, setUserInput] = useState('');
@@ -110,24 +112,31 @@ export function Chatbot({ isPopup = false, onClose, onMinimize }: ChatbotProps) 
         if (!user || !firestore || !historyData || (user && !user.isAnonymous && !userData)) return;
 
         if (historyData.length === 0) {
-            setIsLoading(true);
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            
-            const userName = userData?.firstName || user?.displayName?.split(' ')[0] || 'Friend';
-            const greeting = `Hello ${userName}! I'm **ANEMO BOT**. I can answer your questions about anemia symptoms, prevention, and diet. How can I help you today?`;
-            
-            await addDoc(collection(firestore, `users/${user.uid}/chatHistory`), {
-                role: 'assistant',
-                content: greeting,
-                createdAt: serverTimestamp()
-            });
-            setIsLoading(false);
+            try {
+                setIsLoading(true);
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                if (!isMounted()) return;
+
+                const userName = userData?.firstName || user?.displayName?.split(' ')[0] || 'Friend';
+                const greeting = `Hello ${userName}! I'm **ANEMO BOT**. I can answer your questions about anemia symptoms, prevention, and diet. How can I help you today?`;
+                
+                await addDoc(collection(firestore, `users/${user.uid}/chatHistory`), {
+                    role: 'assistant',
+                    content: greeting,
+                    createdAt: serverTimestamp()
+                });
+            } catch (err) {
+                console.error("Chatbot init failed:", err);
+            } finally {
+                if (isMounted()) setIsLoading(false);
+            }
         }
-        setIsInitializing(false);
+        if (isMounted()) setIsInitializing(false);
     };
 
     initChat();
-  }, [user, firestore, historyData?.length, userData]);
+  }, [user, firestore, historyData?.length, userData, isMounted]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -202,10 +211,13 @@ export function Chatbot({ isPopup = false, onClose, onMinimize }: ChatbotProps) 
   };
 
   const formatMessage = (content: string) => {
-    const parts = content.split(/(\*\*.*?\*\*)/g);
-    return parts.map((part, i) => {
+    // Basic Markdown parser for **bold** and *italics*
+    return content.split(/(\*\*.*?\*\*|\*.*?\*)/g).map((part, i) => {
       if (part.startsWith('**') && part.endsWith('**')) {
         return <strong key={i} className="font-semibold text-foreground">{part.slice(2, -2)}</strong>;
+      }
+      if (part.startsWith('*') && part.endsWith('*')) {
+        return <em key={i} className="italic text-foreground/80">{part.slice(1, -1)}</em>;
       }
       return part;
     });
@@ -228,7 +240,8 @@ export function Chatbot({ isPopup = false, onClose, onMinimize }: ChatbotProps) 
       initial={{ opacity: 0, y: 15, scale: 0.98 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.35, ease: "easeOut" }}
-      className={cn("flex gap-3 md:gap-4 group", msg.role === 'user' ? "flex-row-reverse" : "flex-row")}
+      // added w-full to ensure the row takes up the whole chat width
+      className={cn("flex gap-3 md:gap-4 group w-full mb-4", msg.role === 'user' ? "flex-row-reverse" : "flex-row")}
     >
       {/* Avatars */}
       <div className="shrink-0 pt-1">
@@ -243,26 +256,33 @@ export function Chatbot({ isPopup = false, onClose, onMinimize }: ChatbotProps) 
           )}
       </div>
       
-      {/* Message Bubbles */}
-      <div className={cn("flex flex-col gap-1", msg.role === 'user' ? 'items-end' : 'items-start')}>
+      {/* Message Bubbles Container */}
+      <div className={cn(
+        "flex flex-col gap-1.5", 
+        // flex-1 is the secret sauce here—it forces the container to occupy available space
+        msg.role === 'user' ? 'items-end flex-1' : 'items-start flex-1'
+      )}>
         <div className={cn(
-          "max-w-[88%] md:max-w-[75%] rounded-[1.25rem] px-4 py-3 md:px-5 md:py-3.5 text-sm leading-relaxed shadow-sm transition-all duration-300",
+          // width: fit-content ensures it wraps tightly around text
+          // whitespace-normal stops the vertical stacking
+          "h-auto w-fit min-w-[60px] max-w-[85%] md:max-w-[70%] rounded-[20px] px-5 py-3 md:px-6 md:py-3.5 text-sm leading-relaxed shadow-md",
           msg.role === 'assistant' 
-              ? "bg-foreground/5 hover:bg-foreground/10 border border-foreground/5 text-foreground rounded-tl-sm" 
-              : "bg-gradient-to-br from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-600/10 rounded-tr-sm border border-indigo-500/50"
+              ? "bg-foreground/5 border border-foreground/10 text-foreground rounded-tl-[4px]" 
+              : "bg-gradient-to-br from-indigo-600 to-blue-600 text-white rounded-tr-[4px] border border-white/10"
         )}>
-          <div className="whitespace-pre-wrap tracking-wide font-light">
+          {/* We use break-words only if the word itself is longer than the bubble */}
+          <div className="whitespace-normal break-words tracking-normal font-normal text-left">
             {formatMessage(msg.content)}
           </div>
         </div>
         {msg.createdAt && (
-          <span className="text-[9px] text-muted-foreground/50 font-medium tracking-wide px-1">
+          <span className="text-[10px] text-muted-foreground/40 font-medium tracking-wide px-2">
             {formatRelTime(msg.createdAt)}
           </span>
         )}
       </div>
     </motion.div>
-  )), [history]); // eslint-disable-line react-hooks/exhaustive-deps
+  )), [history]);
 
   const ChatHeader = () => (
     <div className="relative border-b border-border/50 px-6 py-4 flex flex-row items-center justify-between z-20 bg-background/50 backdrop-blur-2xl shrink-0">
@@ -381,7 +401,7 @@ export function Chatbot({ isPopup = false, onClose, onMinimize }: ChatbotProps) 
         
         {/* Input Area */}
         <div className="p-4 md:p-6 bg-gradient-to-t from-background/95 to-transparent backdrop-blur-md relative z-20">
-            <form onSubmit={handleSubmit} className="relative max-w-4xl mx-auto flex items-end gap-3">
+            <form onSubmit={handleSubmit} className="relative max-w-4xl mx-auto flex items-center gap-3">
                 <div className="relative flex-1 group">
                     <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500 rounded-full blur opacity-10 group-focus-within:opacity-40 transition duration-1000 group-hover:opacity-30" />
                     <Input 
@@ -410,14 +430,14 @@ export function Chatbot({ isPopup = false, onClose, onMinimize }: ChatbotProps) 
                     type="button"
                     onClick={toggleVoice}
                     className={cn(
-                        "flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-all border",
+                        "flex-shrink-0 w-11 h-11 md:w-12 md:h-12 rounded-full flex items-center justify-center transition-all border",
                         isListening
                             ? "bg-primary text-white border-primary animate-pulse"
                             : "glass-button border-primary/20 text-muted-foreground hover:text-primary"
                     )}
                     aria-label="Voice input"
                 >
-                    <Mic className="w-4 h-4" />
+                    <Mic className="w-4 h-4 md:w-5 md:h-5" />
                 </button>
                 <Button 
                     type="submit" 

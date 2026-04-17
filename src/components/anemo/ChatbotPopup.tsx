@@ -1,8 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Bot, ChevronUp, X, Minimize2 } from 'lucide-react';
+import { Bot, X } from 'lucide-react';
 import { Chatbot } from '@/components/anemo/Chatbot';
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -49,7 +48,7 @@ export function ChatbotPopup() {
                 )}
             </AnimatePresence>
             
-            {/* Main Toggle Button - Touch Optimized (min 44px) */}
+            {/* Main Toggle Button */}
             <motion.button
                 onClick={toggleOpen}
                 whileHover={{ scale: 1.05 }}
@@ -86,7 +85,7 @@ export function ChatbotPopup() {
             </motion.button>
         </div>
 
-        {/* Chat Window - Full Screen on Mobile, Bubble on Desktop */}
+        {/* Chat Window - Wider and Taller for better bubble rendering */}
         <AnimatePresence mode="wait">
             {isOpen && !isMinimized && (
                 <motion.div
@@ -96,7 +95,9 @@ export function ChatbotPopup() {
                     transition={{ type: "spring", stiffness: 350, damping: 28, mass: 0.6 }}
                     className="fixed inset-0 sm:inset-auto sm:relative sm:mb-1 z-[110] sm:z-auto pointer-events-auto origin-bottom-right"
                 >
-                    <div className="w-full h-full sm:w-[380px] sm:h-[650px] sm:max-h-[calc(100vh-10rem)] flex flex-col sm:rounded-[2.5rem] shadow-[0_30px_100px_-20px_rgba(0,0,0,0.5)] bg-background sm:bg-transparent overflow-hidden relative group">
+                    {/* Width updated to 450px and height to 680px */}
+                    <div className="w-full h-full sm:w-[450px] sm:h-[680px] sm:max-h-[calc(100vh-10rem)] flex flex-col sm:rounded-[2.5rem] shadow-[0_30px_100px_-20px_rgba(0,0,0,0.5)] bg-background sm:bg-transparent overflow-hidden relative group">
+                        
                         {/* Desktop Only Border Glow */}
                         <div className="hidden sm:block absolute -inset-[1px] bg-gradient-to-br from-cyan-500/40 via-blue-500/30 to-indigo-500/40 rounded-[2.5rem] blur-[3px] opacity-60 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
                         
