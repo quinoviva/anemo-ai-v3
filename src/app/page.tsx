@@ -16,17 +16,32 @@ export default function RootPage() {
   const router = useRouter();
   const [isRedirecting, setIsRedirecting] = useState(false);
 
+  // Use a dedicated state to track if we've already determined we should redirect
+  const [shouldHideContent, setShouldHideContent] = useState(true);
+
   useEffect(() => {
-    if (!isUserLoading && user) {
-      setIsRedirecting(true);
-      router.replace('/dashboard');
+    if (!isUserLoading) {
+      if (user) {
+        setIsRedirecting(true);
+        router.replace('/dashboard');
+      } else {
+        // Only show landing page content if we are sure user is NOT logged in
+        setShouldHideContent(false);
+      }
     }
   }, [user, isUserLoading, router]);
 
-  if (isUserLoading || isRedirecting) {
+  if (isUserLoading || isRedirecting || shouldHideContent) {
     return (
       <div className="flex h-screen w-full flex-col items-center justify-center bg-black">
          <AnemoLoading />
+         <motion.p 
+           initial={{ opacity: 0 }}
+           animate={{ opacity: 1 }}
+           className="text-white/40 text-[10px] uppercase tracking-[0.5em] mt-8 animate-pulse"
+         >
+           Authenticating
+         </motion.p>
       </div>
     );
   }

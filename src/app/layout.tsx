@@ -48,7 +48,7 @@ export default function RootLayout({
       <body className={`${spaceGrotesk.variable} font-sans overflow-x-hidden`}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
+          defaultTheme="dark"
           enableSystem
           disableTransitionOnChange
         >
