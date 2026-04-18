@@ -41,7 +41,6 @@ import {
 import { useState, useEffect, useRef } from 'react';
 import { useTheme } from 'next-themes';
 import { Logo } from './Logo';
-import { SequentialImageAnalyzer } from '../anemo/SequentialImageAnalyzer';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const mainNavLinks = [
@@ -51,8 +50,7 @@ const mainNavLinks = [
 ];
 
 const otherLinks = [
-  { href: '/dashboard/chatbot', label: 'AI Assistant', icon: Bot },
-  // { href: '/dashboard/live-analysis', label: 'Live Scan', icon: Video },
+  { href: '/dashboard/chatbot', label: 'Anemo Bot', icon: Bot },
   { href: '/dashboard/find-doctor', label: 'Find Care', icon: Search },
   { href: '/dashboard/remedies', label: 'Remedies', icon: Leaf },
 ];
@@ -97,7 +95,6 @@ export function Header() {
     return name[0] || 'U';
   };
 
-  // Close mobile menu when navigating
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [pathname]);
@@ -105,7 +102,6 @@ export function Header() {
   return (
     <>
       <header className="fixed top-0 z-50 w-full p-4 pointer-events-none flex justify-center">
-        {/* Floating Capsule */}
         <div className="pointer-events-auto flex items-center justify-between w-full max-w-5xl h-16 px-4 md:px-6 bg-background/60 backdrop-blur-xl border border-primary/10 rounded-full shadow-[0_8px_32px_-4px_rgba(0,0,0,0.1)] transition-all duration-500 hover:shadow-[0_16px_48px_-8px_rgba(0,0,0,0.15)]">
 
           {/* Left: Logo */}
@@ -135,7 +131,6 @@ export function Header() {
               </Link>
             ))}
 
-            {/* SCAN Trigger - Updated to navigate to dedicated page */}
             <div className="relative">
               <Link
                 href="/dashboard/analysis/multimodal"
@@ -156,14 +151,13 @@ export function Header() {
                 ref={otherMenuRef}
                 onMouseEnter={() => {
                   if (closeTimeout.current) clearTimeout(closeTimeout.current);
-                  openTimeout.current = setTimeout(() => setOtherMenuOpen(true), 250);
+                  openTimeout.current = setTimeout(() => setOtherMenuOpen(true), 150);
                 }}
                 onMouseLeave={() => {
                   if (openTimeout.current) clearTimeout(openTimeout.current);
-                  closeTimeout.current = setTimeout(() => setOtherMenuOpen(false), 250);
+                  closeTimeout.current = setTimeout(() => setOtherMenuOpen(false), 200);
                 }}
-                className="relative"
-                style={{ width: 140, minWidth: 140, maxWidth: 140 }}
+                className="relative flex items-center justify-center w-[90px]"
               >
                 <DropdownMenuTrigger asChild>
                   <button
@@ -173,48 +167,55 @@ export function Header() {
                         ? 'text-primary bg-primary/5'
                         : 'text-muted-foreground hover:text-foreground hover:bg-primary/5'
                     )}
-                    style={{ width: '100%' }}
                   >
                     MORE
                     <ChevronDown className={cn("h-3 w-3 opacity-50 transition-transform duration-200", otherMenuOpen && "rotate-180")} />
                   </button>
                 </DropdownMenuTrigger>
-                <div style={{ position: 'absolute', left: 0, top: '100%', width: '100%', zIndex: 50 }}>
-                  <DropdownMenuContent align="center" sideOffset={10} className="w-56 p-2 bg-background/90 backdrop-blur-xl border border-primary/10 rounded-2xl shadow-xl">
-                    {otherLinks.map(({ href, label, icon: Icon }) => (
-                      <DropdownMenuItem key={href} asChild className="p-3 cursor-pointer focus:bg-primary/5 rounded-xl text-muted-foreground focus:text-primary transition-colors">
-                        <Link href={href} className="flex items-center gap-3">
-                          <Icon className="h-4 w-4 opacity-70" />
-                          <span className="text-sm font-medium">{label}</span>
-                        </Link>
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </div>
+                
+                <AnimatePresence>
+                  {otherMenuOpen && (
+                    /* The motion.div below is centered using left-1/2 and -translate-x-1/2 */
+                    <motion.div 
+                      initial={{ opacity: 0, y: 8, x: '-50%' }}
+                      animate={{ opacity: 1, y: 0, x: '-50%' }}
+                      exit={{ opacity: 0, y: 8, x: '-50%' }}
+                      className="absolute left-1/2 top-full pt-2 z-50 pointer-events-auto"
+                    >
+                      <div className="w-52 p-2 bg-background/95 backdrop-blur-xl border border-primary/10 rounded-2xl shadow-xl">
+                        {otherLinks.map(({ href, label, icon: Icon }) => (
+                          <Link
+                            key={href}
+                            href={href}
+                            className="flex items-center gap-3 p-3 rounded-xl text-muted-foreground hover:text-primary hover:bg-primary/5 transition-colors"
+                            onClick={() => setOtherMenuOpen(false)}
+                          >
+                            <Icon className="h-4 w-4 opacity-70" />
+                            <span className="text-sm font-medium">{label}</span>
+                          </Link>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </DropdownMenu>
           </nav>
 
-          {/* Right: Actions & Mobile Menu Toggle */}
+          {/* Right: Actions */}
           <div className="flex items-center gap-2 shrink-0 pr-1">
-            {/* Mobile Menu Button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="flex md:hidden items-center justify-center w-11 h-11 rounded-full text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all outline-none"
-              aria-label="Toggle mobile menu"
             >
               {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
 
-            {/* User Profile Menu */}
             <DropdownMenu modal={false}>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-11 w-11 rounded-full hover:bg-primary/5 transition-all" aria-label="Open user menu">
+                <Button variant="ghost" size="icon" className="h-11 w-11 rounded-full hover:bg-primary/5 transition-all">
                   <Avatar className="h-9 w-9 border border-primary/10">
-                    <AvatarImage
-                      src={auth?.currentUser?.photoURL ?? undefined}
-                      alt={displayName || 'User profile'}
-                    />
+                    <AvatarImage src={auth?.currentUser?.photoURL ?? undefined} alt={displayName} />
                     <AvatarFallback className="bg-primary/5 text-primary text-xs font-bold">
                       {getInitials(displayName)}
                     </AvatarFallback>
@@ -224,52 +225,44 @@ export function Header() {
               <DropdownMenuContent align="end" sideOffset={10} className="w-64 p-2 bg-background/80 backdrop-blur-xl border border-primary/10 rounded-2xl shadow-xl">
                 <DropdownMenuLabel className="font-normal px-3 py-2">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">
-                      {isGuest ? 'Guest User' : (displayName || 'User')}
-                    </p>
+                    <p className="text-sm font-medium leading-none">{isGuest ? 'Guest User' : displayName}</p>
                     <p className="text-xs leading-none text-muted-foreground truncate font-mono opacity-70">
-                      {isGuest ? 'Sign in to save data' : (auth?.currentUser?.email || '')}
+                      {isGuest ? 'Sign in to save data' : auth?.currentUser?.email}
                     </p>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator className="bg-primary/10" />
-                <DropdownMenuItem onClick={() => router.push('/dashboard/profile')} disabled={isGuest} className="cursor-pointer focus:bg-primary/5 rounded-lg px-3 py-3 text-sm text-muted-foreground focus:text-primary">
+                <DropdownMenuItem onClick={() => router.push('/dashboard/profile')} disabled={isGuest} className="cursor-pointer focus:bg-primary/5 rounded-lg px-3 py-3 text-sm text-muted-foreground">
                   <User className="mr-3 h-4 w-4 opacity-70" />
                   Profile
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push('/dashboard/settings')} className="cursor-pointer focus:bg-primary/5 rounded-lg px-3 py-3 text-sm text-muted-foreground focus:text-primary">
+                <DropdownMenuItem onClick={() => router.push('/dashboard/settings')} className="cursor-pointer focus:bg-primary/5 rounded-lg px-3 py-3 text-sm text-muted-foreground">
                   <Settings className="mr-3 h-4 w-4 opacity-70" />
                   Settings
                 </DropdownMenuItem>
                 <DropdownMenuSub>
-                  <DropdownMenuSubTrigger className="cursor-pointer focus:bg-primary/5 rounded-lg px-3 py-3 text-sm text-muted-foreground focus:text-primary">
-                    <div className="flex items-center flex-1">
-                      <Sun className="mr-3 h-4 w-4 opacity-70 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-                      <Moon className="absolute mr-3 h-4 w-4 opacity-70 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-                      <span>Theme</span>
-                    </div>
+                  <DropdownMenuSubTrigger className="cursor-pointer focus:bg-primary/5 rounded-lg px-3 py-3 text-sm text-muted-foreground">
+                    <Sun className="mr-3 h-4 w-4 opacity-70 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                    <Moon className="absolute mr-3 h-4 w-4 opacity-70 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                    <span>Theme</span>
                   </DropdownMenuSubTrigger>
                   <DropdownMenuPortal>
                     <DropdownMenuSubContent className="bg-background/80 backdrop-blur-xl border border-primary/10 rounded-xl shadow-xl ml-2 p-1">
-                      <DropdownMenuItem onClick={() => setTheme('light')} className="rounded-lg focus:bg-primary/5 focus:text-primary cursor-pointer p-3">
-                        <Sun className="mr-3 h-4 w-4" />
-                        <span>Light</span>
+                      <DropdownMenuItem onClick={() => setTheme('light')} className="rounded-lg focus:bg-primary/5 p-3">
+                        <Sun className="mr-3 h-4 w-4" /> <span>Light</span>
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => setTheme('dark')} className="rounded-lg focus:bg-primary/5 focus:text-primary cursor-pointer p-3">
-                        <Moon className="mr-3 h-4 w-4" />
-                        <span>Dark</span>
+                      <DropdownMenuItem onClick={() => setTheme('dark')} className="rounded-lg focus:bg-primary/5 p-3">
+                        <Moon className="mr-3 h-4 w-4" /> <span>Dark</span>
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => setTheme('system')} className="rounded-lg focus:bg-primary/5 focus:text-primary cursor-pointer p-3">
-                        <Monitor className="mr-3 h-4 w-4" />
-                        <span>System</span>
+                      <DropdownMenuItem onClick={() => setTheme('system')} className="rounded-lg focus:bg-primary/5 p-3">
+                        <Monitor className="mr-3 h-4 w-4" /> <span>System</span>
                       </DropdownMenuItem>
                     </DropdownMenuSubContent>
                   </DropdownMenuPortal>
                 </DropdownMenuSub>
                 <DropdownMenuSeparator className="bg-primary/10" />
-                <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:bg-destructive/5 focus:text-destructive cursor-pointer rounded-lg px-3 py-3">
-                  <LogOut className="mr-3 h-4 w-4" />
-                  Logout
+                <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:bg-destructive/5 cursor-pointer rounded-lg px-3 py-3">
+                  <LogOut className="mr-3 h-4 w-4" /> Logout
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -277,107 +270,22 @@ export function Header() {
         </div>
       </header>
 
-      {/* Mobile Drawer Overlay */}
+      {/* Mobile Menu */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="fixed inset-0 z-[60] bg-background/80 backdrop-blur-sm md:hidden"
-            />
-            <motion.div
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed right-0 top-0 bottom-0 z-[70] w-[85%] max-w-sm bg-background border-l border-primary/10 shadow-2xl md:hidden flex flex-col p-8 pt-24"
-            >
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsMobileMenuOpen(false)} className="fixed inset-0 z-[60] bg-background/80 backdrop-blur-sm md:hidden" />
+            <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: 'spring', damping: 25, stiffness: 200 }} className="fixed right-0 top-0 bottom-0 z-[70] w-[85%] max-w-sm bg-background border-l border-primary/10 shadow-2xl md:hidden flex flex-col p-8 pt-24">
               <div className="space-y-8 overflow-y-auto">
                 <div className="space-y-2">
                   <p className="text-[10px] font-black tracking-[0.3em] text-primary uppercase ml-4">Main Menu</p>
                   <div className="grid gap-2">
                     {mainNavLinks.map(({ href, label, icon: Icon }) => (
-                      <Link
-                        key={href}
-                        href={href}
-                        className={cn(
-                          'flex items-center gap-4 px-6 py-4 rounded-2xl text-sm font-black tracking-widest transition-all',
-                          pathname === href
-                            ? 'bg-primary text-primary-foreground'
-                            : 'text-muted-foreground hover:bg-primary/5 hover:text-primary'
-                        )}
-                      >
-                        <Icon className="w-5 h-5" />
-                        {label}
-                      </Link>
-                    ))}
-                    <Link
-                      href="/dashboard/analysis/multimodal"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className={cn(
-                        "flex items-center gap-4 px-6 py-4 rounded-2xl text-sm font-black tracking-widest transition-all",
-                        pathname === '/dashboard/analysis/multimodal'
-                          ? 'bg-primary text-primary-foreground shadow-[0_0_20px_-5px_rgba(var(--primary),0.5)]'
-                          : 'text-primary bg-primary/10 hover:bg-primary/20'
-                      )}
-                    >
-                      <HeartPulse className="w-5 h-5 animate-pulse" />
-                      SCAN
-                    </Link>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <p className="text-[10px] font-black tracking-[0.3em] text-muted-foreground uppercase ml-4">Resources</p>
-                  <div className="grid gap-2">
-                    {otherLinks.map(({ href, label, icon: Icon }) => (
-                      <Link
-                        key={href}
-                        href={href}
-                        className={cn(
-                          'flex items-center gap-4 px-6 py-4 rounded-2xl text-sm font-bold tracking-widest transition-all',
-                          pathname === href
-                            ? 'bg-primary/5 text-primary'
-                            : 'text-muted-foreground hover:bg-primary/5 hover:text-primary'
-                        )}
-                      >
-                        <Icon className="w-5 h-5 opacity-70" />
-                        {label}
+                      <Link key={href} href={href} className={cn('flex items-center gap-4 px-6 py-4 rounded-2xl text-sm font-black tracking-widest transition-all', pathname === href ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-primary/5')}>
+                        <Icon className="w-5 h-5" /> {label}
                       </Link>
                     ))}
                   </div>
-                </div>
-              </div>
-
-              <div className="mt-auto pt-8 border-t border-primary/5 space-y-4">
-                {/* Theme Toggle */}
-                <div className="flex items-center justify-between px-2">
-                  <span className="text-[10px] font-black tracking-[0.3em] text-muted-foreground uppercase">Theme</span>
-                  <div className="flex items-center gap-1 p-1 rounded-full bg-primary/5 border border-primary/10">
-                    {(['light', 'dark', 'system'] as const).map((t) => {
-                      const Icon = t === 'light' ? Sun : t === 'dark' ? Moon : Monitor;
-                      return (
-                        <button
-                          key={t}
-                          onClick={() => setTheme(t)}
-                          className={cn(
-                            'w-9 h-9 rounded-full flex items-center justify-center transition-all',
-                            theme === t ? 'bg-primary text-white shadow-md' : 'text-muted-foreground hover:text-primary'
-                          )}
-                          aria-label={t}
-                        >
-                          <Icon className="w-4 h-4" />
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-                <div className="p-6 rounded-3xl bg-primary/5 border border-primary/10">
-                  <p className="text-xs font-bold text-foreground mb-1 uppercase tracking-tight">Anemo</p>
-                  <p className="text-[10px] text-muted-foreground leading-relaxed">Neural diagnostics for blood health assessment.</p>
                 </div>
               </div>
             </motion.div>
