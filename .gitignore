@@ -88,3 +88,15 @@ scripts/ml/fix_notebook_final.py
 .cache/
 .firebase/logs/
 *.log
+
+# Ignore Keras model files
+*.keras
+
+# Ignore all model directories under public/models
+# This covers judges, scouts, and specialists
+public/models/judges/
+public/models/scouts/
+public/models/specialists/
+
+# Alternatively, if you want to be broad:
+# public/models/**/model.json
