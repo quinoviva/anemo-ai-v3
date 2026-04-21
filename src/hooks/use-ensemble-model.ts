@@ -8,34 +8,47 @@
  *   2. Spawn and communicate with the Edge-AI consensus Web Worker.
  *   3. Stream the generated clinical report token-by-token.
  *   4. Report granular loading progress per model.
- *
- * Usage
- * -----
- * ```tsx
- * const {
- *   runAnalysis,
- *   report,
- *   isLoading,
- *   progress,
- *   severity,
- *   consensusHgb,
- *   dietaryRecommendations,
- *   error,
- *   reset,
- * } = useEnsembleModel();
- *
- * // Call with canvas/image elements for each body part
- * await runAnalysis({ Skin: skinCanvas, Fingernails: nailCanvas, Undereye: eyeCanvas });
- * ```
  */
 
-import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
+import { useState, useCallback, useRef, useMemo } from 'react';
 import type { BodyPart, ConsensusReport, InferenceProgressEvent } from '@/lib/ensemble/consensus-engine';
 import type { SeverityClass } from '@/lib/ensemble/severity';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { doc } from 'firebase/firestore';
 
-// ... rest of imports
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
+export interface EnsembleProgress {
+  fraction: number;
+  message: string;
+  phase: 'loading' | 'quality-check' | 'specialist' | 'judge' | 'consensus' | 'worker';
+  currentModelId?: string;
+}
+
+export interface UseEnsembleModelReturn {
+  runAnalysis: (inputs: Partial<Record<BodyPart, HTMLCanvasElement | HTMLImageElement | ImageData>>) => Promise<void>;
+  isLoading: boolean;
+  progress: EnsembleProgress;
+  ensembleReport: ConsensusReport | null;
+  severity: SeverityClass | null;
+  consensusHgb: number | null;
+  report: string;
+  dietaryRecommendations: string[];
+  error: string | null;
+  reset: () => void;
+}
+
+const INITIAL_PROGRESS: EnsembleProgress = {
+  fraction: 0,
+  message: 'Waiting for input...',
+  phase: 'loading',
+};
+
+// ---------------------------------------------------------------------------
+// Hook Implementation
+// ---------------------------------------------------------------------------
 
 export function useEnsembleModel(): UseEnsembleModelReturn {
   const [isLoading, setIsLoading] = useState(false);
@@ -58,7 +71,20 @@ export function useEnsembleModel(): UseEnsembleModelReturn {
   const workerRef = useRef<Worker | null>(null);
   const abortRef = useRef(false);
 
-  // ... rest of hook
+  const reset = useCallback(() => {
+    abortRef.current = true;
+    workerRef.current?.terminate();
+    workerRef.current = null;
+    
+    setIsLoading(false);
+    setProgress(INITIAL_PROGRESS);
+    setEnsembleReport(null);
+    setSeverity(null);
+    setConsensusHgb(null);
+    setReport('');
+    setDietaryRecommendations([]);
+    setError(null);
+  }, []);
 
   const runAnalysis = useCallback(
     async (
@@ -90,7 +116,7 @@ export function useEnsembleModel(): UseEnsembleModelReturn {
         try {
           // Pass canvas/image elements directly into the engine
           const engineInputs = inputs as Parameters<typeof runEnsembleInference>[0];
-          const userSex = userData?.medicalInfo?.sex || 'Female'; // Default to female if unknown
+          const userSex = (userData as any)?.medicalInfo?.sex || 'Female'; // Default to female if unknown
           consensusResult = await runEnsembleInference(engineInputs, onProgress, userSex);
         } catch (tfErr) {
           // If TF.js models aren't available yet, use the heuristic fallback
@@ -167,7 +193,7 @@ export function useEnsembleModel(): UseEnsembleModelReturn {
         setIsLoading(false);
       }
     },
-    [],
+    [userData],
   );
 
   return {
