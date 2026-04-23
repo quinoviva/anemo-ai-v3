@@ -2,7 +2,7 @@ import { config } from 'dotenv';
 config();
 
 import { genkit } from 'genkit';
-import { googleAI } from '@genkit-ai/google-genai';
+import { googleAI } from '@genkit-ai/googleai';
 
 import '@/ai/flows/generate-image-description.ts';
 import '@/ai/flows/conduct-diagnostic-interview.ts';

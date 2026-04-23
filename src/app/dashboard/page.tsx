@@ -417,7 +417,7 @@ export default function DashboardPage() {
 
           {/* 1. HERO: Start New Analysis (Deep Red/Crimson Theme) */}
           <BentoCard
-            colSpan="col-span-1 md:col-span-4 lg:col-span-4"
+            colSpan="col-span-1 sm:col-span-2 md:col-span-4 lg:col-span-4"
             rowSpan="row-span-2"
             className="bg-gradient-to-br from-red-600/30 via-background to-background border-red-500/30 cursor-pointer group overflow-hidden shadow-[0_20px_60px_-15px_rgba(220,38,38,0.15)]"
             onClick={() => window.location.href = '/dashboard/analysis'}

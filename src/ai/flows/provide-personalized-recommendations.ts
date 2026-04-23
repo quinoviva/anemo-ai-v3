@@ -61,13 +61,11 @@ Determine the type and confidence using this decision tree:
   - YES → Lab data is the PRIMARY determinant (images are supplementary)
   - NO → Visual analysis is the PRIMARY determinant (cap confidence at 75)
 
-**Step 2 — Classify anemia type:**
-  - Hgb low + MCV low (<80 fL) → "Iron Deficiency Anemia" (most common in Filipino females)
-  - Hgb low + MCV normal (80-100 fL) → "Normocytic Anemia" (could be chronic disease, acute blood loss)
-  - Hgb low + MCV high (>100 fL) → "Vitamin B12/Folate Deficiency Anemia" (megaloblastic)
-  - Hgb normal + Visual pallor detected → "Borderline / Pre-Anemic State"
-  - Hgb normal + Visual normal → "Negative"
-  - No lab + Visual pallor → "Suspected Iron Deficiency Anemia" (most statistically likely in PH population)
+**Step 2 — Classify result using EXACTLY these labels:**
+  - Hgb normal + Visual normal → "ANEMIA NEGATIVE (Healthy Vascular Presentation)"
+  - Hgb low (10-11.9) OR Visual mild pallor → "ANEMIA SUSPECTED (Mild Pallor Detected)"
+  - Hgb < 10 OR Visual significant pallor → "ANEMIA POSITIVE (Significant Pallor Detected)"
+  - Image quality insufficient OR contradictory data → "INCONCLUSIVE (Ambiguous or Insufficient Data)"
 
 **Step 3 — Confidence calibration:**
   - Lab confirms + Visual confirms + Symptoms match → 85-95%
@@ -191,13 +189,19 @@ const providePersonalizedRecommendationsFlow = ai.defineFlow(
 - Lab Report Summary: ${input.labReport || "N/A"}
 - User Profile: ${input.userProfile}
 
-Determine the Anemia type, confidence score, calculate a risk index (0-100), and provide personalized health recommendations following the rules for a Filipino diet plan (include meals like malunggay, champorado, etc.).
+Classify the result using EXACTLY one of these labels:
+- ANEMIA NEGATIVE (Healthy Vascular Presentation)
+- ANEMIA SUSPECTED (Mild Pallor Detected)
+- ANEMIA POSITIVE (Significant Pallor Detected)
+- INCONCLUSIVE (Ambiguous or Insufficient Data)
+
+Determine the result label, confidence score, calculate a risk index (0-100), and provide personalized health recommendations following the rules for a Filipino diet plan (include meals like malunggay, champorado, etc.).
 
 CRITICAL RULE: Revolve your response ONLY with valid JSON exactly matching this structure. Do not include markdown code fences or conversational text:
 {
   "recommendations": "Provide formatting with simple points",
   "riskScore": 85,
-  "anemiaType": "Iron Deficiency Anemia",
+  "anemiaType": "ANEMIA POSITIVE (Significant Pallor Detected)",
   "confidenceScore": 90,
   "confidenceReasoning": "- Conjunctiva Density: 0.85\n- Nail Bed Density: 0.90\n- Palm Skin Density: 1.00\n- Confidence Logic: (0.85 * 0.5) + (0.90 * 0.3) + (1.00 * 0.2) = 0.90\n- Hgb Synthesis: 5.0 + (0.90 * 11.0) = 14.90"
 }`;

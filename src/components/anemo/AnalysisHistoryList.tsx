@@ -51,26 +51,28 @@ const AnalysisHistoryList: React.FC<AnalysisHistoryListProps> = ({ analysisHisto
         <CardDescription>View your past CBC report analyses.</CardDescription>
       </CardHeader>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Date</TableHead>
-              <TableHead>Summary</TableHead>
-              <TableHead>Hemoglobin</TableHead>
-              <TableHead>RBC</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {analysisHistory.map((analysis, index) => (
-              <TableRow key={index}>
-                <TableCell>{new Date(analysis.createdAt).toLocaleDateString()}</TableCell>
-                <TableCell>{analysis.summary}</TableCell>
-                <TableCell>{getParameterValue(analysis.parameters, 'Hemoglobin')}</TableCell>
-                <TableCell>{getParameterValue(analysis.parameters, 'RBC')}</TableCell>
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Date</TableHead>
+                <TableHead>Summary</TableHead>
+                <TableHead>Hemoglobin</TableHead>
+                <TableHead>RBC</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {analysisHistory.map((analysis, index) => (
+                <TableRow key={index}>
+                  <TableCell className="whitespace-nowrap">{new Date(analysis.createdAt).toLocaleDateString()}</TableCell>
+                  <TableCell className="min-w-[200px]">{analysis.summary}</TableCell>
+                  <TableCell>{getParameterValue(analysis.parameters, 'Hemoglobin')}</TableCell>
+                  <TableCell>{getParameterValue(analysis.parameters, 'RBC')}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </CardContent>
     </GlassSurface>
   );

@@ -205,7 +205,7 @@ export function MenstrualCycleCorrelator({ labReports, cycleLogs, variant = 'def
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                     <TrendingDown className="h-5 w-5 text-primary" />
-                    Hemoglobin Trends & Cycle Correlation
+                    Hemoglobin Trends & Cycle Corr/modeelation
                 </CardTitle>
                 <CardDescription>
                     Visualizing your blood health in relation to your menstrual cycle.

@@ -74,6 +74,16 @@ void main(){
 }
 `;
 
+interface DarkVeilProps {
+  hueShift?: number;
+  noiseIntensity?: number;
+  scanlineIntensity?: number;
+  speed?: number;
+  scanlineFrequency?: number;
+  warpAmount?: number;
+  resolutionScale?: number;
+}
+
 export default function DarkVeil({
   hueShift = 0,
   noiseIntensity = 0,
@@ -82,11 +92,13 @@ export default function DarkVeil({
   scanlineFrequency = 0,
   warpAmount = 0,
   resolutionScale = 1
-}) {
-  const ref = useRef(null);
+}: DarkVeilProps) {
+  const ref = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
     const canvas = ref.current;
+    if (!canvas) return;
     const parent = canvas.parentElement;
+    if (!parent) return;
 
     const renderer = new Renderer({
       dpr: Math.min(window.devicePixelRatio, 2),

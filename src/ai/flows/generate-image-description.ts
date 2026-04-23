@@ -174,6 +174,11 @@ Perform a SYSTEMATIC, MULTI-ZONE analysis:
 - UNDER-EYE: Zone 1 (Palpebral Conjunctiva - Primary), Zone 2 (Fornix), Zone 3 (Lower Lid Skin).
 - FINGERNAILS: Zone 1 (Lunula Contrast), Zone 2 (Mid-Nail Bed), Zone 3 (Tip Transparency).
 
+**VALIDATION GUIDANCE:**
+- Be reasonable: If the user provides a close-up of fingers where the nail bed is the primary focus, accept it. 
+- Only reject if the image is objectively NOT the requested part (e.g., showing a face for fingernails, or a pet for skin).
+- If the image is blurry, describe the blur but still attempt an assessment if color features are visible.
+
 **CROSS-FEATURE SYNTHESIS**
 - Weight palmar creases and palpebral conjunctiva DOUBLE.
 - ≥60% pallor -> Positive.

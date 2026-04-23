@@ -287,6 +287,17 @@ export function Header() {
                     ))}
                   </div>
                 </div>
+
+                <div className="space-y-2">
+                  <p className="text-[10px] font-black tracking-[0.3em] text-primary uppercase ml-4">Support & Tools</p>
+                  <div className="grid gap-2">
+                    {otherLinks.map(({ href, label, icon: Icon }) => (
+                      <Link key={href} href={href} className={cn('flex items-center gap-4 px-6 py-4 rounded-2xl text-sm font-black tracking-widest transition-all', pathname === href ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-primary/5')}>
+                        <Icon className="w-5 h-5" /> {label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
               </div>
             </motion.div>
           </>

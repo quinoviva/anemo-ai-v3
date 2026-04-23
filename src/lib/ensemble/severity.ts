@@ -20,6 +20,10 @@ export type UserSex = 'Male' | 'Female' | 'Other' | string;
 export interface SeverityResult {
   /** The classified severity class label. */
   severity: SeverityClass;
+  /** High-level analysis result status (e.g., "ANEMIA NEGATIVE") */
+  analysisResult: string;
+  /** Clinical meaning of the result. */
+  meaning: string;
   /** Numeric severity index 0–3 (matches dataset folder names). */
   severityIndex: 0 | 1 | 2 | 3;
   /** Dataset folder name, e.g. "0_Normal". */
@@ -30,6 +34,8 @@ export interface SeverityResult {
   description: string;
   /** Recommended urgency level for the user. */
   urgency: 'none' | 'low' | 'moderate' | 'high';
+  /** UI Badge Color */
+  badgeColor: 'green' | 'yellow' | 'orange' | 'red' | 'gray';
   /** Thresholds used for this calculation. */
   thresholds: {
     normal: number;
@@ -69,6 +75,9 @@ export function classifyHgb(hgbValue: number, sex?: UserSex): SeverityResult {
   if (hgbValue > T.normal) {
     return {
       severity: 'Normal',
+      analysisResult: 'ANEMIA NEGATIVE (Healthy Vascular Presentation)',
+      meaning: 'No significant pallor detected; healthy color presentation',
+      badgeColor: 'green',
       severityIndex: 0,
       folderLabel: '0_Normal',
       hgbValue,
@@ -81,6 +90,9 @@ export function classifyHgb(hgbValue: number, sex?: UserSex): SeverityResult {
     const proximity = ((hgbValue - T.mild) / (T.normal - T.mild) * 100).toFixed(0);
     return {
       severity: 'Mild',
+      analysisResult: 'ANEMIA SUSPECTED (Mild Pallor Detected)',
+      meaning: 'Early pallor signs detected; follow-up recommended',
+      badgeColor: 'yellow',
       severityIndex: 1,
       folderLabel: '1_Mild',
       hgbValue,
@@ -92,6 +104,9 @@ export function classifyHgb(hgbValue: number, sex?: UserSex): SeverityResult {
   if (hgbValue >= T.moderate) {
     return {
       severity: 'Moderate',
+      analysisResult: 'ANEMIA POSITIVE (Significant Pallor Detected)',
+      meaning: 'Moderate to severe pallor confirmed; medical consultation needed',
+      badgeColor: 'orange',
       severityIndex: 2,
       folderLabel: '2_Moderate',
       hgbValue,
@@ -102,6 +117,9 @@ export function classifyHgb(hgbValue: number, sex?: UserSex): SeverityResult {
   }
   return {
     severity: 'Severe',
+    analysisResult: 'ANEMIA POSITIVE (Significant Pallor Detected)',
+    meaning: 'Moderate to severe pallor confirmed; medical consultation needed',
+    badgeColor: 'red',
     severityIndex: 3,
     folderLabel: '3_Severe',
     hgbValue,
@@ -134,13 +152,17 @@ export function consensusClassify(
   sex?: UserSex
 ): SeverityResult {
   if (scores.length === 0) {
+    const T = GET_THRESHOLDS(sex);
     return {
       severity: 'Normal',
+      analysisResult: 'INCONCLUSIVE (Ambiguous or Insufficient Data)',
+      meaning: 'Analysis could not determine result with confidence',
+      badgeColor: 'gray',
       severityIndex: 0,
       folderLabel: '0_Normal',
       hgbValue: null,
-      thresholds: GET_THRESHOLDS(sex),
-      description: 'No model scores provided.',
+      thresholds: T,
+      description: 'No model scores provided. Analysis could not be performed.',
       urgency: 'none',
     };
   }

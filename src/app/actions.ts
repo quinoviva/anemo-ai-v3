@@ -38,9 +38,6 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 
-// Use Admin App for checking credentials presence
-const adminApp = getAdminApp();
-
 // ── Server-side rate limiting ──────────────────────────────────────────────
 // In-memory store: userId → last call timestamp per action
 const rateLimitStore = new Map<string, number>();
@@ -76,6 +73,9 @@ function safeBodyPart(bodyPart: string): string {
  * Checks if an image has been processed before and returns its cached result.
  */
 export async function checkImageConsistency(dataUri: string, bodyPart: string) {
+  if (process.env.NODE_ENV !== 'development') {
+    return { isConsistent: false };
+  }
   const safePart = safeBodyPart(bodyPart);
   try {
     const hash = calculateHash(dataUri);
@@ -108,6 +108,9 @@ export async function checkImageConsistency(dataUri: string, bodyPart: string) {
  * Caches an analysis result to ensure consistency.
  */
 export async function cacheAnalysisResult(dataUri: string, bodyPart: string, result: GenerateImageDescriptionOutput) {
+  if (process.env.NODE_ENV !== 'development') {
+    return;
+  }
   const safePart = safeBodyPart(bodyPart);
   try {
     const hash = calculateHash(dataUri);
@@ -308,6 +311,9 @@ export async function saveLabReportForTraining(
   summary: string,
   userName: string = 'Anonymous'
 ) {
+  if (process.env.NODE_ENV !== 'development') {
+    return { success: true }; // Silent skip in production
+  }
   try {
     const cleanUserName = userName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
     const date = new Date();

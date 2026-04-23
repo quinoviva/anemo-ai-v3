@@ -29,7 +29,7 @@ export function ChatbotPopup() {
   };
 
   return (
-    <div className="fixed bottom-4 right-4 sm:bottom-8 sm:right-8 z-[100] flex flex-row-reverse items-end gap-5 pointer-events-none">
+    <div className="fixed bottom-10 right-10 sm:bottom-8 sm:right-8 z-[100] flex flex-row-reverse items-end gap-5 pointer-events-none">
         <div className="pointer-events-auto relative group flex-shrink-0">
             {/* Minimized Indicator */}
             <AnimatePresence>

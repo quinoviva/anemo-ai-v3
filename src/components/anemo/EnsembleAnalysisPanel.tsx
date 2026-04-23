@@ -120,6 +120,11 @@ const SEVERITY_COLORS: Record<string, string> = {
   Mild: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
   Moderate: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
   Severe: 'bg-red-500/20 text-red-400 border-red-500/30',
+  green: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+  yellow: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
+  orange: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
+  red: 'bg-red-500/20 text-red-400 border-red-500/30',
+  gray: 'bg-gray-500/20 text-gray-400 border-gray-500/30',
 };
 
 // ---------------------------------------------------------------------------
@@ -398,7 +403,8 @@ export function EnsembleAnalysisPanel({ onBack }: EnsembleAnalysisPanelProps) {
   const renderResults = () => {
     if (!ensembleReport || severity === null || consensusHgb === null) return null;
 
-    const severityColor = SEVERITY_COLORS[severity] ?? SEVERITY_COLORS.Normal;
+    const sev = ensembleReport.severity;
+    const severityColor = SEVERITY_COLORS[sev.badgeColor] || SEVERITY_COLORS.green;
 
     return (
       <motion.div
@@ -420,6 +426,24 @@ export function EnsembleAnalysisPanel({ onBack }: EnsembleAnalysisPanelProps) {
             Retake
           </Button>
         </div>
+
+        {/* High Level Result */}
+        <GlassSurface intensity="medium" className={cn("p-4 rounded-2xl border-l-4", 
+          sev.badgeColor === 'green' ? "border-l-emerald-500" : 
+          sev.badgeColor === 'yellow' ? "border-l-amber-500" : 
+          sev.badgeColor === 'orange' ? "border-l-orange-500" : 
+          sev.badgeColor === 'red' ? "border-l-red-500" : "border-l-gray-500"
+        )}>
+           <h3 className={cn("font-bold text-lg mb-1", 
+             sev.badgeColor === 'green' ? "text-emerald-400" : 
+             sev.badgeColor === 'yellow' ? "text-amber-400" : 
+             sev.badgeColor === 'orange' ? "text-orange-400" : 
+             sev.badgeColor === 'red' ? "text-red-400" : "text-gray-400"
+           )}>
+             {sev.analysisResult}
+           </h3>
+           <p className="text-sm text-muted-foreground">{sev.meaning}</p>
+        </GlassSurface>
 
         {/* Hgb + Severity */}
         <GlassSurface intensity="medium" className="p-6 rounded-2xl">
