@@ -87,7 +87,7 @@ export default function SettingsPage() {
       if (!('Notification' in window)) {
         toast({
           title: 'Not Supported',
-          description: 'This browser does not support desktop notifications.',
+          description: 'This browser does not support push notifications.',
           variant: 'destructive',
         });
         return;
@@ -101,11 +101,23 @@ export default function SettingsPage() {
           title: 'Notifications Enabled',
           description: "You'll receive a weekly scan reminder and health alerts on this device.",
         });
-        new Notification('Anemo AI \u2014 Notifications Active', {
+        
+        const title = 'Anemo AI \u2014 Notifications Active';
+        const options = {
           body: "You'll receive a weekly check-in reminder. Stay on top of your health!",
           icon: '/anemo.png',
           tag: 'anemo-setup',
-        });
+        };
+
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.ready.then((registration) => {
+            registration.showNotification(title, options);
+          }).catch(() => {
+            try { new Notification(title, options); } catch (e) { console.error(e); }
+          });
+        } else {
+          try { new Notification(title, options); } catch (e) { console.error(e); }
+        }
       } else {
         setPushEnabled(false);
         toast({
