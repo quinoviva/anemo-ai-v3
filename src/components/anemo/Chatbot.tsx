@@ -298,8 +298,8 @@ export function Chatbot({ isPopup = false, onClose, onMinimize }: ChatbotProps) 
         </div>
 
         <div className="flex flex-col justify-center h-10">
-            <h3 className="font-bold text-lg tracking-tight flex items-center gap-2 text-foreground/90">
-              ANEMO BOT 
+            <h3 className="text-lg tracking-tight flex items-center gap-2 text-foreground/90">
+              Anemo Bot
             </h3>
         </div>
       </div>
@@ -307,7 +307,7 @@ export function Chatbot({ isPopup = false, onClose, onMinimize }: ChatbotProps) 
       <div className="flex items-center gap-2">
         {isPopup && (
             <>
-                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-foreground/5" onClick={onMinimize}>
+                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:b3g-foreground/5" onClick={onMinimize}>
                     <Minus className="h-4 w-4" />
                 </Button>
                 <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-red-500/20 hover:text-red-500 transition-colors" onClick={onClose}>
@@ -405,7 +405,7 @@ export function Chatbot({ isPopup = false, onClose, onMinimize }: ChatbotProps) 
                 <div className="relative flex-1 group">
                     <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500 rounded-full blur opacity-10 group-focus-within:opacity-40 transition duration-1000 group-hover:opacity-30" />
                     <Input 
-                        placeholder="Ask Anemo Bot..." 
+                        placeholder="Aa" 
                         value={userInput} 
                         onChange={(e) => setUserInput(e.target.value)} 
                         disabled={isLoading}
