@@ -177,7 +177,7 @@ export function SignUpForm() {
                     <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground/50 transition-colors group-focus-within:text-primary" />
                     <FormControl>
                       <Input 
-                        className="pl-12 h-14 bg-muted/20 border-border/50 focus:border-primary/30 focus:bg-background focus:ring-4 focus:ring-primary/5 transition-all duration-300 rounded-2xl text-base shadow-sm" 
+                        className="pl-12 h-14 bg-muted/20 border-border/50 focus:border-primary/30 focus:bg-background focus:ring-4 focus:ring-primary/5 transition-all duration-300 rounded-full text-base shadow-sm" 
                         placeholder="Zaxius" 
                         {...field} 
                     />
@@ -197,7 +197,7 @@ export function SignUpForm() {
                     <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground/50 transition-colors group-focus-within:text-primary" />
                     <FormControl>
                       <Input 
-                        className="pl-12 h-14 bg-muted/20 border-border/50 focus:border-primary/30 focus:bg-background focus:ring-4 focus:ring-primary/5 transition-all duration-300 rounded-2xl text-base shadow-sm" 
+                        className="pl-12 h-14 bg-muted/20 border-border/50 focus:border-primary/30 focus:bg-background focus:ring-4 focus:ring-primary/5 transition-all duration-300 rounded-full text-base shadow-sm" 
                         placeholder="Berina" 
                         {...field} 
                       />
@@ -220,7 +220,7 @@ export function SignUpForm() {
                      <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground/50 transition-colors group-focus-within:text-primary pointer-events-none z-10" />
                       <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
                       <FormControl>
-                          <SelectTrigger className="pl-12 h-14 bg-muted/20 border-border/50 focus:border-primary/30 focus:bg-background focus:ring-4 focus:ring-primary/5 transition-all duration-300 rounded-2xl text-base shadow-sm">
+                          <SelectTrigger className="pl-12 h-14 bg-muted/20 border-border/50 focus:border-primary/30 focus:bg-background focus:ring-4 focus:ring-primary/5 transition-all duration-300 rounded-full text-base shadow-sm">
                             <SelectValue placeholder="Select location" />
                           </SelectTrigger>
                       </FormControl>
@@ -249,7 +249,7 @@ export function SignUpForm() {
                       <Users className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground/50 transition-colors group-focus-within:text-primary pointer-events-none z-10" />
                       <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
                           <FormControl>
-                          <SelectTrigger className="pl-12 h-14 bg-muted/20 border-border/50 focus:border-primary/30 focus:bg-background focus:ring-4 focus:ring-primary/5 transition-all duration-300 rounded-2xl text-base shadow-sm">
+                          <SelectTrigger className="pl-12 h-14 bg-muted/20 border-border/50 focus:border-primary/30 focus:bg-background focus:ring-4 focus:ring-primary/5 transition-all duration-300 rounded-full text-base shadow-sm">
                               <SelectValue placeholder="Sex" />
                           </SelectTrigger>
                           </FormControl>
@@ -276,7 +276,7 @@ export function SignUpForm() {
                     <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground/50 transition-colors group-focus-within:text-primary" />
                     <FormControl>
                       <Input 
-                          className="pl-12 h-14 bg-muted/20 border-border/50 focus:border-primary/30 focus:bg-background focus:ring-4 focus:ring-primary/5 transition-all duration-300 rounded-2xl text-base shadow-sm" 
+                          className="pl-12 h-14 bg-muted/20 border-border/50 focus:border-primary/30 focus:bg-background focus:ring-4 focus:ring-primary/5 transition-all duration-300 rounded-full text-base shadow-sm" 
                           placeholder="name@example.com" 
                           {...field} 
                       />
@@ -299,7 +299,7 @@ export function SignUpForm() {
                       <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground/50 transition-colors group-focus-within:text-primary" />
                       <FormControl>
                         <Input 
-                            className="pl-12 pr-12 h-14 bg-muted/20 border-border/50 focus:border-primary/30 focus:bg-background focus:ring-4 focus:ring-primary/5 transition-all duration-300 rounded-2xl text-base shadow-sm" 
+                            className="pl-12 pr-12 h-14 bg-muted/20 border-border/50 focus:border-primary/30 focus:bg-background focus:ring-4 focus:ring-primary/5 transition-all duration-300 rounded-full text-base shadow-sm" 
                             type={showPassword ? "text" : "password"} 
                             placeholder="••••••••" 
                             {...field} 
@@ -327,7 +327,7 @@ export function SignUpForm() {
                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground/50 transition-colors group-focus-within:text-primary" />
                     <FormControl>
                       <Input 
-                        className="pl-12 h-14 bg-muted/20 border-border/50 focus:border-primary/30 focus:bg-background focus:ring-4 focus:ring-primary/5 transition-all duration-300 rounded-2xl text-base shadow-sm" 
+                        className="pl-12 h-14 bg-muted/20 border-border/50 focus:border-primary/30 focus:bg-background focus:ring-4 focus:ring-primary/5 transition-all duration-300 rounded-full text-base shadow-sm" 
                         type={showConfirmPassword ? "text" : "password"} 
                         placeholder="••••••••" 
                         {...field} 
@@ -347,7 +347,7 @@ export function SignUpForm() {
               />
           </motion.div>
 
-          <motion.div variants={itemVariants} className="p-4 bg-primary/5 border border-primary/10 rounded-2xl text-sm text-muted-foreground">
+          <motion.div variants={itemVariants} className="p-4 bg-primary/5 border border-primary/10 rounded-lg text-sm text-muted-foreground">
              <p className="leading-relaxed text-center">
                 <span className="font-semibold text-primary block mb-1">Health Note</span> 
                 Female users unlock <span className="text-foreground font-medium">Women’s Health Mode</span> for cycle-aware analysis.
@@ -357,7 +357,7 @@ export function SignUpForm() {
           <motion.div variants={itemVariants}>
             <Button 
               type="submit" 
-              className="w-full h-14 rounded-2xl text-lg font-medium shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all duration-500 hover:scale-[1.01] bg-gradient-to-r from-primary to-rose-600 hover:to-rose-500" 
+              className="w-full h-14 rounded-full text-lg font-medium shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all duration-500 hover:scale-[1.01] bg-gradient-to-r from-primary to-rose-600 hover:to-rose-500" 
               disabled={isLoading}
             >
               {isLoading && <HeartLoader size={24} strokeWidth={2.5} className="mr-2" />}

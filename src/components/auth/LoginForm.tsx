@@ -159,7 +159,7 @@ export function LoginForm() {
         <h3 className="text-4xl font-light tracking-tighter text-foreground">
             Welcome <span className="font-semibold text-primary">Back</span>
         </h3>
-        <p className="text-lg font-semibold tracking-wide">
+        <p className="text-lg tracking-wide">
           Log into Anemo
         </p>
       </motion.div>
@@ -177,7 +177,7 @@ export function LoginForm() {
                     <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground/50 transition-colors group-focus-within:text-primary" />
                     <FormControl>
                         <Input 
-                            className="pl-12 h-14 bg-muted/20 border-border/50 focus:border-primary/30 focus:bg-background focus:ring-4 focus:ring-primary/5 transition-all duration-300 rounded-2xl text-base shadow-sm hover:border-border/80" 
+                            className="pl-12 h-14 bg-muted/20 border-border/50 focus:border-primary/30 focus:bg-background focus:ring-4 focus:ring-primary/5 transition-all duration-300 rounded-full text-base shadow-sm hover:border-border/80" 
                             placeholder="name@example.com" 
                             {...field} 
                         />
@@ -205,7 +205,7 @@ export function LoginForm() {
                     <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground/50 transition-colors group-focus-within:text-primary" />
                     <FormControl>
                         <Input 
-                            className="pl-12 pr-12 h-14 bg-muted/20 border-border/50 focus:border-primary/30 focus:bg-background focus:ring-4 focus:ring-primary/5 transition-all duration-300 rounded-2xl text-base shadow-sm hover:border-border/80" 
+                            className="pl-12 pr-12 h-14 bg-muted/20 border-border/50 focus:border-primary/30 focus:bg-background focus:ring-4 focus:ring-primary/5 transition-all duration-300 rounded-full text-base shadow-sm hover:border-border/80" 
                             type={showPassword ? "text" : "password"} 
                             placeholder="••••••••" 
                             {...field} 
@@ -228,7 +228,7 @@ export function LoginForm() {
           <motion.div variants={itemVariants}>
             <Button 
               type="submit" 
-              className="w-full h-14 rounded-2xl text-lg font-medium shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all duration-500 hover:scale-[1.01] bg-gradient-to-r from-primary to-rose-600 hover:to-rose-500" 
+              className="w-full h-14 rounded-full text-lg font-medium shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all duration-500 hover:scale-[1.01] bg-gradient-to-r from-primary to-rose-600 hover:to-rose-500" 
               disabled={isSigningIn}
             >
               {isLoading && <HeartLoader size={24} strokeWidth={2.5} className="mr-2" />}
@@ -252,7 +252,7 @@ export function LoginForm() {
       <motion.div variants={itemVariants} className="grid grid-cols-2 gap-4">
           <Button
               variant="outline"
-              className="w-full h-12 rounded-xl border-border/50 bg-background/50 hover:bg-muted/30 hover:border-primary/20 transition-all duration-300 shadow-sm"
+              className="w-full h-12 rounded-full border-border/50 bg-background/50 hover:bg-muted/30 hover:border-primary/20 transition-all duration-300 shadow-sm"
               onClick={handleGoogleSignIn}
               disabled={isSigningIn}
           >
@@ -266,7 +266,7 @@ export function LoginForm() {
 
           <Button
               variant="outline"
-              className="w-full h-12 rounded-xl border-border/50 bg-background/50 hover:bg-muted/30 hover:border-primary/20 transition-all duration-300 shadow-sm"
+              className="w-full h-12 rounded-full border-border/50 bg-background/50 hover:bg-muted/30 hover:border-primary/20 transition-all duration-300 shadow-sm"
               onClick={handleGuestSignIn}
               disabled={isSigningIn}
               >

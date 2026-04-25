@@ -83,7 +83,7 @@ export function ForgotPasswordForm() {
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground transition-colors group-focus-within:text-primary" />
                   <FormControl>
                     <Input 
-                        className="pl-10 h-12 bg-muted/30 border-transparent focus:border-primary/20 focus:bg-background focus:ring-4 focus:ring-primary/5 transition-all duration-300 rounded-xl" 
+                        className="pl-10 h-12 bg-muted/30 border-transparent focus:border-primary/20 focus:bg-background focus:ring-4 focus:ring-primary/5 transition-all duration-300 rounded-full" 
                         placeholder="name@example.com" 
                         {...field} 
                     />
@@ -96,7 +96,7 @@ export function ForgotPasswordForm() {
 
           <Button 
             type="submit" 
-            className="w-full h-12 rounded-xl text-base font-medium shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all duration-300 hover:scale-[1.02]" 
+            className="w-full h-12 rounded-full text-base font-medium shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all duration-300 hover:scale-[1.02]" 
             disabled={isLoading}
           >
             {isLoading && <HeartLoader size={24} strokeWidth={2.5} className="mr-2" />}
