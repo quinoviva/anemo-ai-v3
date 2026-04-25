@@ -13,7 +13,7 @@ interface HeartLoaderProps {
 const HeartLoader: React.FC<HeartLoaderProps> = ({ 
   size = 200, 
   fullPage = false, 
-  /* withBackground = false, */
+  withBackground = false,
   className,
   strokeWidth = 8 // Slightly thinner for a more premium look
 }) => {
@@ -22,11 +22,11 @@ const HeartLoader: React.FC<HeartLoaderProps> = ({
       className={cn(
         "heart-loader-container",
         fullPage && "full-page",
-        /* withBackground && "with-bg", */
-        /*!fullPage && !withBackground && "inline",*/
+        withBackground && "with-bg",
+        !fullPage && !withBackground && "inline",
         className
       )}
-      /* style={withBackground ? { background: 'hsl(var(--background))' } : undefined} */
+      style={withBackground ? { background: 'hsl(var(--background))' } : undefined}
     >
       <svg
         className="heart-svg"
