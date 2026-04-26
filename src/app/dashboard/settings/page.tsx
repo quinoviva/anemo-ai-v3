@@ -20,6 +20,7 @@ import { useTheme } from 'next-themes';
 import { useToast } from '@/hooks/use-toast';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { doc, setDoc, collection, getDocs } from 'firebase/firestore';
+import { clearModelCache, listCachedModels } from '@/lib/ensemble/model-loader';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -42,6 +43,7 @@ export default function SettingsPage() {
   const [isSyncing, setIsSyncing] = useState(false);
   const [pushEnabled, setPushEnabled] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [isClearingCache, setIsClearingCache] = useState(false);
 
   const userDocRef = useMemoFirebase(() => {
     if (!user || !firestore) return null;
@@ -50,6 +52,25 @@ export default function SettingsPage() {
 
   const { data: userData } = useDoc(userDocRef);
   const waterReminderEnabled = userData?.hydration?.enabled || false;
+
+  const handleClearCache = async () => {
+    setIsClearingCache(true);
+    try {
+      await clearModelCache();
+      toast({
+        title: 'Cache Cleared',
+        description: 'On-device ML models have been removed. They will be re-downloaded on next use.',
+      });
+    } catch (e) {
+      toast({
+        title: 'Error',
+        description: 'Failed to clear model cache.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsClearingCache(false);
+    }
+  };
 
   const handleWaterToggle = async (checked: boolean) => {
     if (!user || !firestore) return;
@@ -416,6 +437,28 @@ export default function SettingsPage() {
               </div>
               <Button variant="destructive" className="rounded-full group flex-shrink-0">
                 <Trash2 className="mr-2 h-4 w-4 group-hover:animate-bounce" /> Delete Account
+              </Button>
+            </div>
+
+            {/* Clear Model Cache */}
+            <div className="rounded-2xl border border-primary/20 bg-primary/5 p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div className="space-y-1">
+                <span className="rounded-full bg-primary/10 text-primary border border-primary/20 text-[10px] font-bold uppercase tracking-widest px-3 py-1 inline-block mb-2">
+                  System
+                </span>
+                <p className="font-bold text-foreground">Clear Model Cache</p>
+                <p className="text-xs text-muted-foreground">
+                  Remove on-device ML models and re-download the latest versions.
+                </p>
+              </div>
+              <Button
+                onClick={handleClearCache}
+                disabled={isClearingCache}
+                variant="outline"
+                className="rounded-full flex-shrink-0 border-primary/20 hover:bg-primary/10"
+              >
+                <RefreshCw className={`mr-2 h-4 w-4 ${isClearingCache ? 'animate-spin' : ''}`} />
+                {isClearingCache ? 'Clearing…' : 'Clear Cache'}
               </Button>
             </div>
           </div>

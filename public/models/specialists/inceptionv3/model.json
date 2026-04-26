@@ -13,7 +13,7 @@
           "module": "keras.layers",
           "class_name": "InputLayer",
           "config": {
-            "batch_shape": [
+            "batch_input_shape": [
               null,
               299,
               299,
