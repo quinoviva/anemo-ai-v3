@@ -85,7 +85,7 @@ export interface InferenceProgressEvent {
  * to the Tier-2 Specialists. Images below this threshold are flagged as
  * low quality and excluded from the Specialist/Judge tiers.
  */
-const SCOUT_QUALITY_THRESHOLD = 0.30;
+const SCOUT_QUALITY_THRESHOLD = 0.20;
 
 // ---------------------------------------------------------------------------
 // Advanced consensus helpers
@@ -413,8 +413,7 @@ export async function runScoutValidation(
 
   console.log(`[ScoutValidation] ${expectedPart} Score: ${(confidence * 100).toFixed(1)}%`);
   
-  // -- INCREASED STRICTNESS --------------------------------------------
-  // We now use the SCOUT_QUALITY_THRESHOLD (0.45) instead of a low 0.1.
+  // -- QUALITY THRESHOLD CHECK --------------------------------------------
   if (confidence >= SCOUT_QUALITY_THRESHOLD) {
     return {
       isValid: true,
@@ -492,14 +491,12 @@ function computeStructuralIntegrity(
 
     const avgLuma = totalLuma / sampledCount;
     const contrast = (maxLuma - minLuma) / 255;
-    const detailScore = Math.min(1, (edgeDelta / sampledCount) / 15); // Avg luma change > 15 means high detail
+    const detailScore = Math.min(1, (edgeDelta / sampledCount) / 25);
     
-    // Score components
-    const exposureScore = 1 - Math.min(1, Math.abs(avgLuma - 128) / 110);
-    const contrastScore = Math.min(1, contrast / 0.4);
+    const exposureScore = 1 - Math.min(1, Math.abs(avgLuma - 128) / 90);
+    const contrastScore = Math.min(1, contrast / 0.3);
     
-    // Final blended score (Weighted heavily toward detail to catch blur/flat images)
-    return (exposureScore * 0.2) + (contrastScore * 0.3) + (detailScore * 0.5);
+    return (exposureScore * 0.25) + (contrastScore * 0.25) + (detailScore * 0.5);
   } catch (e) {
     return 0.4;
   }
