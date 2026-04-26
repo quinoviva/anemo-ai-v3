@@ -55,7 +55,6 @@ import {
   saveLabReportForTraining,
 } from '@/app/actions';
 import { runValidateMultimodalResults as validateMultimodalResults } from '@/app/actions';
-import { runScoutValidation, type BodyPart as ConsensusBodyPart } from '@/lib/ensemble/consensus-engine';
 import { ImageAnalysisReport } from './ImageAnalysisReport';
 import type { AnalysisState } from './ImageAnalysisReport';
 import { RealTimeCamera } from './RealTimeCamera';
@@ -1224,31 +1223,9 @@ export function MultimodalUploadAnalyzer({ onClose }: MultimodalUploadAnalyzerPr
     }));
 
     try {
-      // ── LOCAL SCOUT VALIDATION (STRICT) ──────────────────────────────
-      // First line of defense: Run the Tier-1 Scouts locally to catch 
-      // simple parameter mismatches (e.g. eye uploaded as skin).
-      const expectedPartMap: Record<BodyPart, ConsensusBodyPart> = {
-        'skin': 'Skin',
-        'under-eye': 'Undereye',
-        'fingernails': 'Fingernails'
-      };
-
-      // Create a temporary image element for the scout
-      const tempImg = new Image();
-      tempImg.src = dataUri;
-      await new Promise((res) => (tempImg.onload = res));
-
-      const scoutCheck = await runScoutValidation(expectedPartMap[part], tempImg);
-
-      if (!scoutCheck.isValid) {
-        setCaptures((prev) => ({
-          ...prev,
-          [part]: { ...prev[part], status: 'error', error: scoutCheck.message },
-        }));
-        return;
-      }
-
-      // ── SERVER-SIDE AI ANALYSIS ──────────────────────────────────────
+      // ── SERVER-SIDE AI ANALYSIS (Gemini/Groq handles all validation) ─────────
+      // AI models (Gemini + Groq fallback) perform body part validation AND
+      // clinical anemia analysis with high accuracy. No local scout models needed.
       const result = await runGenerateImageDescription({ photoDataUri: dataUri, bodyPart: part });
 
       if (!result.isValid) {
