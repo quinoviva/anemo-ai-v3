@@ -4,7 +4,7 @@
   "convertedBy": "manual",
   "modelTopology": {
     "module": "keras.src.models.functional",
-    "class_name": "Functional",
+    "class_name": "Model",
     "config": {
       "name": "scout_mobilenet_skin",
       "trainable": true,
@@ -34,16 +34,9 @@
           "config": {
             "name": "rescaling_1",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null
-            },
+            "dtype": "float32",
             "scale": 0.00784313725490196,
-            "offset": -1.0
+            "offset": -1
           },
           "registered_name": null,
           "build_config": {
@@ -56,28 +49,14 @@
           },
           "name": "rescaling_1",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      224,
-                      224,
-                      3
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "scout_mobilenet_skin_input",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "scout_mobilenet_skin_input",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -86,15 +65,7 @@
           "config": {
             "name": "conv",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "filters": 16,
             "kernel_size": [
               3,
@@ -144,28 +115,14 @@
           },
           "name": "conv",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      224,
-                      224,
-                      3
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "rescaling_1",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "rescaling_1",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -174,15 +131,7 @@
           "config": {
             "name": "conv_bn",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "axis": -1,
             "momentum": 0.999,
             "epsilon": 0.001,
@@ -229,30 +178,14 @@
           },
           "name": "conv_bn",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      112,
-                      112,
-                      16
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "conv",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {
-                "mask": null
-              }
-            }
+            [
+              [
+                "conv",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -261,44 +194,22 @@
           "config": {
             "name": "re_lu_23",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "max_value": null,
-            "negative_slope": 0.0,
-            "threshold": 0.0
+            "negative_slope": 0,
+            "threshold": 0
           },
           "registered_name": null,
           "name": "re_lu_23",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      112,
-                      112,
-                      16
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "conv_bn",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "conv_bn",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -307,15 +218,7 @@
           "config": {
             "name": "expanded_conv_depthwise_pad",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "padding": [
               [
                 0,
@@ -339,28 +242,14 @@
           },
           "name": "expanded_conv_depthwise_pad",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      112,
-                      112,
-                      16
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "re_lu_23",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "re_lu_23",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -369,15 +258,7 @@
           "config": {
             "name": "expanded_conv_depthwise",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "depth_multiplier": 1,
             "kernel_size": [
               3,
@@ -426,28 +307,14 @@
           },
           "name": "expanded_conv_depthwise",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      113,
-                      113,
-                      16
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_depthwise_pad",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "expanded_conv_depthwise_pad",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -456,15 +323,7 @@
           "config": {
             "name": "expanded_conv_depthwise_bn",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "axis": -1,
             "momentum": 0.999,
             "epsilon": 0.001,
@@ -511,30 +370,14 @@
           },
           "name": "expanded_conv_depthwise_bn",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      56,
-                      56,
-                      16
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_depthwise",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {
-                "mask": null
-              }
-            }
+            [
+              [
+                "expanded_conv_depthwise",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -543,44 +386,22 @@
           "config": {
             "name": "re_lu_24",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "max_value": null,
-            "negative_slope": 0.0,
-            "threshold": 0.0
+            "negative_slope": 0,
+            "threshold": 0
           },
           "registered_name": null,
           "name": "re_lu_24",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      56,
-                      56,
-                      16
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_depthwise_bn",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "expanded_conv_depthwise_bn",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -589,15 +410,7 @@
           "config": {
             "name": "expanded_conv_project",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "filters": 16,
             "kernel_size": [
               1,
@@ -647,28 +460,14 @@
           },
           "name": "expanded_conv_project",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      56,
-                      56,
-                      16
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "re_lu_24",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "re_lu_24",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -677,15 +476,7 @@
           "config": {
             "name": "expanded_conv_project_bn",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "axis": -1,
             "momentum": 0.999,
             "epsilon": 0.001,
@@ -732,30 +523,14 @@
           },
           "name": "expanded_conv_project_bn",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      56,
-                      56,
-                      16
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_project",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {
-                "mask": null
-              }
-            }
+            [
+              [
+                "expanded_conv_project",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -764,15 +539,7 @@
           "config": {
             "name": "expanded_conv_1_expand",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "filters": 72,
             "kernel_size": [
               1,
@@ -822,28 +589,14 @@
           },
           "name": "expanded_conv_1_expand",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      56,
-                      56,
-                      16
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_project_bn",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "expanded_conv_project_bn",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -852,15 +605,7 @@
           "config": {
             "name": "expanded_conv_1_expand_bn",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "axis": -1,
             "momentum": 0.999,
             "epsilon": 0.001,
@@ -907,30 +652,14 @@
           },
           "name": "expanded_conv_1_expand_bn",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      56,
-                      56,
-                      72
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_1_expand",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {
-                "mask": null
-              }
-            }
+            [
+              [
+                "expanded_conv_1_expand",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -939,44 +668,22 @@
           "config": {
             "name": "re_lu_25",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "max_value": null,
-            "negative_slope": 0.0,
-            "threshold": 0.0
+            "negative_slope": 0,
+            "threshold": 0
           },
           "registered_name": null,
           "name": "re_lu_25",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      56,
-                      56,
-                      72
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_1_expand_bn",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "expanded_conv_1_expand_bn",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -985,15 +692,7 @@
           "config": {
             "name": "expanded_conv_1_depthwise_pad",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "padding": [
               [
                 0,
@@ -1017,28 +716,14 @@
           },
           "name": "expanded_conv_1_depthwise_pad",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      56,
-                      56,
-                      72
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "re_lu_25",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "re_lu_25",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -1047,15 +732,7 @@
           "config": {
             "name": "expanded_conv_1_depthwise",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "depth_multiplier": 1,
             "kernel_size": [
               3,
@@ -1104,28 +781,14 @@
           },
           "name": "expanded_conv_1_depthwise",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      57,
-                      57,
-                      72
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_1_depthwise_pad",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "expanded_conv_1_depthwise_pad",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -1134,15 +797,7 @@
           "config": {
             "name": "expanded_conv_1_depthwise_bn",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "axis": -1,
             "momentum": 0.999,
             "epsilon": 0.001,
@@ -1189,30 +844,14 @@
           },
           "name": "expanded_conv_1_depthwise_bn",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      28,
-                      28,
-                      72
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_1_depthwise",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {
-                "mask": null
-              }
-            }
+            [
+              [
+                "expanded_conv_1_depthwise",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -1221,44 +860,22 @@
           "config": {
             "name": "re_lu_26",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "max_value": null,
-            "negative_slope": 0.0,
-            "threshold": 0.0
+            "negative_slope": 0,
+            "threshold": 0
           },
           "registered_name": null,
           "name": "re_lu_26",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      28,
-                      28,
-                      72
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_1_depthwise_bn",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "expanded_conv_1_depthwise_bn",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -1267,15 +884,7 @@
           "config": {
             "name": "expanded_conv_1_project",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "filters": 24,
             "kernel_size": [
               1,
@@ -1325,28 +934,14 @@
           },
           "name": "expanded_conv_1_project",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      28,
-                      28,
-                      72
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "re_lu_26",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "re_lu_26",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -1355,15 +950,7 @@
           "config": {
             "name": "expanded_conv_1_project_bn",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "axis": -1,
             "momentum": 0.999,
             "epsilon": 0.001,
@@ -1410,30 +997,14 @@
           },
           "name": "expanded_conv_1_project_bn",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      28,
-                      28,
-                      24
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_1_project",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {
-                "mask": null
-              }
-            }
+            [
+              [
+                "expanded_conv_1_project",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -1442,15 +1013,7 @@
           "config": {
             "name": "expanded_conv_2_expand",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "filters": 88,
             "kernel_size": [
               1,
@@ -1500,28 +1063,14 @@
           },
           "name": "expanded_conv_2_expand",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      28,
-                      28,
-                      24
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_1_project_bn",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "expanded_conv_1_project_bn",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -1530,15 +1079,7 @@
           "config": {
             "name": "expanded_conv_2_expand_bn",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "axis": -1,
             "momentum": 0.999,
             "epsilon": 0.001,
@@ -1585,30 +1126,14 @@
           },
           "name": "expanded_conv_2_expand_bn",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      28,
-                      28,
-                      88
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_2_expand",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {
-                "mask": null
-              }
-            }
+            [
+              [
+                "expanded_conv_2_expand",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -1617,44 +1142,22 @@
           "config": {
             "name": "re_lu_27",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "max_value": null,
-            "negative_slope": 0.0,
-            "threshold": 0.0
+            "negative_slope": 0,
+            "threshold": 0
           },
           "registered_name": null,
           "name": "re_lu_27",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      28,
-                      28,
-                      88
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_2_expand_bn",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "expanded_conv_2_expand_bn",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -1663,15 +1166,7 @@
           "config": {
             "name": "expanded_conv_2_depthwise",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "depth_multiplier": 1,
             "kernel_size": [
               3,
@@ -1720,28 +1215,14 @@
           },
           "name": "expanded_conv_2_depthwise",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      28,
-                      28,
-                      88
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "re_lu_27",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "re_lu_27",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -1750,15 +1231,7 @@
           "config": {
             "name": "expanded_conv_2_depthwise_bn",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "axis": -1,
             "momentum": 0.999,
             "epsilon": 0.001,
@@ -1805,30 +1278,14 @@
           },
           "name": "expanded_conv_2_depthwise_bn",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      28,
-                      28,
-                      88
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_2_depthwise",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {
-                "mask": null
-              }
-            }
+            [
+              [
+                "expanded_conv_2_depthwise",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -1837,44 +1294,22 @@
           "config": {
             "name": "re_lu_28",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "max_value": null,
-            "negative_slope": 0.0,
-            "threshold": 0.0
+            "negative_slope": 0,
+            "threshold": 0
           },
           "registered_name": null,
           "name": "re_lu_28",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      28,
-                      28,
-                      88
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_2_depthwise_bn",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "expanded_conv_2_depthwise_bn",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -1883,15 +1318,7 @@
           "config": {
             "name": "expanded_conv_2_project",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "filters": 24,
             "kernel_size": [
               1,
@@ -1941,28 +1368,14 @@
           },
           "name": "expanded_conv_2_project",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      28,
-                      28,
-                      88
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "re_lu_28",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "re_lu_28",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -1971,15 +1384,7 @@
           "config": {
             "name": "expanded_conv_2_project_bn",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "axis": -1,
             "momentum": 0.999,
             "epsilon": 0.001,
@@ -2026,30 +1431,14 @@
           },
           "name": "expanded_conv_2_project_bn",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      28,
-                      28,
-                      24
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_2_project",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {
-                "mask": null
-              }
-            }
+            [
+              [
+                "expanded_conv_2_project",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -2058,15 +1447,7 @@
           "config": {
             "name": "expanded_conv_2_add",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            }
+            "dtype": "float32"
           },
           "registered_name": null,
           "build_config": {
@@ -2136,15 +1517,7 @@
           "config": {
             "name": "expanded_conv_3_expand",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "filters": 96,
             "kernel_size": [
               1,
@@ -2194,28 +1567,14 @@
           },
           "name": "expanded_conv_3_expand",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      28,
-                      28,
-                      24
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_2_add",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "expanded_conv_2_add",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -2224,15 +1583,7 @@
           "config": {
             "name": "expanded_conv_3_expand_bn",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "axis": -1,
             "momentum": 0.999,
             "epsilon": 0.001,
@@ -2279,30 +1630,14 @@
           },
           "name": "expanded_conv_3_expand_bn",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      28,
-                      28,
-                      96
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_3_expand",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {
-                "mask": null
-              }
-            }
+            [
+              [
+                "expanded_conv_3_expand",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -2311,44 +1646,22 @@
           "config": {
             "name": "re_lu_29",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "max_value": null,
-            "negative_slope": 0.0,
-            "threshold": 0.0
+            "negative_slope": 0,
+            "threshold": 0
           },
           "registered_name": null,
           "name": "re_lu_29",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      28,
-                      28,
-                      96
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_3_expand_bn",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "expanded_conv_3_expand_bn",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -2357,15 +1670,7 @@
           "config": {
             "name": "expanded_conv_3_depthwise_pad",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "padding": [
               [
                 0,
@@ -2389,28 +1694,14 @@
           },
           "name": "expanded_conv_3_depthwise_pad",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      28,
-                      28,
-                      96
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "re_lu_29",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "re_lu_29",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -2419,15 +1710,7 @@
           "config": {
             "name": "expanded_conv_3_depthwise",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "depth_multiplier": 1,
             "kernel_size": [
               3,
@@ -2476,28 +1759,14 @@
           },
           "name": "expanded_conv_3_depthwise",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      29,
-                      29,
-                      96
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_3_depthwise_pad",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "expanded_conv_3_depthwise_pad",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -2506,15 +1775,7 @@
           "config": {
             "name": "expanded_conv_3_depthwise_bn",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "axis": -1,
             "momentum": 0.999,
             "epsilon": 0.001,
@@ -2561,30 +1822,14 @@
           },
           "name": "expanded_conv_3_depthwise_bn",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      14,
-                      14,
-                      96
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_3_depthwise",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {
-                "mask": null
-              }
-            }
+            [
+              [
+                "expanded_conv_3_depthwise",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -2593,44 +1838,22 @@
           "config": {
             "name": "re_lu_30",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "max_value": null,
-            "negative_slope": 0.0,
-            "threshold": 0.0
+            "negative_slope": 0,
+            "threshold": 0
           },
           "registered_name": null,
           "name": "re_lu_30",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      14,
-                      14,
-                      96
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_3_depthwise_bn",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "expanded_conv_3_depthwise_bn",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -2639,15 +1862,7 @@
           "config": {
             "name": "expanded_conv_3_project",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "filters": 40,
             "kernel_size": [
               1,
@@ -2697,28 +1912,14 @@
           },
           "name": "expanded_conv_3_project",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      14,
-                      14,
-                      96
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "re_lu_30",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "re_lu_30",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -2727,15 +1928,7 @@
           "config": {
             "name": "expanded_conv_3_project_bn",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "axis": -1,
             "momentum": 0.999,
             "epsilon": 0.001,
@@ -2782,30 +1975,14 @@
           },
           "name": "expanded_conv_3_project_bn",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      14,
-                      14,
-                      40
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_3_project",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {
-                "mask": null
-              }
-            }
+            [
+              [
+                "expanded_conv_3_project",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -2814,15 +1991,7 @@
           "config": {
             "name": "expanded_conv_4_expand",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "filters": 240,
             "kernel_size": [
               1,
@@ -2872,28 +2041,14 @@
           },
           "name": "expanded_conv_4_expand",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      14,
-                      14,
-                      40
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_3_project_bn",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "expanded_conv_3_project_bn",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -2902,15 +2057,7 @@
           "config": {
             "name": "expanded_conv_4_expand_bn",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "axis": -1,
             "momentum": 0.999,
             "epsilon": 0.001,
@@ -2957,30 +2104,14 @@
           },
           "name": "expanded_conv_4_expand_bn",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      14,
-                      14,
-                      240
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_4_expand",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {
-                "mask": null
-              }
-            }
+            [
+              [
+                "expanded_conv_4_expand",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -2989,44 +2120,22 @@
           "config": {
             "name": "re_lu_31",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "max_value": null,
-            "negative_slope": 0.0,
-            "threshold": 0.0
+            "negative_slope": 0,
+            "threshold": 0
           },
           "registered_name": null,
           "name": "re_lu_31",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      14,
-                      14,
-                      240
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_4_expand_bn",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "expanded_conv_4_expand_bn",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -3035,15 +2144,7 @@
           "config": {
             "name": "expanded_conv_4_depthwise",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "depth_multiplier": 1,
             "kernel_size": [
               3,
@@ -3092,28 +2193,14 @@
           },
           "name": "expanded_conv_4_depthwise",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      14,
-                      14,
-                      240
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "re_lu_31",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "re_lu_31",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -3122,15 +2209,7 @@
           "config": {
             "name": "expanded_conv_4_depthwise_bn",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "axis": -1,
             "momentum": 0.999,
             "epsilon": 0.001,
@@ -3177,30 +2256,14 @@
           },
           "name": "expanded_conv_4_depthwise_bn",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      14,
-                      14,
-                      240
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_4_depthwise",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {
-                "mask": null
-              }
-            }
+            [
+              [
+                "expanded_conv_4_depthwise",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -3209,44 +2272,22 @@
           "config": {
             "name": "re_lu_32",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "max_value": null,
-            "negative_slope": 0.0,
-            "threshold": 0.0
+            "negative_slope": 0,
+            "threshold": 0
           },
           "registered_name": null,
           "name": "re_lu_32",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      14,
-                      14,
-                      240
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_4_depthwise_bn",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "expanded_conv_4_depthwise_bn",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -3255,15 +2296,7 @@
           "config": {
             "name": "expanded_conv_4_project",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "filters": 40,
             "kernel_size": [
               1,
@@ -3313,28 +2346,14 @@
           },
           "name": "expanded_conv_4_project",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      14,
-                      14,
-                      240
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "re_lu_32",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "re_lu_32",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -3343,15 +2362,7 @@
           "config": {
             "name": "expanded_conv_4_project_bn",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "axis": -1,
             "momentum": 0.999,
             "epsilon": 0.001,
@@ -3398,30 +2409,14 @@
           },
           "name": "expanded_conv_4_project_bn",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      14,
-                      14,
-                      40
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_4_project",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {
-                "mask": null
-              }
-            }
+            [
+              [
+                "expanded_conv_4_project",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -3430,15 +2425,7 @@
           "config": {
             "name": "expanded_conv_4_add",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            }
+            "dtype": "float32"
           },
           "registered_name": null,
           "build_config": {
@@ -3508,15 +2495,7 @@
           "config": {
             "name": "expanded_conv_5_expand",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "filters": 240,
             "kernel_size": [
               1,
@@ -3566,28 +2545,14 @@
           },
           "name": "expanded_conv_5_expand",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      14,
-                      14,
-                      40
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_4_add",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "expanded_conv_4_add",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -3596,15 +2561,7 @@
           "config": {
             "name": "expanded_conv_5_expand_bn",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "axis": -1,
             "momentum": 0.999,
             "epsilon": 0.001,
@@ -3651,30 +2608,14 @@
           },
           "name": "expanded_conv_5_expand_bn",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      14,
-                      14,
-                      240
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_5_expand",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {
-                "mask": null
-              }
-            }
+            [
+              [
+                "expanded_conv_5_expand",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -3683,44 +2624,22 @@
           "config": {
             "name": "re_lu_33",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "max_value": null,
-            "negative_slope": 0.0,
-            "threshold": 0.0
+            "negative_slope": 0,
+            "threshold": 0
           },
           "registered_name": null,
           "name": "re_lu_33",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      14,
-                      14,
-                      240
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_5_expand_bn",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "expanded_conv_5_expand_bn",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -3729,15 +2648,7 @@
           "config": {
             "name": "expanded_conv_5_depthwise",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "depth_multiplier": 1,
             "kernel_size": [
               3,
@@ -3786,28 +2697,14 @@
           },
           "name": "expanded_conv_5_depthwise",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      14,
-                      14,
-                      240
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "re_lu_33",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "re_lu_33",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -3816,15 +2713,7 @@
           "config": {
             "name": "expanded_conv_5_depthwise_bn",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "axis": -1,
             "momentum": 0.999,
             "epsilon": 0.001,
@@ -3871,30 +2760,14 @@
           },
           "name": "expanded_conv_5_depthwise_bn",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      14,
-                      14,
-                      240
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_5_depthwise",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {
-                "mask": null
-              }
-            }
+            [
+              [
+                "expanded_conv_5_depthwise",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -3903,44 +2776,22 @@
           "config": {
             "name": "re_lu_34",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "max_value": null,
-            "negative_slope": 0.0,
-            "threshold": 0.0
+            "negative_slope": 0,
+            "threshold": 0
           },
           "registered_name": null,
           "name": "re_lu_34",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      14,
-                      14,
-                      240
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_5_depthwise_bn",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "expanded_conv_5_depthwise_bn",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -3949,15 +2800,7 @@
           "config": {
             "name": "expanded_conv_5_project",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "filters": 40,
             "kernel_size": [
               1,
@@ -4007,28 +2850,14 @@
           },
           "name": "expanded_conv_5_project",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      14,
-                      14,
-                      240
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "re_lu_34",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "re_lu_34",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -4037,15 +2866,7 @@
           "config": {
             "name": "expanded_conv_5_project_bn",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "axis": -1,
             "momentum": 0.999,
             "epsilon": 0.001,
@@ -4092,30 +2913,14 @@
           },
           "name": "expanded_conv_5_project_bn",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      14,
-                      14,
-                      40
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_5_project",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {
-                "mask": null
-              }
-            }
+            [
+              [
+                "expanded_conv_5_project",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -4124,15 +2929,7 @@
           "config": {
             "name": "expanded_conv_5_add",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            }
+            "dtype": "float32"
           },
           "registered_name": null,
           "build_config": {
@@ -4202,15 +2999,7 @@
           "config": {
             "name": "expanded_conv_6_expand",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "filters": 120,
             "kernel_size": [
               1,
@@ -4260,28 +3049,14 @@
           },
           "name": "expanded_conv_6_expand",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      14,
-                      14,
-                      40
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_5_add",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "expanded_conv_5_add",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -4290,15 +3065,7 @@
           "config": {
             "name": "expanded_conv_6_expand_bn",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "axis": -1,
             "momentum": 0.999,
             "epsilon": 0.001,
@@ -4345,30 +3112,14 @@
           },
           "name": "expanded_conv_6_expand_bn",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      14,
-                      14,
-                      120
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_6_expand",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {
-                "mask": null
-              }
-            }
+            [
+              [
+                "expanded_conv_6_expand",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -4377,44 +3128,22 @@
           "config": {
             "name": "re_lu_35",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "max_value": null,
-            "negative_slope": 0.0,
-            "threshold": 0.0
+            "negative_slope": 0,
+            "threshold": 0
           },
           "registered_name": null,
           "name": "re_lu_35",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      14,
-                      14,
-                      120
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_6_expand_bn",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "expanded_conv_6_expand_bn",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -4423,15 +3152,7 @@
           "config": {
             "name": "expanded_conv_6_depthwise",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "depth_multiplier": 1,
             "kernel_size": [
               3,
@@ -4480,28 +3201,14 @@
           },
           "name": "expanded_conv_6_depthwise",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      14,
-                      14,
-                      120
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "re_lu_35",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "re_lu_35",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -4510,15 +3217,7 @@
           "config": {
             "name": "expanded_conv_6_depthwise_bn",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "axis": -1,
             "momentum": 0.999,
             "epsilon": 0.001,
@@ -4565,30 +3264,14 @@
           },
           "name": "expanded_conv_6_depthwise_bn",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      14,
-                      14,
-                      120
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_6_depthwise",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {
-                "mask": null
-              }
-            }
+            [
+              [
+                "expanded_conv_6_depthwise",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -4597,44 +3280,22 @@
           "config": {
             "name": "re_lu_36",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "max_value": null,
-            "negative_slope": 0.0,
-            "threshold": 0.0
+            "negative_slope": 0,
+            "threshold": 0
           },
           "registered_name": null,
           "name": "re_lu_36",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      14,
-                      14,
-                      120
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_6_depthwise_bn",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "expanded_conv_6_depthwise_bn",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -4643,15 +3304,7 @@
           "config": {
             "name": "expanded_conv_6_project",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "filters": 48,
             "kernel_size": [
               1,
@@ -4701,28 +3354,14 @@
           },
           "name": "expanded_conv_6_project",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      14,
-                      14,
-                      120
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "re_lu_36",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "re_lu_36",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -4731,15 +3370,7 @@
           "config": {
             "name": "expanded_conv_6_project_bn",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "axis": -1,
             "momentum": 0.999,
             "epsilon": 0.001,
@@ -4786,30 +3417,14 @@
           },
           "name": "expanded_conv_6_project_bn",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      14,
-                      14,
-                      48
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_6_project",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {
-                "mask": null
-              }
-            }
+            [
+              [
+                "expanded_conv_6_project",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -4818,15 +3433,7 @@
           "config": {
             "name": "expanded_conv_7_expand",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "filters": 144,
             "kernel_size": [
               1,
@@ -4876,28 +3483,14 @@
           },
           "name": "expanded_conv_7_expand",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      14,
-                      14,
-                      48
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_6_project_bn",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "expanded_conv_6_project_bn",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -4906,15 +3499,7 @@
           "config": {
             "name": "expanded_conv_7_expand_bn",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "axis": -1,
             "momentum": 0.999,
             "epsilon": 0.001,
@@ -4961,30 +3546,14 @@
           },
           "name": "expanded_conv_7_expand_bn",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      14,
-                      14,
-                      144
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_7_expand",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {
-                "mask": null
-              }
-            }
+            [
+              [
+                "expanded_conv_7_expand",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -4993,44 +3562,22 @@
           "config": {
             "name": "re_lu_37",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "max_value": null,
-            "negative_slope": 0.0,
-            "threshold": 0.0
+            "negative_slope": 0,
+            "threshold": 0
           },
           "registered_name": null,
           "name": "re_lu_37",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      14,
-                      14,
-                      144
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_7_expand_bn",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "expanded_conv_7_expand_bn",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -5039,15 +3586,7 @@
           "config": {
             "name": "expanded_conv_7_depthwise",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "depth_multiplier": 1,
             "kernel_size": [
               3,
@@ -5096,28 +3635,14 @@
           },
           "name": "expanded_conv_7_depthwise",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      14,
-                      14,
-                      144
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "re_lu_37",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "re_lu_37",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -5126,15 +3651,7 @@
           "config": {
             "name": "expanded_conv_7_depthwise_bn",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "axis": -1,
             "momentum": 0.999,
             "epsilon": 0.001,
@@ -5181,30 +3698,14 @@
           },
           "name": "expanded_conv_7_depthwise_bn",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      14,
-                      14,
-                      144
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_7_depthwise",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {
-                "mask": null
-              }
-            }
+            [
+              [
+                "expanded_conv_7_depthwise",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -5213,44 +3714,22 @@
           "config": {
             "name": "re_lu_38",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "max_value": null,
-            "negative_slope": 0.0,
-            "threshold": 0.0
+            "negative_slope": 0,
+            "threshold": 0
           },
           "registered_name": null,
           "name": "re_lu_38",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      14,
-                      14,
-                      144
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_7_depthwise_bn",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "expanded_conv_7_depthwise_bn",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -5259,15 +3738,7 @@
           "config": {
             "name": "expanded_conv_7_project",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "filters": 48,
             "kernel_size": [
               1,
@@ -5317,28 +3788,14 @@
           },
           "name": "expanded_conv_7_project",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      14,
-                      14,
-                      144
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "re_lu_38",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "re_lu_38",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -5347,15 +3804,7 @@
           "config": {
             "name": "expanded_conv_7_project_bn",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "axis": -1,
             "momentum": 0.999,
             "epsilon": 0.001,
@@ -5402,30 +3851,14 @@
           },
           "name": "expanded_conv_7_project_bn",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      14,
-                      14,
-                      48
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_7_project",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {
-                "mask": null
-              }
-            }
+            [
+              [
+                "expanded_conv_7_project",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -5434,15 +3867,7 @@
           "config": {
             "name": "expanded_conv_7_add",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            }
+            "dtype": "float32"
           },
           "registered_name": null,
           "build_config": {
@@ -5512,15 +3937,7 @@
           "config": {
             "name": "expanded_conv_8_expand",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "filters": 288,
             "kernel_size": [
               1,
@@ -5570,28 +3987,14 @@
           },
           "name": "expanded_conv_8_expand",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      14,
-                      14,
-                      48
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_7_add",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "expanded_conv_7_add",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -5600,15 +4003,7 @@
           "config": {
             "name": "expanded_conv_8_expand_bn",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "axis": -1,
             "momentum": 0.999,
             "epsilon": 0.001,
@@ -5655,30 +4050,14 @@
           },
           "name": "expanded_conv_8_expand_bn",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      14,
-                      14,
-                      288
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_8_expand",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {
-                "mask": null
-              }
-            }
+            [
+              [
+                "expanded_conv_8_expand",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -5687,44 +4066,22 @@
           "config": {
             "name": "re_lu_39",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "max_value": null,
-            "negative_slope": 0.0,
-            "threshold": 0.0
+            "negative_slope": 0,
+            "threshold": 0
           },
           "registered_name": null,
           "name": "re_lu_39",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      14,
-                      14,
-                      288
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_8_expand_bn",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "expanded_conv_8_expand_bn",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -5733,15 +4090,7 @@
           "config": {
             "name": "expanded_conv_8_depthwise_pad",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "padding": [
               [
                 0,
@@ -5765,28 +4114,14 @@
           },
           "name": "expanded_conv_8_depthwise_pad",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      14,
-                      14,
-                      288
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "re_lu_39",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "re_lu_39",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -5795,15 +4130,7 @@
           "config": {
             "name": "expanded_conv_8_depthwise",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "depth_multiplier": 1,
             "kernel_size": [
               3,
@@ -5852,28 +4179,14 @@
           },
           "name": "expanded_conv_8_depthwise",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      15,
-                      15,
-                      288
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_8_depthwise_pad",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "expanded_conv_8_depthwise_pad",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -5882,15 +4195,7 @@
           "config": {
             "name": "expanded_conv_8_depthwise_bn",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "axis": -1,
             "momentum": 0.999,
             "epsilon": 0.001,
@@ -5937,30 +4242,14 @@
           },
           "name": "expanded_conv_8_depthwise_bn",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      7,
-                      7,
-                      288
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_8_depthwise",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {
-                "mask": null
-              }
-            }
+            [
+              [
+                "expanded_conv_8_depthwise",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -5969,44 +4258,22 @@
           "config": {
             "name": "re_lu_40",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "max_value": null,
-            "negative_slope": 0.0,
-            "threshold": 0.0
+            "negative_slope": 0,
+            "threshold": 0
           },
           "registered_name": null,
           "name": "re_lu_40",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      7,
-                      7,
-                      288
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_8_depthwise_bn",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "expanded_conv_8_depthwise_bn",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -6015,15 +4282,7 @@
           "config": {
             "name": "expanded_conv_8_project",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "filters": 96,
             "kernel_size": [
               1,
@@ -6073,28 +4332,14 @@
           },
           "name": "expanded_conv_8_project",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      7,
-                      7,
-                      288
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "re_lu_40",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "re_lu_40",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -6103,15 +4348,7 @@
           "config": {
             "name": "expanded_conv_8_project_bn",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "axis": -1,
             "momentum": 0.999,
             "epsilon": 0.001,
@@ -6158,30 +4395,14 @@
           },
           "name": "expanded_conv_8_project_bn",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      7,
-                      7,
-                      96
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_8_project",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {
-                "mask": null
-              }
-            }
+            [
+              [
+                "expanded_conv_8_project",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -6190,15 +4411,7 @@
           "config": {
             "name": "expanded_conv_9_expand",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "filters": 576,
             "kernel_size": [
               1,
@@ -6248,28 +4461,14 @@
           },
           "name": "expanded_conv_9_expand",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      7,
-                      7,
-                      96
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_8_project_bn",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "expanded_conv_8_project_bn",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -6278,15 +4477,7 @@
           "config": {
             "name": "expanded_conv_9_expand_bn",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "axis": -1,
             "momentum": 0.999,
             "epsilon": 0.001,
@@ -6333,30 +4524,14 @@
           },
           "name": "expanded_conv_9_expand_bn",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      7,
-                      7,
-                      576
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_9_expand",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {
-                "mask": null
-              }
-            }
+            [
+              [
+                "expanded_conv_9_expand",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -6365,44 +4540,22 @@
           "config": {
             "name": "re_lu_41",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "max_value": null,
-            "negative_slope": 0.0,
-            "threshold": 0.0
+            "negative_slope": 0,
+            "threshold": 0
           },
           "registered_name": null,
           "name": "re_lu_41",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      7,
-                      7,
-                      576
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_9_expand_bn",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "expanded_conv_9_expand_bn",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -6411,15 +4564,7 @@
           "config": {
             "name": "expanded_conv_9_depthwise",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "depth_multiplier": 1,
             "kernel_size": [
               3,
@@ -6468,28 +4613,14 @@
           },
           "name": "expanded_conv_9_depthwise",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      7,
-                      7,
-                      576
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "re_lu_41",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "re_lu_41",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -6498,15 +4629,7 @@
           "config": {
             "name": "expanded_conv_9_depthwise_bn",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "axis": -1,
             "momentum": 0.999,
             "epsilon": 0.001,
@@ -6553,30 +4676,14 @@
           },
           "name": "expanded_conv_9_depthwise_bn",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      7,
-                      7,
-                      576
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_9_depthwise",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {
-                "mask": null
-              }
-            }
+            [
+              [
+                "expanded_conv_9_depthwise",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -6585,44 +4692,22 @@
           "config": {
             "name": "re_lu_42",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "max_value": null,
-            "negative_slope": 0.0,
-            "threshold": 0.0
+            "negative_slope": 0,
+            "threshold": 0
           },
           "registered_name": null,
           "name": "re_lu_42",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      7,
-                      7,
-                      576
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_9_depthwise_bn",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "expanded_conv_9_depthwise_bn",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -6631,15 +4716,7 @@
           "config": {
             "name": "expanded_conv_9_project",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "filters": 96,
             "kernel_size": [
               1,
@@ -6689,28 +4766,14 @@
           },
           "name": "expanded_conv_9_project",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      7,
-                      7,
-                      576
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "re_lu_42",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "re_lu_42",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -6719,15 +4782,7 @@
           "config": {
             "name": "expanded_conv_9_project_bn",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "axis": -1,
             "momentum": 0.999,
             "epsilon": 0.001,
@@ -6774,30 +4829,14 @@
           },
           "name": "expanded_conv_9_project_bn",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      7,
-                      7,
-                      96
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_9_project",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {
-                "mask": null
-              }
-            }
+            [
+              [
+                "expanded_conv_9_project",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -6806,15 +4845,7 @@
           "config": {
             "name": "expanded_conv_9_add",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            }
+            "dtype": "float32"
           },
           "registered_name": null,
           "build_config": {
@@ -6884,15 +4915,7 @@
           "config": {
             "name": "expanded_conv_10_expand",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "filters": 576,
             "kernel_size": [
               1,
@@ -6942,28 +4965,14 @@
           },
           "name": "expanded_conv_10_expand",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      7,
-                      7,
-                      96
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_9_add",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "expanded_conv_9_add",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -6972,15 +4981,7 @@
           "config": {
             "name": "expanded_conv_10_expand_bn",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "axis": -1,
             "momentum": 0.999,
             "epsilon": 0.001,
@@ -7027,30 +5028,14 @@
           },
           "name": "expanded_conv_10_expand_bn",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      7,
-                      7,
-                      576
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_10_expand",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {
-                "mask": null
-              }
-            }
+            [
+              [
+                "expanded_conv_10_expand",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -7059,44 +5044,22 @@
           "config": {
             "name": "re_lu_43",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "max_value": null,
-            "negative_slope": 0.0,
-            "threshold": 0.0
+            "negative_slope": 0,
+            "threshold": 0
           },
           "registered_name": null,
           "name": "re_lu_43",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      7,
-                      7,
-                      576
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_10_expand_bn",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "expanded_conv_10_expand_bn",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -7105,15 +5068,7 @@
           "config": {
             "name": "expanded_conv_10_depthwise",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "depth_multiplier": 1,
             "kernel_size": [
               3,
@@ -7162,28 +5117,14 @@
           },
           "name": "expanded_conv_10_depthwise",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      7,
-                      7,
-                      576
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "re_lu_43",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "re_lu_43",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -7192,15 +5133,7 @@
           "config": {
             "name": "expanded_conv_10_depthwise_bn",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "axis": -1,
             "momentum": 0.999,
             "epsilon": 0.001,
@@ -7247,30 +5180,14 @@
           },
           "name": "expanded_conv_10_depthwise_bn",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      7,
-                      7,
-                      576
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_10_depthwise",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {
-                "mask": null
-              }
-            }
+            [
+              [
+                "expanded_conv_10_depthwise",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -7279,44 +5196,22 @@
           "config": {
             "name": "re_lu_44",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "max_value": null,
-            "negative_slope": 0.0,
-            "threshold": 0.0
+            "negative_slope": 0,
+            "threshold": 0
           },
           "registered_name": null,
           "name": "re_lu_44",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      7,
-                      7,
-                      576
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_10_depthwise_bn",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "expanded_conv_10_depthwise_bn",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -7325,15 +5220,7 @@
           "config": {
             "name": "expanded_conv_10_project",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "filters": 96,
             "kernel_size": [
               1,
@@ -7383,28 +5270,14 @@
           },
           "name": "expanded_conv_10_project",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      7,
-                      7,
-                      576
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "re_lu_44",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "re_lu_44",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -7413,15 +5286,7 @@
           "config": {
             "name": "expanded_conv_10_project_bn",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "axis": -1,
             "momentum": 0.999,
             "epsilon": 0.001,
@@ -7468,30 +5333,14 @@
           },
           "name": "expanded_conv_10_project_bn",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      7,
-                      7,
-                      96
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_10_project",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {
-                "mask": null
-              }
-            }
+            [
+              [
+                "expanded_conv_10_project",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -7500,15 +5349,7 @@
           "config": {
             "name": "expanded_conv_10_add",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            }
+            "dtype": "float32"
           },
           "registered_name": null,
           "build_config": {
@@ -7578,15 +5419,7 @@
           "config": {
             "name": "conv_1",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "filters": 576,
             "kernel_size": [
               1,
@@ -7636,28 +5469,14 @@
           },
           "name": "conv_1",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      7,
-                      7,
-                      96
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "expanded_conv_10_add",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "expanded_conv_10_add",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -7666,15 +5485,7 @@
           "config": {
             "name": "conv_1_bn",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "axis": -1,
             "momentum": 0.999,
             "epsilon": 0.001,
@@ -7721,30 +5532,14 @@
           },
           "name": "conv_1_bn",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      7,
-                      7,
-                      576
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "conv_1",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {
-                "mask": null
-              }
-            }
+            [
+              [
+                "conv_1",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -7753,44 +5548,22 @@
           "config": {
             "name": "re_lu_45",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "max_value": null,
-            "negative_slope": 0.0,
-            "threshold": 0.0
+            "negative_slope": 0,
+            "threshold": 0
           },
           "registered_name": null,
           "name": "re_lu_45",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      7,
-                      7,
-                      576
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "conv_1_bn",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "conv_1_bn",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -7799,43 +5572,21 @@
           "config": {
             "name": "global_average_pooling2d_2",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "data_format": "channels_last",
             "keepdims": false
           },
           "registered_name": null,
           "name": "global_average_pooling2d_2",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      7,
-                      7,
-                      576
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "re_lu_45",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "re_lu_45",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -7844,15 +5595,7 @@
           "config": {
             "name": "scout_mobilenet_skin_fc1",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "units": 256,
             "activation": "relu",
             "use_bias": true,
@@ -7884,26 +5627,14 @@
           },
           "name": "scout_mobilenet_skin_fc1",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      576
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "global_average_pooling2d_2",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "global_average_pooling2d_2",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -7912,15 +5643,7 @@
           "config": {
             "name": "dropout_17",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "rate": 0.3,
             "seed": null,
             "noise_shape": null
@@ -7928,28 +5651,14 @@
           "registered_name": null,
           "name": "dropout_17",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      256
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "scout_mobilenet_skin_fc1",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {
-                "training": false
-              }
-            }
+            [
+              [
+                "scout_mobilenet_skin_fc1",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -7958,15 +5667,7 @@
           "config": {
             "name": "scout_mobilenet_skin_fc2",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "units": 128,
             "activation": "relu",
             "use_bias": true,
@@ -7998,26 +5699,14 @@
           },
           "name": "scout_mobilenet_skin_fc2",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      256
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "dropout_17",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "dropout_17",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -8026,15 +5715,7 @@
           "config": {
             "name": "dropout_18",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "mixed_float16"
-              },
-              "registered_name": null,
-              "shared_object_id": 133461767405248
-            },
+            "dtype": "float32",
             "rate": 0.2,
             "seed": null,
             "noise_shape": null
@@ -8042,28 +5723,14 @@
           "registered_name": null,
           "name": "dropout_18",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      128
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "scout_mobilenet_skin_fc2",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {
-                "training": false
-              }
-            }
+            [
+              [
+                "scout_mobilenet_skin_fc2",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -8072,14 +5739,7 @@
           "config": {
             "name": "scout_mobilenet_skin_output",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null
-            },
+            "dtype": "float32",
             "units": 1,
             "activation": "sigmoid",
             "use_bias": true,
@@ -8111,26 +5771,14 @@
           },
           "name": "scout_mobilenet_skin_output",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      128
-                    ],
-                    "dtype": "float16",
-                    "keras_history": [
-                      "dropout_18",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "dropout_18",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         }
       ],
@@ -8163,7 +5811,7 @@
             "module": null,
             "class_name": "WarmupCosineDecay",
             "config": {
-              "base_lr": 1e-05,
+              "base_lr": 0.00001,
               "warmup_steps": 20,
               "total_steps": 300
             },
@@ -8180,7 +5828,7 @@
           "gradient_accumulation_steps": null,
           "beta_1": 0.9,
           "beta_2": 0.999,
-          "epsilon": 1e-07,
+          "epsilon": 1e-7,
           "amsgrad": false
         },
         "registered_name": null

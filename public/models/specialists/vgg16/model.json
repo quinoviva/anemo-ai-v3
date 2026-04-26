@@ -4,7 +4,7 @@
   "convertedBy": "manual",
   "modelTopology": {
     "module": "keras.src.models.functional",
-    "class_name": "Functional",
+    "class_name": "Model",
     "config": {
       "name": "specialist_vgg16",
       "trainable": true,
@@ -34,14 +34,7 @@
           "config": {
             "name": "block1_conv1",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null
-            },
+            "dtype": "float32",
             "filters": 64,
             "kernel_size": [
               3,
@@ -91,28 +84,14 @@
           },
           "name": "block1_conv1",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      224,
-                      224,
-                      3
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "specialist_vgg16_input",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "specialist_vgg16_input",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -121,15 +100,7 @@
           "config": {
             "name": "block1_conv2",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133455377387776
-            },
+            "dtype": "float32",
             "filters": 64,
             "kernel_size": [
               3,
@@ -179,28 +150,14 @@
           },
           "name": "block1_conv2",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      224,
-                      224,
-                      64
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "block1_conv1",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "block1_conv1",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -209,15 +166,7 @@
           "config": {
             "name": "block1_pool",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133455377387776
-            },
+            "dtype": "float32",
             "pool_size": [
               2,
               2
@@ -232,28 +181,14 @@
           "registered_name": null,
           "name": "block1_pool",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      224,
-                      224,
-                      64
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "block1_conv2",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "block1_conv2",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -262,15 +197,7 @@
           "config": {
             "name": "block2_conv1",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133455377387776
-            },
+            "dtype": "float32",
             "filters": 128,
             "kernel_size": [
               3,
@@ -320,28 +247,14 @@
           },
           "name": "block2_conv1",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      112,
-                      112,
-                      64
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "block1_pool",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "block1_pool",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -350,15 +263,7 @@
           "config": {
             "name": "block2_conv2",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133455377387776
-            },
+            "dtype": "float32",
             "filters": 128,
             "kernel_size": [
               3,
@@ -408,28 +313,14 @@
           },
           "name": "block2_conv2",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      112,
-                      112,
-                      128
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "block2_conv1",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "block2_conv1",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -438,15 +329,7 @@
           "config": {
             "name": "block2_pool",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133455377387776
-            },
+            "dtype": "float32",
             "pool_size": [
               2,
               2
@@ -461,28 +344,14 @@
           "registered_name": null,
           "name": "block2_pool",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      112,
-                      112,
-                      128
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "block2_conv2",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "block2_conv2",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -491,15 +360,7 @@
           "config": {
             "name": "block3_conv1",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133455377387776
-            },
+            "dtype": "float32",
             "filters": 256,
             "kernel_size": [
               3,
@@ -549,28 +410,14 @@
           },
           "name": "block3_conv1",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      56,
-                      56,
-                      128
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "block2_pool",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "block2_pool",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -579,15 +426,7 @@
           "config": {
             "name": "block3_conv2",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133455377387776
-            },
+            "dtype": "float32",
             "filters": 256,
             "kernel_size": [
               3,
@@ -637,28 +476,14 @@
           },
           "name": "block3_conv2",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      56,
-                      56,
-                      256
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "block3_conv1",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "block3_conv1",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -667,15 +492,7 @@
           "config": {
             "name": "block3_conv3",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133455377387776
-            },
+            "dtype": "float32",
             "filters": 256,
             "kernel_size": [
               3,
@@ -725,28 +542,14 @@
           },
           "name": "block3_conv3",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      56,
-                      56,
-                      256
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "block3_conv2",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "block3_conv2",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -755,15 +558,7 @@
           "config": {
             "name": "block3_pool",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133455377387776
-            },
+            "dtype": "float32",
             "pool_size": [
               2,
               2
@@ -778,28 +573,14 @@
           "registered_name": null,
           "name": "block3_pool",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      56,
-                      56,
-                      256
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "block3_conv3",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "block3_conv3",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -808,15 +589,7 @@
           "config": {
             "name": "block4_conv1",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133455377387776
-            },
+            "dtype": "float32",
             "filters": 512,
             "kernel_size": [
               3,
@@ -866,28 +639,14 @@
           },
           "name": "block4_conv1",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      28,
-                      28,
-                      256
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "block3_pool",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "block3_pool",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -896,15 +655,7 @@
           "config": {
             "name": "block4_conv2",
             "trainable": false,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133455377387776
-            },
+            "dtype": "float32",
             "filters": 512,
             "kernel_size": [
               3,
@@ -954,28 +705,14 @@
           },
           "name": "block4_conv2",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      28,
-                      28,
-                      512
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "block4_conv1",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "block4_conv1",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -984,15 +721,7 @@
           "config": {
             "name": "block4_conv3",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133455377387776
-            },
+            "dtype": "float32",
             "filters": 512,
             "kernel_size": [
               3,
@@ -1042,28 +771,14 @@
           },
           "name": "block4_conv3",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      28,
-                      28,
-                      512
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "block4_conv2",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "block4_conv2",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -1072,15 +787,7 @@
           "config": {
             "name": "block4_pool",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133455377387776
-            },
+            "dtype": "float32",
             "pool_size": [
               2,
               2
@@ -1095,28 +802,14 @@
           "registered_name": null,
           "name": "block4_pool",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      28,
-                      28,
-                      512
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "block4_conv3",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "block4_conv3",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -1125,15 +818,7 @@
           "config": {
             "name": "block5_conv1",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133455377387776
-            },
+            "dtype": "float32",
             "filters": 512,
             "kernel_size": [
               3,
@@ -1183,28 +868,14 @@
           },
           "name": "block5_conv1",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      14,
-                      14,
-                      512
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "block4_pool",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "block4_pool",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -1213,15 +884,7 @@
           "config": {
             "name": "block5_conv2",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133455377387776
-            },
+            "dtype": "float32",
             "filters": 512,
             "kernel_size": [
               3,
@@ -1271,28 +934,14 @@
           },
           "name": "block5_conv2",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      14,
-                      14,
-                      512
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "block5_conv1",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "block5_conv1",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -1301,15 +950,7 @@
           "config": {
             "name": "block5_conv3",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133455377387776
-            },
+            "dtype": "float32",
             "filters": 512,
             "kernel_size": [
               3,
@@ -1359,28 +1000,14 @@
           },
           "name": "block5_conv3",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      14,
-                      14,
-                      512
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "block5_conv2",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "block5_conv2",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -1389,15 +1016,7 @@
           "config": {
             "name": "block5_pool",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133455377387776
-            },
+            "dtype": "float32",
             "pool_size": [
               2,
               2
@@ -1412,28 +1031,14 @@
           "registered_name": null,
           "name": "block5_pool",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      14,
-                      14,
-                      512
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "block5_conv3",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "block5_conv3",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -1442,43 +1047,21 @@
           "config": {
             "name": "global_average_pooling2d",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133455377387776
-            },
+            "dtype": "float32",
             "data_format": "channels_last",
             "keepdims": false
           },
           "registered_name": null,
           "name": "global_average_pooling2d",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      7,
-                      7,
-                      512
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "block5_pool",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "block5_pool",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -1487,15 +1070,7 @@
           "config": {
             "name": "specialist_vgg16_fc1",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133455377387776
-            },
+            "dtype": "float32",
             "units": 256,
             "activation": "relu",
             "use_bias": true,
@@ -1527,26 +1102,14 @@
           },
           "name": "specialist_vgg16_fc1",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      512
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "global_average_pooling2d",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "global_average_pooling2d",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -1555,15 +1118,7 @@
           "config": {
             "name": "dropout",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133455377387776
-            },
+            "dtype": "float32",
             "rate": 0.3,
             "seed": null,
             "noise_shape": null
@@ -1571,28 +1126,14 @@
           "registered_name": null,
           "name": "dropout",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      256
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "specialist_vgg16_fc1",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {
-                "training": false
-              }
-            }
+            [
+              [
+                "specialist_vgg16_fc1",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -1601,15 +1142,7 @@
           "config": {
             "name": "specialist_vgg16_fc2",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133455377387776
-            },
+            "dtype": "float32",
             "units": 128,
             "activation": "relu",
             "use_bias": true,
@@ -1641,26 +1174,14 @@
           },
           "name": "specialist_vgg16_fc2",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      256
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "dropout",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "dropout",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -1669,15 +1190,7 @@
           "config": {
             "name": "dropout_1",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133455377387776
-            },
+            "dtype": "float32",
             "rate": 0.2,
             "seed": null,
             "noise_shape": null
@@ -1685,28 +1198,14 @@
           "registered_name": null,
           "name": "dropout_1",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      128
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "specialist_vgg16_fc2",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {
-                "training": false
-              }
-            }
+            [
+              [
+                "specialist_vgg16_fc2",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -1715,14 +1214,7 @@
           "config": {
             "name": "specialist_vgg16_output",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null
-            },
+            "dtype": "float32",
             "units": 1,
             "activation": "sigmoid",
             "use_bias": true,
@@ -1754,26 +1246,14 @@
           },
           "name": "specialist_vgg16_output",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      128
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "dropout_1",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "dropout_1",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         }
       ],
@@ -1806,7 +1286,7 @@
             "module": null,
             "class_name": "WarmupCosineDecay",
             "config": {
-              "base_lr": 1e-05,
+              "base_lr": 0.00001,
               "warmup_steps": 1309,
               "total_steps": 19635
             },
@@ -1823,7 +1303,7 @@
           "gradient_accumulation_steps": null,
           "beta_1": 0.9,
           "beta_2": 0.999,
-          "epsilon": 1e-07,
+          "epsilon": 1e-7,
           "amsgrad": false
         },
         "registered_name": null

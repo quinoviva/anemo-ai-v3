@@ -4,7 +4,7 @@
   "convertedBy": "manual",
   "modelTopology": {
     "module": "keras.src.models.functional",
-    "class_name": "Functional",
+    "class_name": "Model",
     "config": {
       "name": "scout_squeezenet_eye",
       "trainable": true,
@@ -34,14 +34,7 @@
           "config": {
             "name": "scout_squeezenet_eye_conv1",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null
-            },
+            "dtype": "float32",
             "filters": 96,
             "kernel_size": [
               7,
@@ -91,28 +84,14 @@
           },
           "name": "scout_squeezenet_eye_conv1",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      227,
-                      227,
-                      3
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "scout_squeezenet_eye_input",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "scout_squeezenet_eye_input",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -121,15 +100,7 @@
           "config": {
             "name": "max_pooling2d",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133457544880896
-            },
+            "dtype": "float32",
             "pool_size": [
               3,
               3
@@ -144,28 +115,14 @@
           "registered_name": null,
           "name": "max_pooling2d",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      111,
-                      111,
-                      96
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "scout_squeezenet_eye_conv1",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "scout_squeezenet_eye_conv1",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -174,15 +131,7 @@
           "config": {
             "name": "scout_squeezenet_eye_fire2_squeeze",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133457544880896
-            },
+            "dtype": "float32",
             "filters": 16,
             "kernel_size": [
               1,
@@ -232,28 +181,14 @@
           },
           "name": "scout_squeezenet_eye_fire2_squeeze",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      55,
-                      55,
-                      96
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "max_pooling2d",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "max_pooling2d",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -262,15 +197,7 @@
           "config": {
             "name": "scout_squeezenet_eye_fire2_e1x1",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133457544880896
-            },
+            "dtype": "float32",
             "filters": 64,
             "kernel_size": [
               1,
@@ -320,28 +247,14 @@
           },
           "name": "scout_squeezenet_eye_fire2_e1x1",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      55,
-                      55,
-                      16
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "scout_squeezenet_eye_fire2_squeeze",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "scout_squeezenet_eye_fire2_squeeze",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -350,15 +263,7 @@
           "config": {
             "name": "scout_squeezenet_eye_fire2_e3x3",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133457544880896
-            },
+            "dtype": "float32",
             "filters": 64,
             "kernel_size": [
               3,
@@ -408,28 +313,14 @@
           },
           "name": "scout_squeezenet_eye_fire2_e3x3",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      55,
-                      55,
-                      16
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "scout_squeezenet_eye_fire2_squeeze",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "scout_squeezenet_eye_fire2_squeeze",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -438,15 +329,7 @@
           "config": {
             "name": "scout_squeezenet_eye_fire2_concat",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133457544880896
-            },
+            "dtype": "float32",
             "axis": -1
           },
           "registered_name": null,
@@ -517,15 +400,7 @@
           "config": {
             "name": "scout_squeezenet_eye_fire3_squeeze",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133457544880896
-            },
+            "dtype": "float32",
             "filters": 16,
             "kernel_size": [
               1,
@@ -575,28 +450,14 @@
           },
           "name": "scout_squeezenet_eye_fire3_squeeze",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      55,
-                      55,
-                      128
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "scout_squeezenet_eye_fire2_concat",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "scout_squeezenet_eye_fire2_concat",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -605,15 +466,7 @@
           "config": {
             "name": "scout_squeezenet_eye_fire3_e1x1",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133457544880896
-            },
+            "dtype": "float32",
             "filters": 64,
             "kernel_size": [
               1,
@@ -663,28 +516,14 @@
           },
           "name": "scout_squeezenet_eye_fire3_e1x1",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      55,
-                      55,
-                      16
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "scout_squeezenet_eye_fire3_squeeze",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "scout_squeezenet_eye_fire3_squeeze",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -693,15 +532,7 @@
           "config": {
             "name": "scout_squeezenet_eye_fire3_e3x3",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133457544880896
-            },
+            "dtype": "float32",
             "filters": 64,
             "kernel_size": [
               3,
@@ -751,28 +582,14 @@
           },
           "name": "scout_squeezenet_eye_fire3_e3x3",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      55,
-                      55,
-                      16
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "scout_squeezenet_eye_fire3_squeeze",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "scout_squeezenet_eye_fire3_squeeze",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -781,15 +598,7 @@
           "config": {
             "name": "scout_squeezenet_eye_fire3_concat",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133457544880896
-            },
+            "dtype": "float32",
             "axis": -1
           },
           "registered_name": null,
@@ -860,15 +669,7 @@
           "config": {
             "name": "scout_squeezenet_eye_fire4_squeeze",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133457544880896
-            },
+            "dtype": "float32",
             "filters": 32,
             "kernel_size": [
               1,
@@ -918,28 +719,14 @@
           },
           "name": "scout_squeezenet_eye_fire4_squeeze",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      55,
-                      55,
-                      128
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "scout_squeezenet_eye_fire3_concat",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "scout_squeezenet_eye_fire3_concat",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -948,15 +735,7 @@
           "config": {
             "name": "scout_squeezenet_eye_fire4_e1x1",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133457544880896
-            },
+            "dtype": "float32",
             "filters": 128,
             "kernel_size": [
               1,
@@ -1006,28 +785,14 @@
           },
           "name": "scout_squeezenet_eye_fire4_e1x1",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      55,
-                      55,
-                      32
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "scout_squeezenet_eye_fire4_squeeze",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "scout_squeezenet_eye_fire4_squeeze",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -1036,15 +801,7 @@
           "config": {
             "name": "scout_squeezenet_eye_fire4_e3x3",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133457544880896
-            },
+            "dtype": "float32",
             "filters": 128,
             "kernel_size": [
               3,
@@ -1094,28 +851,14 @@
           },
           "name": "scout_squeezenet_eye_fire4_e3x3",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      55,
-                      55,
-                      32
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "scout_squeezenet_eye_fire4_squeeze",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "scout_squeezenet_eye_fire4_squeeze",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -1124,15 +867,7 @@
           "config": {
             "name": "scout_squeezenet_eye_fire4_concat",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133457544880896
-            },
+            "dtype": "float32",
             "axis": -1
           },
           "registered_name": null,
@@ -1203,15 +938,7 @@
           "config": {
             "name": "max_pooling2d_1",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133457544880896
-            },
+            "dtype": "float32",
             "pool_size": [
               3,
               3
@@ -1226,28 +953,14 @@
           "registered_name": null,
           "name": "max_pooling2d_1",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      55,
-                      55,
-                      256
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "scout_squeezenet_eye_fire4_concat",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "scout_squeezenet_eye_fire4_concat",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -1256,15 +969,7 @@
           "config": {
             "name": "scout_squeezenet_eye_fire5_squeeze",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133457544880896
-            },
+            "dtype": "float32",
             "filters": 32,
             "kernel_size": [
               1,
@@ -1314,28 +1019,14 @@
           },
           "name": "scout_squeezenet_eye_fire5_squeeze",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      27,
-                      27,
-                      256
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "max_pooling2d_1",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "max_pooling2d_1",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -1344,15 +1035,7 @@
           "config": {
             "name": "scout_squeezenet_eye_fire5_e1x1",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133457544880896
-            },
+            "dtype": "float32",
             "filters": 128,
             "kernel_size": [
               1,
@@ -1402,28 +1085,14 @@
           },
           "name": "scout_squeezenet_eye_fire5_e1x1",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      27,
-                      27,
-                      32
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "scout_squeezenet_eye_fire5_squeeze",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "scout_squeezenet_eye_fire5_squeeze",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -1432,15 +1101,7 @@
           "config": {
             "name": "scout_squeezenet_eye_fire5_e3x3",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133457544880896
-            },
+            "dtype": "float32",
             "filters": 128,
             "kernel_size": [
               3,
@@ -1490,28 +1151,14 @@
           },
           "name": "scout_squeezenet_eye_fire5_e3x3",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      27,
-                      27,
-                      32
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "scout_squeezenet_eye_fire5_squeeze",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "scout_squeezenet_eye_fire5_squeeze",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -1520,15 +1167,7 @@
           "config": {
             "name": "scout_squeezenet_eye_fire5_concat",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133457544880896
-            },
+            "dtype": "float32",
             "axis": -1
           },
           "registered_name": null,
@@ -1599,15 +1238,7 @@
           "config": {
             "name": "scout_squeezenet_eye_fire6_squeeze",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133457544880896
-            },
+            "dtype": "float32",
             "filters": 48,
             "kernel_size": [
               1,
@@ -1657,28 +1288,14 @@
           },
           "name": "scout_squeezenet_eye_fire6_squeeze",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      27,
-                      27,
-                      256
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "scout_squeezenet_eye_fire5_concat",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "scout_squeezenet_eye_fire5_concat",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -1687,15 +1304,7 @@
           "config": {
             "name": "scout_squeezenet_eye_fire6_e1x1",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133457544880896
-            },
+            "dtype": "float32",
             "filters": 192,
             "kernel_size": [
               1,
@@ -1745,28 +1354,14 @@
           },
           "name": "scout_squeezenet_eye_fire6_e1x1",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      27,
-                      27,
-                      48
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "scout_squeezenet_eye_fire6_squeeze",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "scout_squeezenet_eye_fire6_squeeze",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -1775,15 +1370,7 @@
           "config": {
             "name": "scout_squeezenet_eye_fire6_e3x3",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133457544880896
-            },
+            "dtype": "float32",
             "filters": 192,
             "kernel_size": [
               3,
@@ -1833,28 +1420,14 @@
           },
           "name": "scout_squeezenet_eye_fire6_e3x3",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      27,
-                      27,
-                      48
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "scout_squeezenet_eye_fire6_squeeze",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "scout_squeezenet_eye_fire6_squeeze",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -1863,15 +1436,7 @@
           "config": {
             "name": "scout_squeezenet_eye_fire6_concat",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133457544880896
-            },
+            "dtype": "float32",
             "axis": -1
           },
           "registered_name": null,
@@ -1942,15 +1507,7 @@
           "config": {
             "name": "scout_squeezenet_eye_fire7_squeeze",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133457544880896
-            },
+            "dtype": "float32",
             "filters": 48,
             "kernel_size": [
               1,
@@ -2000,28 +1557,14 @@
           },
           "name": "scout_squeezenet_eye_fire7_squeeze",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      27,
-                      27,
-                      384
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "scout_squeezenet_eye_fire6_concat",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "scout_squeezenet_eye_fire6_concat",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -2030,15 +1573,7 @@
           "config": {
             "name": "scout_squeezenet_eye_fire7_e1x1",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133457544880896
-            },
+            "dtype": "float32",
             "filters": 192,
             "kernel_size": [
               1,
@@ -2088,28 +1623,14 @@
           },
           "name": "scout_squeezenet_eye_fire7_e1x1",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      27,
-                      27,
-                      48
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "scout_squeezenet_eye_fire7_squeeze",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "scout_squeezenet_eye_fire7_squeeze",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -2118,15 +1639,7 @@
           "config": {
             "name": "scout_squeezenet_eye_fire7_e3x3",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133457544880896
-            },
+            "dtype": "float32",
             "filters": 192,
             "kernel_size": [
               3,
@@ -2176,28 +1689,14 @@
           },
           "name": "scout_squeezenet_eye_fire7_e3x3",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      27,
-                      27,
-                      48
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "scout_squeezenet_eye_fire7_squeeze",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "scout_squeezenet_eye_fire7_squeeze",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -2206,15 +1705,7 @@
           "config": {
             "name": "scout_squeezenet_eye_fire7_concat",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133457544880896
-            },
+            "dtype": "float32",
             "axis": -1
           },
           "registered_name": null,
@@ -2285,15 +1776,7 @@
           "config": {
             "name": "scout_squeezenet_eye_fire8_squeeze",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133457544880896
-            },
+            "dtype": "float32",
             "filters": 64,
             "kernel_size": [
               1,
@@ -2343,28 +1826,14 @@
           },
           "name": "scout_squeezenet_eye_fire8_squeeze",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      27,
-                      27,
-                      384
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "scout_squeezenet_eye_fire7_concat",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "scout_squeezenet_eye_fire7_concat",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -2373,15 +1842,7 @@
           "config": {
             "name": "scout_squeezenet_eye_fire8_e1x1",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133457544880896
-            },
+            "dtype": "float32",
             "filters": 256,
             "kernel_size": [
               1,
@@ -2431,28 +1892,14 @@
           },
           "name": "scout_squeezenet_eye_fire8_e1x1",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      27,
-                      27,
-                      64
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "scout_squeezenet_eye_fire8_squeeze",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "scout_squeezenet_eye_fire8_squeeze",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -2461,15 +1908,7 @@
           "config": {
             "name": "scout_squeezenet_eye_fire8_e3x3",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133457544880896
-            },
+            "dtype": "float32",
             "filters": 256,
             "kernel_size": [
               3,
@@ -2519,28 +1958,14 @@
           },
           "name": "scout_squeezenet_eye_fire8_e3x3",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      27,
-                      27,
-                      64
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "scout_squeezenet_eye_fire8_squeeze",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "scout_squeezenet_eye_fire8_squeeze",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -2549,15 +1974,7 @@
           "config": {
             "name": "scout_squeezenet_eye_fire8_concat",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133457544880896
-            },
+            "dtype": "float32",
             "axis": -1
           },
           "registered_name": null,
@@ -2628,15 +2045,7 @@
           "config": {
             "name": "max_pooling2d_2",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133457544880896
-            },
+            "dtype": "float32",
             "pool_size": [
               3,
               3
@@ -2651,28 +2060,14 @@
           "registered_name": null,
           "name": "max_pooling2d_2",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      27,
-                      27,
-                      512
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "scout_squeezenet_eye_fire8_concat",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "scout_squeezenet_eye_fire8_concat",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -2681,15 +2076,7 @@
           "config": {
             "name": "scout_squeezenet_eye_fire9_squeeze",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133457544880896
-            },
+            "dtype": "float32",
             "filters": 64,
             "kernel_size": [
               1,
@@ -2739,28 +2126,14 @@
           },
           "name": "scout_squeezenet_eye_fire9_squeeze",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      13,
-                      13,
-                      512
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "max_pooling2d_2",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "max_pooling2d_2",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -2769,15 +2142,7 @@
           "config": {
             "name": "scout_squeezenet_eye_fire9_e1x1",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133457544880896
-            },
+            "dtype": "float32",
             "filters": 256,
             "kernel_size": [
               1,
@@ -2827,28 +2192,14 @@
           },
           "name": "scout_squeezenet_eye_fire9_e1x1",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      13,
-                      13,
-                      64
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "scout_squeezenet_eye_fire9_squeeze",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "scout_squeezenet_eye_fire9_squeeze",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -2857,15 +2208,7 @@
           "config": {
             "name": "scout_squeezenet_eye_fire9_e3x3",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133457544880896
-            },
+            "dtype": "float32",
             "filters": 256,
             "kernel_size": [
               3,
@@ -2915,28 +2258,14 @@
           },
           "name": "scout_squeezenet_eye_fire9_e3x3",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      13,
-                      13,
-                      64
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "scout_squeezenet_eye_fire9_squeeze",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "scout_squeezenet_eye_fire9_squeeze",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -2945,15 +2274,7 @@
           "config": {
             "name": "scout_squeezenet_eye_fire9_concat",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133457544880896
-            },
+            "dtype": "float32",
             "axis": -1
           },
           "registered_name": null,
@@ -3024,15 +2345,7 @@
           "config": {
             "name": "dropout",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133457544880896
-            },
+            "dtype": "float32",
             "rate": 0.5,
             "seed": null,
             "noise_shape": null
@@ -3040,30 +2353,14 @@
           "registered_name": null,
           "name": "dropout",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      13,
-                      13,
-                      512
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "scout_squeezenet_eye_fire9_concat",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {
-                "training": false
-              }
-            }
+            [
+              [
+                "scout_squeezenet_eye_fire9_concat",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -3072,15 +2369,7 @@
           "config": {
             "name": "scout_squeezenet_eye_conv_final",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133457544880896
-            },
+            "dtype": "float32",
             "filters": 256,
             "kernel_size": [
               1,
@@ -3130,28 +2419,14 @@
           },
           "name": "scout_squeezenet_eye_conv_final",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      13,
-                      13,
-                      512
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "dropout",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "dropout",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -3160,43 +2435,21 @@
           "config": {
             "name": "global_average_pooling2d",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133457544880896
-            },
+            "dtype": "float32",
             "data_format": "channels_last",
             "keepdims": false
           },
           "registered_name": null,
           "name": "global_average_pooling2d",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      13,
-                      13,
-                      256
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "scout_squeezenet_eye_conv_final",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "scout_squeezenet_eye_conv_final",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -3205,15 +2458,7 @@
           "config": {
             "name": "scout_squeezenet_eye_fc1",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133457544880896
-            },
+            "dtype": "float32",
             "units": 256,
             "activation": "relu",
             "use_bias": true,
@@ -3245,26 +2490,14 @@
           },
           "name": "scout_squeezenet_eye_fc1",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      256
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "global_average_pooling2d",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "global_average_pooling2d",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -3273,15 +2506,7 @@
           "config": {
             "name": "dropout_1",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133457544880896
-            },
+            "dtype": "float32",
             "rate": 0.3,
             "seed": null,
             "noise_shape": null
@@ -3289,28 +2514,14 @@
           "registered_name": null,
           "name": "dropout_1",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      256
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "scout_squeezenet_eye_fc1",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {
-                "training": false
-              }
-            }
+            [
+              [
+                "scout_squeezenet_eye_fc1",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -3319,15 +2530,7 @@
           "config": {
             "name": "scout_squeezenet_eye_fc2",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133457544880896
-            },
+            "dtype": "float32",
             "units": 128,
             "activation": "relu",
             "use_bias": true,
@@ -3359,26 +2562,14 @@
           },
           "name": "scout_squeezenet_eye_fc2",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      256
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "dropout_1",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "dropout_1",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -3387,15 +2578,7 @@
           "config": {
             "name": "dropout_2",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null,
-              "shared_object_id": 133457544880896
-            },
+            "dtype": "float32",
             "rate": 0.2,
             "seed": null,
             "noise_shape": null
@@ -3403,28 +2586,14 @@
           "registered_name": null,
           "name": "dropout_2",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      128
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "scout_squeezenet_eye_fc2",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {
-                "training": false
-              }
-            }
+            [
+              [
+                "scout_squeezenet_eye_fc2",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -3433,14 +2602,7 @@
           "config": {
             "name": "scout_squeezenet_eye_output",
             "trainable": true,
-            "dtype": {
-              "module": "keras",
-              "class_name": "DTypePolicy",
-              "config": {
-                "name": "float32"
-              },
-              "registered_name": null
-            },
+            "dtype": "float32",
             "units": 1,
             "activation": "sigmoid",
             "use_bias": true,
@@ -3472,26 +2634,14 @@
           },
           "name": "scout_squeezenet_eye_output",
           "inbound_nodes": [
-            {
-              "args": [
-                {
-                  "class_name": "__keras_tensor__",
-                  "config": {
-                    "shape": [
-                      null,
-                      128
-                    ],
-                    "dtype": "float32",
-                    "keras_history": [
-                      "dropout_2",
-                      0,
-                      0
-                    ]
-                  }
-                }
-              ],
-              "kwargs": {}
-            }
+            [
+              [
+                "dropout_2",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         }
       ],
@@ -3541,7 +2691,7 @@
           "gradient_accumulation_steps": null,
           "beta_1": 0.9,
           "beta_2": 0.999,
-          "epsilon": 1e-07,
+          "epsilon": 1e-7,
           "amsgrad": false
         },
         "registered_name": null
