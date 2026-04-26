@@ -1973,81 +1973,32 @@
           },
           "name": "mixed0",
           "inbound_nodes": [
-            {
-              "args": [
-                [
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        35,
-                        35,
-                        64
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "activation_5",
-                        0,
-                        0
-                      ]
-                    }
-                  },
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        35,
-                        35,
-                        64
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "activation_7",
-                        0,
-                        0
-                      ]
-                    }
-                  },
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        35,
-                        35,
-                        96
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "activation_10",
-                        0,
-                        0
-                      ]
-                    }
-                  },
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        35,
-                        35,
-                        32
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "activation_11",
-                        0,
-                        0
-                      ]
-                    }
-                  }
-                ]
+            [
+              [
+                "activation_5",
+                0,
+                0,
+                {}
               ],
-              "kwargs": {}
-            }
+              [
+                "activation_7",
+                0,
+                0,
+                {}
+              ],
+              [
+                "activation_10",
+                0,
+                0,
+                {}
+              ],
+              [
+                "activation_11",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -3178,81 +3129,32 @@
           },
           "name": "mixed1",
           "inbound_nodes": [
-            {
-              "args": [
-                [
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        35,
-                        35,
-                        64
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "activation_12",
-                        0,
-                        0
-                      ]
-                    }
-                  },
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        35,
-                        35,
-                        64
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "activation_14",
-                        0,
-                        0
-                      ]
-                    }
-                  },
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        35,
-                        35,
-                        96
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "activation_17",
-                        0,
-                        0
-                      ]
-                    }
-                  },
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        35,
-                        35,
-                        64
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "activation_18",
-                        0,
-                        0
-                      ]
-                    }
-                  }
-                ]
+            [
+              [
+                "activation_12",
+                0,
+                0,
+                {}
               ],
-              "kwargs": {}
-            }
+              [
+                "activation_14",
+                0,
+                0,
+                {}
+              ],
+              [
+                "activation_17",
+                0,
+                0,
+                {}
+              ],
+              [
+                "activation_18",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -4383,81 +4285,32 @@
           },
           "name": "mixed2",
           "inbound_nodes": [
-            {
-              "args": [
-                [
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        35,
-                        35,
-                        64
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "activation_19",
-                        0,
-                        0
-                      ]
-                    }
-                  },
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        35,
-                        35,
-                        64
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "activation_21",
-                        0,
-                        0
-                      ]
-                    }
-                  },
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        35,
-                        35,
-                        96
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "activation_24",
-                        0,
-                        0
-                      ]
-                    }
-                  },
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        35,
-                        35,
-                        64
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "activation_25",
-                        0,
-                        0
-                      ]
-                    }
-                  }
-                ]
+            [
+              [
+                "activation_19",
+                0,
+                0,
+                {}
               ],
-              "kwargs": {}
-            }
+              [
+                "activation_21",
+                0,
+                0,
+                {}
+              ],
+              [
+                "activation_24",
+                0,
+                0,
+                {}
+              ],
+              [
+                "activation_25",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -5129,64 +4982,26 @@
           },
           "name": "mixed3",
           "inbound_nodes": [
-            {
-              "args": [
-                [
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        17,
-                        17,
-                        384
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "activation_26",
-                        0,
-                        0
-                      ]
-                    }
-                  },
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        17,
-                        17,
-                        96
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "activation_29",
-                        0,
-                        0
-                      ]
-                    }
-                  },
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        17,
-                        17,
-                        288
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "max_pooling2d_2",
-                        0,
-                        0
-                      ]
-                    }
-                  }
-                ]
+            [
+              [
+                "activation_26",
+                0,
+                0,
+                {}
               ],
-              "kwargs": {}
-            }
+              [
+                "activation_29",
+                0,
+                0,
+                {}
+              ],
+              [
+                "max_pooling2d_2",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -6770,81 +6585,32 @@
           },
           "name": "mixed4",
           "inbound_nodes": [
-            {
-              "args": [
-                [
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        17,
-                        17,
-                        192
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "activation_30",
-                        0,
-                        0
-                      ]
-                    }
-                  },
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        17,
-                        17,
-                        192
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "activation_33",
-                        0,
-                        0
-                      ]
-                    }
-                  },
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        17,
-                        17,
-                        192
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "activation_38",
-                        0,
-                        0
-                      ]
-                    }
-                  },
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        17,
-                        17,
-                        192
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "activation_39",
-                        0,
-                        0
-                      ]
-                    }
-                  }
-                ]
+            [
+              [
+                "activation_30",
+                0,
+                0,
+                {}
               ],
-              "kwargs": {}
-            }
+              [
+                "activation_33",
+                0,
+                0,
+                {}
+              ],
+              [
+                "activation_38",
+                0,
+                0,
+                {}
+              ],
+              [
+                "activation_39",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -8428,81 +8194,32 @@
           },
           "name": "mixed5",
           "inbound_nodes": [
-            {
-              "args": [
-                [
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        17,
-                        17,
-                        192
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "activation_40",
-                        0,
-                        0
-                      ]
-                    }
-                  },
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        17,
-                        17,
-                        192
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "activation_43",
-                        0,
-                        0
-                      ]
-                    }
-                  },
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        17,
-                        17,
-                        192
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "activation_48",
-                        0,
-                        0
-                      ]
-                    }
-                  },
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        17,
-                        17,
-                        192
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "activation_49",
-                        0,
-                        0
-                      ]
-                    }
-                  }
-                ]
+            [
+              [
+                "activation_40",
+                0,
+                0,
+                {}
               ],
-              "kwargs": {}
-            }
+              [
+                "activation_43",
+                0,
+                0,
+                {}
+              ],
+              [
+                "activation_48",
+                0,
+                0,
+                {}
+              ],
+              [
+                "activation_49",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -10086,81 +9803,32 @@
           },
           "name": "mixed6",
           "inbound_nodes": [
-            {
-              "args": [
-                [
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        17,
-                        17,
-                        192
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "activation_50",
-                        0,
-                        0
-                      ]
-                    }
-                  },
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        17,
-                        17,
-                        192
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "activation_53",
-                        0,
-                        0
-                      ]
-                    }
-                  },
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        17,
-                        17,
-                        192
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "activation_58",
-                        0,
-                        0
-                      ]
-                    }
-                  },
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        17,
-                        17,
-                        192
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "activation_59",
-                        0,
-                        0
-                      ]
-                    }
-                  }
-                ]
+            [
+              [
+                "activation_50",
+                0,
+                0,
+                {}
               ],
-              "kwargs": {}
-            }
+              [
+                "activation_53",
+                0,
+                0,
+                {}
+              ],
+              [
+                "activation_58",
+                0,
+                0,
+                {}
+              ],
+              [
+                "activation_59",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -11744,81 +11412,32 @@
           },
           "name": "mixed7",
           "inbound_nodes": [
-            {
-              "args": [
-                [
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        17,
-                        17,
-                        192
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "activation_60",
-                        0,
-                        0
-                      ]
-                    }
-                  },
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        17,
-                        17,
-                        192
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "activation_63",
-                        0,
-                        0
-                      ]
-                    }
-                  },
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        17,
-                        17,
-                        192
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "activation_68",
-                        0,
-                        0
-                      ]
-                    }
-                  },
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        17,
-                        17,
-                        192
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "activation_69",
-                        0,
-                        0
-                      ]
-                    }
-                  }
-                ]
+            [
+              [
+                "activation_60",
+                0,
+                0,
+                {}
               ],
-              "kwargs": {}
-            }
+              [
+                "activation_63",
+                0,
+                0,
+                {}
+              ],
+              [
+                "activation_68",
+                0,
+                0,
+                {}
+              ],
+              [
+                "activation_69",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -12792,64 +12411,26 @@
           },
           "name": "mixed8",
           "inbound_nodes": [
-            {
-              "args": [
-                [
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        8,
-                        8,
-                        320
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "activation_71",
-                        0,
-                        0
-                      ]
-                    }
-                  },
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        8,
-                        8,
-                        192
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "activation_75",
-                        0,
-                        0
-                      ]
-                    }
-                  },
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        8,
-                        8,
-                        768
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "max_pooling2d_3",
-                        0,
-                        0
-                      ]
-                    }
-                  }
-                ]
+            [
+              [
+                "activation_71",
+                0,
+                0,
+                {}
               ],
-              "kwargs": {}
-            }
+              [
+                "activation_75",
+                0,
+                0,
+                {}
+              ],
+              [
+                "max_pooling2d_3",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -14248,47 +13829,20 @@
           },
           "name": "mixed9_0",
           "inbound_nodes": [
-            {
-              "args": [
-                [
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        8,
-                        8,
-                        384
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "activation_78",
-                        0,
-                        0
-                      ]
-                    }
-                  },
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        8,
-                        8,
-                        384
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "activation_79",
-                        0,
-                        0
-                      ]
-                    }
-                  }
-                ]
+            [
+              [
+                "activation_78",
+                0,
+                0,
+                {}
               ],
-              "kwargs": {}
-            }
+              [
+                "activation_79",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -14319,47 +13873,20 @@
           },
           "name": "concatenate",
           "inbound_nodes": [
-            {
-              "args": [
-                [
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        8,
-                        8,
-                        384
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "activation_82",
-                        0,
-                        0
-                      ]
-                    }
-                  },
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        8,
-                        8,
-                        384
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "activation_83",
-                        0,
-                        0
-                      ]
-                    }
-                  }
-                ]
+            [
+              [
+                "activation_82",
+                0,
+                0,
+                {}
               ],
-              "kwargs": {}
-            }
+              [
+                "activation_83",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -14424,81 +13951,32 @@
           },
           "name": "mixed9",
           "inbound_nodes": [
-            {
-              "args": [
-                [
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        8,
-                        8,
-                        320
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "activation_76",
-                        0,
-                        0
-                      ]
-                    }
-                  },
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        8,
-                        8,
-                        768
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "mixed9_0",
-                        0,
-                        0
-                      ]
-                    }
-                  },
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        8,
-                        8,
-                        768
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "concatenate",
-                        0,
-                        0
-                      ]
-                    }
-                  },
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        8,
-                        8,
-                        192
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "activation_84",
-                        0,
-                        0
-                      ]
-                    }
-                  }
-                ]
+            [
+              [
+                "activation_76",
+                0,
+                0,
+                {}
               ],
-              "kwargs": {}
-            }
+              [
+                "mixed9_0",
+                0,
+                0,
+                {}
+              ],
+              [
+                "concatenate",
+                0,
+                0,
+                {}
+              ],
+              [
+                "activation_84",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -15897,47 +15375,20 @@
           },
           "name": "mixed9_1",
           "inbound_nodes": [
-            {
-              "args": [
-                [
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        8,
-                        8,
-                        384
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "activation_87",
-                        0,
-                        0
-                      ]
-                    }
-                  },
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        8,
-                        8,
-                        384
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "activation_88",
-                        0,
-                        0
-                      ]
-                    }
-                  }
-                ]
+            [
+              [
+                "activation_87",
+                0,
+                0,
+                {}
               ],
-              "kwargs": {}
-            }
+              [
+                "activation_88",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -15968,47 +15419,20 @@
           },
           "name": "concatenate_1",
           "inbound_nodes": [
-            {
-              "args": [
-                [
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        8,
-                        8,
-                        384
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "activation_91",
-                        0,
-                        0
-                      ]
-                    }
-                  },
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        8,
-                        8,
-                        384
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "activation_92",
-                        0,
-                        0
-                      ]
-                    }
-                  }
-                ]
+            [
+              [
+                "activation_91",
+                0,
+                0,
+                {}
               ],
-              "kwargs": {}
-            }
+              [
+                "activation_92",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -16073,81 +15497,32 @@
           },
           "name": "mixed10",
           "inbound_nodes": [
-            {
-              "args": [
-                [
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        8,
-                        8,
-                        320
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "activation_85",
-                        0,
-                        0
-                      ]
-                    }
-                  },
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        8,
-                        8,
-                        768
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "mixed9_1",
-                        0,
-                        0
-                      ]
-                    }
-                  },
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        8,
-                        8,
-                        768
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "concatenate_1",
-                        0,
-                        0
-                      ]
-                    }
-                  },
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        8,
-                        8,
-                        192
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "activation_93",
-                        0,
-                        0
-                      ]
-                    }
-                  }
-                ]
+            [
+              [
+                "activation_85",
+                0,
+                0,
+                {}
               ],
-              "kwargs": {}
-            }
+              [
+                "mixed9_1",
+                0,
+                0,
+                {}
+              ],
+              [
+                "concatenate_1",
+                0,
+                0,
+                {}
+              ],
+              [
+                "activation_93",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {

@@ -1468,47 +1468,20 @@
           },
           "name": "expanded_conv_2_add",
           "inbound_nodes": [
-            {
-              "args": [
-                [
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        28,
-                        28,
-                        24
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "expanded_conv_1_project_bn",
-                        0,
-                        0
-                      ]
-                    }
-                  },
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        28,
-                        28,
-                        24
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "expanded_conv_2_project_bn",
-                        0,
-                        0
-                      ]
-                    }
-                  }
-                ]
+            [
+              [
+                "expanded_conv_1_project_bn",
+                0,
+                0,
+                {}
               ],
-              "kwargs": {}
-            }
+              [
+                "expanded_conv_2_project_bn",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -2446,47 +2419,20 @@
           },
           "name": "expanded_conv_4_add",
           "inbound_nodes": [
-            {
-              "args": [
-                [
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        14,
-                        14,
-                        40
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "expanded_conv_3_project_bn",
-                        0,
-                        0
-                      ]
-                    }
-                  },
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        14,
-                        14,
-                        40
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "expanded_conv_4_project_bn",
-                        0,
-                        0
-                      ]
-                    }
-                  }
-                ]
+            [
+              [
+                "expanded_conv_3_project_bn",
+                0,
+                0,
+                {}
               ],
-              "kwargs": {}
-            }
+              [
+                "expanded_conv_4_project_bn",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -2950,47 +2896,20 @@
           },
           "name": "expanded_conv_5_add",
           "inbound_nodes": [
-            {
-              "args": [
-                [
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        14,
-                        14,
-                        40
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "expanded_conv_4_add",
-                        0,
-                        0
-                      ]
-                    }
-                  },
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        14,
-                        14,
-                        40
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "expanded_conv_5_project_bn",
-                        0,
-                        0
-                      ]
-                    }
-                  }
-                ]
+            [
+              [
+                "expanded_conv_4_add",
+                0,
+                0,
+                {}
               ],
-              "kwargs": {}
-            }
+              [
+                "expanded_conv_5_project_bn",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -3888,47 +3807,20 @@
           },
           "name": "expanded_conv_7_add",
           "inbound_nodes": [
-            {
-              "args": [
-                [
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        14,
-                        14,
-                        48
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "expanded_conv_6_project_bn",
-                        0,
-                        0
-                      ]
-                    }
-                  },
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        14,
-                        14,
-                        48
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "expanded_conv_7_project_bn",
-                        0,
-                        0
-                      ]
-                    }
-                  }
-                ]
+            [
+              [
+                "expanded_conv_6_project_bn",
+                0,
+                0,
+                {}
               ],
-              "kwargs": {}
-            }
+              [
+                "expanded_conv_7_project_bn",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -4866,47 +4758,20 @@
           },
           "name": "expanded_conv_9_add",
           "inbound_nodes": [
-            {
-              "args": [
-                [
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        7,
-                        7,
-                        96
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "expanded_conv_8_project_bn",
-                        0,
-                        0
-                      ]
-                    }
-                  },
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        7,
-                        7,
-                        96
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "expanded_conv_9_project_bn",
-                        0,
-                        0
-                      ]
-                    }
-                  }
-                ]
+            [
+              [
+                "expanded_conv_8_project_bn",
+                0,
+                0,
+                {}
               ],
-              "kwargs": {}
-            }
+              [
+                "expanded_conv_9_project_bn",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -5370,47 +5235,20 @@
           },
           "name": "expanded_conv_10_add",
           "inbound_nodes": [
-            {
-              "args": [
-                [
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        7,
-                        7,
-                        96
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "expanded_conv_9_add",
-                        0,
-                        0
-                      ]
-                    }
-                  },
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        7,
-                        7,
-                        96
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "expanded_conv_10_project_bn",
-                        0,
-                        0
-                      ]
-                    }
-                  }
-                ]
+            [
+              [
+                "expanded_conv_9_add",
+                0,
+                0,
+                {}
               ],
-              "kwargs": {}
-            }
+              [
+                "expanded_conv_10_project_bn",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {

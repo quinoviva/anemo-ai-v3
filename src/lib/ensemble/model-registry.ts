@@ -37,7 +37,7 @@ export interface EnsembleModelConfig {
   parameter: ModelParameter;
   /**
    * Path to the TensorFlow.js model JSON file inside /public/models/.
-   * Example: "/models/scouts/mobilenet-v4-skin/model.json"
+   * Example: "/models/scouts/mobilenet-v3-skin/model.json"
    */
   modelUrl: string;
   /** Input image size expected by this model [height, width]. */
@@ -67,7 +67,7 @@ export const ENSEMBLE_MODELS: EnsembleModelConfig[] = [
     tier: 1,
     group: 'Scouts',
     parameter: 'Skin',
-    modelUrl: '/models/scouts/mobilenet-v4-skin/model.json?v=4',
+    modelUrl: '/models/scouts/mobilenet-v3-skin/model.json?v=5',
     inputShape: [224, 224],
     consensusWeight: 0.5,
     description:
@@ -79,7 +79,7 @@ export const ENSEMBLE_MODELS: EnsembleModelConfig[] = [
     tier: 1,
     group: 'Scouts',
     parameter: 'Fingernails',
-    modelUrl: '/models/scouts/mobilenet-v4-nails/model.json?v=4',
+    modelUrl: '/models/scouts/mobilenet-v3-nails/model.json?v=5',
     inputShape: [224, 224],
     consensusWeight: 0.5,
     description:
@@ -109,7 +109,7 @@ export const ENSEMBLE_MODELS: EnsembleModelConfig[] = [
     tier: 2,
     group: 'Specialists',
     parameter: 'All',
-    modelUrl: '/models/specialists/resnet50v2/model.json?v=4',
+    modelUrl: '/models/specialists/resnet50v2/model.json?v=5',
     inputShape: [224, 224],
     consensusWeight: 1.0,
     description:
@@ -121,7 +121,7 @@ export const ENSEMBLE_MODELS: EnsembleModelConfig[] = [
     tier: 2,
     group: 'Specialists',
     parameter: 'All',
-    modelUrl: '/models/specialists/densenet121/model.json?v=4',
+    modelUrl: '/models/specialists/densenet121/model.json?v=5',
     inputShape: [224, 224],
     consensusWeight: 1.0,
     description:

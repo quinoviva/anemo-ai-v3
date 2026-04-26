@@ -351,47 +351,20 @@
           },
           "name": "scout_squeezenet_eye_fire2_concat",
           "inbound_nodes": [
-            {
-              "args": [
-                [
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        55,
-                        55,
-                        64
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "scout_squeezenet_eye_fire2_e1x1",
-                        0,
-                        0
-                      ]
-                    }
-                  },
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        55,
-                        55,
-                        64
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "scout_squeezenet_eye_fire2_e3x3",
-                        0,
-                        0
-                      ]
-                    }
-                  }
-                ]
+            [
+              [
+                "scout_squeezenet_eye_fire2_e1x1",
+                0,
+                0,
+                {}
               ],
-              "kwargs": {}
-            }
+              [
+                "scout_squeezenet_eye_fire2_e3x3",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -620,47 +593,20 @@
           },
           "name": "scout_squeezenet_eye_fire3_concat",
           "inbound_nodes": [
-            {
-              "args": [
-                [
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        55,
-                        55,
-                        64
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "scout_squeezenet_eye_fire3_e1x1",
-                        0,
-                        0
-                      ]
-                    }
-                  },
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        55,
-                        55,
-                        64
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "scout_squeezenet_eye_fire3_e3x3",
-                        0,
-                        0
-                      ]
-                    }
-                  }
-                ]
+            [
+              [
+                "scout_squeezenet_eye_fire3_e1x1",
+                0,
+                0,
+                {}
               ],
-              "kwargs": {}
-            }
+              [
+                "scout_squeezenet_eye_fire3_e3x3",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -889,47 +835,20 @@
           },
           "name": "scout_squeezenet_eye_fire4_concat",
           "inbound_nodes": [
-            {
-              "args": [
-                [
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        55,
-                        55,
-                        128
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "scout_squeezenet_eye_fire4_e1x1",
-                        0,
-                        0
-                      ]
-                    }
-                  },
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        55,
-                        55,
-                        128
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "scout_squeezenet_eye_fire4_e3x3",
-                        0,
-                        0
-                      ]
-                    }
-                  }
-                ]
+            [
+              [
+                "scout_squeezenet_eye_fire4_e1x1",
+                0,
+                0,
+                {}
               ],
-              "kwargs": {}
-            }
+              [
+                "scout_squeezenet_eye_fire4_e3x3",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -1189,47 +1108,20 @@
           },
           "name": "scout_squeezenet_eye_fire5_concat",
           "inbound_nodes": [
-            {
-              "args": [
-                [
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        27,
-                        27,
-                        128
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "scout_squeezenet_eye_fire5_e1x1",
-                        0,
-                        0
-                      ]
-                    }
-                  },
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        27,
-                        27,
-                        128
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "scout_squeezenet_eye_fire5_e3x3",
-                        0,
-                        0
-                      ]
-                    }
-                  }
-                ]
+            [
+              [
+                "scout_squeezenet_eye_fire5_e1x1",
+                0,
+                0,
+                {}
               ],
-              "kwargs": {}
-            }
+              [
+                "scout_squeezenet_eye_fire5_e3x3",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -1458,47 +1350,20 @@
           },
           "name": "scout_squeezenet_eye_fire6_concat",
           "inbound_nodes": [
-            {
-              "args": [
-                [
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        27,
-                        27,
-                        192
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "scout_squeezenet_eye_fire6_e1x1",
-                        0,
-                        0
-                      ]
-                    }
-                  },
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        27,
-                        27,
-                        192
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "scout_squeezenet_eye_fire6_e3x3",
-                        0,
-                        0
-                      ]
-                    }
-                  }
-                ]
+            [
+              [
+                "scout_squeezenet_eye_fire6_e1x1",
+                0,
+                0,
+                {}
               ],
-              "kwargs": {}
-            }
+              [
+                "scout_squeezenet_eye_fire6_e3x3",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -1727,47 +1592,20 @@
           },
           "name": "scout_squeezenet_eye_fire7_concat",
           "inbound_nodes": [
-            {
-              "args": [
-                [
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        27,
-                        27,
-                        192
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "scout_squeezenet_eye_fire7_e1x1",
-                        0,
-                        0
-                      ]
-                    }
-                  },
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        27,
-                        27,
-                        192
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "scout_squeezenet_eye_fire7_e3x3",
-                        0,
-                        0
-                      ]
-                    }
-                  }
-                ]
+            [
+              [
+                "scout_squeezenet_eye_fire7_e1x1",
+                0,
+                0,
+                {}
               ],
-              "kwargs": {}
-            }
+              [
+                "scout_squeezenet_eye_fire7_e3x3",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -1996,47 +1834,20 @@
           },
           "name": "scout_squeezenet_eye_fire8_concat",
           "inbound_nodes": [
-            {
-              "args": [
-                [
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        27,
-                        27,
-                        256
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "scout_squeezenet_eye_fire8_e1x1",
-                        0,
-                        0
-                      ]
-                    }
-                  },
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        27,
-                        27,
-                        256
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "scout_squeezenet_eye_fire8_e3x3",
-                        0,
-                        0
-                      ]
-                    }
-                  }
-                ]
+            [
+              [
+                "scout_squeezenet_eye_fire8_e1x1",
+                0,
+                0,
+                {}
               ],
-              "kwargs": {}
-            }
+              [
+                "scout_squeezenet_eye_fire8_e3x3",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
@@ -2296,47 +2107,20 @@
           },
           "name": "scout_squeezenet_eye_fire9_concat",
           "inbound_nodes": [
-            {
-              "args": [
-                [
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        13,
-                        13,
-                        256
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "scout_squeezenet_eye_fire9_e1x1",
-                        0,
-                        0
-                      ]
-                    }
-                  },
-                  {
-                    "class_name": "__keras_tensor__",
-                    "config": {
-                      "shape": [
-                        null,
-                        13,
-                        13,
-                        256
-                      ],
-                      "dtype": "float32",
-                      "keras_history": [
-                        "scout_squeezenet_eye_fire9_e3x3",
-                        0,
-                        0
-                      ]
-                    }
-                  }
-                ]
+            [
+              [
+                "scout_squeezenet_eye_fire9_e1x1",
+                0,
+                0,
+                {}
               ],
-              "kwargs": {}
-            }
+              [
+                "scout_squeezenet_eye_fire9_e3x3",
+                0,
+                0,
+                {}
+              ]
+            ]
           ]
         },
         {
