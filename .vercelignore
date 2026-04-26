@@ -1,0 +1,15 @@
+.gitignore
+node_modules
+.next
+.cache
+.vercel
+.env
+.env.local
+.env.production
+*.keras
+public/models/specialists/**/*.keras
+public/models/judges/**/*.keras
+public/models/scouts/**/*.keras
+public/models/**/*.bin
+scripts/
+dataset/

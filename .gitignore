@@ -85,3 +85,4 @@ public/models/specialists/
 
 # Alternatively, if you want to be broad:
 # public/models/**/model.json
+.env*.local
