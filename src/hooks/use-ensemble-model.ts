@@ -8,9 +8,28 @@
  *   2. Spawn and communicate with the Edge-AI consensus Web Worker.
  *   3. Stream the generated clinical report token-by-token.
  *   4. Report granular loading progress per model.
+ *
+ * Usage
+ * -----
+ * ```tsx
+ * const {
+ *   runAnalysis,
+ *   report,
+ *   isLoading,
+ *   progress,
+ *   severity,
+ *   consensusHgb,
+ *   dietaryRecommendations,
+ *   error,
+ *   reset,
+ * } = useEnsembleModel();
+ *
+ * // Call with canvas/image elements for each body part
+ * await runAnalysis({ Skin: skinCanvas, Fingernails: nailCanvas, Undereye: eyeCanvas });
+ * ```
  */
 
-import { useState, useCallback, useRef, useMemo } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import type { BodyPart, ConsensusReport, InferenceProgressEvent } from '@/lib/ensemble/consensus-engine';
 import type { SeverityClass } from '@/lib/ensemble/severity';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
@@ -21,29 +40,52 @@ import { doc } from 'firebase/firestore';
 // ---------------------------------------------------------------------------
 
 export interface EnsembleProgress {
+  /** Overall fraction 0–1. */
   fraction: number;
+  /** Human-readable status message. */
   message: string;
-  phase: 'loading' | 'quality-check' | 'specialist' | 'judge' | 'consensus' | 'worker';
+  /** Which model is currently being processed (if any). */
   currentModelId?: string;
+  /** Current pipeline phase. */
+  phase: InferenceProgressEvent['phase'] | 'worker' | 'idle';
 }
 
 export interface UseEnsembleModelReturn {
-  runAnalysis: (inputs: Partial<Record<BodyPart, HTMLCanvasElement | HTMLImageElement | ImageData>>) => Promise<void>;
+  /**
+   * Kick off the full analysis pipeline for the provided image sources.
+   * Resolves when the consensus report is fully generated.
+   */
+  runAnalysis: (
+    inputs: Partial<Record<BodyPart, HTMLCanvasElement | HTMLImageElement | ImageData>>,
+  ) => Promise<void>;
+  /** Whether any analysis is currently in progress. */
   isLoading: boolean;
+  /** Granular progress information. */
   progress: EnsembleProgress;
+  /** Full {@link ConsensusReport} from the ensemble (null until complete). */
   ensembleReport: ConsensusReport | null;
+  /** Final severity classification string. */
   severity: SeverityClass | null;
+  /** Consensus Hgb estimate in g/dL. */
   consensusHgb: number | null;
+  /** Streaming clinical report text (updates token-by-token during LLM generation). */
   report: string;
+  /** Localised dietary recommendations for the detected severity. */
   dietaryRecommendations: string[];
+  /** Last error message, if any. */
   error: string | null;
+  /** Reset all state back to initial values. */
   reset: () => void;
 }
 
+// ---------------------------------------------------------------------------
+// Initial state
+// ---------------------------------------------------------------------------
+
 const INITIAL_PROGRESS: EnsembleProgress = {
   fraction: 0,
-  message: 'Waiting for input...',
-  phase: 'loading',
+  message: '',
+  phase: 'idle',
 };
 
 // ---------------------------------------------------------------------------
@@ -70,6 +112,14 @@ export function useEnsembleModel(): UseEnsembleModelReturn {
 
   const workerRef = useRef<Worker | null>(null);
   const abortRef = useRef(false);
+
+  // Tear down the worker when the component unmounts
+  useEffect(() => {
+    return () => {
+      workerRef.current?.terminate();
+      workerRef.current = null;
+    };
+  }, []);
 
   const reset = useCallback(() => {
     abortRef.current = true;
