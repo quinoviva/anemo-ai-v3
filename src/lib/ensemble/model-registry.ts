@@ -62,36 +62,36 @@ export const ENSEMBLE_MODELS: EnsembleModelConfig[] = [
   //       Low-latency MobileNet/SqueezeNet architectures for fast rejection.
   // ══════════════════════════════════════════════════════════════════════════
   {
-    id: 'scout-mobilenet-skin-v2',
+    id: 'scout-mobilenet-skin-v3',
     name: 'MobileNetV3-Small (Skin)',
     tier: 1,
     group: 'Scouts',
     parameter: 'Skin',
-    modelUrl: '/models/scouts/mobilenet-v3-skin/model.json?v=2',
+    modelUrl: '/models/scouts/mobilenet-v3-skin/model.json?v=3',
     inputShape: [224, 224],
     consensusWeight: 0.5,
     description:
       'Validates skin image quality, checks for correct ROI framing, and provides an initial skin-pallor confidence score.',
   },
   {
-    id: 'scout-mobilenet-nails-v2',
+    id: 'scout-mobilenet-nails-v3',
     name: 'MobileNetV3-Small (Fingernails)',
     tier: 1,
     group: 'Scouts',
     parameter: 'Fingernails',
-    modelUrl: '/models/scouts/mobilenet-v3-nails/model.json?v=2',
+    modelUrl: '/models/scouts/mobilenet-v3-nails/model.json?v=3',
     inputShape: [224, 224],
     consensusWeight: 0.5,
     description:
       'Validates nailbed image quality and ROI alignment; outputs nailbed-pallor confidence.',
   },
   {
-    id: 'scout-squeezenet-eye-v2',
+    id: 'scout-squeezenet-eye-v3',
     name: 'SqueezeNet 1.1 (Under-eye / Conjunctiva)',
     tier: 1,
     group: 'Scouts',
     parameter: 'Undereye',
-    modelUrl: '/models/scouts/squeezenet-1.1-eye/model.json?v=2',
+    modelUrl: '/models/scouts/squeezenet-1.1-eye/model.json?v=3',
     inputShape: [227, 227],
     consensusWeight: 0.5,
     description:
@@ -104,48 +104,48 @@ export const ENSEMBLE_MODELS: EnsembleModelConfig[] = [
   //       body-part parameters for comprehensive anemia feature extraction.
   // ══════════════════════════════════════════════════════════════════════════
   {
-    id: 'specialist-resnet50v2-v2',
+    id: 'specialist-resnet50v2-v3',
     name: 'ResNet50V2',
     tier: 2,
     group: 'Specialists',
     parameter: 'All',
-    modelUrl: '/models/specialists/resnet50v2/model.json?v=2',
+    modelUrl: '/models/specialists/resnet50v2/model.json?v=3',
     inputShape: [224, 224],
     consensusWeight: 1.0,
     description:
       'Deep residual network (50 layers, v2 pre-activation) for robust pallor feature extraction across all ROIs.',
   },
   {
-    id: 'specialist-densenet121-v2',
+    id: 'specialist-densenet121-v3',
     name: 'DenseNet121',
     tier: 2,
     group: 'Specialists',
     parameter: 'All',
-    modelUrl: '/models/specialists/densenet121/model.json?v=2',
+    modelUrl: '/models/specialists/densenet121/model.json?v=3',
     inputShape: [224, 224],
     consensusWeight: 1.0,
     description:
       'Densely-connected network with strong feature reuse; excels at detecting subtle colour changes in tissue.',
   },
   {
-    id: 'specialist-inceptionv3-v2',
+    id: 'specialist-inceptionv3-v3',
     name: 'InceptionV3',
     tier: 2,
     group: 'Specialists',
     parameter: 'All',
-    modelUrl: '/models/specialists/inceptionv3/model.json?v=2',
+    modelUrl: '/models/specialists/inceptionv3/model.json?v=3',
     inputShape: [299, 299],
     consensusWeight: 1.0,
     description:
       'Multi-scale feature extraction via Inception modules; captures both fine-grained texture and macro colour gradients.',
   },
   {
-    id: 'specialist-vgg16-v2',
+    id: 'specialist-vgg16-v3',
     name: 'VGG16',
     tier: 2,
     group: 'Specialists',
     parameter: 'All',
-    modelUrl: '/models/specialists/vgg16/model.json?v=2',
+    modelUrl: '/models/specialists/vgg16/model.json?v=3',
     inputShape: [224, 224],
     consensusWeight: 1.0,
     description:
@@ -159,36 +159,36 @@ export const ENSEMBLE_MODELS: EnsembleModelConfig[] = [
   //       severity classification and estimated Hgb value.
   // ══════════════════════════════════════════════════════════════════════════
   {
-    id: 'judge-efficientnet-b0-v2',
+    id: 'judge-efficientnet-b0-v3',
     name: 'EfficientNet-B0',
     tier: 3,
     group: 'Judges',
     parameter: 'All',
-    modelUrl: '/models/judges/efficientnet-b0/model.json?v=2',
+    modelUrl: '/models/judges/efficientnet-b0/model.json?v=3',
     inputShape: [224, 224],
     consensusWeight: 1.5,
     description:
       'Compound-scaled efficient network; provides the primary Hgb regression estimate with high parameter efficiency.',
   },
   {
-    id: 'judge-vit-tiny-v2',
+    id: 'judge-vit-tiny-v3',
     name: 'Vision Transformer (ViT-Tiny)',
     tier: 3,
     group: 'Judges',
     parameter: 'All',
-    modelUrl: '/models/judges/vit-tiny/model.json?v=2',
+    modelUrl: '/models/judges/vit-tiny/model.json?v=3',
     inputShape: [224, 224],
     consensusWeight: 1.5,
     description:
       'Lightweight Vision Transformer; captures global tissue context via self-attention for Hgb estimation.',
   },
   {
-    id: 'judge-mlp-meta-learner-v2',
+    id: 'judge-mlp-meta-learner-v3',
     name: 'Custom MLP Meta-Learner',
     tier: 3,
     group: 'Judges',
     parameter: 'All',
-    modelUrl: '/models/judges/mlp-meta-learner/model.json?v=2',
+    modelUrl: '/models/judges/mlp-meta-learner/model.json?v=3',
     inputShape: [224, 224],
     consensusWeight: 2.0,
     description:

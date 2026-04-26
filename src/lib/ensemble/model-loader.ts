@@ -183,6 +183,8 @@ async function loadFromNetwork(
   modelUrl: string,
   onProgress?: (progress: number) => void,
 ): Promise<tf.GraphModel | tf.LayersModel> {
+  console.log(`[ModelLoader] Attempting to fetch model: ${modelUrl}`);
+  
   const handlers = onProgress
     ? tf.io.browserHTTPRequest(modelUrl, {
         onProgress: (fraction) => onProgress(fraction),
@@ -190,9 +192,19 @@ async function loadFromNetwork(
     : modelUrl;
 
   try {
-    return await tf.loadGraphModel(handlers as string);
-  } catch {
-    return await tf.loadLayersModel(handlers as string);
+    const model = await tf.loadGraphModel(handlers as string);
+    console.log(`[ModelLoader] Successfully loaded GraphModel from ${modelUrl}`);
+    return model;
+  } catch (graphError) {
+    console.warn(`[ModelLoader] GraphModel load failed for ${modelUrl}, trying LayersModel...`);
+    try {
+      const model = await tf.loadLayersModel(handlers as string);
+      console.log(`[ModelLoader] Successfully loaded LayersModel from ${modelUrl}`);
+      return model;
+    } catch (layersError) {
+      console.error(`[ModelLoader] FAILED to load model from ${modelUrl}:`, layersError);
+      throw layersError;
+    }
   }
 }
 

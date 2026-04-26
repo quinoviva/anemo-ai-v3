@@ -375,7 +375,7 @@ export async function runSingleModel(
     };
   } catch (err) {
     const error = err instanceof Error ? err.message : String(err);
-    console.warn(`[ConsensusEngine] Model "${config.id}" failed:`, error);
+    console.error(`[ConsensusEngine] Model "${config.id}" CRITICAL FAILURE:`, error);
     return {
       modelId: config.id,
       modelName: config.name,
@@ -400,33 +400,56 @@ export async function runScoutValidation(
   expectedPart: BodyPart,
   source: HTMLImageElement | HTMLVideoElement | HTMLCanvasElement | ImageData
 ): Promise<{ isValid: boolean; confidence: number; detectedPart?: BodyPart; message: string }> {
-  // Find the specific scout model for the expected part
-  const scoutConfig = MODELS_BY_TIER[1].find(m => m.parameter === expectedPart);
+  // Run ALL Tier-1 scouts to provide the multi-parameter logging requested by the user
+  const scouts = MODELS_BY_TIER[1];
   
-  if (!scoutConfig) {
-    return { isValid: true, confidence: 1, message: "No scout configured for this part." };
-  }
+  try {
+    const results = await Promise.all(scouts.map(config => runSingleModel(config, source)));
+    
+    // Format the multi-score log string
+    const scoresStr = results
+      .map(r => `${r.parameter}: ${(r.confidence * 100).toFixed(1)}%`)
+      .join(' | ');
+    
+    console.log(`[ScoutValidation] Scores: ${scoresStr}`);
 
-  // Run ONLY the relevant scout model
-  const res = await runSingleModel(scoutConfig, source);
-  const confidence = res.confidence;
+    const targetResult = results.find(r => r.parameter === expectedPart);
+    const confidence = targetResult?.confidence ?? 0;
+    
+    // -- QUALITY THRESHOLD CHECK --------------------------------------------
+    if (confidence >= SCOUT_QUALITY_THRESHOLD) {
+      return {
+        isValid: true,
+        confidence: confidence,
+        message: "Image passed local candidate check."
+      };
+    }
+    
+    // Find if it might be another part instead
+    const bestMatch = [...results].sort((a, b) => b.confidence - a.confidence)[0];
+    const detectedPart = (bestMatch.confidence > SCOUT_QUALITY_THRESHOLD && bestMatch.parameter !== expectedPart) 
+      ? bestMatch.parameter as BodyPart 
+      : undefined;
 
-  console.log(`[ScoutValidation] ${expectedPart} Score: ${(confidence * 100).toFixed(1)}%`);
-  
-  // -- QUALITY THRESHOLD CHECK --------------------------------------------
-  if (confidence >= SCOUT_QUALITY_THRESHOLD) {
+    let message = `[LOCAL_FAIL] Low quality or blurry image detected for ${expectedPart}. Please ensure the area is in focus and well-lit.`;
+    if (detectedPart) {
+      message = `[LOCAL_FAIL] Image appears to be ${detectedPart} instead of ${expectedPart}. Please capture the correct body part.`;
+    }
+
     return {
-      isValid: true,
+      isValid: false,
       confidence: confidence,
-      message: "Image passed local candidate check."
+      detectedPart,
+      message
+    };
+  } catch (err) {
+    console.error("[ScoutValidation] Execution error:", err);
+    return {
+      isValid: false,
+      confidence: 0,
+      message: "[LOCAL_FAIL] Internal error during image validation."
     };
   }
-  
-  return {
-    isValid: false,
-    confidence: confidence,
-    message: `[LOCAL_FAIL] Low quality or blurry image detected for ${expectedPart}. Please ensure the area is in focus and well-lit.`
-  };
 }
 
 /**
