@@ -1,0 +1,86 @@
+================================================================================
+                  NOTEBOOK FIX VERIFICATION CHECKLIST
+================================================================================
+
+PRE-FIX CHECKLIST:
+─────────────────
+[ ] File exists: C:\laragon\www\anemo-ai-v3\scripts\ml\AnemoAI_Training_Colab.ipynb
+[ ] File size is ~568 KB (corrupted size)
+[ ] File cannot be opened in Google Colab (error)
+[ ] Fix scripts are present in scripts/ml/ directory
+
+FIX EXECUTION:
+──────────────
+[ ] Opened Command Prompt or terminal
+[ ] Navigated to: C:\laragon\www\anemo-ai-v3\scripts\ml
+[ ] Ran: python fix_notebook_final.py
+[ ] Saw success message with byte count
+
+POST-FIX VERIFICATION:
+──────────────────────
+[ ] File size reduced to ~312 KB
+[ ] File can be opened in text editor (shows JSON)
+[ ] File starts with: {
+[ ] File ends with: }
+[ ] No extra characters or code after final }
+
+COLAB VERIFICATION:
+───────────────────
+[ ] Upload to Google Colab (or open from GitHub)
+[ ] Notebook opens without errors
+[ ] All 10 cells are visible:
+    [ ] Cell 1: GPU Check
+    [ ] Cell 2: Install Dependencies  
+    [ ] Cell 3: Kaggle Credentials
+    [ ] Cell 4: Setup Workspace
+    [ ] Cell 5: Download Datasets
+    [ ] Cell 6: Organise Dataset
+    [ ] Cell 7: Train Models
+    [ ] Cell 8: Convert to TF.js
+    [ ] Cell 9: Download Models
+    [ ] Cell 10: Final Summary
+[ ] Can execute cells without JSON errors
+[ ] Training pipeline is ready
+
+SUCCESS INDICATORS:
+───────────────────
+✓ File opens in Colab without errors
+✓ All cells display correctly
+✓ Cell content matches expected training pipeline
+✓ Can select "Runtime → Run all" without failure
+✓ No JSON parse errors in browser console
+
+TROUBLESHOOTING IF NOT WORKING:
+────────────────────────────────
+If the fix didn't work:
+
+1. Verify the fix ran successfully:
+   python check_notebook.py
+   
+2. Check file size reduction:
+   - Before: ~568 KB
+   - After: should be ~312 KB
+   
+3. Inspect the file directly:
+   - Open with: Notepad, VS Code, or your editor
+   - Check last 10 characters should be: }
+   - Should NOT see code after the closing brace
+   
+4. Validate JSON manually:
+   python -c "import json; json.load(open('AnemoAI_Training_Colab.ipynb'))"
+   (If it prints nothing, JSON is valid)
+   
+5. If still failing, try:
+   - Delete the file
+   - Re-download from the repository
+   - Run fix_notebook_final.py again
+
+QUICK STATUS CHECK:
+────────────────────
+Run this command to see current state:
+
+  python -c "import os; f='AnemoAI_Training_Colab.ipynb'; s=os.path.getsize(f); print(f'Size: {s:,} bytes ({\"Fixed\" if s < 350000 else \"Still corrupt\"})')"
+
+Expected: Size: ~312,456 bytes (Fixed)
+
+================================================================================

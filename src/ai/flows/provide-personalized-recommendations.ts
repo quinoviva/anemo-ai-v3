@@ -16,6 +16,7 @@ const PersonalizedRecommendationsInputSchema = z.object({
   imageAnalysis: z.string().describe('A summary of the analysis from the three uploaded images (skin, under-eye, fingernails).'),
   labReport: z.string().optional().describe('A summary of the extracted data from a CBC lab report.'),
   userProfile: z.string().describe('The user profile data, including age, gender, health history and crucially their location for finding nearby clinics.'),
+  cycleData: z.string().optional().describe('Menstrual cycle data including LMP date, cycle regularity, length, flow intensity, and symptoms related to anemia.'),
 });
 export type PersonalizedRecommendationsInput = z.infer<
   typeof PersonalizedRecommendationsInputSchema
@@ -50,10 +51,17 @@ const prompt = ai.definePrompt({
 -   **Image Analysis Summary:** {{{imageAnalysis}}}
 -   **Lab Report Summary (OCR Extracted):** {{{labReport}}}
 -   **User Profile Information (includes clinical indicators):** {{{userProfile}}}
+-   **Menstrual Cycle Data:** {{{cycleData}}}
 
-══════════════════════════════════════════════════════════════
+═════════════════════════════════════════════════════════════
 TASK 1: ANEMIA TYPE IDENTIFICATION & CONFIDENCE SCORING
-══════════════════════════════════════════════════════════════
+═════════════════════════════════════════════════════════════
+
+Analyze cycle data effects on hemoglobin:
+- If female with recent LMP (< 14 days ago): Hemoglobin may temporarily drop 0.5-1.0 g/dL during menstruation
+- If heavy flow (> 3 pads/day): Higher risk of iron loss, add +5-10 risk points
+- If irregular cycles: May indicate hormonal issues affecting iron absorption
+- Use cycle phase to CONTEXTUALIZE visual pallor findings - menstrual pallor may be temporary vs chronic
 
 Determine the type and confidence using this decision tree:
 
@@ -68,15 +76,15 @@ Determine the type and confidence using this decision tree:
   - Image quality insufficient OR contradictory data → "INCONCLUSIVE (Ambiguous or Insufficient Data)"
 
 **Step 3 — Confidence calibration:**
-  - Lab confirms + Visual confirms + Symptoms match → 85-95%
+  - Lab confirms + Visual confirms + Cycle symptoms match → 85-95%
   - Lab confirms + Visual unclear → 70-85%
-  - No lab + Visual confirms + Symptoms match → 55-75%
-  - No lab + Visual confirms + No symptoms → 40-60%
+  - No lab + Visual confirms + Recent heavy period → 55-75% (adjust for cycle)
+  - No lab + Visual confirms + No cycle data → 40-60%
   - Contradictory data → 20-40%
 
-══════════════════════════════════════════════════════════════
+═════════════════════════════════════════════════════════════
 TASK 2: COMPOSITE RISK SCORE (0-100)
-══════════════════════════════════════════════════════════════
+═════════════════════════════════════════════════════════════
 
 Calculate using this weighted formula:
 
@@ -93,6 +101,13 @@ Calculate using this weighted formula:
   - Hgb ≥ 12 or no lab: +0
   - LOW RBC count or LOW Hematocrit: additional +5
 
+**Cycle Modifier (additional 0-15 points for females):**
+  - Heavy menstrual flow (soaking >1 pad/hr): +10 points
+  - Recent LMP within 7 days: +5 points (expected temporary drop)
+  - Irregular cycles: +3 points
+  - Regular cycles: +0 points
+  - No cycle data available: +0 points
+
 **Symptom Modifier (0-25 points):**
   - Severe fatigue: +10
   - Moderate fatigue: +5
@@ -101,16 +116,17 @@ Calculate using this weighted formula:
   - Female + Heavy menstrual flow: +10
   - Female + Normal menstrual flow: +2
 
-**Final score = Base + Lab + Symptoms (capped at 100)**
+**Final score = Base + Lab + Cycle + Symptoms (capped at 100)**
 
-══════════════════════════════════════════════════════════════
+═════════════════════════════════════════════════════════════
 TASK 3: PERSONALIZED RECOMMENDATIONS
-══════════════════════════════════════════════════════════════
+═════════════════════════════════════════════════════════════
 
 Generate a comprehensive, structured recommendation using these sections:
 
 **A. Understanding Your Results** (2-3 sentences in simple language)
   - Explain what the Hgb level means
+  - If cycle data provided, explain how current menstrual phase may affect results
   - If lab values are provided, explain each abnormal value simply
   - Relate visual findings to clinical significance
 
@@ -134,11 +150,17 @@ Generate a comprehensive, structured recommendation using these sections:
   - Rest guidance based on severity
   - Exercise modifications
   - Hydration recommendations
+  - For females: Track iron intake around menstrual cycle
 
 **E. When to See a Doctor** (severity-adapted)
   - MILD: Follow-up CBC in 4-6 weeks
   - MODERATE: See doctor within 1-2 weeks for iron studies panel
   - SEVERE: Go to hospital / ER immediately
+
+**F. For Women's Health** (only if cycle data provided)
+  - Menstrual tracking advice
+  - Additional iron needs during menstruation
+  - When heavy flow warrants gynecological consultation
 
 **F. For Women's Health** (only if sex is Female)
   - Menstrual tracking advice
@@ -188,12 +210,16 @@ const providePersonalizedRecommendationsFlow = ai.defineFlow(
 - Image Analysis Summary: ${input.imageAnalysis}
 - Lab Report Summary: ${input.labReport || "N/A"}
 - User Profile: ${input.userProfile}
+- Menstrual Cycle Data: ${input.cycleData || "Not provided"}
 
 Classify the result using EXACTLY one of these labels:
 - ANEMIA NEGATIVE (Healthy Vascular Presentation)
 - ANEMIA SUSPECTED (Mild Pallor Detected)
 - ANEMIA POSITIVE (Significant Pallor Detected)
 - INCONCLUSIVE (Ambiguous or Insufficient Data)
+
+Note: If cycle data is provided (especially heavy flow or recent LMP), add 5-10 points to the risk score.
+For females with cycle data: Heavy flow = +10, Recent LMP within 7 days = +5
 
 Determine the result label, confidence score, calculate a risk index (0-100), and provide personalized health recommendations following the rules for a Filipino diet plan (include meals like malunggay, champorado, etc.).
 

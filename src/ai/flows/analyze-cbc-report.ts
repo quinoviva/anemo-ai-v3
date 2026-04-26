@@ -27,6 +27,9 @@ export type AnalyzeCbcReportOutput = z.infer<typeof AnalyzeCbcReportOutputSchema
  * Analyze CBC report
  * Supports multiple image formats and PDFs
  * Generates summary including anemia status
+ * 
+ * IMPORTANT: Handles unit conversion from g/L to g/dL
+ * Conversion: g/L ÷ 10 = g/dL
  */
 export const analyzeCbcReport = ai.defineFlow(
   {
@@ -45,15 +48,64 @@ export const analyzeCbcReport = ai.defineFlow(
       if (match) contentType = match[1];
     } else if (uri.endsWith('.pdf')) {
       contentType = 'application/pdf';
-    } else if (uri.endsWith('.png')) {
-      contentType = 'image/png';
-    } else if (uri.endsWith('.gif')) {
-      contentType = 'image/gif';
-    } else if (uri.endsWith('.bmp')) {
-      contentType = 'image/bmp';
-    } else if (uri.endsWith('.webp')) {
-      contentType = 'image/webp';
     }
+
+    // Helper function to convert g/L to g/dL
+    const convertGLtoGDL = (value: string, unit: string): { value: string; unit: string } => {
+      const unitLower = unit.toLowerCase().trim();
+      
+      // If unit is g/L, convert to g/dL (divide by 10)
+      if (unitLower === 'g/l' || unitLower === 'g/liter') {
+        const numValue = parseFloat(value);
+        if (!isNaN(numValue)) {
+          // Convert: g/L → g/dL
+          const convertedValue = (numValue / 10).toFixed(1);
+          return { value: convertedValue, unit: 'g/dL' };
+        }
+      }
+      return { value, unit };
+    };
+
+    // Parameter type for processing
+    type CBCParameter = {
+      parameter: string;
+      value: string;
+      unit: string;
+      range: string;
+      isNormal: boolean;
+    };
+
+    // Post-process parameters to handle unit conversion
+    const processParameters = (params: CBCParameter[]): CBCParameter[] => {
+      return params.map((param) => {
+        // Special handling for Hemoglobin
+        if (param.parameter.toLowerCase().includes('hemoglobin') || 
+            param.parameter.toLowerCase() === 'hgb' ||
+            param.parameter.toLowerCase() === 'hb') {
+          
+          // Check if unit is g/L and needs conversion
+          const converted = convertGLtoGDL(param.value, param.unit);
+          
+          // Also check the range - if it's in g/L, convert that too
+          let newRange = param.range;
+          if (converted.unit === 'g/dL' && param.unit.toLowerCase().includes('g/l')) {
+            // Convert reference range: g/L → g/dL (÷10)
+            newRange = param.range.replace(/(\d+\.?\d*)/g, (match) => {
+              const num = parseFloat(match);
+              return isNaN(num) ? match : (num / 10).toFixed(1);
+            });
+          }
+          
+          return {
+            ...param,
+            value: converted.value,
+            unit: converted.unit,
+            range: newRange,
+          };
+        }
+        return param;
+      });
+    };
 
     try {
         const {output} = await ai.generate({
@@ -107,9 +159,14 @@ Extract ONLY these parameters if present on the report. For each, provide the EX
 For each parameter:
   - parameter: The standardized name (e.g., "Hemoglobin", "MCV")
   - value: The EXACT numeric value as printed (e.g., "10.2", "82.5")
-  - unit: The EXACT unit as printed (e.g., "g/dL", "fL", "x10^12/L")
-  - range: The reference range as printed on the report (e.g., "12.0-16.0", "80-100"). If no range is printed, use standard WHO ranges for Filipino adults.
+  - unit: The EXACT unit as printed (e.g., "g/dL", "g/L", "fL", "x10^12/L")
+  - range: The reference range as printed on the report (e.g., "12.0-16.0", "120-160"). If no range is printed, use standard WHO ranges for Filipino adults.
   - isNormal: true if the value falls within the reference range, false if outside
+
+**IMPORTANT - UNIT CONVERSION:**
+- If Hemoglobin unit is "g/L" (grams per liter), convert the value to g/dL by dividing by 10
+- Example: 120 g/L = 12.0 g/dL; 100 g/L = 10.0 g/dL
+- Always report Hemoglobin in g/dL for consistency
 
 ═══════════════════════════════════════════════════════════════
 PHASE 3: CLINICAL INTERPRETATION SUMMARY
@@ -155,7 +212,7 @@ CRITICAL RULES:
       summary:
         output?.summary ??
         'An unexpected error occurred while analyzing the CBC report.',
-      parameters: output?.parameters ?? [],
+      parameters: processParameters(output?.parameters ?? []),
     };
     } catch (err: any) {
         console.warn("⚠️ [Silent Fallback] CBC Analysis Gemini API Failed. Routing to Groq Llama 3.2 Vision...", err.message);
@@ -216,7 +273,10 @@ If the image is not a report, return an empty parameters array and an error mess
         const content = data.choices?.[0]?.message?.content || "{}";
         const parsed = JSON.parse(content);
         
-        return parsed as AnalyzeCbcReportOutput;
+        return {
+          summary: parsed.summary ?? 'Error analyzing CBC report.',
+          parameters: processParameters(parsed.parameters ?? []),
+        } as AnalyzeCbcReportOutput;
     }
   }
 );

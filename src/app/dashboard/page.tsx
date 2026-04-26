@@ -136,7 +136,9 @@ export default function DashboardPage() {
   useEffect(() => {
     if (userData) {
       if (userData.address) setLocation(userData.address);
-      if (userData.medicalInfo?.sex) setUserSex(userData.medicalInfo.sex);
+      // Check both userData.sex and userData.medicalInfo.sex
+      const sex = userData.sex || userData.medicalInfo?.sex;
+      if (sex) setUserSex(sex);
       if (userData.hydration?.enabled !== undefined) {
         setShowWaterReminder(userData.hydration.enabled);
       }
@@ -642,10 +644,10 @@ export default function DashboardPage() {
             )}
           </BentoCard>
 
-          {/* 6. Cycle Tracker (Conditional) - Rose Theme */}
-          {!isUserDataLoading && userSex === 'Female' && (
+          {/* 6. Cycle Tracker (Conditional) - Rose Theme - Full Width */}
+          {userSex && userSex.toLowerCase() === 'female' && (
+            <div id="cycle-log" className="col-span-1 md:col-span-2 lg:col-span-4">
             <BentoCard
-              colSpan="col-span-1 md:col-span-4 lg:col-span-6"
               className="p-5 md:p-8 lg:p-12 bg-gradient-to-r from-rose-500/20 via-transparent to-transparent border border-rose-500/20 shadow-[0_20px_60px_-15px_rgba(244,63,94,0.1)]"
             >
               <div className="flex flex-col md:flex-row gap-12 items-center h-full">
@@ -675,6 +677,7 @@ export default function DashboardPage() {
                 </div>
               </div>
             </BentoCard>
+            </div>
           )}
 
           {/* 7. Water Reminder (Blue Theme Container) */}

@@ -44,8 +44,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { useUser, useFirestore, useMemoFirebase, useDoc } from '@/firebase';
-import { doc } from 'firebase/firestore';
+import { useUser, useFirestore, useMemoFirebase, useDoc, useCollection, useMemoFirebase as useMemoFirestore } from '@/firebase';
+import { doc, addDoc, collection, serverTimestamp, setDoc } from 'firebase/firestore';
 import { cn } from '@/lib/utils';
 import HeartLoader from '@/components/ui/HeartLoader';
 import {
@@ -301,7 +301,7 @@ function CaptureStep({
           </div>
           <h2 className="text-2xl sm:text-3xl font-light tracking-tight">
             Capture{' '}
-            <span className="font-black italic" style={{ color: part.color }}>
+            <span className="font-black italic pr-1.5" style={{ color: part.color }}>
               {part.label}
             </span>
           </h2>
@@ -705,7 +705,7 @@ function CbcStep({ onFile, onSkip, isAnalyzing, cbcImageUrl }: CbcStepProps) {
           </div>
           <h2 className="text-2xl sm:text-3xl font-light tracking-tight">
             Lab Report{' '}
-            <span className="font-black italic text-blue-400">Sync</span>
+            <span className="font-black italic text-blue-400 pr-1.5">Sync</span>
           </h2>
           <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
             Upload a CBC report photo to cross-reference hemoglobin values and boost accuracy.
@@ -859,12 +859,15 @@ interface CyclePreAnalysisModalProps {
 }
 
 function CyclePreAnalysisModal({ onComplete, onSkip }: CyclePreAnalysisModalProps) {
+  const { user } = useUser();
+  const firestore = useFirestore();
   const [lmpDate, setLmpDate] = useState<string>('');
   const [cycleDescription, setCycleDescription] = useState<string>('');
   const [cycleLength, setCycleLength] = useState<string>('');
   const [isRegular, setIsRegular] = useState<boolean | null>(null);
   const [symptoms, setSymptoms] = useState<string[]>([]);
   const [step, setStep] = useState<1 | 2>(1);
+  const [isSaving, setIsSaving] = useState(false);
 
   const cycleDescriptionOptions = [
     'Regular (21–35 days)',
@@ -887,17 +890,64 @@ function CyclePreAnalysisModal({ onComplete, onSkip }: CyclePreAnalysisModalProp
   const toggleSymptom = (s: string) =>
     setSymptoms((prev) => (prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]));
 
-  const handleComplete = () => {
-    const ctx = [
-      lmpDate ? `Last menstrual period: ${lmpDate}` : null,
-      cycleDescription ? `Cycle description: ${cycleDescription}` : null,
-      isRegular !== null ? `Cycle regularity: ${isRegular ? 'Regular' : 'Irregular'}` : null,
-      cycleLength ? `Average cycle length: ${cycleLength} days` : null,
-      symptoms.length > 0 ? `Reported symptoms: ${symptoms.join(', ')}` : null,
-    ]
-      .filter(Boolean)
-      .join('. ');
-    onComplete(ctx);
+  const handleComplete = async () => {
+    setIsSaving(true);
+    try {
+      // Save cycle data to Firestore
+      if (user && firestore && lmpDate) {
+        const lmpDateObj = new Date(lmpDate);
+        
+        // Save to cycle_logs collection
+        await addDoc(collection(firestore, `users/${user.uid}/cycle_logs`), {
+          startDate: lmpDateObj,
+          endDate: lmpDateObj, // End date same as start for new period
+          flowIntensity: symptoms.includes('Heavy menstrual flow (soaking >1 pad/hr)') ? 'Heavy' : 'Medium',
+          cycleLength: cycleLength ? parseInt(cycleLength) : null,
+          isRegular: isRegular,
+          cycleDescription: cycleDescription,
+          symptoms: symptoms,
+          createdAt: serverTimestamp(),
+        });
+
+        // Also update user medical info
+        await setDoc(doc(firestore, 'users', user.uid), {
+          medicalInfo: {
+            lastMenstrualPeriod: lmpDateObj,
+            cycleLength: cycleLength ? parseInt(cycleLength) : null,
+            cycleRegularity: isRegular ? 'Regular' : 'Irregular',
+            flowIntensity: symptoms.includes('Heavy menstrual flow (soaking >1 pad/hr)') ? 'Heavy' : 'Medium',
+          }
+        }, { merge: true });
+      }
+
+      // Build context string for analysis
+      const ctx = [
+        lmpDate ? `Last menstrual period: ${lmpDate}` : null,
+        cycleDescription ? `Cycle: ${cycleDescription}` : null,
+        isRegular !== null ? `Regularity: ${isRegular ? 'Regular' : 'Irregular'}` : null,
+        cycleLength ? `Cycle length: ${cycleLength} days` : null,
+        symptoms.length > 0 ? `Symptoms: ${symptoms.join(', ')}` : null,
+      ]
+        .filter(Boolean)
+        .join('. ');
+
+      onComplete(ctx);
+    } catch (err) {
+      console.error('Failed to save cycle data:', err);
+      // Still proceed even if save fails - use context for current session
+      const ctx = [
+        lmpDate ? `Last menstrual period: ${lmpDate}` : null,
+        cycleDescription ? `Cycle: ${cycleDescription}` : null,
+        isRegular !== null ? `Regularity: ${isRegular ? 'Regular' : 'Irregular'}` : null,
+        cycleLength ? `Cycle length: ${cycleLength} days` : null,
+        symptoms.length > 0 ? `Symptoms: ${symptoms.join(', ')}` : null,
+      ]
+        .filter(Boolean)
+        .join('. ');
+      onComplete(ctx);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const today = new Date().toISOString().split('T')[0];
@@ -1058,9 +1108,11 @@ function CyclePreAnalysisModal({ onComplete, onSkip }: CyclePreAnalysisModalProp
                 </Button>
                 <Button
                   onClick={handleComplete}
+                  disabled={isSaving}
                   className="flex-1 h-12 rounded-full bg-primary hover:bg-primary/90 text-white font-black text-[10px] uppercase tracking-[0.3em]"
                 >
-                  <Zap className="w-4 h-4 mr-1 fill-white" /> Start Scan
+                  {isSaving ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Zap className="w-4 h-4 mr-1 fill-white" />} 
+                  {isSaving ? 'Saving...' : 'Start Scan'}
                 </Button>
               </div>
             </motion.div>

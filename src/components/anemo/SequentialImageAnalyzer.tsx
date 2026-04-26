@@ -140,7 +140,7 @@ export default function SequentialImageAnalyzer({ isPage = false, onClose }: { i
                                 </div>
                             </div>
                             <div className="space-y-6">
-                                <h3 className="text-5xl md:text-6xl font-black uppercase tracking-tighter leading-none drop-shadow-2xl">Clinical <span className="text-blue-500 italic-font">Fibre</span></h3>
+                                <h3 className="text-5xl md:text-6xl font-black uppercase tracking-tighter leading-none drop-shadow-2xl">Clinical <span className="text-blue-500 italic-font pr-1.5">Fibre</span></h3>
                                 <p className="text-sm md:text-base font-medium tracking-wide text-muted-foreground/80 max-w-sm mx-auto leading-relaxed">Match laboratory data for accurate results.</p>
                             </div>
                             <div className="flex flex-col gap-4 w-full px-12">

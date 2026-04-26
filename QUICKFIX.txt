@@ -1,0 +1,46 @@
+===============================================================================
+QUICKEST FIX - COPY & PASTE DIRECTLY INTO PYTHON
+===============================================================================
+
+Open Python (any version) and paste the entire code below:
+
+---START COPY HERE---
+
+import json
+nb_path = r'C:\laragon\www\anemo-ai-v3\scripts\ml\AnemoAI_Training_Colab.ipynb'
+with open(nb_path) as f: c = f.read()
+d, p = 0, 0
+for i, ch in enumerate(c):
+    if ch == '{': d += 1
+    elif ch == '}':
+        d -= 1
+        if d == 0: p = i + 1; break
+v = c[:p]
+json.loads(v)
+with open(nb_path, 'w') as f: f.write(v)
+print(f'✓ Fixed! Removed {len(c)-len(v):,} bytes. File: {nb_path}')
+
+---END COPY HERE---
+
+Then press Enter. Done!
+
+===============================================================================
+OR RUN IN ONE LINE:
+===============================================================================
+
+python -c "import json;nb_path=r'C:\laragon\www\anemo-ai-v3\scripts\ml\AnemoAI_Training_Colab.ipynb';c=open(nb_path).read();d=0;p=0
+for i,ch in enumerate(c):
+ d+=1 if ch=='{' else (-1 if ch=='}' else 0)
+ if d==0 and ch=='}':p=i+1;break
+v=c[:p];json.loads(v);open(nb_path,'w').write(v);print(f'✓ Fixed! Removed {len(c)-len(v):,} bytes')"
+
+===============================================================================
+OR EASIEST - JUST RUN THE PROVIDED SCRIPT:
+===============================================================================
+
+Command Prompt:
+  cd C:\laragon\www\anemo-ai-v3\scripts\ml && python fix_notebook_final.py
+
+Done!
+
+===============================================================================

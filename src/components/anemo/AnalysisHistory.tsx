@@ -99,6 +99,39 @@ function toDate(ts: { toDate: () => Date } | Date | null | undefined): Date | nu
     return null;
 }
 
+/** Safely converts Firestore Timestamp or Date to a string (ISO format) */
+function toISOString(ts: { toDate: () => Date } | Date | null | undefined): string | null {
+    if (!ts) return null;
+    if (ts instanceof Date) return ts.toISOString();
+    if (typeof (ts as any).toDate === 'function') return (ts as any).toDate().toISOString();
+    return null;
+}
+
+/** Converts Firestore Timestamp fields to ISO strings for server function serialization */
+function sanitizeForServer(obj: Record<string, any>): Record<string, any> {
+    if (!obj) return {};
+    const sanitized: Record<string, any> = {};
+    for (const [key, value] of Object.entries(obj)) {
+        if (value === null || value === undefined) {
+            sanitized[key] = null;
+        } else if (typeof value === 'object' && typeof (value as any).toDate === 'function') {
+            sanitized[key] = toISOString(value);
+        } else if (Array.isArray(value)) {
+            sanitized[key] = value.map((item: any) => {
+                if (item && typeof item === 'object' && typeof item.toDate === 'function') {
+                    return toISOString(item);
+                }
+                return item;
+            });
+        } else if (typeof value === 'object') {
+            sanitized[key] = sanitizeForServer(value);
+        } else {
+            sanitized[key] = value;
+        }
+    }
+    return sanitized;
+}
+
 function CalendarView({ records, onViewReport }: { records: any[]; onViewReport: (r: any) => void }) {
     const [calMonth, setCalMonth] = useState(() => {
         const d = new Date();
@@ -592,7 +625,7 @@ export function AnalysisHistory() {
         }
 
         try {
-            const medicalInfo = userData?.medicalInfo || {};
+            const medicalInfo = sanitizeForServer(userData?.medicalInfo || {});
 
             const result = await runValidateMultimodalResults({
                 medicalInfo: medicalInfo,

@@ -36,7 +36,11 @@ import {
   X,
   Home,
   Activity,
-  History
+  History,
+  Gamepad2,
+  Droplets,
+  Heart,
+  Calendar
 } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useTheme } from 'next-themes';
@@ -53,6 +57,9 @@ const otherLinks = [
   { href: '/dashboard/chatbot', label: 'Anemo Bot', icon: Bot },
   { href: '/dashboard/find-doctor', label: 'Find Care', icon: Search },
   { href: '/dashboard/remedies', label: 'Remedies', icon: Leaf },
+  { href: '/dashboard/games/iron-catcher', label: 'Iron Catcher', icon: Gamepad2 },
+  { href: '/dashboard/games/hydration', label: 'Hydration', icon: Droplets },
+  { href: '/dashboard#cycle-log', label: 'Cycle Log', icon: Calendar },
 ];
 
 export function Header() {

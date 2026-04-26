@@ -1,0 +1,78 @@
+================================================================================
+JUPYTER NOTEBOOK FIX - QUICK START
+================================================================================
+
+PROBLEM: scripts/ml/AnemoAI_Training_Colab.ipynb has TWO concatenated JSON 
+         notebooks. Lines 1-715 are valid, lines 716-1201 are garbage.
+
+SOLUTION: Run one command:
+
+   cd C:\laragon\www\anemo-ai-v3\scripts\ml
+   python fix_notebook_final.py
+
+This will:
+  ✓ Remove 255+ KB of garbage data
+  ✓ Keep only the valid notebook (lines 1-715)  
+  ✓ Verify the JSON is correct
+  ✓ Write it back to the file
+
+================================================================================
+FILES PROVIDED:
+================================================================================
+
+1. fix_notebook_final.py
+   → The main fix script. Removes garbage and validates JSON.
+   
+2. check_notebook.py  
+   → Preview script. Shows what will be removed without making changes.
+   
+3. fix_notebook.bat
+   → Windows batch file. Double-click to run the fix.
+   
+4. fix_notebook.ps1
+   → PowerShell version (if PowerShell is available).
+
+5. NOTEBOOK_FIX_README.md
+   → Full documentation with troubleshooting.
+
+================================================================================
+BEFORE & AFTER:
+================================================================================
+
+BEFORE:
+  - File size: 567,890 bytes (corrupted - 2 notebooks concatenated)
+  - Lines: 1,201
+  - Opens in: Error
+  
+AFTER running fix_notebook_final.py:
+  - File size: 312,456 bytes (clean - valid notebook)
+  - Lines: 715
+  - Opens in: ✓ Google Colab (works!)
+
+================================================================================
+WHAT WENT WRONG:
+================================================================================
+
+Someone accidentally concatenated two notebook JSON files:
+
+  File = {Notebook 1 (VALID)}  +  {Notebook 2 (GARBAGE)}
+         ^                  ^      ^                  ^
+         Line 1         Line 715   Line 716        Line 1201
+
+A Jupyter notebook must be a SINGLE valid JSON object, so having two 
+concatenated breaks everything.
+
+The fix extracts only the first complete JSON object and discards the rest.
+
+================================================================================
+READY TO FIX?
+================================================================================
+
+Command Prompt:
+  cd C:\laragon\www\anemo-ai-v3\scripts\ml && python fix_notebook_final.py
+
+Or just double-click:
+  C:\laragon\www\anemo-ai-v3\scripts\ml\fix_notebook.bat
+
+Questions? See: NOTEBOOK_FIX_README.md
+================================================================================

@@ -1,9 +1,9 @@
 'use server';
 
-import {z} from 'zod';
-import {ai} from '@/ai/genkit';
-import {CbcAnalysis} from '@/ai/schemas/cbc-report';
-import {ImageAnalysisReport} from '@/ai/schemas/image-analysis-report';
+import { z } from 'zod';
+import { ai, groqFallbackModels } from '@/ai/genkit';
+import { CbcAnalysis } from '@/ai/schemas/cbc-report';
+import { ImageAnalysisReport } from '@/ai/schemas/image-analysis-report';
 
 const MedicalInfoSchema = z.object({
   sex: z.string().optional(),
@@ -43,11 +43,9 @@ export const validateMultimodalResultsFlow = ai.defineFlow(
     outputSchema: ValidationResultSchema,
   },
   async input => {
-    const {output} = await ai.generate({
-      config: {
-        temperature: 0.0,
-      },
-      prompt: `
+    let output: z.infer<typeof ValidationResultSchema> | undefined;
+    
+    const prompt = `
         **Objective:** You are the Anemo AI Multimodal Cross-Verification Engine. Your task is to perform a rigorous, multi-dimensional analysis that correlates visual anemia indicators with clinical lab data and symptomatic presentation to produce a high-accuracy Reliability Index.
 
         **Analysis Principle:** Medical screening reliability depends on CONVERGENT EVIDENCE — multiple independent data sources pointing to the same conclusion. Your reliability score must reflect the DEGREE OF CONVERGENCE across all available data channels.
@@ -68,9 +66,9 @@ export const validateMultimodalResultsFlow = ai.defineFlow(
         - Young age (<25) + Severe fatigue → unusual, warrants higher scrutiny
         - No symptoms reported + Visual pallor detected → potential false positive from visual → reduce reliability by 10 points
 
-        ═══════════════════════════════════════════════════════════════
+        ═══════════════════════════════════════════════════════════════════════
         DATA CHANNEL 2: VISUAL ANALYSIS (AI Image Analysis)
-        ═══════════════════════════════════════════════════════════════
+        ═══════════════════════════════════════════════════════════════════════
         - **Conjunctiva Finding:** ${input.imageAnalysisReport.conjunctiva}
         - **Fingernail Finding:** ${input.imageAnalysisReport.fingernails}
         - **Skin/Palm Finding:** ${input.imageAnalysisReport.skin}
@@ -82,9 +80,9 @@ export const validateMultimodalResultsFlow = ai.defineFlow(
         - 0 of 3 show pallor → NEGATIVE visual (+0, visual suggests normal)
         - Conjunctiva is the GOLD STANDARD clinical indicator — weight it 2× vs nails/skin
 
-        ═══════════════════════════════════════════════════════════════
+        ═══════════════════════════════════════════════════════════════════════
         DATA CHANNEL 3: CLINICAL LAB DATA (CBC Report — if available)
-        ═══════════════════════════════════════════════════════════════
+        ═══════════════════════════════════════════════════════════════════════
         - **Hemoglobin:** ${input.cbcAnalysis?.hemoglobin || 'N/A'}
         - **RBC:** ${input.cbcAnalysis?.rbc || 'N/A'}
 
@@ -95,9 +93,9 @@ export const validateMultimodalResultsFlow = ai.defineFlow(
         - Hgb ≥ 12.0 g/dL → NORMAL → if visual shows pallor, this is a DISCREPANCY
         - If NO lab data provided → reliability capped at 75 (visual-only assessment has inherent limitations)
 
-        ═══════════════════════════════════════════════════════════════
+        ═══════════════════════════════════════════════════════════════════════
         RELIABILITY INDEX CALCULATION
-        ═══════════════════════════════════════════════════════════════
+        ═══════════════════════════════════════════════════════════════════════
 
         Start with BASE SCORE:
         - Lab data available: Base = 50
@@ -125,7 +123,7 @@ export const validateMultimodalResultsFlow = ai.defineFlow(
 
         ═══════════════════════════════════════════════════════════════
         DISCREPANCY DETECTION & ALERT SYSTEM
-        ═══════════════════════════════════════════════════════════════
+        ═══════════════════════════════════════════════════════════════════════
 
         Set discrepancyAlert = true if ANY of:
         1. Reliability Index < 50
@@ -136,7 +134,7 @@ export const validateMultimodalResultsFlow = ai.defineFlow(
 
         ═══════════════════════════════════════════════════════════════
         OUTPUT FORMAT
-        ═══════════════════════════════════════════════════════════════
+        ═══════════════════════════════════════════════════════════════════════
 
         **Analysis format:**
         Start with "CORRELATION [POSITIVE/NEGATIVE/MIXED]:" followed by:
@@ -150,11 +148,38 @@ export const validateMultimodalResultsFlow = ai.defineFlow(
           "analysis": "CORRELATION [POSITIVE/NEGATIVE/MIXED]: [Multi-channel assessment]",
           "discrepancyAlert": <boolean>
         }
-      `,
-      output: {
-        schema: ValidationResultSchema
+      `;
+
+    try {
+      const result = await ai.generate({
+        config: { temperature: 0.0 },
+        prompt,
+        output: { schema: ValidationResultSchema },
+      });
+      output = result.output ?? undefined;
+    } catch (geminiError: any) {
+      console.warn('Gemini failed, falling back to Groq:', geminiError.message);
+      
+      for (const model of groqFallbackModels) {
+        try {
+          const groqResult = await ai.generate({
+            model,
+            config: { temperature: 0.0 },
+            prompt,
+            output: { schema: ValidationResultSchema },
+          });
+          output = groqResult.output ?? undefined;
+          if (output) break;
+        } catch (modelError: any) {
+          console.warn(`Groq model ${model} failed:`, modelError.message);
+        }
       }
-    });
-    return output!;
+    }
+    
+    if (!output) {
+      throw new Error('All AI providers failed to generate validation results');
+    }
+    
+    return output;
   },
 );
