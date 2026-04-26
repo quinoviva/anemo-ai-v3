@@ -58,12 +58,6 @@ dataconnect-debug.log
 /models_output/
 *.h5
 
-# TF.js weight shards (binary, too large for git)
-public/models/**/*.bin
-# Keep model.json files in git (small, text-based topology descriptors)
-!public/models/**/model.json
-!public/models/**/metadata.json
-
 # Scripts directory (training, diagnostic, fix scripts - not source code)
 scripts/
 
@@ -76,12 +70,6 @@ scripts/
 
 # Ignore Keras model files
 *.keras
-
-# Ignore all model directories under public/models
-# This covers judges, scouts, and specialists
-public/models/judges/
-public/models/scouts/
-public/models/specialists/
 
 # Alternatively, if you want to be broad:
 # public/models/**/model.json

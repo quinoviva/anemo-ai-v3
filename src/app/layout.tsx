@@ -43,7 +43,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <link rel="icon" href="/anemo.png" type="image/svg+xml" />
+        <link rel="icon" href="/anemo.png" type="image/png" />
       </head>
       <body className={`${spaceGrotesk.variable} font-sans overflow-x-hidden`}>
         <ThemeProvider
