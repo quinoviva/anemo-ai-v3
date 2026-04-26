@@ -46,12 +46,7 @@
             "bias_initializer": {
               "class_name": "Zeros",
               "config": {}
-            },
-            "kernel_regularizer": null,
-            "bias_regularizer": null,
-            "activity_regularizer": null,
-            "kernel_constraint": null,
-            "bias_constraint": null
+            }
           }
         }
       ]

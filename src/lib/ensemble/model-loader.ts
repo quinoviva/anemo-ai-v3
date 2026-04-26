@@ -36,7 +36,7 @@ import type { EnsembleModelConfig } from './model-registry';
 // ---------------------------------------------------------------------------
 
 const IDB_NAME = 'anemo-models-cache';
-const IDB_VERSION = 1;
+const IDB_VERSION = 2;
 const IDB_STORE = 'models';
 
 interface ModelCacheEntry {
@@ -161,11 +161,11 @@ async function loadFromIdb(
     const entry = await database.get(IDB_STORE, modelId) as ModelCacheEntry | undefined;
     if (!entry) return null;
 
-    const ioHandler = tf.io.fromMemory(
-      JSON.parse(entry.modelTopology),
-      entry.weightSpecs,
-      entry.weightData,
-    );
+    const ioHandler = tf.io.fromMemory({
+      modelTopology: JSON.parse(entry.modelTopology),
+      weightSpecs: entry.weightSpecs,
+      weightData: entry.weightData,
+    });
 
     // Attempt graph model first (smaller, faster); fall back to layers model.
     try {
@@ -202,7 +202,14 @@ async function loadFromNetwork(
       console.log(`[ModelLoader] Successfully loaded LayersModel from ${modelUrl}`);
       return model;
     } catch (layersError) {
-      console.error(`[ModelLoader] FAILED to load model from ${modelUrl}:`, layersError);
+      const errorMsg = layersError instanceof Error ? layersError.message : String(layersError);
+      console.error(`[ModelLoader] FAILED to load model from ${modelUrl}:`, errorMsg);
+      
+      // Check if it's a metadata mismatch error
+      if (errorMsg.includes('no target variable') || errorMsg.includes('weight')) {
+        console.error(`[ModelLoader] Model weights appear corrupted or incompatible. Model needs regeneration.`);
+      }
+      
       throw layersError;
     }
   }

@@ -67,7 +67,7 @@ export const ENSEMBLE_MODELS: EnsembleModelConfig[] = [
     tier: 1,
     group: 'Scouts',
     parameter: 'Skin',
-    modelUrl: '/models/scouts/mobilenet-v3-skin/model.json?v=5',
+    modelUrl: '/models/scouts/mobilenet-v3-skin/model.json?v=7',
     inputShape: [224, 224],
     consensusWeight: 0.5,
     description:
@@ -79,7 +79,7 @@ export const ENSEMBLE_MODELS: EnsembleModelConfig[] = [
     tier: 1,
     group: 'Scouts',
     parameter: 'Fingernails',
-    modelUrl: '/models/scouts/mobilenet-v3-nails/model.json?v=5',
+    modelUrl: '/models/scouts/mobilenet-v3-nails/model.json?v=7',
     inputShape: [224, 224],
     consensusWeight: 0.5,
     description:
@@ -91,7 +91,7 @@ export const ENSEMBLE_MODELS: EnsembleModelConfig[] = [
     tier: 1,
     group: 'Scouts',
     parameter: 'Undereye',
-    modelUrl: '/models/scouts/squeezenet-1.1-eye/model.json?v=4',
+    modelUrl: '/models/scouts/squeezenet-1.1-eye/model.json?v=6',
     inputShape: [227, 227],
     consensusWeight: 0.5,
     description:
@@ -109,7 +109,7 @@ export const ENSEMBLE_MODELS: EnsembleModelConfig[] = [
     tier: 2,
     group: 'Specialists',
     parameter: 'All',
-    modelUrl: '/models/specialists/resnet50v2/model.json?v=5',
+    modelUrl: '/models/specialists/resnet50v2/model.json?v=7',
     inputShape: [224, 224],
     consensusWeight: 1.0,
     description:
@@ -121,7 +121,7 @@ export const ENSEMBLE_MODELS: EnsembleModelConfig[] = [
     tier: 2,
     group: 'Specialists',
     parameter: 'All',
-    modelUrl: '/models/specialists/densenet121/model.json?v=5',
+    modelUrl: '/models/specialists/densenet121/model.json?v=7',
     inputShape: [224, 224],
     consensusWeight: 1.0,
     description:
@@ -133,7 +133,7 @@ export const ENSEMBLE_MODELS: EnsembleModelConfig[] = [
     tier: 2,
     group: 'Specialists',
     parameter: 'All',
-    modelUrl: '/models/specialists/inceptionv3/model.json?v=4',
+    modelUrl: '/models/specialists/inceptionv3/model.json?v=7',
     inputShape: [299, 299],
     consensusWeight: 1.0,
     description:
@@ -145,7 +145,7 @@ export const ENSEMBLE_MODELS: EnsembleModelConfig[] = [
     tier: 2,
     group: 'Specialists',
     parameter: 'All',
-    modelUrl: '/models/specialists/vgg16/model.json?v=4',
+    modelUrl: '/models/specialists/vgg16/model.json?v=7',
     inputShape: [224, 224],
     consensusWeight: 1.0,
     description:
@@ -164,7 +164,7 @@ export const ENSEMBLE_MODELS: EnsembleModelConfig[] = [
     tier: 3,
     group: 'Judges',
     parameter: 'All',
-    modelUrl: '/models/judges/efficientnet-b0/model.json?v=4',
+    modelUrl: '/models/judges/efficientnet-b0/model.json?v=7',
     inputShape: [224, 224],
     consensusWeight: 1.5,
     description:
@@ -176,7 +176,7 @@ export const ENSEMBLE_MODELS: EnsembleModelConfig[] = [
     tier: 3,
     group: 'Judges',
     parameter: 'All',
-    modelUrl: '/models/judges/vit-tiny/model.json?v=4',
+    modelUrl: '/models/judges/vit-tiny/model.json?v=7',
     inputShape: [224, 224],
     consensusWeight: 1.5,
     description:
@@ -188,7 +188,7 @@ export const ENSEMBLE_MODELS: EnsembleModelConfig[] = [
     tier: 3,
     group: 'Judges',
     parameter: 'All',
-    modelUrl: '/models/judges/mlp-meta-learner/model.json?v=4',
+    modelUrl: '/models/judges/mlp-meta-learner/model.json?v=7',
     inputShape: [224, 224],
     consensusWeight: 2.0,
     description:
