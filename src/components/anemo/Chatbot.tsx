@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
-import { useIsMounted } from '@/hooks/use-is-mounted';
 import { runAnswerAnemiaQuestion } from '@/app/actions';
 import { CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -29,7 +28,16 @@ const sampleQuestions = [
 ];
 
 export function Chatbot({ isPopup = false, onClose, onMinimize }: ChatbotProps) {
-  const isMounted = useIsMounted();
+  const isMountedRef = useRef(false);
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  const isMounted = useCallback(() => isMountedRef.current, []);
+  
   const { user } = useUser();
   const firestore = useFirestore();
   const [userInput, setUserInput] = useState('');
