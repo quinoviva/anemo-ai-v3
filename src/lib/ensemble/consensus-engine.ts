@@ -85,7 +85,7 @@ export interface InferenceProgressEvent {
  * to the Tier-2 Specialists. Images below this threshold are flagged as
  * low quality and excluded from the Specialist/Judge tiers.
  */
-const SCOUT_QUALITY_THRESHOLD = 0.20;
+const SCOUT_QUALITY_THRESHOLD = 0.05;
 
 // ---------------------------------------------------------------------------
 // Advanced consensus helpers
