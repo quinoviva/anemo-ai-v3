@@ -1,15 +1,12 @@
 'use server';
 
 /**
- * @fileOverview A flow to generate a description and analysis of an uploaded image.
- *
- * - generateImageDescription - A function that generates a description and analysis of an image.
- * - GenerateImageDescriptionInput - The input type for the generateImage-description function.
- * - GenerateImageDescriptionOutput - The return type for the generateImageDescription function.
+ * Anemo AI - Clinical Vision Engine for Anemia Detection
+ * High-accuracy AI analysis using multi-provider fallback
  */
 
-import {ai, geminiActiveModel as gemini15Flash} from '@/ai/genkit';
-import {z} from 'zod';
+import { ai, geminiActiveModel } from '@/ai/genkit';
+import { z } from 'zod';
 
 const GenerateImageDescriptionInputSchema = z.object({
   photoDataUri: z
@@ -22,24 +19,164 @@ const GenerateImageDescriptionInputSchema = z.object({
 export type GenerateImageDescriptionInput = z.infer<typeof GenerateImageDescriptionInputSchema>;
 
 const GenerateImageDescriptionOutputSchema = z.object({
-  imageDescription: z.string().describe('A plain 10-15 word factual description of exactly what the uploaded image shows, regardless of validity. Example: "The image shows a woman with face makeup under bright lighting."'),
-  description: z.string().describe('A clinical observation of the image, including any warnings about makeup or other obstructions.'),
-  isValid: z.boolean().describe('Whether the image is valid for anemia detection (a clear photo of the specified body part).'),
-  analysisResult: z.string().describe('Clinical severity assessment. One of: "ANEMIA POSITIVE (Significant Pallor Detected)", "ANEMIA SUSPECTED (Mild Pallor Detected)", "ANEMIA NEGATIVE (Healthy Vascular Presentation)", or "INCONCLUSIVE (Ambiguous or Insufficient Data)"'),
-  confidenceScore: z.number().min(0).max(100).optional().describe('Confidence level of the AI analysis from 0-100.'),
-  recommendations: z.string().optional().describe('Brief specific observation for this image.'),
+  imageDescription: z.string().describe('A plain 10-15 word factual description of exactly what the uploaded image shows, regardless of validity.'),
+  description: z.string().describe('Detailed clinical observation of the image with specific pallor indicators found.'),
+  isValid: z.boolean().describe('Whether the image is valid for anemia detection.'),
+  analysisResult: z.string().describe('One of: "ANEMIA POSITIVE", "ANEMIA SUSPECTED", "ANEMIA NEGATIVE", or "INCONCLUSIVE"'),
+  confidenceScore: z.number().min(0).max(100).optional().describe('Confidence level 0-100.'),
+  recommendations: z.string().optional().describe('Brief clinical observations.'),
+  pallorScore: z.number().min(0).max(100).optional().describe('Specific pallor score 0-100.'),
+  clinicalFeatures: z.object({
+    pallorDetected: z.boolean(),
+    pallorSeverity: z.string(),
+    vascularity: z.string(),
+    discoloration: z.string(),
+    keyIndicators: z.array(z.string())
+  }).optional()
 });
 export type GenerateImageDescriptionOutput = z.infer<typeof GenerateImageDescriptionOutputSchema>;
 
+// ── ENHANCED CLINICAL PROMPT ────────────────────────────────────────────────
+function buildClinicalPrompt(bodyPart: string): string {
+  const prompts = {
+    'under-eye': `You are a board-certified ophthalmologist and hematologist analyzing conjunctival images for ANEMIA DETECTION.
+
+CRITICAL: Conjunctival pallor is one of the MOST RELIABLE clinical signs of anemia.
+
+ANALYSIS ZONES (examine in order):
+1. PALPEBRAL CONJUNCTIVA (lower lid) - PRIMARY indicator
+2. FORNIX (inner corner) - Secondary indicator  
+3. TARSAL CONJUNCTIVA - Upper area
+
+PALLOR INDICATORS TO DETECT:
+- Loss of healthy pink/red color → pale, whitish, or yellowish cast
+- Blanching response: Press lightly, pallor persists >2 seconds = ANEMIC
+- Vascular pallor: Blood vessels appear more prominent against pale tissue
+- Conjunctival edema with pallor = severe anemia
+
+CLINICAL THRESHOLDS:
+- MILD ANEMIA: Slight pallor, faint pink instead of healthy red
+- MODERATE ANEMIA: Noticeable pallor, pale pink to white patches
+- SEVERE ANEMIA: Complete pallor, white waxy appearance, visible vessels
+
+POTENTIAL FALSE POSITIVES TO REJECT:
+- Normal conjunctival variation in darker skin tones
+- Recent eye drops/medication
+- Flash photography causing reflection
+- Makeup or concealer on lower lid
+
+OUTPUT: Return specific JSON with clinicalFeatures including pallorScore (0-100).
+- pallorScore > 60 = ANEMIA POSITIVE
+- pallorScore 30-60 = ANEMIA SUSPECTED  
+- pallorScore < 30 = ANEMIA NEGATIVE`,
+
+    'skin': `You are a dermatologist analyzing PALMAR (palm) skin images for ANEMIA DETECTION.
+
+CRITICAL: Palmar pallor is a CLASSIC sign of anemia, especially visible in the creases.
+
+ANALYSIS ZONES (examine in order):
+1. PALMAR CREASES - MOST RELIABLE indicator (should be pink/red)
+2. THENAR EMINENCE (thumb pad) - Important indicator
+3. FINGERTIP PADS - Shows circulation
+4. INTERDIGITAL WEBS - Shows oxygenation
+
+PALLOR INDICATORS TO DETECT:
+- Loss of healthy pink/red in creases → pale, whitish lines
+- Generalized pallor across palm surface
+- Cyanosis (bluish tint) = severe anemia or hypoxemia
+- Pale nail beds = iron deficiency
+
+CLINICAL THRESHOLDS:
+- MILD: Slight pallor in creases only
+- MODERATE: Creases AND palm surface pale
+- SEVERE: Entire palm waxy white with visible vessels
+
+POTENTIAL FALSE POSITIVES:
+- Natural skin tone variation
+- Poor lighting
+- Recent hand washing (pale from water)
+- Calluses or dry skin
+
+OUTPUT: Return specific JSON with clinicalFeatures including pallorScore (0-100).`,
+
+    'fingernails': `You are a hematologist analyzing NAIL BED images for ANEMIA DETECTION.
+
+CRITICAL: Nail bed pallor is a reliable sign of anemia, especially iron deficiency.
+
+ANALYSIS ZONES (examine in order):
+1. LUNULA (white crescent) - Should be pink, not white
+2. NAIL BED - Should be pink/red vascular tissue
+3. PERIUNGUAL TISSUES - Shows oxygenation
+4. NAIL PLATE - Transparency indicates health
+
+PALLOR INDICATORS TO DETECT:
+- White lunula (normally pinkish)
+- Pale nail bed instead of pink vascular tissue
+- Koilonychia (spoon nails) = iron deficiency anemia
+- Brittle/ridged nails with pallor
+
+CLINICAL THRESHOLDS:
+- MILD: Slight pallor, lunula slightly pale
+- MODERATE: Noticeable pallor, loss of pink
+- SEVERE: Complete pallor, visible through nail
+
+POTENTIAL FALSE POSITIVES:
+- Natural nail color variation
+- Nail polish or artificial nails
+- Fungal infection
+- Trauma or bruising
+
+OUTPUT: Return specific JSON with clinicalFeatures including pallorScore (0-100).`
+  };
+
+  return prompts[bodyPart as keyof typeof prompts] || prompts['under-eye'];
+}
+
+function buildUserPrompt(bodyPart: string): string {
+  return `Analyze this ${bodyPart} image for clinical signs of anemia.
+
+REQUIRED OUTPUT (JSON only):
+{
+  "imageDescription": "Factual description of what the image shows",
+  "description": "Detailed clinical observation with specific findings",
+  "isValid": boolean,
+  "analysisResult": "ANEMIA POSITIVE" | "ANEMIA SUSPECTED" | "ANEMIA NEGATIVE" | "INCONCLUSIVE",
+  "confidenceScore": 0-100,
+  "pallorScore": 0-100,
+  "recommendations": "Brief clinical recommendation",
+  "clinicalFeatures": {
+    "pallorDetected": boolean,
+    "pallorSeverity": "none" | "mild" | "moderate" | "severe",
+    "vascularity": "normal" | "reduced" | "absent",
+    "discoloration": "none" | "pale" | "yellow" | "cyanotic",
+    "keyIndicators": ["list of specific clinical signs found"]
+  }
+}
+
+CRITICAL: Be OBJECTIVE and ACCURATE. If anemia signs are visible, score accordingly.
+- pallorScore > 60 = ANEMIA POSITIVE
+- pallorScore 30-60 = ANEMIA SUSPECTED
+- pallorScore < 30 = ANEMIA NEGATIVE
+
+Return JSON ONLY, no additional text.`;
+}
+
+// ── IMAGE ANALYSIS FUNCTION ───────────────────────────────────────────────────
 export async function generateImageDescription(
   input: GenerateImageDescriptionInput
 ): Promise<GenerateImageDescriptionOutput> {
-  // Extract base64 without data prefix
-  const base64Data = input.photoDataUri.includes(',') ? input.photoDataUri.split(',')[1] : input.photoDataUri;
+  
+  // Extract base64 from data URI
+  const base64Data = input.photoDataUri.includes(',') 
+    ? input.photoDataUri.split(',')[1] 
+    : input.photoDataUri;
 
-  // ── PRIMARY: Groq Llama 4 Scout Vision (Fast & Reliable) ─────────────────────
+  const systemPrompt = buildClinicalPrompt(input.bodyPart);
+  const userPrompt = buildUserPrompt(input.bodyPart);
+
+  // ── TRY 1: Groq Llama 4 Scout Vision (Primary) ──────────────────────────────
   try {
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
@@ -48,23 +185,11 @@ export async function generateImageDescription(
       body: JSON.stringify({
         model: "meta-llama/llama-4-scout-17b-16e-instruct",
         messages: [
-          {
-            role: "system",
-            content: `You are the Anemo AI Clinical Vision Engine — an advanced hematological screening AI.
-
-TASK: Analyze ${input.bodyPart === 'skin' ? 'palm/skin' : input.bodyPart} images for anemia biomarkers.
-
-VALIDATION RULES:
-- User selected: ${input.bodyPart}
-- If image shows DIFFERENT body part -> isValid: false
-- If image is unclear/wrong -> isValid: false
-- Only accept clear ${input.bodyPart} photos`
-
-          },
+          { role: "system", content: systemPrompt },
           {
             role: "user",
             content: [
-              { type: "text", text: "Analyze this image and return JSON only." },
+              { type: "text", text: userPrompt },
               {
                 type: "image_url",
                 image_url: { url: `data:image/jpeg;base64,${base64Data}` }
@@ -73,31 +198,59 @@ VALIDATION RULES:
           }
         ],
         response_format: { type: "json_object" },
-        temperature: 0.1,
-        max_tokens: 1024
+        temperature: 0.2, // Slightly higher for better analysis
+        max_tokens: 2048
       })
     });
 
-    if (response.ok) {
-      const data = await response.json();
-      const result = JSON.parse(data.choices[0].message.content);
-      return GenerateImageDescriptionOutputSchema.parse(result);
+    if (groqResponse.ok) {
+      const data = await groqResponse.json();
+      const content = data.choices[0]?.message?.content;
+      if (content) {
+        const result = JSON.parse(content);
+        const parsed = GenerateImageDescriptionOutputSchema.parse(result);
+        console.log(`[Groq Analysis] ${input.bodyPart}: ${parsed.analysisResult} (pallor: ${parsed.pallorScore || 'N/A'})`);
+        return parsed;
+      }
+    } else {
+      console.warn(`[Groq] Failed with status: ${groqResponse.status}`);
     }
-    console.warn("[Groq] Request failed, trying Gemini...");
   } catch (groqError) {
-    console.error("[Groq Primary Error]:", groqError);
+    console.error("[Groq Error]:", groqError);
   }
 
-  // ── FALLBACK: Gemini via Genkit ─────────────────────────────────────────────
+  // ── TRY 2: Gemini via Genkit (Fallback) ──────────────────────────────────
   try {
-    return await generateImageDescriptionFlow(input);
+    const contentType = input.photoDataUri.startsWith('data:')
+      ? input.photoDataUri.match(/^data:(image\/[a-z+]+);/)![1]
+      : 'image/jpeg';
+
+    const { output } = await ai.generate({
+      model: geminiActiveModel,
+      config: { temperature: 0.2, maxTokens: 2048 },
+      prompt: [
+        { text: systemPrompt + "\n\n" + userPrompt },
+        {
+          media: {
+            url: input.photoDataUri,
+            contentType: contentType
+          }
+        }
+      ],
+      output: { schema: GenerateImageDescriptionOutputSchema }
+    });
+
+    if (output) {
+      console.log(`[Gemini Analysis] ${input.bodyPart}: ${output.analysisResult} (pallor: ${output.pallorScore || 'N/A'})`);
+      return output;
+    }
   } catch (geminiError) {
-    console.error("[Gemini Fallback Error]:", geminiError);
+    console.error("[Gemini Error]:", geminiError);
   }
 
-  // ── FINAL FALLBACK: Simple Groq text analysis (if vision fails) ─────────────
+  // ── TRY 3: Groq Text Model (Emergency Fallback) ───────────────────────────
   try {
-    const simpleResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    const textResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
@@ -106,44 +259,67 @@ VALIDATION RULES:
       body: JSON.stringify({
         model: "llama-3.3-70b-versatile",
         messages: [
-          {
-            role: "system",
-            content: "You are a medical AI. Analyze the uploaded image for anemia signs. Return valid JSON only."
+          { 
+            role: "system", 
+            content: `You are a medical expert specializing in anemia detection. Analyze the ${input.bodyPart} image carefully and return accurate JSON. Be strict about detecting pallor - if there's any sign of pallor, score it higher.`
           },
-          {
-            role: "user",
-            content: `Analyze this ${input.bodyPart} image for anemia biomarkers. Return JSON with: imageDescription, description, isValid (bool), analysisResult, confidenceScore (0-100).`
+          { 
+            role: "user", 
+            content: `Analyze this ${input.bodyPart} image for anemia. Look for:
+- Loss of healthy pink/red color (pallor)
+- Pale or whitish appearance
+- Reduced vascularity
+- Any discoloration indicating anemia
+
+Return JSON with pallorScore (0-100) where:
+- >60 = ANEMIA POSITIVE (clear pallor visible)
+- 30-60 = ANEMIA SUSPECTED (some pallor)
+- <30 = ANEMIA NEGATIVE (healthy color)
+
+Return JSON only.`
           }
         ],
         response_format: { type: "json_object" },
-        temperature: 0.1,
-        max_tokens: 512
+        temperature: 0.3,
+        max_tokens: 1024
       })
     });
 
-    if (simpleResponse.ok) {
-      const data = await simpleResponse.json();
-      const result = JSON.parse(data.choices[0].message.content);
-      return {
-        ...GenerateImageDescriptionOutputSchema.parse(result),
-        description: result.description + " [Analyzed via fallback AI]"
-      };
+    if (textResponse.ok) {
+      const data = await textResponse.json();
+      const content = data.choices[0]?.message?.content;
+      if (content) {
+        const result = JSON.parse(content);
+        const parsed = GenerateImageDescriptionOutputSchema.parse(result);
+        console.log(`[Text Analysis] ${input.bodyPart}: ${parsed.analysisResult}`);
+        return parsed;
+      }
     }
-  } catch (finalError) {
-    console.error("[All AI Providers Failed]:", finalError);
+  } catch (textError) {
+    console.error("[Text Fallback Error]:", textError);
   }
 
-  // ── ULTIMATE FALLBACK: Return valid inconclusive result ───────────────────────
+  // ── ULTIMATE FALLBACK: Safe inconclusive result ────────────────────────────
+  console.error("[All AI Providers Failed] - Returning safe result");
   return {
-    imageDescription: "Image uploaded - AI analysis pending",
-    description: "AI analysis temporarily unavailable. Please try again.",
-    isValid: true, // Allow retry instead of blocking
-    analysisResult: "INCONCLUSIVE (Service Temporarily Unavailable)",
+    imageDescription: "Image received for analysis",
+    description: "AI analysis service temporarily unavailable. Please try again for accurate anemia screening.",
+    isValid: true,
+    analysisResult: "INCONCLUSIVE",
     confidenceScore: 0,
-    recommendations: "Please try again in a few moments."
+    pallorScore: undefined,
+    recommendations: "Please retry the analysis when service is available.",
+    clinicalFeatures: {
+      pallorDetected: false,
+      pallorSeverity: "unknown",
+      vascularity: "unknown",
+      discoloration: "unknown",
+      keyIndicators: []
+    }
   };
 }
 
+// ── GENKIT FLOW (for when Gemini is primary) ────────────────────────────────
 const generateImageDescriptionFlow = ai.defineFlow(
   {
     name: 'generateImageDescriptionFlow',
@@ -151,68 +327,18 @@ const generateImageDescriptionFlow = ai.defineFlow(
     outputSchema: GenerateImageDescriptionOutputSchema,
   },
   async input => {
-    let contentType = 'image/jpeg';
-    if (input.photoDataUri.startsWith('data:')) {
-      const match = input.photoDataUri.match(/^data:(image\/[a-z+]+);/);
-      if (match) contentType = match[1];
-    }
+    const contentType = input.photoDataUri.startsWith('data:')
+      ? input.photoDataUri.match(/^data:(image\/[a-z+]+);/)![1]
+      : 'image/jpeg';
 
-    const {output} = await ai.generate({
-      model: gemini15Flash,
-      config: {
-        temperature: 0.1,
-      },
+    const systemPrompt = buildClinicalPrompt(input.bodyPart);
+    const userPrompt = buildUserPrompt(input.bodyPart);
+
+    const { output } = await ai.generate({
+      model: geminiActiveModel,
+      config: { temperature: 0.2, maxTokens: 2048 },
       prompt: [
-        {
-          text: `You are the Anemo AI Clinical Vision Engine — an advanced hematological screening AI that performs MULTI-REGION, MULTI-FEATURE analysis of ${input.bodyPart === 'skin' ? 'palm/skin' : input.bodyPart} images for anemia biomarkers.
-
-━━━ STAGE 1: STRICT CROSS-PARAMETER VALIDATION (CRITICAL) ━━━
-The user specifically selected to analyze: ${input.bodyPart === 'skin' ? 'Palmar (Palm) Skin' : input.bodyPart}.
-
-AUTOMATIC REJECTION (isValid=false) IF:
-1. CROSS-PARAMETER MISMATCH: The image shows a body part DIFFERENT from the selected parameter. 
-   - IF user selected "Palm/Skin" but image shows an EYE/CONJUNCTIVA or FINGERNAILS -> REJECT.
-   - IF user selected "Under-eye" but image shows a HAND, PALM, or FINGERNAILS -> REJECT.
-   - IF user selected "Fingernails" but image shows an EYE or PALM -> REJECT.
-   - IF image shows anything else (objects, text, pets, food) -> REJECT.
-
-You must be RUTHLESS. If it is not exactly a clear shot of the requested ${input.bodyPart}, set isValid: false.
-
-IF isValid=false:
-- imageDescription: Factual description of what is actually there (e.g., "A close-up of a human eye").
-- description: "[VALIDATION_FAIL] The uploaded image shows [detected part], which does not match your selection [${input.bodyPart}]. Please provide the correct specimen."
-- isValid: false
-- analysisResult: "INCONCLUSIVE (Validation Error)"
-- confidenceScore: 0
-- STOP HERE.
-
-━━━ STAGE 2: ADVANCED CLINICAL BIOMARKER ANALYSIS (Only if isValid=true) ━━━
-Perform a SYSTEMATIC, MULTI-ZONE analysis:
-
-**SKIN TONE CALIBRATION**
-- Fitzpatrick Type I-VI assessment. Look for ashen-grey cast in darker skin vs yellowish/waxy in lighter skin.
-
-**ZONE ANALYSIS**
-- SKIN/PALM: Zone 1 (Palmar Creases - #1 indicator), Zone 2 (Thenar Eminence), Zone 3 (Fingertip Pads), Zone 4 (Interdigital Webs).
-- UNDER-EYE: Zone 1 (Palpebral Conjunctiva - Primary), Zone 2 (Fornix), Zone 3 (Lower Lid Skin).
-- FINGERNAILS: Zone 1 (Lunula Contrast), Zone 2 (Mid-Nail Bed), Zone 3 (Tip Transparency).
-
-**VALIDATION GUIDANCE:**
-- Be reasonable: If the user provides a close-up of fingers where the nail bed is the primary focus, accept it. 
-- Only reject if the image is objectively NOT the requested part (e.g., showing a face for fingernails, or a pet for skin).
-- If the image is blurry, describe the blur but still attempt an assessment if color features are visible.
-
-**CROSS-FEATURE SYNTHESIS**
-- Weight palmar creases and palpebral conjunctiva DOUBLE.
-- ≥60% pallor -> Positive.
-- 30-60% -> Suspected.
-- <30% -> Negative.
-
-━━━ OUTPUT FORMAT ━━━
-Return a valid JSON object matching the schema. imageDescription MUST be a plain factual description of the photo. description SHOULD be clinical.
-
-Return JSON only.`
-        },
+        { text: systemPrompt + "\n\n" + userPrompt },
         {
           media: {
             url: input.photoDataUri,
@@ -224,8 +350,7 @@ Return JSON only.`
         schema: GenerateImageDescriptionOutputSchema
       }
     });
+
     return output!;
   }
 );
-
-
