@@ -166,12 +166,12 @@ export default function AboutAnemiaPage() {
                 <div className="grid grid-cols-2 gap-3">
                   <div className="rounded-xl bg-rose-500/10 border border-rose-500/20 p-4 text-center">
                     <p className="text-sm font-bold text-rose-500">Females</p>
-                    <p className="text-2xl font-black">&lt; 12 g/dL</p>
+                    <p className="text-2xl font-black">&ge; 12 g/dL</p>
                     <p className="text-xs text-muted-foreground">Non-pregnant</p>
                   </div>
                   <div className="rounded-xl bg-blue-500/10 border border-blue-500/20 p-4 text-center">
                     <p className="text-sm font-bold text-blue-500">Males</p>
-                    <p className="text-2xl font-black">&lt; 13 g/dL</p>
+                    <p className="text-2xl font-black">&ge; 13 g/dL</p>
                     <p className="text-xs text-muted-foreground">Adult</p>
                   </div>
                 </div>
@@ -348,7 +348,7 @@ export default function AboutAnemiaPage() {
                 <div className="space-y-2">
                   <div className="flex justify-between items-center p-3 rounded-xl bg-green-500/10 border border-green-500/20">
                     <span className="text-sm flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" /> Normal</span>
-                    <span className="font-bold text-green-600">&gt; 12.0 g/dL</span>
+                    <span className="font-bold text-green-600">&ge; 12.0 g/dL</span>
                   </div>
                   <div className="flex justify-between items-center p-3 rounded-xl bg-yellow-500/10 border border-yellow-500/20">
                     <span className="text-sm flex items-center gap-2"><AlertTriangle className="h-4 w-4 text-yellow-500" /> Mild</span>
@@ -375,7 +375,7 @@ export default function AboutAnemiaPage() {
                 <div className="space-y-2">
                   <div className="flex justify-between items-center p-3 rounded-xl bg-green-500/10 border border-green-500/20">
                     <span className="text-sm flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" /> Normal</span>
-                    <span className="font-bold text-green-600">&gt; 13.0 g/dL</span>
+                    <span className="font-bold text-green-600">&ge; 13.0 g/dL</span>
                   </div>
                   <div className="flex justify-between items-center p-3 rounded-xl bg-yellow-500/10 border border-yellow-500/20">
                     <span className="text-sm flex items-center gap-2"><AlertTriangle className="h-4 w-4 text-yellow-500" /> Mild</span>
