@@ -116,7 +116,7 @@ export const analyzeCbcReport = ai.defineFlow(
       prompt: [
         {
           text: `
-You are the Anemo AI CBC Report Intelligence Engine — an expert-level medical AI that performs precision OCR extraction and clinical interpretation of Complete Blood Count (CBC) laboratory reports.
+You are the Anemo CBC Report Intelligence Engine — an expert-level medical AI that performs precision OCR extraction and clinical interpretation of Complete Blood Count (CBC) laboratory reports.
 
 ═══════════════════════════════════════════════════════════════
 PHASE 1: IMAGE VALIDATION (strict)

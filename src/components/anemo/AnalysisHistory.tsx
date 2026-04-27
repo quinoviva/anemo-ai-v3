@@ -422,7 +422,7 @@ export function AnalysisHistory() {
         pdf.setTextColor(255, 255, 255);
         pdf.setFontSize(11);
         pdf.setFont('helvetica', 'bold');
-        pdf.text('ANEMO AI — DIAGNOSTIC REPORT', margin, 12);
+        pdf.text('ANEMO — DIAGNOSTIC REPORT', margin, 12);
         pdf.setFontSize(8);
         pdf.setFont('helvetica', 'normal');
         pdf.text('Non-invasive Hematological Screening', pageW - margin, 12, { align: 'right' });
@@ -569,7 +569,7 @@ export function AnalysisHistory() {
         pdf.setFontSize(7);
         pdf.setFont('helvetica', 'normal');
         pdf.setTextColor(160, 160, 160);
-        pdf.text('ANEMO AI — For screening purposes only. Not a medical diagnosis. Consult a licensed healthcare professional.', pageW / 2, pageH - 11, { align: 'center' });
+        pdf.text('ANEMO — For screening purposes only. Not a medical diagnosis. Consult a licensed healthcare professional.', pageW / 2, pageH - 11, { align: 'center' });
         pdf.text(`anemo.ai · ${format(new Date(), 'yyyy')}`, pageW / 2, pageH - 6, { align: 'center' });
 
         pdf.save(`anemo-report-${item.id.substring(0, 8)}-${format(toDate(item.createdAt) ?? new Date(), 'yyyyMMdd')}.pdf`);

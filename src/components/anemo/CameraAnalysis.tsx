@@ -685,7 +685,7 @@ export function CameraAnalysis({ onBack }: CameraAnalysisProps) {
 
     // Browser notification
     if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
-        new Notification('Anemo AI — Scan Complete', {
+        new Notification('Anemo — Scan Complete', {
             body: `${severity} detected. Est. Hgb: ${consensusHgb?.toFixed(1)} g/dL. Risk: ${Math.round(Math.max(0, Math.min(100, ((16 - (consensusHgb ?? 12)) / 11) * 100)))}`,
             icon: '/icons/icon-192x192.png',
         });

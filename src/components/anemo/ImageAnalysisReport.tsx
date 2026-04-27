@@ -1257,14 +1257,17 @@ export function ImageAnalysisReport({ analyses, labReport, onReset }: ImageAnaly
                               {value.analysisResult || 'No result recorded'}
                             </p>
                           </div>
+</div>
+                       <div className="pt-4 border-t border-white/5 space-y-3">
+                          <div className="flex items-center gap-2">
+                            <Activity className="w-3 h-3 text-primary" />
+                            <span className="text-[8px] font-black uppercase tracking-widest text-primary">AI Analysis</span>
+                          </div>
+                          <p className="text-sm text-foreground/80 leading-relaxed italic">
+                             {value.description || 'Target specimen processed. No detailed description available.'}
+                          </p>
                        </div>
-                      <div className="pt-4 border-t border-white/5">
-                         <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/60">Analysis</span>
-                         <p className="text-sm text-slate-900 dark:text-slate-200 leading-relaxed">
-                            {value.description || 'Target specimen processed successfully.'}
-                         </p>
-                      </div>
-                    </div>
+                     </div>
                   </div>
                 ))}
              </div>

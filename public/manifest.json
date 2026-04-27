@@ -1,5 +1,5 @@
 {
-  "name": "Anemo AI – Health Intelligence",
+  "name": "Anemo – Health Intelligence",
   "short_name": "Anemo",
   "description": "CNN-powered non-invasive anemia screening. Scan your palm, conjunctiva, and nailbed to detect anemia risk in seconds.",
   "start_url": "/dashboard",
