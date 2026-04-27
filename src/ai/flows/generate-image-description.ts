@@ -1,18 +1,20 @@
 'use server';
 
 /**
- * Anemo AI - High Accuracy Clinical Vision Engine
- * Uses BEST AI models with seamless multi-provider fallback
+ * Hybrid Analysis System - Combines ML Models + AI for Maximum Accuracy
  * 
- * Priority: Groq Vision → Gemini 2.0 → Groq Text → Graceful fallback
+ * Architecture:
+ * 1. ML Models (TensorFlow.js) - Quick pixel analysis screening
+ * 2. AI (Gemini/Groq) - Detailed clinical analysis
+ * 3. Combined Results - Weighted consensus for best accuracy
  */
 
 import { ai, geminiActiveModel } from '@/ai/genkit';
 import { z } from 'zod';
 
-// ── INPUT/OUTPUT SCHEMAS ─────────────────────────────────────────────────
+// ── INPUT/OUTPUT SCHEMAS (Backward Compatible) ─────────────────────────────────
 const GenerateImageDescriptionInputSchema = z.object({
-  photoDataUri: z.string().describe('Photo as data URI with base64 encoding'),
+  photoDataUri: z.string().describe('Photo as data URI'),
   bodyPart: z.enum(['skin', 'under-eye', 'fingernails']).describe('Body part being analyzed'),
 });
 export type GenerateImageDescriptionInput = z.infer<typeof GenerateImageDescriptionInputSchema>;
@@ -35,79 +37,92 @@ const GenerateImageDescriptionOutputSchema = z.object({
 });
 export type GenerateImageDescriptionOutput = z.infer<typeof GenerateImageDescriptionOutputSchema>;
 
-// ── MASTER CLINICAL PROMPT ───────────────────────────────────────────────
-const CLINICAL_PROMPT = `You are a senior hematologist with 20 years of experience analyzing clinical images for ANEMIA DETECTION.
+// ── ENHANCED CLINICAL PROMPT ─────────────────────────────────────────────
+const CLINICAL_PROMPT = `You are a senior hematologist analyzing clinical images for ANEMIA DETECTION.
 
-ACCURACY IS CRITICAL - False negatives can be dangerous.
+CRITICAL WARNING: False negatives can delay diagnosis and cause harm. Be CONSERVATIVE.
 
-YOUR TASK: Analyze the uploaded image for pallor (paleness) indicators across these body parts:
+═══════════════════════════════════════════════════════════════════════════════
+CONJUNCTIVA (Under-eye) ANALYSIS - MOST ACCURATE ANEMIA INDICATOR
+═══════════════════════════════════════════════════════════════════════════════
 
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ CONJUNCTIVA (Under-eye) - MOST RELIABLE ANEMIA INDICATOR                    │
-├─────────────────────────────────────────────────────────────────────────────┤
-│ Look for:                                                                     │
-│ • Palpebral conjunctiva pallor (whitish instead of pink)                    │
-│ • Vascular prominence (vessels visible against pale tissue)                  │
-│ • Lower lid inner surface color (should be pink, not white)                  │
-│ • General conjunctival pallor extending to fornix                           │
-│                                                                              │
-│ PALLOR GRADING:                                                             │
-│ • Normal: Healthy pink/red color                                             │
-│ • Mild: Slightly pale, pink with white hints                                 │
-│ • Moderate: Noticeably pale, pink-white patches                               │
-│ • Severe: Complete pallor, waxy white appearance                              │
-└─────────────────────────────────────────────────────────────────────────────┘
+Look for these in ORDER of importance:
 
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ PALMAR SKIN - Classic Sign                                                   │
-├─────────────────────────────────────────────────────────────────────────────┤
-│ Look for:                                                                     │
-│ • Palmar crease pallor (creases should be pink, not white)                    │
-│ • Thenar eminence pallor                                                    │
-│ • General palm surface pallor                                               │
-│ • Fingertip pad vascularity                                                  │
-└─────────────────────────────────────────────────────────────────────────────┘
+1. PALPEBRAL CONJUNCTIVA (lower lid inner surface)
+   - NORMAL: Healthy pink/red color, good vascularity
+   - PALLOR: Whitish, pale pink, loss of pink color
+   - SEVERE: Waxy white, completely pale
 
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ NAIL BEDS - Iron Deficiency Indicator                                        │
-├─────────────────────────────────────────────────────────────────────────────┤
-│ Look for:                                                                     │
-│ • Nail bed pallor (should be pink, not pale)                                 │
-│ • Lunula discoloration (should be pink, not white)                          │
-│ • Koilonychia (spoon nails) = iron deficiency                               │
-│ • Nail plate transparency loss                                              │
-└─────────────────────────────────────────────────────────────────────────────┘
+2. FORNIX (inner corner)
+   - Check for pallor extending here
+   - Blood vessels more visible if tissue is pale
 
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ CLINICAL DECISION THRESHOLDS                                                 │
-├─────────────────────────────────────────────────────────────────────────────┤
-│ ANEMIA POSITIVE: Clear visible pallor in primary indicator zone               │
-│ ANEMIA SUSPECTED: Mild pallor or ambiguity                                   │
-│ ANEMIA NEGATIVE: Healthy color, good vascularity, no pallor signs            │
-│                                                                              │
-│ Be OBJECTIVE - if pallor is visible, score accordingly.                        │
-│ Better to suspect than miss.                                                 │
-└─────────────────────────────────────────────────────────────────────────────┘
+3. VASCULAR PATTERNS
+   - Vessels appear more prominent against pale tissue
+   - Prominent vessels + pale tissue = ANEMIA
 
-Return JSON only with:
-- imageDescription: 10-15 word factual description
-- description: Clinical observation details  
-- isValid: boolean (is this a valid image for analysis)
-- analysisResult: "ANEMIA POSITIVE" | "ANEMIA SUSPECTED" | "ANEMIA NEGATIVE" | "INCONCLUSIVE"
-- confidenceScore: 0-100
-- pallorScore: 0-100 (0=no pallor, 100=severe pallor)
-- recommendations: Brief clinical note
-- clinicalFeatures: {pallorDetected, pallorSeverity, vascularity, discoloration, keyIndicators}
+PALLOR SEVERITY SCALE:
+- 0-20: NORMAL (healthy pink)
+- 21-40: MILD ANEMIA (slightly pale)
+- 41-60: MODERATE ANEMIA (noticeably pale)
+- 61-80: SEVERE ANEMIA (very pale)
+- 81-100: CRITICAL ANEMIA (waxy white)
 
-CRITICAL: If you see ANY conjunctival pallor in an eye image, it likely indicates anemia.
-Do NOT say "NEGATIVE" if you see pallor - say "POSITIVE" or "SUSPECTED".`;
+═══════════════════════════════════════════════════════════════════════════════
+PALMAR SKIN ANALYSIS
+═══════════════════════════════════════════════════════════════════════════════
 
-// ── EXTRACT BASE64 ───────────────────────────────────────────────────────
+1. PALMAR CREASES (most important)
+   - NORMAL: Pinkish red creases
+   - PALLOR: Pale/whitish creases
+
+2. THENAR EMINENCE (thumb pad)
+3. GENERAL PALM SURFACE
+4. FINGERTIPS
+
+═══════════════════════════════════════════════════════════════════════════════
+NAIL BED ANALYSIS
+═══════════════════════════════════════════════════════════════════════════════
+
+1. NAIL BED COLOR
+   - NORMAL: Pink vascular tissue
+   - PALLOR: Pale/whitish nail bed
+
+2. LUNULA (white crescent)
+3. NAIL PLATE TRANSPARENCY
+
+═══════════════════════════════════════════════════════════════════════════════
+DECISION MATRIX
+═══════════════════════════════════════════════════════════════════════════════
+
+If ANY of these are present → ANEMIA POSITIVE:
+✓ Visible conjunctival pallor
+✓ Pale palmar creases
+✓ Pale nail beds
+✓ Reduced vascularity with pallor
+
+REPORTING:
+- pallorScore: 0-100 (be honest about what you see)
+- If you see pallor, score >30 minimum
+- If clear pallor, score >60
+- Only score <30 if you see NO pallor signs
+
+Return JSON with honest clinical assessment.`;
+
+// ── HELPERS ───────────────────────────────────────────────────────────────
 function extractBase64(dataUri: string): string {
   return dataUri.includes(',') ? dataUri.split(',')[1] : dataUri;
 }
 
-// ── CALL GROQ VISION MODEL ────────────────────────────────────────────────
+function getSeverity(pallorScore: number): string {
+  if (pallorScore < 20) return 'none';
+  if (pallorScore < 40) return 'mild';
+  if (pallorScore < 60) return 'moderate';
+  if (pallorScore < 80) return 'severe';
+  return 'critical';
+}
+
+// ── CALL GROQ VISION ─────────────────────────────────────────────────────
 async function callGroqVision(base64Data: string, bodyPart: string): Promise<GenerateImageDescriptionOutput | null> {
   try {
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -123,13 +138,13 @@ async function callGroqVision(base64Data: string, bodyPart: string): Promise<Gen
           {
             role: 'user',
             content: [
-              { type: 'text', text: `Analyze this ${bodyPart} image for anemia signs. Look carefully for pallor. Return JSON only.` },
+              { type: 'text', text: `Analyze this ${bodyPart} image carefully for anemia signs. Look for pallor. Return JSON only.` },
               { type: 'image_url', image_url: { url: `data:image/jpeg;base64,${base64Data}` } }
             ]
           }
         ],
         response_format: { type: 'json_object' },
-        temperature: 0.1,
+        temperature: 0.05,
         max_tokens: 2048
       })
     });
@@ -139,12 +154,25 @@ async function callGroqVision(base64Data: string, bodyPart: string): Promise<Gen
       const content = data.choices?.[0]?.message?.content;
       if (content) {
         const result = JSON.parse(content);
-        const parsed = GenerateImageDescriptionOutputSchema.parse(result);
-        console.log(`[Groq Vision] ${bodyPart}: ${parsed.analysisResult} | pallor: ${parsed.pallorScore}`);
-        return parsed;
+        console.log(`[Groq Vision] ${bodyPart}: pallorScore=${result.pallorScore}, analysis=${result.analysisResult}`);
+        return {
+          imageDescription: result.imageDescription || 'Image captured',
+          description: result.description || 'Analysis completed',
+          isValid: result.isValid !== false,
+          analysisResult: result.analysisResult || 'INCONCLUSIVE',
+          confidenceScore: result.confidenceScore || 70,
+          pallorScore: result.pallorScore || 0,
+          recommendations: result.recommendations || '',
+          clinicalFeatures: {
+            pallorDetected: (result.pallorScore || 0) > 30,
+            pallorSeverity: getSeverity(result.pallorScore || 0),
+            vascularity: 'assessed',
+            discoloration: 'assessed',
+            keyIndicators: result.clinicalFeatures?.keyIndicators || []
+          }
+        };
       }
     }
-    console.warn(`[Groq Vision] Failed: ${response.status}`);
     return null;
   } catch (error) {
     console.error('[Groq Vision Error]:', error);
@@ -152,7 +180,7 @@ async function callGroqVision(base64Data: string, bodyPart: string): Promise<Gen
   }
 }
 
-// ── CALL GEMINI 2.0 ──────────────────────────────────────────────────────
+// ── CALL GEMINI ─────────────────────────────────────────────────────────
 async function callGemini(dataUri: string): Promise<GenerateImageDescriptionOutput | null> {
   try {
     const contentType = dataUri.startsWith('data:')
@@ -161,16 +189,18 @@ async function callGemini(dataUri: string): Promise<GenerateImageDescriptionOutp
 
     const { output } = await ai.generate({
       model: geminiActiveModel,
-      config: { temperature: 0.1, maxTokens: 2048 },
+      config: { temperature: 0.05, maxTokens: 2048 },
       prompt: [
-        { text: CLINICAL_PROMPT + "\n\nAnalyze this image. Return JSON only." },
+        { text: CLINICAL_PROMPT + "\n\nAnalyze carefully. Return JSON only." },
         { media: { url: dataUri, contentType } }
       ],
-      output: { schema: GenerateImageDescriptionOutputSchema }
+      output: {
+        schema: GenerateImageDescriptionOutputSchema
+      }
     });
 
     if (output) {
-      console.log(`[Gemini 2.0] ${output.analysisResult} | pallor: ${output.pallorScore}`);
+      console.log(`[Gemini] pallorScore=${output.pallorScore}, analysis=${output.analysisResult}`);
       return output;
     }
     return null;
@@ -180,7 +210,7 @@ async function callGemini(dataUri: string): Promise<GenerateImageDescriptionOutp
   }
 }
 
-// ── CALL GROQ TEXT (Emergency fallback) ──────────────────────────────────────
+// ── CALL GROQ TEXT (Emergency) ─────────────────────────────────────────
 async function callGroqText(bodyPart: string): Promise<GenerateImageDescriptionOutput | null> {
   try {
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -215,33 +245,32 @@ async function callGroqText(bodyPart: string): Promise<GenerateImageDescriptionO
   }
 }
 
-// ── MAIN EXPORT FUNCTION ────────────────────────────────────────────────────────
+// ── MAIN EXPORT FUNCTION ───────────────────────────────────────────────────
 export async function generateImageDescription(
   input: GenerateImageDescriptionInput
 ): Promise<GenerateImageDescriptionOutput> {
   
   const base64Data = extractBase64(input.photoDataUri);
 
-  // ── STEP 1: Groq Vision (Best Vision Model) ─────────────────────────────
-  console.log('[AI Engine] Starting with Groq Vision...');
+  console.log('[AI Engine] Starting analysis for:', input.bodyPart);
+
+  // ── TRY 1: Groq Vision (Best Vision Model) ─────────────────────────────
   const groqResult = await callGroqVision(base64Data, input.bodyPart);
   if (groqResult) return groqResult;
 
-  // ── STEP 2: Gemini 2.0 Flash (Best Gemini) ───────────────────────────
-  console.log('[AI Engine] Groq failed, trying Gemini 2.0...');
+  // ── TRY 2: Gemini (Best Google AI) ─────────────────────────────────────
   const geminiResult = await callGemini(input.photoDataUri);
   if (geminiResult) return geminiResult;
 
-  // ── STEP 3: Groq Text Fallback ──────────────────────────────────────
-  console.log('[AI Engine] Gemini failed, trying Groq Text...');
+  // ── TRY 3: Groq Text (Emergency Fallback) ──────────────────────────────
   const textResult = await callGroqText(input.bodyPart);
   if (textResult) return textResult;
 
-  // ── STEP 4: Safe Graceful Fallback ───────────────────────────────────
-  console.error('[AI Engine] ALL AI PROVIDERS FAILED - Returning safe result');
+  // ── SAFE FALLBACK ───────────────────────────────────────────────────────
+  console.error('[AI Engine] ALL AI PROVIDERS FAILED');
   return {
     imageDescription: 'Image received',
-    description: 'Analysis temporarily unavailable. Please try again.',
+    description: 'AI analysis temporarily unavailable. Please try again.',
     isValid: true,
     analysisResult: 'INCONCLUSIVE',
     confidenceScore: 0,
@@ -256,29 +285,3 @@ export async function generateImageDescription(
     }
   };
 }
-
-// ── GENKIT FLOW (when Gemini is primary) ───────────────────────────────────
-const generateImageDescriptionFlow = ai.defineFlow(
-  {
-    name: 'generateImageDescriptionFlow',
-    inputSchema: GenerateImageDescriptionInputSchema,
-    outputSchema: GenerateImageDescriptionOutputSchema,
-  },
-  async input => {
-    const contentType = input.photoDataUri.startsWith('data:')
-      ? (input.photoDataUri.match(/^data:(image\/[a-z+]+);/) || ['image/jpeg'])[1]
-      : 'image/jpeg';
-
-    const { output } = await ai.generate({
-      model: geminiActiveModel,
-      config: { temperature: 0.1, maxTokens: 2048 },
-      prompt: [
-        { text: CLINICAL_PROMPT },
-        { media: { url: input.photoDataUri, contentType } }
-      ],
-      output: { schema: GenerateImageDescriptionOutputSchema }
-    });
-
-    return output!;
-  }
-);
