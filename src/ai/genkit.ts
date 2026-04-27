@@ -1,8 +1,6 @@
-import { gemini25FlashLite, googleAI } from '@genkit-ai/googleai';
+import { gemini15Flash, googleAI } from '@genkit-ai/googleai';
 import { genkit } from 'genkit';
 import oai from '@genkit-ai/compat-oai';
-
-const GROQ_API_KEY = process.env.GROQ_API_KEY || '';
 
 export const ai = genkit({
   plugins: [
@@ -11,16 +9,19 @@ export const ai = genkit({
     }),
     oai({
       name: 'groq',
-      apiKey: GROQ_API_KEY,
+      apiKey: process.env.GROQ_API_KEY || '',
       baseURL: 'https://api.groq.com/openai/v1',
     }),
   ],
-  model: gemini25FlashLite,
+  model: gemini15Flash,
 });
 
-export { gemini25FlashLite as geminiActiveModel };
-export const groqFallbackModels = [
-  'llama-3.1-8b-instant',
-  'llama-3.3-70b-versatile',
-  'gemma2-9b-it',
-];
+export const geminiActiveModel = gemini15Flash;
+
+export const AI_MODELS = {
+  groq: {
+    vision: 'meta-llama/llama-4-scout-17b-16e-instruct',
+    text: 'llama-3.3-70b-versatile',
+  },
+  gemini: 'gemini-2.0-flash',
+};

@@ -1,9 +1,11 @@
 'use server';
 
 import { z } from 'zod';
-import { ai, groqFallbackModels } from '@/ai/genkit';
+import { ai, AI_MODELS } from '@/ai/genkit';
 import { CbcAnalysis } from '@/ai/schemas/cbc-report';
 import { ImageAnalysisReport } from '@/ai/schemas/image-analysis-report';
+
+const groqFallbackModels = [AI_MODELS.groq.text];
 
 const MedicalInfoSchema = z.object({
   sex: z.string().optional(),
