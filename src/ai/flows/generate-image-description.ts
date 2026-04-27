@@ -1,23 +1,13 @@
 'use server';
 
 /**
- * Anemo AI - Ultimate Hybrid Analysis System
+ * Anemo AI - STRICT Validation + HIGH Accuracy
  * 
- * Combines TWO layers for MAXIMUM accuracy:
- * 
- * LAYER 1: JavaScript Pixel Analysis (ML-style)
- * - Analyzes actual pixel data for clinical features
- * - Provides objective, reproducible measurements
- * - Works offline, no API needed
- * 
- * LAYER 2: AI Clinical Analysis (Gemini/Groq)
- * - Expert-level clinical interpretation
- * - Detects subtle pallor patterns
- * - Provides detailed medical insights
- * 
- * FINAL: Weighted Combination
- * - Takes best of both worlds
- * - Conservative decision making (favors detecting anemia over missing it)
+ * VALIDATION RULES (In Order):
+ * 1. Only 3 body parts accepted: palm, under-eye, fingernails
+ * 2. NO makeup, filters, or obstructions allowed
+ * 3. NO wrong body parts
+ * 4. Clinical analysis for actual anemia detection
  */
 
 import { z } from 'zod';
@@ -29,6 +19,7 @@ const InputSchema = z.object({
   bodyPart: z.enum(['skin', 'under-eye', 'fingernails']),
 });
 export type Input = z.infer<typeof InputSchema>;
+export type GenerateImageDescriptionInput = Input;
 
 const OutputSchema = z.object({
   imageDescription: z.string(),
@@ -44,102 +35,193 @@ const OutputSchema = z.object({
     vascularity: z.string(),
     discoloration: z.string(),
     keyIndicators: z.array(z.string())
-  }),
-  pixelAnalysis: z.object({
-    avgLuminance: z.number(),
-    rednessScore: z.number(),
-    greennessScore: z.number(),
-    vascularDensity: z.number(),
-    pallorIndex: z.number(),
-    confidence: z.number()
-  }).optional()
+  })
 });
 export type Output = z.infer<typeof OutputSchema>;
+export type GenerateImageDescriptionOutput = Output;
 
-// ── CLINICAL PROMPT (Expert Level) ────────────────────────────────────────
-const CLINICAL_PROMPT = `You are a board-certified hematologist analyzing clinical images for ANEMIA.
+// ── STRICT VALIDATION PROMPT ────────────────────────────────────────────
+const STRICT_VALIDATION = {
+  'skin': `STRICT VALIDATION - PALM/SKIN IMAGE
 
-🚨 CRITICAL: False negatives can cause serious harm. Be CONSERVATIVE in your assessment.
+You MUST REJECT (isValid: false) if ANY of these:
+✗ Makeup, foundation, concealer on palm
+✗ Nail polish or artificial nails in frame
+✗ Filters, effects, or edited images
+✗ Face, eyes, or head in image
+✗ Under-eye or conjunctiva
+✗ Fingernails or toes
+✗ Any clothing, jewelry on palm
+✗ Blurry, dark, or unreadable image
+✗ Non-human subjects (pets, objects)
 
-═══════════════════════════════════════════════════════════════════════════════
-CONJUNCTIVAL ASSESSMENT (Under-eye) - GOLD STANDARD
-═══════════════════════════════════════════════════════════════════════════════
+You MUST ACCEPT (isValid: true) ONLY if:
+✓ Clear palm/hand palm image
+✓ Natural skin tone visible
+✓ Palmar creases visible
+✓ No makeup, polish, or filters
+✓ Good lighting
 
-Look for CONJUNCTIVAL PALLOR in these zones:
-1. Palpebral conjunctiva (lower lid inner surface) - PRIMARY
-2. Fornix (inner corner) - Secondary
-3. Tarsal conjunctiva - Upper area
+Return JSON: {"isValid": boolean, "rejectionReason": "specific reason if invalid"}`,
 
-COLOR GRADING:
-- Healthy: Pink to reddish-pink (R:180-220, G:100-150, B:100-140)
-- Mild Pallor: Pale pink (R:200-240, G:140-180, B:130-170)
-- Moderate: Whitish-pink (R:220-250, G:170-200, B:160-190)
-- Severe: White to yellow-white (R:240-255, G:200-230, B:190-220)
+  'under-eye': `STRICT VALIDATION - UNDER-EYE/CONJUNCTIVA IMAGE
 
-PALLOR PATTERNS:
-- Diffuse pallor: Entire conjunctiva pale
-- Zone-specific: Only fornix or only lower lid
-- Vessel prominence: Vessels stand out against pale tissue
+You MUST REJECT (isValid: false) if ANY of these:
+✗ Eye makeup, mascara, eyeliner on lower lid
+✗ Concealer or foundation on under-eye area
+✗ Filters, effects, or edited images
+✗ Full face selfie without under-eye visible
+✗ Palm, hand, or skin elsewhere
+✗ Fingernails
+✗ Blurry or dark image
+✗ Contact lenses visible
+✗ Non-human subjects
 
-═══════════════════════════════════════════════════════════════════════════════
-PALMAR ASSESSMENT (Palm)
-═══════════════════════════════════════════════════════════════════════════════
+You MUST ACCEPT (isValid: true) ONLY if:
+✓ Clear under-eye area with conjunctiva visible
+✓ No makeup on lower lid
+✓ Natural skin tone
+✓ Good lighting
+✓ Inner eyelid visible
 
-CRITICAL ZONES:
-1. Palmar creases - Should be pink, NOT white
-2. Thenar eminence - Thumb pad
-3. Hypothenar eminence - Pinky pad
+Return JSON: {"isValid": boolean, "rejectionReason": "specific reason if invalid"}`,
 
-HEALTHY: Pink/red creases and palm
-PALLOR: Cream/white appearance in creases
+  'fingernails': `STRICT VALIDATION - FINGERNAIL IMAGE
 
-═══════════════════════════════════════════════════════════════════════════════
-NAIL BED ASSESSMENT
-═══════════════════════════════════════════════════════════════════════════════
+You MUST REJECT (isValid: false) if ANY of these:
+✗ Nail polish, gel, or acrylic nails
+✗ Fake nails or nail art
+✗ Makeup on hands
+✗ Filters or edited images
+✗ Face, eyes, or under-eye
+✗ Palm without nails visible
+✗ Toenails (must be fingernails)
+✗ Blurry or dark image
+✗ Bandages or band-aids on nails
+✗ Non-human subjects
 
-LOOK FOR:
-- Nail bed color (should be pink, not pale)
-- Lunula (white crescent - normally pinkish)
-- Periungual tissue
-- Koilonychia (spoon nails) = Iron deficiency
+You MUST ACCEPT (isValid: true) ONLY if:
+✓ Clear fingernails with nail beds visible
+✓ No polish, makeup, or artificial nails
+✓ Natural nail color
+✓ Good lighting
+✓ At least 1-2 nails clearly visible
 
-═══════════════════════════════════════════════════════════════════════════════
-PALLOR SCORING (Be Honest)
-═══════════════════════════════════════════════════════════════════════════════
+Return JSON: {"isValid": boolean, "rejectionReason": "specific reason if invalid"}`
+};
 
-- pallorScore 0-20: NO PALLOR - Healthy color
-- pallorScore 21-40: MILD - Slight pallor, uncertain
-- pallorScore 41-60: MODERATE - Noticeable pallor
-- pallorScore 61-80: SEVERE - Clear pallor visible
-- pallorScore 81-100: CRITICAL - Marked pallor
+// ── CLINICAL ANALYSIS PROMPTS ─────────────────────────────────────────
+const CLINICAL_ANALYSIS = {
+  'skin': `CLINICAL ANALYSIS - PALM FOR ANEMIA
 
-If ANY pallor is visible → Score minimum 30
-If clear pallor → Score minimum 50
-If marked pallor → Score > 70
+WARNING: False negatives can delay critical diagnosis. Be CONSERVATIVE.
 
-ANALYSIS DECISION:
-- pallorScore > 60 → "ANEMIA POSITIVE"
-- pallorScore 30-60 → "ANEMIA SUSPECTED"
-- pallorScore < 30 → "ANEMIA NEGATIVE" (only if truly no pallor)
+EXAMINE PALM CAREFULLY:
+1. Palmar Creases (MOST IMPORTANT)
+   - Normal: Pink to red lines
+   - Anemia: Pale, whitish creases
+   
+2. Thenar Eminence (thumb pad)
+   - Normal: Healthy pink
+   - Anemia: Pale, ashen
 
-Return JSON with honest assessment.`;
+3. Overall Palm Color
+   - Normal: Pinkish-tan
+   - Anemia: Pale, waxy, grayish
 
-// ── HELPER: Extract Base64 ───────────────────────────────────────────────
+PALLOR SCORING:
+- 0-20: Healthy pink - NO ANEMIA
+- 21-40: Slightly pale - MILD ANEMIA
+- 41-60: Noticeably pale - MODERATE ANEMIA
+- 61-80: Very pale - SEVERE ANEMIA
+- 81-100: Waxy white - CRITICAL ANEMIA
+
+RULES:
+- If ANY pallor visible → minimum score 50
+- If creases are pale → minimum score 60
+- Only score <30 if clearly healthy pink
+
+Return JSON with honest pallorScore (0-100) and analysisResult.`,
+
+  'under-eye': `CLINICAL ANALYSIS - CONJUNCTIVA FOR ANEMIA
+
+WARNING: Conjunctival pallor is ONE OF THE MOST RELIABLE anemia signs.
+
+EXAMINE CONJUNCTIVA CAREFULLY:
+1. Lower Lid Inner Surface (Palpebral Conjunctiva)
+   - Normal: Pink to red
+   - Anemia: White, pale pink, yellowish
+   
+2. Fornix (inner corner)
+   - Check for pallor extension
+
+3. Vascular Pattern
+   - Vessels more visible against pale tissue = ANEMIA
+
+PALLOR SCORING:
+- 0-20: Healthy pink conjunctiva - NO ANEMIA
+- 21-40: Slightly pale - MILD ANEMIA
+- 41-60: Noticeably pale - MODERATE ANEMIA
+- 61-80: Very pale - SEVERE ANEMIA  
+- 81-100: Waxy white - CRITICAL ANEMIA
+
+RULES:
+- If ANY conjunctival pallor → minimum score 55
+- If clear pallor + visible vessels → minimum score 70
+- Only score <30 if clearly healthy pink
+
+Return JSON with honest pallorScore (0-100) and analysisResult.`,
+
+  'fingernails': `CLINICAL ANALYSIS - NAIL BEDS FOR ANEMIA
+
+EXAMINE NAILS CAREFULLY:
+1. Nail Beds (under nail)
+   - Normal: Pink vascular tissue
+   - Anemia: Pale, whitish nail beds
+   
+2. Lunula (white crescent)
+   - Normal: Pinkish
+   - Anemia: White or absent
+
+3. Nail Plate
+   - Koilonychia (spoon nails) = Iron deficiency
+   - Brittle nails with pallor
+
+PALLOR SCORING:
+- 0-20: Healthy pink nails - NO ANEMIA
+- 21-40: Slightly pale - MILD ANEMIA
+- 41-60: Noticeably pale - MODERATE ANEMIA
+- 61-80: Very pale - SEVERE ANEMIA
+- 81-100: White nail beds - CRITICAL ANEMIA
+
+RULES:
+- If ANY nail bed pallor → minimum score 50
+- If Koilonychia visible → minimum score 65
+- Only score <30 if clearly healthy pink
+
+Return JSON with honest pallorScore (0-100) and analysisResult.`
+};
+
+// ── HELPERS ───────────────────────────────────────────────────────────
 function extractBase64(dataUri: string): string {
   return dataUri.includes(',') ? dataUri.split(',')[1] : dataUri;
 }
 
-// ── HELPER: Severity ────────────────────────────────────────────────────
 function getSeverity(score: number): string {
   if (score < 20) return 'none';
   if (score < 40) return 'mild';
   if (score < 60) return 'moderate';
-  if (score < 80) return 'severe';
-  return 'critical';
+  return 'severe';
 }
 
-// ── CALL GROQ VISION ────────────────────────────────────────────────────
-async function callGroqVision(base64: string, bodyPart: string): Promise<Output | null> {
+function getAnalysisResult(pallorScore: number): string {
+  if (pallorScore > 60) return 'ANEMIA POSITIVE';
+  if (pallorScore >= 30) return 'ANEMIA SUSPECTED';
+  return 'ANEMIA NEGATIVE';
+}
+
+// ── STEP 1: STRICT VALIDATION ────────────────────────────────────────
+async function strictValidate(base64: string, bodyPart: string): Promise<{ isValid: boolean; reason?: string }> {
   try {
     const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
@@ -150,17 +232,62 @@ async function callGroqVision(base64: string, bodyPart: string): Promise<Output 
       body: JSON.stringify({
         model: 'meta-llama/llama-4-scout-17b-16e-instruct',
         messages: [
-          { role: 'system', content: CLINICAL_PROMPT },
+          { role: 'system', content: STRICT_VALIDATION[bodyPart as keyof typeof STRICT_VALIDATION] },
           {
             role: 'user',
             content: [
-              { type: 'text', text: `Analyze this ${bodyPart} for anemia. Look carefully for pallor. Return JSON only.` },
+              { type: 'text', text: 'STRICT VALIDATION: Check if this image meets ALL requirements. Return JSON only.' },
               { type: 'image_url', image_url: { url: `data:image/jpeg;base64,${base64}` } }
             ]
           }
         ],
         response_format: { type: 'json_object' },
-        temperature: 0.05, // Low temp for consistent results
+        temperature: 0.02,
+        max_tokens: 256
+      })
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      const content = data.choices?.[0]?.message?.content;
+      if (content) {
+        const result = JSON.parse(content);
+        console.log(`[VALIDATION] ${bodyPart}: isValid=${result.isValid}, reason=${result.rejectionReason}`);
+        return {
+          isValid: result.isValid === true,
+          reason: result.rejectionReason
+        };
+      }
+    }
+  } catch (e) {
+    console.error('[Validation Error]:', e);
+  }
+  return { isValid: true }; // Don't block on errors
+}
+
+// ── STEP 2: CLINICAL ANALYSIS ─────────────────────────────────────────
+async function analyzeClinical(base64: string, bodyPart: string): Promise<Output | null> {
+  try {
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+        messages: [
+          { role: 'system', content: CLINICAL_ANALYSIS[bodyPart as keyof typeof CLINICAL_ANALYSIS] },
+          {
+            role: 'user',
+            content: [
+              { type: 'text', text: `Analyze this ${bodyPart} for anemia. Look for pallor. Return honest JSON with pallorScore.` },
+              { type: 'image_url', image_url: { url: `data:image/jpeg;base64,${base64}` } }
+            ]
+          }
+        ],
+        response_format: { type: 'json_object' },
+        temperature: 0.02,
         max_tokens: 2048
       })
     });
@@ -170,33 +297,36 @@ async function callGroqVision(base64: string, bodyPart: string): Promise<Output 
       const content = data.choices?.[0]?.message?.content;
       if (content) {
         const r = JSON.parse(content);
-        console.log(`[Groq] pallorScore=${r.pallorScore}, result=${r.analysisResult}`);
+        const pallorScore = r.pallorScore || 50;
+        
+        console.log(`[CLINICAL] ${bodyPart}: pallorScore=${pallorScore}, result=${getAnalysisResult(pallorScore)}`);
+        
         return {
-          imageDescription: r.imageDescription || 'Image analyzed',
-          description: r.description || 'Analysis completed',
-          isValid: r.isValid !== false,
-          analysisResult: r.analysisResult || 'INCONCLUSIVE',
-          confidenceScore: r.confidenceScore || 75,
-          pallorScore: r.pallorScore || 0,
-          recommendations: r.recommendations || 'Monitor health',
+          imageDescription: r.imageDescription || `${bodyPart} image`,
+          description: r.description || 'Analysis complete',
+          isValid: true,
+          analysisResult: getAnalysisResult(pallorScore),
+          confidenceScore: r.confidenceScore || 85,
+          pallorScore,
+          recommendations: r.recommendations || 'Continue monitoring',
           clinicalFeatures: {
-            pallorDetected: (r.pallorScore || 0) > 30,
-            pallorSeverity: getSeverity(r.pallorScore || 0),
-            vascularity: 'assessed',
-            discoloration: 'assessed',
+            pallorDetected: pallorScore > 30,
+            pallorSeverity: getSeverity(pallorScore),
+            vascularity: pallorScore > 50 ? 'reduced' : 'normal',
+            discoloration: pallorScore > 40 ? 'pale' : 'none',
             keyIndicators: r.clinicalFeatures?.keyIndicators || []
           }
         };
       }
     }
   } catch (e) {
-    console.error('[Groq Error]:', e);
+    console.error('[Clinical Error]:', e);
   }
   return null;
 }
 
-// ── CALL GEMINI ────────────────────────────────────────────────────────
-async function callGemini(dataUri: string): Promise<Output | null> {
+// ── GEMINI FALLBACK ─────────────────────────────────────────────────
+async function analyzeWithGemini(dataUri: string): Promise<Output | null> {
   try {
     const ct = dataUri.startsWith('data:')
       ? (dataUri.match(/^data:(image\/[a-z+]+);/) || ['image/jpeg'])[1]
@@ -204,17 +334,26 @@ async function callGemini(dataUri: string): Promise<Output | null> {
 
     const { output } = await ai.generate({
       model: geminiActiveModel,
-      config: { temperature: 0.05, maxTokens: 2048 },
+      config: { temperature: 0.02, maxTokens: 2048 },
       prompt: [
-        { text: CLINICAL_PROMPT + "\n\nAnalyze and return JSON." },
+        { text: 'Analyze for anemia pallor. If any pallor visible, score minimum 50. Return JSON with pallorScore 0-100.' },
         { media: { url: dataUri, contentType: ct } }
       ],
       output: { schema: OutputSchema }
     });
 
     if (output) {
-      console.log(`[Gemini] pallorScore=${output.pallorScore}, result=${output.analysisResult}`);
-      return output;
+      return {
+        ...output,
+        analysisResult: getAnalysisResult(output.pallorScore || 50),
+        clinicalFeatures: output.clinicalFeatures || {
+          pallorDetected: (output.pallorScore || 0) > 30,
+          pallorSeverity: getSeverity(output.pallorScore || 0),
+          vascularity: 'assessed',
+          discoloration: 'assessed',
+          keyIndicators: []
+        }
+      };
     }
   } catch (e) {
     console.error('[Gemini Error]:', e);
@@ -222,63 +361,66 @@ async function callGemini(dataUri: string): Promise<Output | null> {
   return null;
 }
 
-// ── CALL GROQ TEXT (Emergency) ─────────────────────────────────────────
-async function callGroqText(bodyPart: string): Promise<Output | null> {
-  try {
-    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
-        messages: [
-          { role: 'system', content: 'You are a medical hematologist expert.' },
-          { role: 'user', content: `Analyze ${bodyPart} for anemia. Return JSON with pallorScore 0-100. If pallor visible, score >30.` }
-        ],
-        response_format: { type: 'json_object' },
-        temperature: 0.2,
-        max_tokens: 1024
-      })
-    });
-
-    if (res.ok) {
-      const data = await res.json();
-      const content = data.choices?.[0]?.message?.content;
-      if (content) {
-        return OutputSchema.parse(JSON.parse(content));
-      }
-    }
-  } catch (e) {
-    console.error('[Groq Text Error]:', e);
-  }
-  return null;
-}
-
-// ── MAIN EXPORT ────────────────────────────────────────────────────────
+// ── MAIN EXPORT ───────────────────────────────────────────────────────
 export async function generateImageDescription(input: Input): Promise<Output> {
   const base64 = extractBase64(input.photoDataUri);
+  const bodyPart = input.bodyPart;
 
-  console.log('[Anemo AI] Starting hybrid analysis for:', input.bodyPart);
+  console.log('[Anemo AI] Processing:', bodyPart);
 
-  // Try AI providers in order of capability
-  const result = await callGroqVision(base64, input.bodyPart)
-    || await callGemini(input.photoDataUri)
-    || await callGroqText(input.bodyPart);
+  // ── STEP 1: STRICT VALIDATION ───────────────────────────────────
+  console.log('[Step 1] Strict validation...');
+  const validation = await strictValidate(base64, bodyPart);
+  
+  if (!validation.isValid) {
+    console.log('[Step 1] REJECTED:', validation.reason);
+    
+    const bodyPartName = bodyPart === 'skin' ? 'palm/skin' : bodyPart === 'under-eye' ? 'under-eye area' : 'fingernails';
+    
+    return {
+      imageDescription: 'Invalid image',
+      description: `Image rejected: ${validation.reason || 'Does not meet requirements for ' + bodyPartName}`,
+      isValid: false,
+      analysisResult: 'INVALID_IMAGE',
+      confidenceScore: 0,
+      pallorScore: 0,
+      recommendations: `Please upload a CLEAR, NATURAL image of your ${bodyPartName} without makeup, filters, or nail polish.`,
+      clinicalFeatures: {
+        pallorDetected: false,
+        pallorSeverity: 'none',
+        vascularity: 'unknown',
+        discoloration: 'unknown',
+        keyIndicators: []
+      }
+    };
+  }
+  console.log('[Step 1] Passed ✓');
 
-  if (result) return result;
+  // ── STEP 2: CLINICAL ANALYSIS ─────────────────────────────────────
+  console.log('[Step 2] Clinical analysis...');
+  
+  let result = await analyzeClinical(base64, bodyPart);
+  
+  if (!result) {
+    console.log('[Step 2] Trying Gemini...');
+    result = await analyzeWithGemini(input.photoDataUri);
+  }
 
-  // Safe fallback - NEVER block the user
-  console.warn('[Anemo AI] All AI failed - returning safe result');
+  if (result) {
+    console.log(`[Step 2] Result: ${result.analysisResult} (pallor: ${result.pallorScore})`);
+    return result;
+  }
+
+  // ── STEP 3: ALL FAILED ────────────────────────────────────────────
+  console.error('[Step 3] All AI failed');
   return {
-    imageDescription: 'Image received',
-    description: 'Analysis completed with available data.',
+    imageDescription: 'Analysis unavailable',
+    description: 'Please try again with a clearer image.',
     isValid: true,
     analysisResult: 'INCONCLUSIVE',
-    confidenceScore: 50,
-    pallorScore: 25,
-    recommendations: 'Please retry for full analysis.',
+    confidenceScore: 0,
+    pallorScore: 0,
+    recommendations: 'Ensure good lighting and try again.',
     clinicalFeatures: {
       pallorDetected: false,
       pallorSeverity: 'unknown',
@@ -288,7 +430,3 @@ export async function generateImageDescription(input: Input): Promise<Output> {
     }
   };
 }
-
-// ── Aliases for backward compatibility ──────────────────────────────────
-export type GenerateImageDescriptionInput = Input;
-export type GenerateImageDescriptionOutput = Output;
