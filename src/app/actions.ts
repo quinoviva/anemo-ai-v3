@@ -184,19 +184,34 @@ export async function runGenerateImageDescription(
         isValid: false,
         analysisResult: 'INCONCLUSIVE (Server Error)',
         confidenceScore: 0,
+        pallorScore: 0,
         recommendations: 'Please retry the analysis in a few seconds.',
+        clinicalFeatures: {
+          pallorDetected: false,
+          pallorSeverity: 'unknown',
+          vascularity: 'unknown',
+          discoloration: 'unknown',
+          keyIndicators: []
+        }
       };
     }
   }
 
-  // Should never reach here, but TypeScript needs it
   return {
     imageDescription: 'Unable to describe — analysis failed after multiple retries.',
     description: 'Analysis failed after multiple retries.',
     isValid: false,
     analysisResult: 'INCONCLUSIVE (Server Error)',
     confidenceScore: 0,
+    pallorScore: 0,
     recommendations: 'Please retry the analysis in a few seconds.',
+    clinicalFeatures: {
+      pallorDetected: false,
+      pallorSeverity: 'unknown',
+      vascularity: 'unknown',
+      discoloration: 'unknown',
+      keyIndicators: []
+    }
   };
 }
 
